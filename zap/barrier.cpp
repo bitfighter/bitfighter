@@ -87,7 +87,7 @@ namespace Zap
          Barrier *b = Barrier::createBarrier(vec, width, true);
          if(!b)
             return false;
-         
+
          b->addToGame(game, game->getGameObjDatabase());
          return true;
       }
@@ -186,7 +186,7 @@ namespace Zap
 
          // Create rendering fill triangles --> checks min point count and populates fillGeometry
          if(!Triangulate::Process(points, fillGeometry))
-            return NULL; 
+            return NULL;
 
          if(fillGeometry.size() == 0)        // Geometry is bogus; perhaps duplicated points, or other badness
             return NULL;
@@ -202,7 +202,7 @@ namespace Zap
    }
 
 
-   // Processes mPoints and fills polyPoints 
+   // Processes mPoints and fills polyPoints
    const Vector<Point> *Barrier::getCollisionPoly() const
    {
       return &mOutline;
@@ -244,7 +244,7 @@ namespace Zap
 
 
    // Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
-   // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets 
+   // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets
    // refined as each additional intersecting barrier gets processed.
    void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)
    {
@@ -476,7 +476,7 @@ namespace Zap
    }
 
 
-   // Size of object in editor 
+   // Size of object in editor
    F32 WallItem::getEditorRadius(F32 currentScale)
    {
       return getWallEditorRadius(currentScale);
@@ -528,7 +528,7 @@ namespace Zap
       if(!Parent::addToGame(game, database))    // Can't currently happen, but here to avoid future bugs.  Hopefully compiler optimizes away.
          return false;
 
-      // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+      // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and
       // is convenient to transmit to the clients
       if(!game->addWall(WallRec(this)))
          return false;
@@ -557,7 +557,7 @@ namespace Zap
     * sequence, each consecutive pair defining a straight-line segment. WallItem
     * geometry can cross or form loops with no adverse consequences.
     */
-    //               Fn name       Param profiles  Profile count                           
+    //               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWidth,     ARRAYDEF({{      END }}), 1 ) \
    METHOD(CLASS, setWidth,     ARRAYDEF({{ INT, END }}), 1 ) \
@@ -722,7 +722,7 @@ namespace Zap
    }
 
 
-   // Size of object in editor 
+   // Size of object in editor
    F32 PolyWall::getEditorRadius(F32 currentScale)
    {
       return getWallEditorRadius(currentScale);
@@ -760,7 +760,7 @@ namespace Zap
    {
       Parent::addToGame(game, database);
 
-      // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+      // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and
       // is convenient to transmit to the clients
       if(!game->addWall(WallRec(this)))
          return false;
@@ -799,7 +799,7 @@ namespace Zap
     *
     * @geom PolyWall geometry is a typical polygon.
     */
-    //                Fn name                  Param profiles            Profile count                           
+    //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
    GENERATE_LUA_FUNARGS_TABLE(PolyWall, LUA_METHODS);

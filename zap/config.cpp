@@ -61,7 +61,7 @@ IniSettings::IniSettings()
 {
    // Can probably get rid of VerboseHelpMessages
 
-   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
+   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment
    mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
    mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
    mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
@@ -114,7 +114,7 @@ IniSettings::IniSettings()
 
    connectionSpeed = 0;
 
-   defaultRobotScript = "s_bot.bot";            
+   defaultRobotScript = "s_bot.bot";
    globalLevelScript = "";
 
    wallFillColor.set(0,0,.15);
@@ -164,15 +164,15 @@ IniSettings::IniSettings()
    logNetBase = false;
    logUDP = false;
 
-   logFatalError = true;       
-   logError = true;            
-   logWarning = true;     
+   logFatalError = true;
+   logError = true;
+   logWarning = true;
    logConfigurationError = true;
-   logConnection = true;       
-   logLevelLoaded = true;      
+   logConnection = true;
+   logLevelLoaded = true;
    logLuaObjectLifecycle = false;
-   luaScriptMessage = true;       
-   serverFilter = false; 
+   luaScriptMessage = true;
+   serverFilter = false;
 
    logLevelError = true;
 
@@ -285,7 +285,7 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
    parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000"), iniSettings->alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
-   // In case the master server fails, we can use this list to try to find some game servers. 
+   // In case the master server fails, we can use this list to try to find some game servers.
    //parseString(ini->GetValue("ForeignServers", "ForeignServerList"), prevServerListFromMaster, ',');
    iniSettings->prevServerListFromMaster.clear();
    ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
@@ -326,7 +326,7 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "EditorPlugins";
 
-   ini->addSection(section);             
+   ini->addSection(section);
 
    if(ini->numSectionComments(section) == 0)
    {
@@ -357,7 +357,7 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
 static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Connections";
-   
+
    ini->addSection(section);
 
    if(ini->numSectionComments(section) == 0)
@@ -457,7 +457,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->winSizeFact   = ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
    iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
-   
+
    iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
@@ -471,7 +471,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
 
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
-   if(fps >= 1) 
+   if(fps >= 1)
       iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
    // else warn?
 
@@ -544,7 +544,7 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
       rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
-   
+
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
       LoadoutTracker loadout(rawPresets[i]);
@@ -571,7 +571,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
          logprintf(LogConsumer::LogError, "Error parsing EditorPlugin defnition in INI: too few values (read: %s)", values[i].c_str());
          continue;
       }
-      
+
       PluginBinding binding;
       binding.key = words[0];
       binding.script = words[1];
@@ -640,8 +640,8 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 
 
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
-   if(fps >= 1) 
-      iniSettings->maxDedicatedFPS = fps; 
+   if(fps >= 1)
+      iniSettings->maxDedicatedFPS = fps;
    // TODO: else warn?
 
    iniSettings->logStats = ini->GetValueYN(section, "LogStats", iniSettings->logStats);
@@ -717,7 +717,7 @@ static string getInputString(CIniFile *ini, const string &section, const string 
    }
 
    // We don't understand what is in the INI file... print a warning, and fall back to the default
-   logprintf(LogConsumer::ConfigurationError, "Invalid key binding in INI section [%s]: %s=%s", 
+   logprintf(LogConsumer::ConfigurationError, "Invalid key binding in INI section [%s]: %s=%s",
              section.c_str(), key.c_str(), inputStringFromIni.c_str());
    return defaultValue;
 }
@@ -725,14 +725,14 @@ static string getInputString(CIniFile *ini, const string &section, const string 
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
-{                                
+{
    ///// BINDING_TABLE
    ///// KEYBOARD
 
    // Generates a block of code that looks like this:
    // if(true)
-   //    inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1, InputModeKeyboard, 
-   //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1), 
+   //    inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1, InputModeKeyboard,
+   //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
    //                       KEY_1));
 
 #define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                                             \
@@ -771,7 +771,7 @@ void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManag
       inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
                                           getInputString(ini, "EditorKeyBindings",                              \
                                                          InputCodeManager::getEditorBindingName(editorEnumVal), \
-                                                         defaultEditorKeyboardBinding)); 
+                                                         defaultEditorKeyboardBinding));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
@@ -784,7 +784,7 @@ void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
       inputCodeManager->setSpecialBinding(specialEnumVal,                                                         \
                                           getInputString(ini, "SpecialKeyBindings",                               \
                                                          InputCodeManager::getSpecialBindingName(specialEnumVal), \
-                                                         defaultSpecialKeyboardBinding)); 
+                                                         defaultSpecialKeyboardBinding));
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 }
@@ -800,7 +800,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 #define BINDING(enumVal, b, savedInIni, d, e, f)                                                                   \
       if(savedInIni)                                                                                               \
          ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
-                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
+                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode)));
     BINDING_TABLE
 #undef BINDING
 }
@@ -811,7 +811,7 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
    string key;
 
    // Expands to:
-   // key = InputCodeManager::getEditorBindingName(FlipItemHorizontal); 
+   // key = InputCodeManager::getEditorBindingName(FlipItemHorizontal);
    // if(!ini->hasKey(section, key))
    //   ini->SetValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
 
@@ -831,7 +831,7 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
    string key;
 
    // Expands to:
-   // key = InputCodeManager::getSpecialBindingName(FlipItemHorizontal); 
+   // key = InputCodeManager::getSpecialBindingName(FlipItemHorizontal);
    // if(!ini->hasKey(section, key))
    //   ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal));
 
@@ -1687,16 +1687,16 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
+   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);
 
-   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
+   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);
    ini->SetValueI (section, "Version", BUILD_VERSION);
 
    ini->SetValueI (section, "QueryServerSortColumn",    iniSettings->queryServerSortColumn);
    ini->SetValueB (section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
 
 #ifndef ZAP_DEDICATED
-   // Don't save new value if out of range, so it will go back to the old value. 
+   // Don't save new value if out of range, so it will go back to the old value.
    // Just in case a user screw up with /linewidth command using value too big or too small.
    if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 5)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
@@ -1841,7 +1841,7 @@ static void writeLevels(CIniFile *ini)
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
    if(ini->findSection("Levels") == ini->noID)    // Section doesn't exist... let's write one
-      ini->addSection("Levels");              
+      ini->addSection("Levels");
 
    if(ini->numSectionComments("Levels") == 0)
    {
@@ -1948,10 +1948,10 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeTesting(ini, settings);
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
-   
+
    writeDefaultQuickChatMessages(ini, iniSettings);  // Does nothing if there are already chat messages in the INI
 
-   // only needed for users using custom joystick 
+   // only needed for users using custom joystick
    // or joystick that maps differenly in LINUX
    // This adds 200+ lines.
    //writeJoystick();
@@ -2056,7 +2056,7 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
       return cmdLineDir;
    else if(rootDataDir != "")       // ...over specification via rootdatadir param
       return joindir(rootDataDir, subdir);
-   else 
+   else
       return subdir;
 }
 
@@ -2135,23 +2135,23 @@ void FolderManager::resolveDirs(const string &root)
 //            rootDataDir/levels/levelDir
 //            rootDataDir/levelDir
 //       End
-//   
+//
 //       rootDataDir/levels
 // End      ==> Don't use rootDataDir
-//      
+//
 // If iniLevelDir is specified
 //     If levelDir is also specified try
 //         iniLevelDir/levelDir
-//     End   
+//     End
 //     iniLevelDir
 // End    ==> Don't use iniLevelDir
-//      
+//
 // levels
 //
 // If none of the above work, no hosting/editing for you!
 //
 // NOTE: See above for full explanation of what these functions are doing
-string FolderManager::resolveLevelDir(const string &levelDir)    
+string FolderManager::resolveLevelDir(const string &levelDir)
 {
    if(levelDir != "")
       if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
@@ -2173,7 +2173,7 @@ string FolderManager::resolveLevelDir(const string &levelDir)
 
 
 // Figuring out where the levels are stored is so complex, it needs its own function!
-void FolderManager::resolveLevelDir(GameSettings *settings)  
+void FolderManager::resolveLevelDir(GameSettings *settings)
 {
    string cmdLineLevelDir = settings->getLevelDir(CMD_LINE);
 
@@ -2188,7 +2188,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
    if(rootDataDir != "")
    {
       string candidate = strictjoindir(rootDataDir, "levels");    // Try rootDataDir/levels
-      if(fileExists(candidate))   
+      if(fileExists(candidate))
       {
          levelDir = candidate;
          return;
@@ -2212,7 +2212,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
             return;
          }
       }
-      
+
 
       // Ok, forget about cmdLineLevelDir.  Getting desperate here.  Try just the straight folder name specified in the INI file.
       if(fileExists(iniLevelDir))
@@ -2248,7 +2248,7 @@ static string checkName(const string &filename, const Vector<string> &folders, c
    }
    else
    {
-      S32 i = 0; 
+      S32 i = 0;
       while(strcmp(extensions[i], ""))
       {
          for(S32 j = 0; j < folders.size(); j++)
@@ -2340,7 +2340,7 @@ string FolderManager::findPlugin(const string &filename) const
 }
 
 
-string FolderManager::findBotFile(const string &filename) const          
+string FolderManager::findBotFile(const string &filename) const
 {
    Vector<string> folders;
    folders.push_back(robotDir);

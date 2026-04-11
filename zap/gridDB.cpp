@@ -17,7 +17,7 @@ U32 GridDatabase::mQueryId = 0;
 ClassChunker<DatabaseBucketEntry> *GridDatabase::mChunker = NULL;
 U32 GridDatabase::mCountGridDatabase = 0;
 
-static U32 getNextId() 
+static U32 getNextId()
 {
    static U32 nextId = 0;
    return nextId++;
@@ -48,14 +48,14 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
 // GridDatabase::GridDatabase(const GridDatabase &source)
 // {
 //    mAllObjects.reserve(source.mAllObjects.size());
-// 
+//
 //    for(S32 i = 0; i < source.mAllObjects.size(); i++)
 //       addToDatabase(source.mAllObjects[i]->clone(), source.mAllObjects[i]->getExtent());
 // }
 
 
 // Destructor
-GridDatabase::~GridDatabase()       
+GridDatabase::~GridDatabase()
 {
    removeEverythingFromDatabase();
 
@@ -155,7 +155,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject)
       mFlags.push_back(theObject);
    else if(type == SpyBugTypeNumber)
       mSpyBugs.push_back(theObject);
-   
+
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -192,7 +192,7 @@ void GridDatabase::removeEverythingFromDatabase()
    mSpyBugs.clear();
 
    mAllObjects.deleteAndClear();
-   
+
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
 }
@@ -204,7 +204,7 @@ static void eraseObject_fast(Vector<DatabaseObject *> *objects, DatabaseObject *
    for(S32 i = 0; i < objects->size(); i++)
       if(objects->get(i) == objectToDelete)
       {
-         objects->erase_fast(i);     
+         objects->erase_fast(i);
          return;
       }
 }
@@ -253,7 +253,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mSpyBugs, object);
 
    if(deleteObject)
-      delete object;      
+      delete object;
 }
 
 
@@ -326,7 +326,7 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
-   TNLAssert(typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
+   TNLAssert(typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber,
              "Can use findObjects_fast()?  If not, uncomment the appropriate block below; it will perform better!");
 
    if(typeNumber == GoalZoneTypeNumber)
@@ -537,7 +537,7 @@ WallSegmentManager *GridDatabase::getWallSegmentManager() const
 ////////////////////////////////////////
 
 // Constructor
-DatabaseObject::DatabaseObject() 
+DatabaseObject::DatabaseObject()
 {
    initialize();
 }
@@ -545,9 +545,9 @@ DatabaseObject::DatabaseObject()
 
 // Copy constructor
 DatabaseObject::DatabaseObject(const DatabaseObject &t) : Parent(t)
-{  
+{
    initialize();
-   mObjectTypeNumber = t.mObjectTypeNumber; 
+   mObjectTypeNumber = t.mObjectTypeNumber;
    mExtent = t.mExtent;
    mExtentSet = t.mExtentSet;
 }
@@ -562,10 +562,10 @@ DatabaseObject::~DatabaseObject()
 
 
 // Code that needs to run for both constructor and copy constructor
-void DatabaseObject::initialize() 
+void DatabaseObject::initialize()
 {
-   mLastQueryId = 0; 
-   mExtent = Rect(); 
+   mLastQueryId = 0;
+   mExtent = Rect();
    mExtentSet = false;
    mDatabase = NULL;
    mBucketList = NULL;
@@ -576,7 +576,7 @@ void DatabaseObject::initialize()
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
 DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex,
-                                            const Point &rayStart, const Point &rayEnd, 
+                                            const Point &rayStart, const Point &rayEnd,
                                             float &collisionTime, Point &surfaceNormal) const
 {
    return findObjectLOS(typeNumber, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
@@ -647,7 +647,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 
 
 DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format,
-                                            const Point &rayStart, const Point &rayEnd, 
+                                            const Point &rayStart, const Point &rayEnd,
                                             float &collisionTime, Point &surfaceNormal) const
 {
    Rect queryRect(rayStart, rayEnd);
@@ -801,12 +801,12 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
 // and the index of the bot zones is stored as an ID by the zone.  If we added and removed zones from our list, this would probably not
 // be a reliable way to access a specific item.  We could probably phase this out by passing pointers to zones rather than indices.
 DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
-{  
+{
    if(index < 0 || index >= mAllObjects.size())
       return NULL;
    else
-      return mAllObjects[index]; 
-} 
+      return mAllObjects[index];
+}
 
 
 void DatabaseObject::addToDatabase(GridDatabase *database)
@@ -824,7 +824,7 @@ bool DatabaseObject::isInDatabase()
 }
 
 
-bool DatabaseObject::isDeleted() 
+bool DatabaseObject::isDeleted()
 {
    return mObjectTypeNumber == DeletedTypeNumber;
 }
@@ -848,7 +848,7 @@ bool DatabaseObject::isDatabasable()
 const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
    return NULL;
-}  
+}
 
 
 bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const

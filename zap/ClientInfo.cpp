@@ -59,7 +59,7 @@ ClientInfo::~ClientInfo()
 void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed)
 {
    mNeedToCheckAuthenticationWithMaster = false;     // Once we get here, we'll treat the ruling as definitive
-   mIsAuthenticated = isAuthenticated; 
+   mIsAuthenticated = isAuthenticated;
    mBadges = badges;
    mGamesPlayed = gamesPlayed;
 }
@@ -163,7 +163,7 @@ bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 }
 
 
-// Returns true if spawn has actually been delayed 
+// Returns true if spawn has actually been delayed
 bool ClientInfo::isSpawnDelayed()
 {
    return mSpawnDelayed;
@@ -196,7 +196,7 @@ ClientInfo::ClientClass ClientInfo::getClientClass() const
 }
 
 
-// Returns true if spawn has actually been delayed 
+// Returns true if spawn has actually been delayed
 bool ClientInfo::isBusy()
 {
    return mIsBusy;
@@ -234,7 +234,7 @@ void::ClientInfo::updateLoadout(bool useOnDeck, bool engineerAllowed, bool silen
 
    // This could be triggered if on-deck loadout were set on a level where engineer were allowed,
    // but not actualized until after a level change where engineer was banned.
-   if(!isLoadoutValid(loadout, engineerAllowed))   
+   if(!isLoadoutValid(loadout, engineerAllowed))
       return;
 
    Ship *ship = getShip();
@@ -579,7 +579,7 @@ const LoadoutTracker &ClientInfo::getOldLoadout() const
 }
 
 
-// Return pointer to statistics tracker 
+// Return pointer to statistics tracker
 Statistics *ClientInfo::getStatistics()
 {
    return &mStatistics;
@@ -641,11 +641,11 @@ FullClientInfo::~FullClientInfo()
 // Seems to run on both client and server, or at least with mGame as a ClientGame and a ServerGame
 void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed)
 {
-   TNLAssert(isAuthenticated || badges == NO_BADGES || gamesPlayed == 0, 
+   TNLAssert(isAuthenticated || badges == NO_BADGES || gamesPlayed == 0,
                   "Unauthenticated players should never have badges or gamesPlayed!");
    Parent::setAuthenticated(isAuthenticated, badges, gamesPlayed);
 
-   // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.  
+   // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.
    if(mGame->isServer())
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(mGame->getClientInfo(i)->getName() != mName && mGame->getClientInfo(i)->getConnection())
@@ -655,8 +655,8 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
 
 bool FullClientInfo::isRobot() const
 {
-   return mClientClass == ClassRobotAddedByAddbots     || 
-          mClientClass == ClassRobotAddedByAutoleveler || 
+   return mClientClass == ClassRobotAddedByAddbots     ||
+          mClientClass == ClassRobotAddedByAutoleveler ||
           mClientClass == ClassRobotAddedByLevel       ||
           mClientClass == ClassRobotAddedByLevelNoTeam ||
           mClientClass == ClassRobotWithUnknownSource;
@@ -780,8 +780,8 @@ S32 FullClientInfo::getShowLevelUpMessage() const
 
 #ifndef ZAP_DEDICATED
 // Constructor
-RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,
+                                   U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role,
                                    bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
    mGame = game;

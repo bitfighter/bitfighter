@@ -37,9 +37,9 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
-   bool hasTeam();      
-   bool canBeHostile(); 
-   bool canBeNeutral(); 
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    string toLevelCode() const;
 

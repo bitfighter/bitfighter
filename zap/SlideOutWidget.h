@@ -11,7 +11,7 @@
 #include "Timer.h"
 
 
-using namespace TNL; 
+using namespace TNL;
 
 
 namespace Zap

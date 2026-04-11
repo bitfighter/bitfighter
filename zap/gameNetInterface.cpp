@@ -159,7 +159,7 @@ static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStr
       serverId = 0;              // then set this to zero
 
    // Alert the user
-   game->gotQueryResponse(remoteAddress, serverId, nonce, name.getString(), descr.getString(), 
+   game->gotQueryResponse(remoteAddress, serverId, nonce, name.getString(), descr.getString(),
                           playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
@@ -173,8 +173,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             handlePing(mGame, remoteAddress, mSocket, stream, mGame->getClientId());
          break;
 
-      case PingResponse: 
-         if(!mGame->isServer())  
+      case PingResponse:
+         if(!mGame->isServer())
             handlePingResponse(mGame, remoteAddress, stream);
          break;
 
@@ -183,8 +183,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             handleQuery(mGame, remoteAddress, mSocket, stream);
          break;
 
-      case QueryResponse: 
-         if(!mGame->isServer())  
+      case QueryResponse:
+         if(!mGame->isServer())
             handleQueryResponse(mGame, remoteAddress, stream);
          break;
 

@@ -7,8 +7,8 @@
  *	This is part of my wrapper-class to create
  *	a MD5 Hash from a string and a file.
  *
- *	This code is completly free, you 
- *	can copy it, modify it, or do 
+ *	This code is completly free, you
+ *	can copy it, modify it, or do
  *	what ever you want with it.
  *
  *	Feb. 2005
@@ -19,7 +19,7 @@
 #  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 //basic includes
 #include <fstream>
 #include <iostream>
@@ -35,7 +35,7 @@
 /*
  * internal hash function, calling
  * the basic methods from md5.h
- */	
+ */
 std::string md5wrapper::hashit(std::string text)
 {
    unsigned char outBuffer[16] = "";
@@ -63,7 +63,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 	{
 		::sprintf(&asciihash[p],"%02x",bytes[i]);
 		p += 2;
-	}	
+	}
 	asciihash[32] = '\0';
 	return std::string(asciihash);
 }
@@ -96,10 +96,10 @@ md5wrapper::~md5wrapper()
  * creates a MD5 hash from
  * "text" and returns it as
  * string
- */	
+ */
 std::string md5wrapper::getHashFromString(std::string text)
 {
-	return this->hashit(text); 
+	return this->hashit(text);
 }
 
 std::string md5wrapper::getHashFromString(const char *text)
@@ -121,7 +121,7 @@ std::string md5wrapper::getSaltedHashFromString(std::string text)
    // From http://clsc.net/tools/random-string-generator.php, in case you care!
    // Changing this will break compatibility with any clients/servers using a different salt.
    std::string salt = "8-0qf_C5z5xoH_M_--39_0xS5mPC99bbq9q-g80-003_4b__m7";
-	return this->hashit(lcase(text) + salt); 
+	return this->hashit(lcase(text) + salt);
 }
 
 std::string md5wrapper::getSaltedHashFromString(const char *text)
@@ -142,12 +142,12 @@ std::string md5wrapper::getSaltedHashFromString(const char *text)
 
 /*
  * creates a MD5 hash from
- * a file specified in "filename" and 
+ * a file specified in "filename" and
  * returns it as string
  * (based on Ronald L. Rivest's code
  * from RFC1321 "The MD5 Message-Digest Algorithm")
- */	
-std::string md5wrapper::getHashFromFile(std::string filename)	
+ */
+std::string md5wrapper::getHashFromFile(std::string filename)
 {
 	FILE *file;
    hash_state md;

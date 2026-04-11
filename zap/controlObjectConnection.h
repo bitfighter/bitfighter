@@ -8,7 +8,7 @@
 
 #include "move.h"
 #include "Point.h"
-#include "BfObject.h" 
+#include "BfObject.h"
 
 #include "tnl.h"
 #include "tnlGhostConnection.h"
@@ -58,7 +58,7 @@ private:
    S8 highSendIndex[3];
    U32 mMoveTimeCredit;
 
-   U32 mTimeSinceLastMove; 
+   U32 mTimeSinceLastMove;
    F32 mPrevAngle;
 
    bool mObjectMovedThisGame;

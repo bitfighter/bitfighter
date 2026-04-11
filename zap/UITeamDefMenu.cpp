@@ -78,7 +78,7 @@ static SymbolString getSymbolString(const string &text, const InputCodeManager *
 }
 
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : 
+TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    Parent(game),
    mMenuSubTitle(8),
    mMenuTitle("CONFIGURE TEAMS")
@@ -163,8 +163,8 @@ void TeamDefUserInterface::render()
    FontManager::pushFontContext(MenuHeaderContext);
    r.setColor(Colors::green);
    drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
-   
-   //mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter); 
+
+   //mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
    r.setColor(Colors::white);
@@ -221,7 +221,7 @@ void TeamDefUserInterface::render()
       {
          string numstr = "Team " + itos(j + 1) + ": ";
          string namestr = numstr + ui->getTeam(j)->getName().getString();
-         
+
          string colorstr;
 
          const Color *color = ui->getGame()->getTeamColor(j);
@@ -239,11 +239,11 @@ void TeamDefUserInterface::render()
             else
                TNLAssert(false, "Unknown entry mode!");
 
-            colorstr = "(" + itos(S32(color->r * multiplier + 0.5)) + ", " + 
+            colorstr = "(" + itos(S32(color->r * multiplier + 0.5)) + ", " +
                              itos(S32(color->g * multiplier + 0.5)) + ", " +
                              itos(S32(color->b * multiplier + 0.5)) + ")";
          }
-         
+
          static const string spacer1 = "  ";
          string nameColorStr = namestr + spacer1 + colorstr + " " + getEntryMessage();
 
@@ -256,15 +256,15 @@ void TeamDefUserInterface::render()
          {
             if(mEditingTeam)
             {
-               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
+               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) +
                        getStringWidth(fontsize, numstr.c_str());
-                       
+
 
                ui->getTeam(j)->getTeamNameEditor()->drawCursor(x, y, fontsize);
             }
             else if(mEditingColor)
             {
-               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
+               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) +
                        getStringWidth(fontsize, namestr.c_str()) +
                        getStringWidth(fontsize, spacer1.c_str()) +
                        getStringWidth(fontsize, "#");
@@ -398,7 +398,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
    else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
    {
-      if(ui->getTeamCount() == 1) 
+      if(ui->getTeamCount() == 1)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "There must be at least one team";
@@ -409,7 +409,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(selectedIndex >= ui->getTeamCount())
          selectedIndex = ui->getTeamCount() - 1;
    }
-  
+
    else if(inputCode == KEY_INSERT || inputCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 teamCount = ui->getTeamCount();
@@ -589,7 +589,7 @@ void TeamDefUserInterface::onMouseMoved()
 
    S32 teams = ui->getTeamCount();
 
-   selectedIndex = (S32)((DisplayManager::getScreenInfo()->getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2; 
+   selectedIndex = (S32)((DisplayManager::getScreenInfo()->getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2;
 
    if(selectedIndex >= teams)
       selectedIndex = teams - 1;

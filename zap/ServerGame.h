@@ -81,7 +81,7 @@ public:
 private:
 
    // For simulating CPU stutter
-   Timer mStutterTimer;                   
+   Timer mStutterTimer;
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
@@ -119,7 +119,7 @@ private:
 
    GridDatabase *mBotZoneDatabase;
    Vector<BotNavMeshZone *> mAllZones;
-   
+
 public:
    ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer = false);    // Constructor
    virtual ~ServerGame();   // Destructor
@@ -136,7 +136,7 @@ public:
    };
 
    // These are public so this can be accessed by tests
-   static const U32 MaxTimeDelta = TWO_SECONDS;     
+   static const U32 MaxTimeDelta = TWO_SECONDS;
    static const U32 LevelSwitchTime = FIVE_SECONDS;
 
    U32 mVoteTimer;
@@ -163,7 +163,7 @@ public:
    void addClient(ClientInfo *clientInfo);
    void removeClient(ClientInfo *clientInfo);
 
-   void setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason);  
+   void setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason);
 
    void resetLevelLoadIndex();
    string loadNextLevelInfo();
@@ -187,7 +187,7 @@ public:
    /////
    // Bot related
    void startAllBots();                            // Loop through all our bots and run thier main() functions
-   
+
    S32 getBotCount() const;
 
    void balanceTeams();
@@ -214,7 +214,7 @@ public:
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);            // Figures out the level index if the input is a relative index
 
-   string getCurrentLevelFileName() const;         // Return filename of level currently in play  
+   string getCurrentLevelFileName() const;         // Return filename of level currently in play
    StringTableEntry getCurrentLevelName() const;   // Return name of level currently in play
    GameTypeId getCurrentLevelType();               // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();     // Return name of type of level currently in play

@@ -32,7 +32,7 @@ struct Subscription {
 
 
 // Statics:
-bool EventManager::anyPending = false; 
+bool EventManager::anyPending = false;
 static Vector<Subscription>      subscriptions         [EventManager::EventTypes];
 static Vector<Subscription>      pendingSubscriptions  [EventManager::EventTypes];
 static Vector<LuaScriptRunner *> pendingUnsubscriptions[EventManager::EventTypes];
@@ -115,9 +115,9 @@ void EventManager::subscribe(LuaScriptRunner *subscriber, EventType eventType, S
    if(!ok)
    {
       if(!failSilently)
-         logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", 
+         logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.",
                                           eventDefs[eventType].name);
-      lua_pop(L, -1);    // Remove function from stack    
+      lua_pop(L, -1);    // Remove function from stack
 
       return;
    }
@@ -230,7 +230,7 @@ void EventManager::update()
             removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
 
       for(S32 i = 0; i < EventTypes; i++)
-         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     
+         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)
             subscriptions[i].push_back(pendingSubscriptions[i][j]);
 
       for(S32 i = 0; i < EventTypes; i++)
@@ -247,7 +247,7 @@ void EventManager::update()
 // onNexusOpened, onNexusClosed
 void EventManager::fireEvent(EventType eventType)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -257,9 +257,9 @@ void EventManager::fireEvent(EventType eventType)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 0, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -273,11 +273,11 @@ void EventManager::fireEvent(EventType eventType)
 // onTick
 void EventManager::fireEvent(EventType eventType, U32 deltaT)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    if(eventType == TickEvent)
-      mStepCount--;   
+      mStepCount--;
 
    lua_State *L = LuaScriptRunner::getL();
 
@@ -287,9 +287,9 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
    {
       lua_pushinteger(L, deltaT);   // -- deltaT
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -314,9 +314,9 @@ void EventManager::fireEvent(EventType eventType, CoreItem *core)
    {
       core->push(L);                // -- core
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -330,7 +330,7 @@ void EventManager::fireEvent(EventType eventType, CoreItem *core)
 // onShipSpawned
 void EventManager::fireEvent(EventType eventType, Ship *ship)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -341,9 +341,9 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
    {
       ship->push(L);                // -- ship
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -379,9 +379,9 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damaging
          lua_pushnil(L);
 
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -397,7 +397,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damaging
 // callerId will be NULL when player sends message
 void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -419,9 +419,9 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
       lua_pushboolean(L, global);   // -- message, player, isGlobal
 
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
-         
+
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -465,7 +465,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
       bool error = fire(L, subscription.subscriber, eventDefs[eventType].function, argCount, subscription.context);
 
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -487,7 +487,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
 // onPlayerJoined, onPlayerLeft, onPlayerTeamChanged
 void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -503,7 +503,7 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
 
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -517,7 +517,7 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
 // onShipEnteredZone, onShipLeftZone
 void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -528,14 +528,14 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
    {
       // Passing ship, zone, zoneType, zoneId
       ship->push(L);                                     // -- ship
-      zone->push(L);                                     // -- ship, zone   
+      zone->push(L);                                     // -- ship, zone
       lua_pushinteger(L, zone->getObjectTypeNumber());   // -- ship, zone, zone->objTypeNumber
       lua_pushinteger(L, zone->getUserAssignedId());     // -- ship, zone, zone->objTypeNumber, zone->id
 
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 4, subscriptions[eventType][i].context);
 
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -549,7 +549,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 // ObjectEnteredZoneEvent, ObjectLeftZoneEvent
 void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone)
 {
-   if(suppressEvents(eventType))   
+   if(suppressEvents(eventType))
       return;
 
    lua_State *L = LuaScriptRunner::getL();
@@ -560,14 +560,14 @@ void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone
    {
       // Passing object, zone, zoneType, zoneId
       object->push(L);                                   // -- object
-      zone->push(L);                                     // -- object, zone   
+      zone->push(L);                                     // -- object, zone
       lua_pushinteger(L, zone->getObjectTypeNumber());   // -- object, zone, zone->objTypeNumber
       lua_pushinteger(L, zone->getUserAssignedId());     // -- object, zone, zone->objTypeNumber, zone->id
 
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 4, subscriptions[eventType][i].context);
 
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -601,7 +601,7 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
 
       // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
-      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to
       // compensate for that by decrementing it here.
       if(error)
       {
@@ -633,7 +633,7 @@ bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char 
 //      // It was a levelgen
 //      logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
 //   }
-//      
+//
 //   // Don't clear the stack here, as some callers may still need stack items
 //}
 
@@ -670,7 +670,7 @@ bool EventManager::isPaused()
 void EventManager::addSteps(S32 steps)
 {
    if(mIsPaused)           // Don't add steps if not paused to avoid hitting pause and having bot still run a few steps
-      mStepCount = steps;     
+      mStepCount = steps;
 }
 
 

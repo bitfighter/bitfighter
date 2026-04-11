@@ -217,7 +217,7 @@ SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
 
 
 // Convenience constructor, just pass in a string, we'll do the rest!
-SymbolString::SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
+SymbolString::SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context,
                            S32 textSize, bool blockMode, Alignment alignment)
 {
    SymbolString::symbolParse(inputCodeManager, str, mSymbols, context, textSize, blockMode);
@@ -250,7 +250,7 @@ void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
 }
 
 
-void SymbolString::setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager, 
+void SymbolString::setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager,
                                         FontContext fontContext, S32 textSize, const Color *color)
 {
    Vector<SymbolShapePtr> symbols;
@@ -268,13 +268,13 @@ void SymbolString::clear()
 
 
 S32 SymbolString::getWidth() const
-{ 
+{
    return mWidth;
 }
 
 
 S32 SymbolString::getHeight() const
-{ 
+{
    S32 height = 0;
    for(S32 i = 0; i < mSymbols.size(); i++)
       height = max(height, mSymbols[i]->getHeight());
@@ -375,31 +375,31 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color *color)
          return SymbolShapePtr(new SymbolCircle(buttonHalfHeight, color));
 
       case Joystick::ButtonShapeRect:
-         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
-                                                     rectButtonHeight, 
+         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth,
+                                                     rectButtonHeight,
                                                      RectRadius,
                                                      color));
 
       case Joystick::ButtonShapeSmallRect:
-         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
-                                                          smallRectButtonHeight, 
+         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth,
+                                                          smallRectButtonHeight,
                                                           RectRadius,
                                                           color));
 
       case Joystick::ButtonShapeRoundedRect:
-         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
-                                                     rectButtonHeight, 
+         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth,
+                                                     rectButtonHeight,
                                                      RoundedRectRadius,
                                                      color));
 
       case Joystick::ButtonShapeSmallRoundedRect:
-         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
-                                                          smallRectButtonHeight, 
+         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth,
+                                                          smallRectButtonHeight,
                                                           RoundedRectRadius,
                                                           color));
-                                                     
+
       case Joystick::ButtonShapeHorizEllipse:
-         return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonDiameterX, 
+         return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonDiameterX,
                                                       horizEllipseButtonDiameterY,
                                                       color));
 
@@ -424,7 +424,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
 {
    static const S32 LabelSize = 13;
    Vector<SymbolShapePtr> symbols;
-   
+
    // Get the button outline
    SymbolShapePtr shapePtr = getSymbol(shape, color);
 
@@ -435,7 +435,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
 
    // Point(0,-1) below is a font-dependent rendering factor chosen by trial-and-error
    if(buttonSymbol == Joystick::ButtonSymbolNone)
-      symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize), 
+      symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize),
                                                       KeyContext, shapePtr->getLabelOffset(label, LabelSize) + Point(0,-1))));
    else
       symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
@@ -459,7 +459,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
          modifiers.push_back(InputCodeManager::inputCodeToString(KEY_CTRL));
       else // if(isAltKey(inputCode))
          modifiers.push_back(InputCodeManager::inputCodeToString(KEY_ALT));
-      
+
       return SymbolString::getModifiedKeySymbol(InputCodeManager::getBaseKey(inputCode), modifiers, color);
    }
    else if(InputCodeManager::isControllerButton(inputCode))
@@ -482,7 +482,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
    }
 
    else if(strcmp(InputCodeManager::inputCodeToString(inputCode), "") != 0)
-      return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)); 
+      return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color));
 
    else if(inputCode == KEY_UNKNOWN)
       return SymbolShapePtr(new SymbolUnknown(color));
@@ -518,7 +518,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, cons
 
    InputCode inputCode = InputCodeManager::stringToInputCode(sym.c_str());     // Get the base inputCode
 
-   if(inputCode == KEY_UNKNOWN) 
+   if(inputCode == KEY_UNKNOWN)
        return SymbolShapePtr();
 
    SymbolShapePtr s = SymbolString::getModifiedKeySymbol(inputCode, foundMods, color);
@@ -661,7 +661,7 @@ static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *input
 static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, S32 fontSize,
                            const Color *color, Vector<SymbolShapePtr> &symbols)
 {
-   // The first thing we'll do is see if we can convert symbolName into an inputCode, which we can then convert into its 
+   // The first thing we'll do is see if we can convert symbolName into an inputCode, which we can then convert into its
    // string representation.  If conversion doesn't work, convertStringToInputCode will return KEY_UNKNOWN.
    InputCode inputCode = convertStringToInputCode(inputCodeManager, symbol);
 
@@ -733,7 +733,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD2)));
    }
 
-   else if(symbol == "BULLET")                    // Square bullet point 
+   else if(symbol == "BULLET")                    // Square bullet point
       symbols.push_back(SymbolString::getBullet());
 
    else if(symbolName == "TAB_STOP")                  // Adds whitespace until width is equal to n
@@ -796,7 +796,7 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
       symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, textColor)));
 
       // Use + 2 to advance past the opening "[["
-      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), fontSize, symbolColor, symbols); 
+      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), fontSize, symbolColor, symbols);
 
       offset = endPos + 2;
    }
@@ -965,7 +965,7 @@ static const S32 SpacingAdjustor = 2;
 
 
 // Constructor
-SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) :
                                                                   Parent(width + SpacingAdjustor, height + SpacingAdjustor, color)
 {
    mRadius = radius;
@@ -984,7 +984,7 @@ void SymbolRoundedRect::render(const Point &center) const
    if(mHasColor)
       Renderer::get().setColor(mColor);
 
-   drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1), 
+   drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1),
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
@@ -993,7 +993,7 @@ void SymbolRoundedRect::render(const Point &center) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) :
                                                                Parent(width + SpacingAdjustor, height + SpacingAdjustor, radius, color)
 {
    mLabelOffset.set(0, -1);
@@ -1012,7 +1012,7 @@ void SymbolSmallRoundedRect::render(const Point &center) const
    if(mHasColor)
       Renderer::get().setColor(mColor);
 
-   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2), 
+   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2),
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
@@ -1179,7 +1179,7 @@ S32 SymbolCircle::getLabelSizeAdjustor(const string &label, S32 labelSize) const
    // Shrink labels a little when the text is uncomfortably big for the button
    if(getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
       return mLabelSizeAdjustor - 2;
-   
+
    return mLabelSizeAdjustor;
 }
 
@@ -1212,7 +1212,7 @@ SymbolButtonSymbol::~SymbolButtonSymbol()
 void SymbolButtonSymbol::render(const Point &pos) const
 {
    // Get symbol in the proper position for rendering -- it's either this or change all the render methods
-   Point renderPos = pos + Point(0, -6);   
+   Point renderPos = pos + Point(0, -6);
 
    switch(mGlyph)
    {
@@ -1357,7 +1357,7 @@ void SymbolSpinner::render(const Point &pos) const
       case 3:
          charstr = "\\";
          break;
-      default: 
+      default:
          TNLAssert(false, "Unexpected value of charindx");
          break;
    }
@@ -1391,13 +1391,13 @@ void SymbolSpinner::render(const Point &pos) const
    //      charstr = "\xEF\x9E\xB6";
    //      break;
 
-   //   default: 
+   //   default:
    //      TNLAssert(false, "Unexpected value of charindx");
    //      break;
    //}
 
    //SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext)
-   
+
 }
 
 
@@ -1433,7 +1433,7 @@ void SymbolBullet::render(const Point &pos) const
 
 
 // Constructor with no vertical offset
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : 
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) :
                               Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
@@ -1443,7 +1443,7 @@ SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, co
 
 
 // Constructor with vertical offset
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) :
                                        Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
@@ -1525,7 +1525,7 @@ SymbolKey::~SymbolKey()
 void SymbolKey::render(const Point &center) const
 {
    // Compensate for the fact that boxes draw from center
-   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 - 3); 
+   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 - 3);
 
    // The -4 is a font-dependent aesthetic value determined by trial and error while looking at the help screens
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 4);

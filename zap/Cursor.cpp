@@ -9,11 +9,11 @@
 #include "tnlAssert.h"
 #include "tnlPlatform.h"
 
-#ifdef TNL_OS_WIN32 
+#ifdef TNL_OS_WIN32
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
 
-#include "SDL_mouse.h"     
+#include "SDL_mouse.h"
 #include "SDL_version.h"
 
 namespace Zap
@@ -27,7 +27,7 @@ static SDL_Cursor *mVerticalResize = NULL;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-// Cursors embedded below.  Note that image data comes from Gimp -- create the image, save as "xbm" type, and copy the structs as done below.  
+// Cursors embedded below.  Note that image data comes from Gimp -- create the image, save as "xbm" type, and copy the structs as done below.
 // Be sure to include the mask file.
 // The only modification is to add the two hotspot bytes.  Images can be full color, with transparency.
 static Cursor cursorSpray = {
@@ -48,7 +48,7 @@ static Cursor cursorSpray = {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 
    // Mask bits
-   {  
+   {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0xc0, 0x01, 0x00,
       0x00, 0xe0, 0x03, 0x00, 0x00, 0xf0, 0x07, 0x00, 0x00, 0xf8, 0x0f, 0x00,
@@ -111,7 +111,7 @@ static Cursor cursorDefault = {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 
    // Mask bits
-   {  
+   {
       0x03, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00,
       0x1f, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x00, 0x7f, 0x00, 0x00, 0x00,
       0xff, 0x00, 0x00, 0x00, 0xff, 0x01, 0x00, 0x00, 0xff, 0x03, 0x00, 0x00,
@@ -147,7 +147,7 @@ void Cursor::init()
 }
 
 
-void Cursor::reverseBits() 
+void Cursor::reverseBits()
 {
    // We need to reverse the bits encoded in our cursor; We're assuming the data comes from Gimp, which writes data
    // with a different bit order than SDL expects.  Don't know who is right, but this needs to be done.
@@ -157,8 +157,8 @@ void Cursor::reverseBits()
 
    for(U32 i = 0; i < ARRAYSIZE(bits); i++)
    {
-      bits[i] = U8(((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);    
-      maskBits[i] = U8(((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);    
+      bits[i] = U8(((bits[i] * 0x0802LU & 0x22110LU) | (bits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);
+      maskBits[i] = U8(((maskBits[i] * 0x0802LU & 0x22110LU) | (maskBits[i] * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16);
    }
 }
 

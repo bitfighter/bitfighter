@@ -98,7 +98,7 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
    //Parent::unpackUpdate(connection, stream);  // Goes to empty function NetObject::unpackUpdate
 
    mInitial = stream->readFlag();      // InitialMask
-   if(mInitial)     
+   if(mInitial)
       mItemId = stream->readRangedU32(0, U16_MAX);
 
    if(stream->readFlag())              // GeomMask
@@ -127,7 +127,7 @@ void Item::setOutline()
    F32 x = getPos().x;
    F32 y = getPos().y;
 
-   S32 rad = (S32)mRadius; 
+   S32 rad = (S32)mRadius;
 
    mOutlinePoints.clear();
    mOutlinePoints.reserve(4);
@@ -182,7 +182,7 @@ void Item::render()
 
 void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
-   renderItem(getPos());                    
+   renderItem(getPos());
 }
 
 
@@ -202,11 +202,11 @@ Rect Item::calcExtents()
 // Lua interface
 /**
  * @luaclass Item
- * 
+ *
  * @brief Parent class for most common game items
  */
 // Standard methods available to all Items:
-//               Fn name           Param profiles  Profile count                           
+//               Fn name           Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getRad,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getShip,          ARRAYDEF({{ END }}), 1 ) \
@@ -225,9 +225,9 @@ REGISTER_LUA_SUBCLASS(Item, BfObject);
 
 /**
  * @luafunc num Item::getRad()
- * 
+ *
  * @brief Returns the radius of an item.
- * 
+ *
  * @return The radius of the item. For a Teleporter, this is the radius of the
  * entrance. For a ForceFieldProjector, this is the radius of the base.
  */
@@ -236,13 +236,13 @@ S32 Item::lua_getRad(lua_State *L) { return returnFloat(L, getRadius()); }
 
 /**
  * @luafunc Zone Item::getCaptureZone()
- * 
+ *
  * @brief Returns capture zone holding the item.
- * 
+ *
  * @descr Many games do not feature capture zones. For those games, this
- * function will always return nil. Currently only \link FlagItem FlagItems\endlink 
+ * function will always return nil. Currently only \link FlagItem FlagItems\endlink
  * can be captured.
- * 
+ *
  * @return Zone where the item has been captured. Returns nil if the item is not
  * in a capture zone.
  */
@@ -251,12 +251,12 @@ S32 Item::lua_getCaptureZone (lua_State *L) { return returnNil(L); }
 
 /**
  * @luafunc Ship Item::getShip()
- * 
+ *
  * @brief Returns the ship where the item is mounted.
- * 
+ *
  * @descr Most objects cannot be mounted. For those, this function will always
  * return nil.
- * 
+ *
  * @return Ship where the item is mounted. Returns nil if the item is not
  * mounted.
  */

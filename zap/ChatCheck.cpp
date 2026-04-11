@@ -42,7 +42,7 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
    U32 millisecondsClock = Platform::getRealMilliseconds();
 
 	if(mMillisecondsClock - millisecondsClock < 10)       // Makes up for inaccurate clock slightly going backwards by 1 or 2 ms
-      millisecondsClock = mMillisecondsClock;  
+      millisecondsClock = mMillisecondsClock;
 
    U32 milliseconds = millisecondsClock - mMillisecondsClock;
 

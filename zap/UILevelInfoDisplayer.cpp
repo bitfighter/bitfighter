@@ -18,13 +18,13 @@
 #include "Colors.h"
 #include "Intervals.h"
 
-#include "stringUtils.h"             
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "gameObjectRender.h"
 
 
-namespace Zap { 
-   
+namespace Zap {
+
 namespace UI {
 
 // Constructor
@@ -46,7 +46,7 @@ LevelInfoDisplayer::~LevelInfoDisplayer()
 
 void LevelInfoDisplayer::onGameTypeChanged()
 {
-   setExpectedWidth(getSideBoxWidth()); 
+   setExpectedWidth(getSideBoxWidth());
 }
 
 
@@ -90,7 +90,7 @@ void LevelInfoDisplayer::render() const
    FontManager::pushFontContext(MenuHeaderContext);
 
     // Only render these when they are not empty
-   bool showCredits = gameType->getLevelCredits()->isNotNull();    
+   bool showCredits = gameType->getLevelCredits()->isNotNull();
    bool showDescr   = strcmp(gameType->getLevelDescription(), "") != 0;
 
    const S32 titleSize = 30;
@@ -127,7 +127,7 @@ void LevelInfoDisplayer::render() const
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
       S32 pos;
-      
+
       symbols.push_back(SymbolString::getBlankSymbol(8));  // Padding -- more symbols will be added below in symbolParse
 
       if(totalRating == UnknownRating)
@@ -146,7 +146,7 @@ void LevelInfoDisplayer::render() const
          totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
          totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
 
-         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, 
+         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols,
                                    LevelInfoContext, (S32)RatingSize, true, &Colors::red);
       }
    }
@@ -188,7 +188,7 @@ void LevelInfoDisplayer::render() const
    const char *credits         = gameType->getLevelCredits()->getString();
    const S32 creditsSize       = 20;
    const S32 creditsHeight     = showCredits ? creditsSize + 8 : 0;
-   
+
    const S32 frameMargin       = UserInterface::vertMargin;
 
    const S32 totalHeight = frameMargin + titleSize + titleGap + descriptionHeight + creditsHeight + frameMargin;
@@ -238,7 +238,7 @@ void LevelInfoDisplayer::render() const
    const S32 scoreToWinMargin  =  6;
    const S32 scoreToWinHeight  = ScoreToWinSize + scoreToWinMargin;
 
-   const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) + 
+   const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) +
                                   postInstructionMargin + scoreToWinHeight + frameMargin;
 
    string gt  = getGameTypeName();
@@ -246,8 +246,8 @@ void LevelInfoDisplayer::render() const
 
    const S32 sideBoxWidth = getSideBoxWidth();
    const S32 sideBoxCen   = DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth / 2;
-   
-   renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth, 
+
+   renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth,
                              sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
    yPos = sideBoxY + frameMargin;
@@ -270,7 +270,7 @@ void LevelInfoDisplayer::render() const
 
    yPos += postInstructionMargin;
 
-   drawCenteredStringPair(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
+   drawCenteredStringPair(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
                           Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
@@ -310,16 +310,16 @@ S32 LevelInfoDisplayer::getSideBoxWidth() const
    string gt  = getGameTypeName();
    string sgt = getShortGameTypeName();
 
-   
+
    FontManager::pushFontContext(LevelInfoHeadlineContext);
    const S32 scoreToWinWidth = getStringWidthf(ScoreToWinSize, "%s%d", ScoreToWinStr, gameType->getWinningScore()) + 5;
    FontManager::popFontContext();
 
 
-   const S32 instrWidth = max(getStringWidth(InstructionSize, gameType->getInstructionString()[0]), 
-                           showTwoLinesOfInstructions ? getStringWidth(InstructionSize, gameType->getInstructionString()[1]) : 0); 
+   const S32 instrWidth = max(getStringWidth(InstructionSize, gameType->getInstructionString()[0]),
+                           showTwoLinesOfInstructions ? getStringWidth(InstructionSize, gameType->getInstructionString()[1]) : 0);
 
-   const S32 gameTypeWidth = getStringPairWidth(GameTypeTextSize, LevelInfoHeadlineContext, 
+   const S32 gameTypeWidth = getStringPairWidth(GameTypeTextSize, LevelInfoHeadlineContext,
                                                 LevelInfoHeadlineContext, gt.c_str(), sgt.c_str());
 
 

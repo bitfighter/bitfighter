@@ -20,7 +20,7 @@ using namespace TNL;
 
 namespace Zap {
 
-struct WeaponStats 
+struct WeaponStats
 {
    WeaponType weaponType;
    U32 shots;
@@ -29,7 +29,7 @@ struct WeaponStats
 };
 
 
-struct ModuleStats 
+struct ModuleStats
 {
    ShipModule shipModule;
    U32 seconds;
@@ -53,8 +53,8 @@ struct PlayerStats
    S32 points;
    U32 kills;
    U32 turretKills;     // Turrets killed
-   U32 ffKills;         // FFs killed 
-   U32 astKills;        // Asteroids killed 
+   U32 ffKills;         // FFs killed
+   U32 astKills;        // Asteroids killed
    U32 turretsEngr;     // Turrets constructed with engineer
    U32 ffEngr;          // Forcefields engineered
    U32 telEngr;         // Teleporters engineered
@@ -86,7 +86,7 @@ struct PlayerStats
 
 
 // Embedded within GameStats below
-struct TeamStats 
+struct TeamStats
 {
    U32 intColor;     // To send as number, not string
    string hexColor;  // Not sent, calculated on receiving based on intColor

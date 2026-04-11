@@ -39,11 +39,11 @@ TNL_IMPLEMENT_NETOBJECT(FlagItem);
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
-      
+
       S32 profile = checkArgList(L, constructorArgList, "FlagItem", "constructor");
 
       if(profile == 1)
@@ -91,7 +91,7 @@ FlagItem::FlagItem(const Point &pos, const Point &vel, bool useDropDelay) : Pare
 
 
 // Destructor
-FlagItem::~FlagItem()      
+FlagItem::~FlagItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -104,7 +104,7 @@ FlagItem *FlagItem::clone() const
 
 
 void FlagItem::onAddedToGame(Game *theGame)
-{ 
+{
    Parent::onAddedToGame(theGame);
    theGame->addFlag(this);
 }
@@ -150,7 +150,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));
-   
+
    if(!Parent::processArguments(argc-1, argv+1, game))
       return false;
 
@@ -299,7 +299,7 @@ void FlagItem::sendHome()
    if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
    {
       TNLAssert(false, "No flag spawn points!");
-      logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
+      logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**",
          ((ServerGame *)getGame())->getCurrentLevelFileName().c_str(), getTeam());
    }
    else if(!mSpawnLock)
@@ -409,8 +409,8 @@ bool FlagItem::collide(BfObject *hitObject)
 
    Ship *ship = static_cast<Ship*>(hitObject);
 
-   // Ignore collisions that occur to recently dropped flags.  Make sure flag is ready to be picked up! 
-   if(mDroppedTimer.getCurrent())    
+   // Ignore collisions that occur to recently dropped flags.  Make sure flag is ready to be picked up!
+   if(mDroppedTimer.getCurrent())
       return false;
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
@@ -453,13 +453,13 @@ bool FlagItem::isAtHome()
 
 /**
  * @luaclass FlagItem
- * 
+ *
  * @brief Flags are used in many games, such as Nexus and Capture The Flag
  * (CTF).
- * 
+ *
  * @geom The geometry of a FlagItem is a point.
  */
-//               Fn name       Param profiles  Profile count                           
+//               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isInInitLoc,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getFlagCount, ARRAYDEF({{ END }}), 1 ) \
@@ -476,15 +476,15 @@ REGISTER_LUA_SUBCLASS(FlagItem, MountableItem);
 
 /**
  * @luafunc bool FlagItem::isInInitLoc()
- * 
+ *
  * @brief Returns `true` if the flag is in its starting position, `false` if it
  * has been moved.
- * 
+ *
  * @return `true` if the flag is "at home", `false` otherwise.
  */
 S32 FlagItem::lua_isInInitLoc(lua_State *L)
-{ 
-   return returnBool(L, isAtHome()); 
+{
+   return returnBool(L, isAtHome());
 }
 
 
@@ -506,9 +506,9 @@ S32 FlagItem::lua_getFlagCount(lua_State *L)
 
 /**
  * @luafunc Zone FlagItem::getCaptureZone()
- * 
+ *
  * @brief Get the zone which "holds" this flag (e.g. in the Retrieve game mode)
- * 
+ *
  * @return The zone where the FlagItem is held, or nil if it is not held in a
  * zone.
  */

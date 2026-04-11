@@ -20,7 +20,7 @@ GeomObject::GeomObject()
 
 
 //// Copy constructor
-//GeomObject::GeomObject(const GeomObject &g) 
+//GeomObject::GeomObject(const GeomObject &g)
 //{
 //   mGeometry = g.mGeometry;
 //}
@@ -69,7 +69,7 @@ Point    GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(ind
 
 
 bool GeomObject::deleteVert(S32 vertIndex)
-{   
+{
    if(mGeometry.getGeometry()->deleteVert(vertIndex))
    {
       onPointsChanged();
@@ -80,8 +80,8 @@ bool GeomObject::deleteVert(S32 vertIndex)
 }
 
 
-bool GeomObject::insertVert(Point vertex, S32 vertIndex) 
-{   
+bool GeomObject::insertVert(Point vertex, S32 vertIndex)
+{
    if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
    {
       onPointsChanged();
@@ -93,12 +93,12 @@ bool GeomObject::insertVert(Point vertex, S32 vertIndex)
 
 
 void GeomObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
-                                                                                           
+
 bool GeomObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
 S32 GeomObject::getVertCount() const         {   return mGeometry.getGeometry()->getVertCount();            }
 S32 GeomObject::getMinVertCount() const      {   return mGeometry.getGeometry()->getMinVertCount();         }
 
-void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
+void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }
 
 
 bool GeomObject::addVertFront(Point vert)
@@ -113,7 +113,7 @@ bool GeomObject::addVertFront(Point vert)
 }
 
 
-bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit) 
+bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 {
    if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
    {
@@ -130,13 +130,13 @@ void GeomObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->select
 void GeomObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
 void GeomObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
 void GeomObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
-     
+
 bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 // Geometric calculations
 Point GeomObject::getCentroid()   const {   return mGeometry.getGeometry()->getCentroid();     }
 F32   GeomObject::getLabelAngle() const {   return mGeometry.getGeometry()->getLabelAngle();   }
-      
+
 
 // Geometry operations
 const Vector<Point> *GeomObject::getOutline() const       {   return mGeometry.getOutline();    }
@@ -159,9 +159,9 @@ void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {  
 void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
 void GeomObject::setGeom(const Vector<Point> &points)                        {   mGeometry.getGeometry()->setGeom(points); }
 
-void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
-{  
-   mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
+void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+{
+   mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize);
    onPointsChanged();
 }
 
@@ -187,7 +187,7 @@ Point GeomObject::getRenderPos() const { return getPos();   }
 
 void GeomObject::setPos(const Point &pos)
 {
-   setVert(pos, 0);  
+   setVert(pos, 0);
    setExtent(calcExtents());
 }
 
@@ -204,8 +204,8 @@ void GeomObject::onGeomChanging()
 void GeomObject::onGeomChanged() {  /* Do nothing */ }
 
 
-void GeomObject::onPointsChanged()                        
-{   
+void GeomObject::onPointsChanged()
+{
    mGeometry.getGeometry()->onPointsChanged();
 }
 
@@ -264,7 +264,7 @@ void GeometryContainer::setGeometry(Geometry *geometry)
 }
 
 
-void GeometryContainer::reverseWinding()    
+void GeometryContainer::reverseWinding()
 {
    mGeometry->reverseWinding();
 }
@@ -276,20 +276,20 @@ const Vector<Point> *GeometryContainer::getOutline() const
 }
 
 
-const Vector<Point> *GeometryContainer::getFill() const    
+const Vector<Point> *GeometryContainer::getFill() const
 {
    return mGeometry->getFill();
 }
 
 
-Point GeometryContainer::getVert(S32 index) const   
-{   
-   return mGeometry->getVert(index);  
+Point GeometryContainer::getVert(S32 index) const
+{
+   return mGeometry->getVert(index);
 }
 
 
 string GeometryContainer::geomToLevelCode() const
-{  
+{
    return mGeometry->geomToLevelCode();
 }
 

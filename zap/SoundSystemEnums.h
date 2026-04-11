@@ -9,7 +9,7 @@
 namespace Zap {
 
 
-// TODO: Make this an X-MACRO!  
+// TODO: Make this an X-MACRO!
 // Must keep this aligned with sfxProfilesModern[]
 enum SFXProfiles
 {
@@ -32,7 +32,7 @@ enum SFXProfiles
    SFXRailgunProjectile,
    SFXRailgunImpact,
 
-   SFXBurst, 
+   SFXBurst,
 
    SFXMineDeploy,
    SFXMineArm,

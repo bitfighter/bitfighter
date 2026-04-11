@@ -209,7 +209,7 @@ protected:
    virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
 
    virtual void cleanUp();
-   
+
    struct DeleteRef
    {
       SafePtr<BfObject> theObject;
@@ -279,7 +279,7 @@ public:
    ClientInfo *getClientInfo(S32 index) const;
    const Vector<RefPtr<ClientInfo> > *getClientInfos();
 
-   void addToClientList(ClientInfo *clientInfo);                  
+   void addToClientList(ClientInfo *clientInfo);
    void removeFromClientList(const StringTableEntry &name);       // Client side
    void removeFromClientList(ClientInfo *clientInfo);             // Server side
    void clearClientList();
@@ -296,8 +296,8 @@ public:
    virtual bool isTestServer() const = 0;
 
    virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
-   virtual void gotQueryResponse(const Address &address, S32 serverId, 
-                                 const Nonce &nonce, const char *serverName, const char *serverDescr, 
+   virtual void gotQueryResponse(const Address &address, S32 serverId,
+                                 const Nonce &nonce, const char *serverName, const char *serverDescr,
                                  U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    virtual void displayMessage(const Color &msgColor, const char *format, ...) const;
@@ -306,7 +306,7 @@ public:
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    Ship *findShip(const StringTableEntry &clientName);            // Find ship by name
-   
+
    const Rect *getWorldExtents() const;
 
    virtual const Color *getTeamColor(S32 teamId) const;
@@ -334,7 +334,7 @@ public:
    virtual Robot *findBot(const char *id);                // Find bot with specified script id
    virtual void addBot(Robot *robot);
    virtual void removeBot(Robot *robot);
-   virtual void deleteBot(const StringTableEntry &name);  // Delete by name 
+   virtual void deleteBot(const StringTableEntry &name);  // Delete by name
    virtual void deleteBot(S32 i);                         // Delete by index
    virtual void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    virtual void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
@@ -356,12 +356,12 @@ public:
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum) = 0;
 
-   virtual bool addPolyWall(BfObject *polyWall, GridDatabase *database);     
-   virtual void addWallItem(BfObject *wallItem, GridDatabase *database);     
+   virtual bool addPolyWall(BfObject *polyWall, GridDatabase *database);
+   virtual void addWallItem(BfObject *wallItem, GridDatabase *database);
 
    bool addWall(const WallRec &barrier);
 
-   virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
+   virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0;
 
    virtual Ship *getLocalPlayerShip() const = 0;
 
@@ -401,7 +401,7 @@ public:
 
    // Team functions
    S32 getTeamCount() const;
-   
+
    AbstractTeam *getTeam(S32 teamIndex) const;
 
    bool getTeamHasFlag(S32 teamIndex) const;
@@ -436,7 +436,7 @@ public:
    void setReadyToConnectToMaster(bool ready);
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
-   S32 mObjectsLoaded;  
+   S32 mObjectsLoaded;
 
    Point getScopeRange(bool sensorEquipped);
 

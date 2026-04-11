@@ -54,7 +54,7 @@ MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32)
 
 
 // Constructor
-MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientGame *, U32), 
+MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientGame *, U32),
                    const string &help, InputCode k1, InputCode k2)
 {
    initialize();
@@ -89,10 +89,10 @@ void MenuItem::initialize()
 
 
 // Destructor
-MenuItem::~MenuItem() 
-{ 
+MenuItem::~MenuItem()
+{
    LUAW_DESTRUCTOR_CLEANUP;
-} 
+}
 
 
 MenuItemTypes MenuItem::getItemType()
@@ -113,9 +113,9 @@ MenuItemSize MenuItem::getSize()
 }
 
 
-MenuUserInterface *MenuItem::getMenu()  
-{ 
-   return mMenu; 
+MenuUserInterface *MenuItem::getMenu()
+{
+   return mMenu;
 }
 
 
@@ -155,9 +155,9 @@ void MenuItem::setHelp(string help)
 }
 
 
-void MenuItem::setMenu(MenuUserInterface *menu) 
-{ 
-   mMenu = menu; 
+void MenuItem::setMenu(MenuUserInterface *menu)
+{
+   mMenu = menu;
 }
 
 
@@ -222,7 +222,7 @@ void MenuItem::setEnterAdvancesItem(bool enterAdvancesItem)
 
 
 // Default implementations will be overridden by child classes
-const char *MenuItem::getSpecialEditingInstructions() { return ""; } 
+const char *MenuItem::getSpecialEditingInstructions() { return ""; }
 S32         MenuItem::getIntValue() const             { return 0;  }
 
 
@@ -279,15 +279,15 @@ void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in chil
 
 /**
  * @luaclass MenuItem
- * 
+ *
  * @brief Simple menu item that calls a method or opens a submenu when selected.
- * 
- * @descr MenuItem is the parent class for all other MenuItems. 
- * 
+ *
+ * @descr MenuItem is the parent class for all other MenuItems.
+ *
  * Currently, you cannot instantiate a MenuItem from Lua, though you can
  * instatiate MenuItem subclasses.
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(MenuItem, LUA_METHODS);
@@ -381,7 +381,7 @@ void ValueMenuItem::setUnselectedValueColor(const Color &color)
 ////////////////////////////////////
 
 // Constructor
-ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap,
                                void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2) :
       ValueMenuItem(title, callback, help, k1, k2)
 {
@@ -435,10 +435,10 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
       return true;
    }
    else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_UP)
-   {      
+   {
       U32 nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
-      
+
       if(mCallback)
          mCallback(getMenu()->getGame(), mIndex);
 
@@ -514,7 +514,7 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
       if(!lua_isstring(L, -1))
       {
          char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", 
+         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d",
                                     methodName, index, strings.size() + 1);
          logprintf(LogConsumer::LogError, msg);
 
@@ -578,11 +578,11 @@ string ToggleMenuItem::getValue() const
 
 /**
  * @luaclass ToggleMenuItem
- * 
+ *
  * @brief Menu item that lets users choose one of several options.
- * 
+ *
  * @luafunc ToggleMenuItem::ToggleMenuItem(string name, table options, int currentIndex, bool wrap, string help)
- * 
+ *
  * @param name The text shown on the menu item.
  * @param options The options to be displayed.
  * @param currentIndex The index of the item to be selected initially (1 = first
@@ -590,16 +590,16 @@ string ToggleMenuItem::getValue() const
  * @param wrap `true`if the items should wrap around when you reach the last
  * index.
  * @param help A bit of help text.
- * 
+ *
  * The MenuItem will return the text of the item the user selected.
- * 
+ *
  * For example:
- * 
+ *
  * @code
  *   m = ToggleMenuItem.new("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, `true`, "Type of item to insert")
  * @endcode
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(ToggleMenuItem, LUA_METHODS);
@@ -619,7 +619,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KE
 
    // Required items -- will throw if they are missing or misspecified
    mDisplayVal = getCheckedString(L, 1, methodName);
-   getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
+   getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table
 
    // Optional (but recommended) items
    mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
@@ -712,27 +712,27 @@ void YesNoMenuItem::setIndex(S32 index)
 
 /**
  * @luaclass YesNoMenuItem
- * 
+ *
  * @brief A specialized ToggleMenuItem prepopulated with Yes and No.
- * 
+ *
  * @descr To create a YesNoMenuItem from a plugin, use the following syntax:
- * 
+ *
  * @luafunc YesNoMenuItem::YesNoMenuItem(string name, int currentIndex, string help)
- * 
+ *
  * @param name The text shown on the menu item.
  * @param currentIndex The index of the item to be selected initially (1 = Yes,
  * 2 = No).
  * @param help A bit of help text.
- * 
+ *
  * The YesNoMenuItem will return 1 if the user selected Yes, 2 if No.
- * 
+ *
  * For example:
- * 
+ *
  * @code
  *   m = YesNoMenuItem.new("Hostile", 1, "Should this turret be hostile?")
  * @endcode
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(YesNoMenuItem, LUA_METHODS);
@@ -749,7 +749,7 @@ REGISTER_LUA_SUBCLASS(YesNoMenuItem, ToggleMenuItem);
 ////////////////////////////////////
 
 // Constructor
-CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
+CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units,
                                  const string &minMsg, const string &help, InputCode k1, InputCode k2) :
    Parent(title, NULL, help, k1, k2)
 {
@@ -759,7 +759,7 @@ CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 m
    mMinValue = minVal;
    mMaxValue = maxVal;
    mUnits = units;
-   mMinMsg = minMsg;   
+   mMinMsg = minMsg;
 
    setIntValue(value);     // Needs to be done after mMinValue and mMaxValue are set
 }
@@ -813,7 +813,7 @@ S32 CounterMenuItem::getWidth(S32 textsize)
 // Return true if key was handled, false otherwise
 bool CounterMenuItem::handleKey(InputCode inputCode)
 {
-   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)  
+   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
@@ -852,14 +852,14 @@ bool CounterMenuItem::handleKey(InputCode inputCode)
 }
 
 
-void CounterMenuItem::increment(S32 fact) 
-{ 
+void CounterMenuItem::increment(S32 fact)
+{
    setIntValue(mValue + mStep * fact);
 }
 
 
-void CounterMenuItem::decrement(S32 fact) 
-{ 
+void CounterMenuItem::decrement(S32 fact)
+{
    setIntValue(mValue - mStep * fact);
 }
 
@@ -927,13 +927,13 @@ string CounterMenuItem::getUnits() const
 
 void CounterMenuItem::snap()
 {
-   // Do nothing 
+   // Do nothing
 }
 
 
 void CounterMenuItem::activatedWithShortcutKey()
 {
-   // Do nothing 
+   // Do nothing
 }
 
 
@@ -942,33 +942,33 @@ void CounterMenuItem::activatedWithShortcutKey()
 
 /**
  * @luaclass CounterMenuItem
- * 
+ *
  * @brief Menu item for entering a numeric value, with increment and decrement
  * controls.
  *
  * @luafunc CounterMenuItem::CounterMenuItem(string name, num startingVal, num step, num minVal, num maxVal, string units, string minText, string help)
- * 
+ *
  * @param name The text shown on the menu item.
- * @param startingVal The starting value of the menu item. 
+ * @param startingVal The starting value of the menu item.
  * @param step The amount by which to increase or decrease the value when the
  * arrow keys are used.
- * @param minVal The minimum allowable value that can be entered. 
- * @param maxVal The maximum allowable value that can be entered. 
+ * @param minVal The minimum allowable value that can be entered.
+ * @param maxVal The maximum allowable value that can be entered.
  * @param units The units to be shown alongside the numeric item. Pass "" if you
  * don't want to display units.
  * @param minText The text shown on the menu item when the minimum value has
- * been reached. Pass "" to simply display the minimum value. 
+ * been reached. Pass "" to simply display the minimum value.
  * @param help A bit of help text.
- * 
+ *
  * The MenuItem will return the value entered.
- * 
+ *
  * For example:
- * 
+ *
  * @code
  *   m = CounterMenuItem.new("Wall Thickness", 50, 1, 1, 50, "grid units", "", "Thickness of wall to be created")
  * @endcode
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(CounterMenuItem, LUA_METHODS);
@@ -995,9 +995,9 @@ CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, 
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
-      mStep =     getInt(L, 3, 1);   
-      mMinValue = getInt(L, 4, 0);   
-      mMaxValue = getInt(L, 5, 100);   
+      mStep =     getInt(L, 3, 1);
+      mMinValue = getInt(L, 4, 0);
+      mMaxValue = getInt(L, 5, 100);
       mUnits =    getString(L, 6, "");
       mMinMsg =   getString(L, 7, "");
       mHelp =     getString(L, 8, "");
@@ -1404,7 +1404,7 @@ string TimeCounterMenuItem::getValueForWritingToLevelFile() const
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
+TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg,
                                                        const string &help, InputCode k1, InputCode k2) :
    TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
@@ -1524,8 +1524,8 @@ string TeamMenuItem::getOptionText() const
    Team *team = (Team *)mTeam;
 
    // Static may help reduce allocation/deallocation churn at the cost of 2K memory; not sure either are really a problem
-   static char buffer[2048];  
-   dSprintf(buffer, sizeof(buffer), "%s%s  [ %d | %d | %d ]", mIsCurrent ? "* " : "", getPrompt().c_str(), 
+   static char buffer[2048];
+   dSprintf(buffer, sizeof(buffer), "%s%s  [ %d | %d | %d ]", mIsCurrent ? "* " : "", getPrompt().c_str(),
                                                            team->getPlayerCount(), team->getBotCount(), team->getScore());
 
    return buffer;
@@ -1593,7 +1593,7 @@ string TextEntryMenuItem::getOptionText() const
 
 void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   Color textColor;     
+   Color textColor;
    if(mLineEditor.getString() == "" && mEmptyVal != "")
       textColor.set(.4, .4, .4);
    else if(isSelected)
@@ -1621,7 +1621,7 @@ S32 TextEntryMenuItem::getWidth(S32 textsize)
 
 
 bool TextEntryMenuItem::handleKey(InputCode inputCode)
-{ 
+{
    bool handled = mLineEditor.handleKey(inputCode);
    if(mTextEditedCallback)
       mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
@@ -1713,26 +1713,26 @@ void TextEntryMenuItem::setSecret(bool secret)
 
 /**
  * @luaclass TextEntryMenuItem
- * 
+ *
  * @brief Menu item allowing users to enter a text value.
- * 
+ *
  * @luafunc TextEntryMenuItem::TextEntryMenuItem(string name, string initial, string empty, int maxLength, string help)
- * 
+ *
  * @param name The text shown on the menu item.
  * @param initial The initial text in the menu item.
  * @param empty The text to display when the menu item is empty.
  * @param maxLength The maximum number of characters to allow (default: 32)
  * @param help A bit of help text.
- * 
+ *
  * The MenuItem will return the text which the user entered.
- * 
+ *
  * For example:
- * 
+ *
  * @code
  *   m = TextEntryMenuItem.new("Player Name", "ChumpChange", "<no name entered>", 64, "The new player's name")
  * @endcode
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(TextEntryMenuItem, LUA_METHODS);
@@ -1766,7 +1766,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NO
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, 
+MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help,
                                                  U32 maxLen, InputCode k1, InputCode k2) :
    Parent(title, val, emptyVal, help, maxLen, k1, k2)
 {

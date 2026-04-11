@@ -20,9 +20,9 @@ TNL_IMPLEMENT_NETOBJECT(GoalZone);
 /**
  * @luafunc GoalZone::GoalZone()
  * @luafunc GoalZone::GoalZone(Geom geom, int teamIndex)
- * 
+ *
  * @brief GoalZone constructor.
- * 
+ *
  * @descr Default team is Neutral.
  */
 // Combined Lua / C++ constructor
@@ -36,7 +36,7 @@ GoalZone::GoalZone(lua_State *L)
    mHasFlag = false;
    mScore = 1;             // For now...  may someday let GoalZones have different scoring values
    mCapturer = NULL;
-   setTeam(TEAM_NEUTRAL); 
+   setTeam(TEAM_NEUTRAL);
 
    if(L)    // Coming from Lua -- grab params from L
    {
@@ -49,7 +49,7 @@ GoalZone::GoalZone(lua_State *L)
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
- 
+
 
 GoalZone::~GoalZone()
 {
@@ -73,7 +73,7 @@ void GoalZone::render()
    if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
       glow = 0;
 
-   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
+   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore,
                   mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0);
 }
 
@@ -185,7 +185,7 @@ bool GoalZone::collide(BfObject *hitObject)
 {
    if( !isGhost() && (isShipType(hitObject->getObjectTypeNumber())) )
    {
-      Ship *s = static_cast<Ship *>(hitObject); 
+      Ship *s = static_cast<Ship *>(hitObject);
       getGame()->shipTouchZone(s, this);
    }
 
@@ -220,7 +220,7 @@ void GoalZone::setHasFlag(bool hasFlag)
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    Parent::packUpdate(connection, updateMask, stream);      // Handles Geomand Team
-   
+
    if(stream->writeFlag(updateMask & InitialMask))
       stream->write(mScore);
 
@@ -234,7 +234,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    Parent::unpackUpdate(connection, stream);
 
-   if(stream->readFlag()) 
+   if(stream->readFlag())
       stream->read(&mScore);
 
    // Some special handling if we've changed teams
@@ -263,10 +263,10 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 // Lua interface
 /**
  * @luaclass GoalZone
- * 
+ *
  * @brief Place to deposit flags or get the ball to, depending on game type.
  */
-//               Fn name       Param profiles  Profile count                           
+//               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, hasFlag,     ARRAYDEF({{ END }}), 1 ) \
 
@@ -281,13 +281,13 @@ REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
 /**
  * @luafunc bool GoalZone::hasFlag()
- * 
+ *
  * @brief Does the zone have a flag?
- * 
+ *
  * @descr GoalZones can hold flags in some game types. If the current game type
  * does not feature zones that hold flags (e.g. Soccer, ZoneControl), then the
  * function will return `false`.
- * 
+ *
  * @return `true` if the GoalZone is currently holding a flag, `false`
  * otherwise.
  */

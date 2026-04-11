@@ -1,6 +1,6 @@
 #
 # Full client build
-# 
+#
 set(BF_EXE_NAME "bitfighter")
 
 BF_PLATFORM_SET_EXECUTABLE_NAME()

@@ -40,8 +40,8 @@ namespace Zap
 const S32 UIManager::MessageBoxWrapWidth = 500;
 
 // Constructor
-UIManager::UIManager() 
-{ 
+UIManager::UIManager()
+{
    mGame = NULL;
    mSettings = NULL;
 
@@ -80,7 +80,7 @@ void UIManager::reactivatePrevUI()
       mLastUI = mCurrentInterface;
       mCurrentInterface = prev;
       mLastWasLower = true;
-      
+
       mCurrentInterface->reactivate();
    }
    else
@@ -135,7 +135,7 @@ bool UIManager::hasPrevUI()
 
 void UIManager::clearPrevUIs()
 {
-   //for(UiIterator it = mUis.begin(); it != mUis.end(); it++) 
+   //for(UiIterator it = mUis.begin(); it != mUis.end(); it++)
    //   delete it->second;
 
    mUis.clear();
@@ -296,7 +296,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
          // We have the wrong password, let's make sure it's not saved
          string serverName = getLastSelectedServerName();
          GameSettings::deleteServerPassword(serverName);
-   
+
          setConnectAddressAndActivatePasswordEntryUI(Address(serverAddress));
          return;
       }
@@ -341,7 +341,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
 
       case NetConnection::ReasonBadLogin:
-         message = 
+         message =
             "Unable to log you in with the username/password you provided. If you have an account, please verify your "
             "password. Otherwise, you chose a reserved name; please try another.\n\n"
 
@@ -351,7 +351,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
 
       case NetConnection::ReasonInvalidUsername:
-         message = 
+         message =
             "Your connection was rejected by the server because you sent a username that contained illegal characters.\n\n"
             "Please try a different name.";
 
@@ -359,7 +359,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
 
       case NetConnection::ReasonError:
-         message = 
+         message =
             "Unable to connect to the server.  Received message:\n\n" +
             string(reasonStr) + "\n\n"
             "Please try a different game server, or try again later.";
@@ -374,7 +374,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
             return;
 
          title = "Connection Failed";
-         message = 
+         message =
                "My attempt to connect to the Master Server failed because the server did not respond.  Either the server is down, "
                "or, more likely, you are not connected to the internet or your firewall is blocking the connection.\n\n"
 
@@ -418,7 +418,7 @@ void UIManager::onConnectionToServerRejected(const char *reason)
 
    if(reason[0])
       message += "\n\nReason: " + string(reason);
-   
+
    displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
 }
 
@@ -427,9 +427,9 @@ void UIManager::onPlayerJoined(const char *playerName, bool isLocalClient, bool 
 {
    if(showMessage)
    {
-      if(isLocalClient)    
+      if(isLocalClient)
          displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");            // SysMsg
-      else   
+      else
          displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", playerName); // SysMsg
    }
 
@@ -464,12 +464,12 @@ void UIManager::onGameOver()
 void UIManager::displayMessage(const Color &msgColor, const char *format, ...)
 {
    va_list args;
-   char message[MAX_CHAT_MSG_LENGTH]; 
+   char message[MAX_CHAT_MSG_LENGTH];
 
    va_start(args, format);
-   vsnprintf(message, sizeof(message), format, args); 
+   vsnprintf(message, sizeof(message), format, args);
    va_end(args);
-    
+
    getUI<GameUserInterface>()->displayMessage(msgColor, message);
 }
 
@@ -552,11 +552,11 @@ MusicLocation UIManager::selectMusic()
 
 void UIManager::processAudio(U32 timeDelta)
 {
-   SoundSystem::processAudio(timeDelta, 
+   SoundSystem::processAudio(timeDelta,
                              mSettings->getIniSettings()->sfxVolLevel,
                              mSettings->getIniSettings()->getMusicVolLevel(),
                              mSettings->getIniSettings()->voiceChatVolLevel,
-                             selectMusic());  
+                             selectMusic());
 }
 
 
@@ -664,11 +664,11 @@ void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 
 }
 
 
-void UIManager::gotQueryResponse(const Address &address, S32 serverId, 
-                                 const Nonce &nonce, const char *serverName, const char *serverDescr, 
+void UIManager::gotQueryResponse(const Address &address, S32 serverId,
+                                 const Nonce &nonce, const char *serverName, const char *serverDescr,
                                  U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   getUI<QueryServersUserInterface>()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount, 
+   getUI<QueryServersUserInterface>()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount,
                                                         maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
@@ -723,7 +723,7 @@ void UIManager::renderLevelListDisplayer()
 
 void UIManager::setMOTD(const char *motd)
 {
-   getUI<MainMenuUserInterface>()->setMOTD(motd); 
+   getUI<MainMenuUserInterface>()->setMOTD(motd);
 }
 
 
@@ -739,7 +739,7 @@ void UIManager::gotPasswordOrPermissionsReply(const ClientGame *game, const char
    if(isCurrentUI<GameMenuUserInterface>())
       getUI<GameMenuUserInterface>()->mMenuSubTitle = message;
    else
-      game->displayCmdChatMessage(message);     
+      game->displayCmdChatMessage(message);
 }
 
 
@@ -756,7 +756,7 @@ void UIManager::showMenuToChangeTeamForPlayer(const string &playerName)
 {
    TeamMenuUserInterface *ui = getUI<TeamMenuUserInterface>();
    ui->nameToChange = playerName;
-   activate(ui);                  
+   activate(ui);
 }
 
 
@@ -772,7 +772,7 @@ void UIManager::reactivateGameUI()
 }
 
 
-void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
+void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr,
                                   const Vector<StringTableEntry> &messages)
 {
    string msg = "";
@@ -788,8 +788,8 @@ void UIManager::displayMessageBox(const string &title, const string &instr, cons
    string msg = "";
 
    for(S32 i = 0; i < messages.size(); i++)
-      msg += messages[i] + "\n";   
-   
+      msg += messages[i] + "\n";
+
    displayMessageBox(title, instr, msg);
 }
 
@@ -988,9 +988,9 @@ void UIManager::shutdownInitiated(U16 time, const StringTableEntry &name, const 
 }
 
 
-void UIManager::cancelShutdown() 
-{ 
-   getUI<GameUserInterface>()->cancelShutdown(); 
+void UIManager::cancelShutdown()
+{
+   getUI<GameUserInterface>()->cancelShutdown();
 }
 
 
@@ -1043,7 +1043,7 @@ void UIManager::readRobotLine(const string &robotLine)
 }
 
 
-void UIManager::markEditorLevelPermanentlyDirty() 
+void UIManager::markEditorLevelPermanentlyDirty()
 {
    getUI<EditorUserInterface>()->markLevelPermanentlyDirty();
 }

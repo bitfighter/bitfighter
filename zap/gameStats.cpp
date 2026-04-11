@@ -47,7 +47,7 @@ S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)
 // Sorts team stats by score, high to low
 S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 {
-   return b->score - a->score;  
+   return b->score - a->score;
 }
 
 
@@ -55,7 +55,7 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 ////////////////////////////////////////
 
 PlayerStats::PlayerStats()    // Constructor
-{      
+{
    isAuthenticated = false;
    isRobot         = false;
    isAdmin         = false;
@@ -146,8 +146,8 @@ void processStatsResults(GameStats *gameStats)
       {
          playerStats->sort(playerScoreSort);
          for(S32 j = 0; j < playerStats->size(); j++)
-            (*playerStats)[j].gameResult = 
-               getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 
+            (*playerStats)[j].gameResult =
+               getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ?
                                                             0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
       }
    }
@@ -158,7 +158,7 @@ void processStatsResults(GameStats *gameStats)
       teams->sort(teamScoreSort);
       for(S32 i = 0; i < teams->size(); i++)
       {
-         (*teams)[i].gameResult = 
+         (*teams)[i].gameResult =
             getResult(teams->size(), (*teams)[0].score, teams->size() == 1 ? 0 : (*teams)[1].score, (*teams)[i].score, i == 0);
          for(S32 j = 0; j < (*teams)[i].playerStats.size(); j++) // make all players in a team same gameResults
             (*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
@@ -167,7 +167,7 @@ void processStatsResults(GameStats *gameStats)
 }
 
 
-void logGameStats(VersionedGameStats *stats) 
+void logGameStats(VersionedGameStats *stats)
 {
    processStatsResults(&stats->gameStats);
 
@@ -495,7 +495,7 @@ void write(TNL::BitStream &s, Zap::GameStats &val, U8 version)
    write(s, val.teamStats, version);
 }
 
-   
+
 /// Reads objects from a BitStream
 void read(TNL::BitStream &s, VersionedGameStats *val)
 {

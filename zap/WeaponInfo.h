@@ -27,9 +27,9 @@ class BfObject;
  *
  * -- This will print all info for all weapons
  * for i = Weapon.Phaser, Weapon.Railgun do
- * 
+ *
  *    print()
- * 
+ *
  *    for k, v in pairs(WeaponInfo[i]) do
  *       print(k .. ": " .. tostring(v))
  *    end
@@ -66,7 +66,7 @@ enum WeaponType {
 #define WEAPON_ITEM(value, b, c, d, e, f, g, h, i, j, k, l) value,
    WEAPON_ITEM_TABLE
 #undef WEAPON_ITEM
-   WeaponCount, 
+   WeaponCount,
    WeaponNone
 };
 

@@ -176,9 +176,9 @@ void PickupItem::show()
 // Implementations provided to keep class from being abstract; need non-abstract class
 // so luaW can (theoretically) instantiate this class, even though it never will.  If
 // that issue gets resolved, we can remove this code and revert the class to abstract.
-bool PickupItem::pickup(Ship *ship) 
-{ 
-   TNLAssert(false, "Function not implemented!"); 
+bool PickupItem::pickup(Ship *ship)
+{
+   TNLAssert(false, "Function not implemented!");
    return false;
 }
 
@@ -216,7 +216,7 @@ void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &val
  * they will regenerate after a time, called the regenTime. PickupItems continue
  * to exist, even when they are not visible.
  */
-//               Fn name  Param profiles  Profile count                           
+//               Fn name  Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isVis,        ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setVis,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
@@ -274,7 +274,7 @@ S32 PickupItem::lua_setVis(lua_State *L)
  * @param time Time in seconds for the item to remain hidden.
  */
 S32 PickupItem::lua_setRegenTime(lua_State *L)
-{ 
+{
    checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
 
    mRepopDelay = S32(getInt(L, 1));
@@ -304,11 +304,11 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
  * @luafunc RepairItem::RepairItem(point pos, int time)
  */
 RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME)   // Combined Lua / C++ default constructor
-{ 
+{
    mObjectTypeNumber = RepairItemTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
@@ -395,11 +395,11 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 
 /**
  * @luaclass RepairItem
- * 
+ *
  * @brief Adds health to ships that pick them up.
  */
 // Only implements inherited methods
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(RepairItem, LUA_METHODS);
@@ -440,7 +440,7 @@ EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Co
          mRepopDelay = S32(getInt(L, 2));
       }
    }
-   
+
    mObjectTypeNumber = EnergyItemTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -471,7 +471,7 @@ bool EnergyItem::pickup(Ship *ship)
 
    static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
 
-   // Credit the ship 
+   // Credit the ship
    ship->creditEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
 
    // And tell the client to do the same.  Note that we are handling energy with a s2c because it is possible to be
@@ -523,11 +523,11 @@ F32 EnergyItem::getEditorRadius(F32 currentScale)
 
 /**
  * @luaclass EnergyItem
- * 
+ *
  * @brief Adds energy to ships that pick them up.
  */
 // Only implements inherited methods
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(EnergyItem, LUA_METHODS);

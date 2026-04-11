@@ -30,7 +30,7 @@ Console::Console()
 
    mScriptId = "console";    // Overwrite default name with something custom
    mScriptType = ScriptTypeConsole;
-};     
+};
 
 
 // Destructor
@@ -54,12 +54,12 @@ void Console::initialize()
    TNLAssert(DisplayManager::getScreenInfo()->isActualized(), "Must run VideoSystem::updateDisplayState() before initializing console!");
    TNLAssert(!mConsole,                  "Only intialize once!");
 
-   mConsole = OGLCONSOLE_Create(); 
+   mConsole = OGLCONSOLE_Create();
 
    if(!mConsole)
       return;
 
-   prepareEnvironment();   
+   prepareEnvironment();
 
    setCommandProcessorCallback(processConsoleCommandCallback);
 
@@ -71,8 +71,8 @@ const char *Console::getErrorMessagePrefix() { return "Console"; }
 
 
 // TODO: Merge with luaLevelGenerator version, which is almost identical
-bool Console::prepareEnvironment()  
-{ 
+bool Console::prepareEnvironment()
+{
 #ifndef BF_NO_CONSOLE
 
    if(!Parent::prepareEnvironment())
@@ -137,23 +137,23 @@ void Console::processCommand(const char *cmdline)
    setEnvironment();
 
    // If we are not on the first line of our command, we need to append the command to our existing line
-   if(consoleCommand == "")      
+   if(consoleCommand == "")
       consoleCommand = cmdline;
    else
       consoleCommand += "\n" + string(cmdline);
 
    S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput" );
-      
-      
+
+
    if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
    {
       std::size_t lmsg;
       const char *msg = lua_tolstring(L, -1, &lmsg);
       const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
 
-      if(strstr(msg, LUA_QL("<eof>")) == tp) 
+      if(strstr(msg, LUA_QL("<eof>")) == tp)
          lua_pop(L, 1);
-      else 
+      else
       {
          // Error -- print to console
          output("%s\n", lua_tostring(L, -1));
@@ -162,21 +162,21 @@ void Console::processCommand(const char *cmdline)
    }
 
    // Success -- print results to console
-   else if(status == 0) 
+   else if(status == 0)
    {
-      if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
+      if(lua_pcall(L, 0, LUA_MULTRET, 0))
       {
          output("%s\n", lua_tostring(L, -1));
          lua_pop(L, 1);
       }
-      if(lua_gettop(L) > 0) 
+      if(lua_gettop(L) > 0)
       {
          lua_getglobal(L, "print");
          lua_insert(L, 1);
          if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)
             output("Error printing results.");
       }
-      
+
       consoleCommand = "";    // Reset command
    }
 
@@ -253,7 +253,7 @@ void Console::render()
 #ifndef BF_NO_CONSOLE
 
    OGLCONSOLE_setCursor((Platform::getRealMilliseconds() / 100) % 2);     // Make cursor blink
-   OGLCONSOLE_Draw();   
+   OGLCONSOLE_Draw();
 
 #endif
 }
@@ -309,10 +309,10 @@ void Console::output(const char *format, ...)
    static char message[MAX_CONSOLE_OUTPUT_LENGTH];    // Reusable buffer
 
    va_start(args, format);
-   vsnprintf(message, sizeof(message), format, args); 
+   vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   OGLCONSOLE_Output(mConsole, message); 
+   OGLCONSOLE_Output(mConsole, message);
 
 #endif
 }

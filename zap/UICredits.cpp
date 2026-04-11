@@ -106,7 +106,7 @@ void CreditsUserInterface::onActivate()
 void CreditsUserInterface::onReactivate()
 {
    if(quitting)
-      quit();     
+      quit();
 }
 
 
@@ -365,7 +365,7 @@ bool SplashUserInterface::onKeyDown(InputCode inputCode)
       quit();                              // Quit the interface when any key is pressed...  any key at all.  Almost.
 
       // Unless user hit Enter or Escape, or some other thing...
-      if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    
+      if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)
          getUIManager()->getCurrentUI()->onKeyDown(inputCode); // ...pass keystroke on  (after reactivate in quit(), current is now the prev
 
       if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)

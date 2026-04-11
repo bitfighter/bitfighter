@@ -24,7 +24,7 @@ string LevelDatabaseDownloadThread::LevelgenRequest = "/levels/raw/%s/levelgen";
 
 // Constructor
 LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(const string &levelId, ClientGame *game)
-   : mLevelId(levelId), 
+   : mLevelId(levelId),
      mGame(game)
 {
    errorNumber = 0;
@@ -54,7 +54,7 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(const string &levelId, 
 
 
 // Destructor
-LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()    
+LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()
 {
    // Do nothing
 }
@@ -67,7 +67,7 @@ void LevelDatabaseDownloadThread::run()
 
    dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelRequest).c_str(), mLevelId.c_str());
    HttpRequest req(url);
-   
+
    if(!req.send())
    {
       dSprintf(url, UrlLength, "!!! Error connecting to server");

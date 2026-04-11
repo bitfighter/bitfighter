@@ -243,7 +243,7 @@ void Geometry::flip(F32 center, bool isHoriz)
    for(S32 i = 0; i < count; i++)
    {
       Point p = getVert(i);
-      
+
       if(isHoriz)
          p.x = center * 2 - p.x;
       else
@@ -269,7 +269,7 @@ void Geometry::reverseWinding()
 
 
 // Make object bigger or smaller
-void Geometry::scale(const Point &center, F32 scale) 
+void Geometry::scale(const Point &center, F32 scale)
 {
    S32 count = getVertCount();
 
@@ -464,7 +464,7 @@ Rect PointGeometry::calcExtents()
 
 string PointGeometry::geomToLevelCode() const
 {
-   Point pos = getVert(0); 
+   Point pos = getVert(0);
    return pos.toLevelCode();
 }
 
@@ -703,20 +703,20 @@ GeomType PolylineGeometry::getGeomType() const
 
 
 Point PolylineGeometry::getVert(S32 index)  const
-{ 
-   return mPolyBounds[index]; 
+{
+   return mPolyBounds[index];
 }
 
 
-void PolylineGeometry::setVert(const Point &point, S32 index) 
-{ 
-   mPolyBounds[index] = point; 
+void PolylineGeometry::setVert(const Point &point, S32 index)
+{
+   mPolyBounds[index] = point;
 }
 
 
-S32 PolylineGeometry::getVertCount() const 
-{ 
-   return mPolyBounds.size(); 
+S32 PolylineGeometry::getVertCount() const
+{
+   return mPolyBounds.size();
 }
 
 
@@ -726,60 +726,60 @@ S32 PolylineGeometry::getMinVertCount() const
 }
 
 
-void PolylineGeometry::clearVerts() 
-{ 
-   mPolyBounds.clear(); 
-   mVertSelected.clear(); 
+void PolylineGeometry::clearVerts()
+{
+   mPolyBounds.clear();
+   mVertSelected.clear();
    mAnyVertsSelected = false;
 }
 
 
-bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit) 
-{ 
+bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
+{
    if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS && !ignoreMaxPointsLimit)
       return false;
 
-   mPolyBounds.push_back(point); 
-   mVertSelected.push_back(false); 
+   mPolyBounds.push_back(point);
+   mVertSelected.push_back(false);
 
    return true;
 }
 
 
-bool PolylineGeometry::addVertFront(Point vert) 
-{ 
+bool PolylineGeometry::addVertFront(Point vert)
+{
    if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS)
       return false;
 
-   mPolyBounds.push_front(vert); 
-   mVertSelected.push_front(false); 
+   mPolyBounds.push_front(vert);
+   mVertSelected.push_front(false);
 
    return true;
 }
 
 
-bool PolylineGeometry::deleteVert(S32 vertIndex) 
-{ 
+bool PolylineGeometry::deleteVert(S32 vertIndex)
+{
    TNLAssert(vertIndex < S32(mVertSelected.size()), "Index out of bounds!");
 
    if(vertIndex >= mPolyBounds.size())
       return false;
 
-   mPolyBounds.erase(vertIndex); 
-   mVertSelected.erase(vertIndex); 
+   mPolyBounds.erase(vertIndex);
+   mVertSelected.erase(vertIndex);
    checkIfAnyVertsSelected();
 
    return true;
 }
 
 
-bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex) 
-{ 
+bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex)
+{
    if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS)
       return false;
 
-   mPolyBounds.insert(vertIndex, vertex);                                                   
-   mVertSelected.insert(vertIndex, false); 
+   mPolyBounds.insert(vertIndex, vertex);
+   mVertSelected.insert(vertIndex, false);
 
    return true;
 }
@@ -873,7 +873,7 @@ void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
    TNLAssert(mPolyBounds.size() > 0, "Invalid geometry!");
 
    // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
-   stream->writeEnum(mPolyBounds.size() - 1, Geometry::MAX_POLY_POINTS);  
+   stream->writeEnum(mPolyBounds.size() - 1, Geometry::MAX_POLY_POINTS);
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       mPolyBounds[i].write(stream);
 }
@@ -886,7 +886,7 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
 
    mPolyBounds.resize(size);
    mVertSelected.resize(size);
-   
+
    for(U32 i = 0; i < size; i++)
       mPolyBounds[i].read(stream);
 
@@ -938,13 +938,13 @@ string PolylineGeometry::geomToLevelCode() const
 
 
 // Fills bounds with points from argv starting at firstCoord; also resizes selected to match the size of bounds
-static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, 
+static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize,
                            bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds, Vector<bool> &selected)
 {
    Point p, lastP;
-   
+
    bool isTwoPointLine = (argc - firstCoord) / 2 == 2;
-   
+
    bounds.clear();
 
    // Make sure we don't crash with firstCoord = 0; argc = 7; or some uneven number

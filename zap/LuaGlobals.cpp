@@ -30,7 +30,7 @@ static string buildPrintString(lua_State *L)
   string out;
 
   lua_getglobal(L, "tostring");
-  for(i = 1; i <= n; i++) 
+  for(i = 1; i <= n; i++)
   {
     const char *s;
     lua_pushvalue(L, -1);  /* function to be called */
@@ -39,7 +39,7 @@ static string buildPrintString(lua_State *L)
     s = lua_tostring(L, -1);  /* get result */
     if (s == NULL)
       luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
-    if(i > 1) 
+    if(i > 1)
        out += "\t";
 
     out += s;
@@ -51,12 +51,12 @@ static string buildPrintString(lua_State *L)
 
 /**
  * @luafunc static void global::logprint(any val)
- * 
+ *
  * @brief Print to bitfighter's logging engine.
- * 
+ *
  * @descr This will (currently) print to the bitfighter log file as well as
  * stdout.
- * 
+ *
  * @param val The value you wish to print.
  */
 S32 lua_logprint(lua_State *L)
@@ -217,12 +217,12 @@ S32 lua_readFromFile(lua_State *L)
 
 /**
  * @luafunc static void global::writeToFile(string filename, string contents, bool append)
- * 
+ *
  * @brief Write or append to a file on the filesystem.
- * 
+ *
  * @descr This is in a sandboxed environment and will only allow writing to a
  * specific directory.
- * 
+ *
  * @param filename The filename to write.
  * @param contents The contents to save to the file.
  * @param append (optional) If `true`, append to the file instead of creating

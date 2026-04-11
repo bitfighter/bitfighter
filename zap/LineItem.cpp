@@ -48,7 +48,7 @@ const S32 LineItem::MAX_LINE_WIDTH = 255;
  * @luafunc LineItem::LineItem(Geom lineGeom, int teamIndex)
  */
 LineItem::LineItem(lua_State *L)
-{ 
+{
    mNetFlags.set(Ghostable);
    setNewGeometry(geomPolyLine);
    mObjectTypeNumber = LineTypeNumber;
@@ -57,7 +57,7 @@ LineItem::LineItem(lua_State *L)
    mGlobal = true;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { LINE, END }, { LINE, TEAM_INDX, END }}, 3 };
@@ -75,7 +75,7 @@ LineItem::LineItem(lua_State *L)
 
 // Destructor
 LineItem::~LineItem()
-{ 
+{
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
@@ -128,7 +128,7 @@ void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 #ifndef ZAP_DEDICATED
    const Color *color = NULL;       // HACK!  Should pass desired color into renderEditor instead of using NULL here
 
-   if(!isSelected() && !isLitUp())           
+   if(!isSelected() && !isLitUp())
       color = getEditorRenderColor();
 
    renderLine(getOutline(), color);
@@ -138,9 +138,9 @@ void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 }
 
 
-const Color *LineItem::getEditorRenderColor() 
-{ 
-   return getColor(); 
+const Color *LineItem::getEditorRenderColor()
+{
+   return getColor();
 }
 
 
@@ -282,14 +282,14 @@ void LineItem::setWidth(S32 width, S32 min, S32 max)
    if(width < min)
       width = min;
    else if(width > max)
-      width = max; 
+      width = max;
 
-   mWidth = width; 
+   mWidth = width;
 }
 
 
-void LineItem::setWidth(S32 width) 
-{         
+void LineItem::setWidth(S32 width)
+{
    setWidth(width, LineItem::MIN_LINE_WIDTH, LineItem::MAX_LINE_WIDTH);
 }
 
@@ -386,18 +386,18 @@ bool LineItem::canBeNeutral() { return true; }
 
 /**
  * @luaclass LineItem
- * 
+ *
  * @brief Decorative line visible to one or all teams. Has no specific game
  * function.
- * 
+ *
  * @descr If a non-global LineItem is assigned to a team, it will only be
  * visible to players on that team. If the LineItem is neutral (that is, `team
  * == Team.Neutral`, the default), it will be visible to all players regardless
  * of team or globalness.
- * 
+ *
  * @geom The geometry of a LineItem is a polyline (i.e. 2 or more points)
  */
-//               Fn name       Param profiles  Profile count                           
+//               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, setGlobal, ARRAYDEF({{ BOOL,    END }}), 1 ) \
       METHOD(CLASS, getGlobal, ARRAYDEF({{          END }}), 1 ) \
@@ -415,7 +415,7 @@ GENERATE_LUA_FUNARGS_TABLE(LineItem, LUA_METHODS);
  *
  * @descr LineItems are normally viewable by all players in a game. If you wish
  * to only let the LineItem be viewable to the owning team, set to `false`. You
- * must call setTeam() on the LineItem before using this method. Global is `true` 
+ * must call setTeam() on the LineItem before using this method. Global is `true`
  * by default.
  *
  * @param global `false` if this LineItem should be viewable only by the owning

@@ -190,7 +190,7 @@ GLuint loadGLTex(PictureLoader *picture)
    /* Get a font index from OpenGL */
    glGenTextures(1, &outputGL);    /* Create 1 texture, store in glFontHandle */
    {int err=glGetError();if(err)printf("glGenTextures() error: %i\n",err);}
-    
+
    /* Select our font */
    glBindTexture(GL_TEXTURE_2D, outputGL);
    {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}

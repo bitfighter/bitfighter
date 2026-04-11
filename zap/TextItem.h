@@ -49,7 +49,7 @@ public:
    Rect calcExtents();      // Bounding box for display scoping purposes
 
 
-   void onAddedToGame(Game *theGame);  
+   void onAddedToGame(Game *theGame);
 
    static void textEditedCallback(string text, BfObject *obj);
 

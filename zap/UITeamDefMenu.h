@@ -36,10 +36,10 @@ private:
    UI::SymbolString    mBottomInstructions3a;
    UI::SymbolString    mBottomInstructions3b;
    UI::SymbolString    mBottomInstructions4;
-   
+
    S32 selectedIndex;          // Highlighted menu item
 
-   bool mEditingTeam;         
+   bool mEditingTeam;
    bool mEditingColor;
    ColorEntryMode mColorEntryMode;
 

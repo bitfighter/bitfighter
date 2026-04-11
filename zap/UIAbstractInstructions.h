@@ -42,14 +42,14 @@ protected:
    void render(const char *header, S32 page, S32 pages);
    void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList) const;
 
-   UI::SymbolStringSet 
-         mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
+   UI::SymbolStringSet
+         mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft,
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
 
    void pack(SymbolStringSet &instrs, const string *helpBindings, S32 bindingCount) const;
 
-   void pack(SymbolStringSet &instrs, SymbolStringSet &bindings, 
+   void pack(SymbolStringSet &instrs, SymbolStringSet &bindings,
              const ControlStringsEditor *helpBindings, S32 bindingCount) const;
 
 public:

@@ -18,7 +18,7 @@ namespace Zap
 {
 
 // Can represent a move by a human player or a robot
-class Move 
+class Move
 {
 public:
    Move();              // Constructor

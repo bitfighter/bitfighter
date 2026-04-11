@@ -99,7 +99,7 @@ public:
    Color mMenuSubTitleColor;
    bool mMenuFooterContainsInstructions;
 
-   void idle(U32 timeDelta); 
+   void idle(U32 timeDelta);
 
    void getMenuResponses(Vector<string> &responses);     // Fill responses with values from menu
 
@@ -127,7 +127,7 @@ class MenuUserInterfaceWithIntroductoryAnimation : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 private:
-   static const S32 FadeInTime = 400;       // Post animation fade in time (ms) 
+   static const S32 FadeInTime = 400;       // Post animation fade in time (ms)
 
    static bool mFirstTime;    // Is this the first time an intro menu is being shown?
    Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
@@ -158,10 +158,10 @@ private:
    U32 motdArriveTime;
    Timer mColorTimer;
    Timer mColorTimer2;
-   
+
    static const S32 ColorTime = 1000;
    static const S32 ColorTime2 = 1700;
-   
+
    bool mTransDir;
    bool mTransDir2;
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
@@ -177,7 +177,7 @@ public:
 
    void onEscape();
    void render();
-   void idle(U32 timeDelta); 
+   void idle(U32 timeDelta);
    void setMOTD(const char *motd);              // Message of the day, from Master
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
@@ -471,7 +471,7 @@ public:
    string category;
    void onActivate();
    bool processMenuSpecificKeys(InputCode inputCode); // Custom key handling for level selection menus
-      
+
    S32 getIndexOfNext(const string &startingWith);    // Public so tests can access this
 
    void processSelection(U32 index);

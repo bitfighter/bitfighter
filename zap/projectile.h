@@ -62,7 +62,7 @@ public:
    UI::FxTrail mTrail;
 #endif
 
-   Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
+   Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired
    explicit Projectile(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor -- only used in Lua at the moment
    virtual ~Projectile();                                                               // Destructor
 

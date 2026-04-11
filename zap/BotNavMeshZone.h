@@ -44,11 +44,11 @@ class ServerGame;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public DatabaseObject 
+class BotNavMeshZone : public DatabaseObject
 {
    typedef GeomObject Parent;
 
-private:   
+private:
    U16 mZoneId;                              // Unique ID for each zone
    bool mWalkable;                           // Flag for if this zone can currently be traversed
 
@@ -57,7 +57,7 @@ private:
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
    virtual ~BotNavMeshZone();                // Destructor
-   
+
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
    static const F32 CoreTraversalCost;       // Cost for a bot to go into a Core zone
@@ -103,7 +103,7 @@ private:
 
 public:
    static Vector<Point> findPath (const Vector<BotNavMeshZone *> *zones, S32 startZone, S32 targetZone, const Point &target);
-   
+
 };
 
 

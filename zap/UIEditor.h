@@ -66,7 +66,7 @@ class EditorUserInterface : public UserInterface
 
 public:
    // Some items have special attributes.  These are the ones we can edit in the editor.
-   enum SpecialAttribute {  
+   enum SpecialAttribute {
       Text,
       RepopDelay,
       GoFastSpeed,
@@ -119,7 +119,7 @@ private:
 
    SymbolString mLingeringMessage;
 
-   Vector<shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
+   Vector<shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
    Vector<Point> mMoveOrigins;
@@ -216,9 +216,9 @@ private:
    void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
-   BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);   
+   BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);
    BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
-   
+
    BfObject *findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const;
 
    bool anyItemsSelected(const GridDatabase *database) const;  // Are any items selected?
@@ -229,11 +229,11 @@ public:
 
 private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
-   void findHitItemAndEdge();                         
+   void findHitItemAndEdge();
    bool checkForVertexHit(BfObject *object);
-   bool checkForEdgeHit(const Point &point, BfObject *object);        
+   bool checkForEdgeHit(const Point &point, BfObject *object);
    bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
-   bool checkForPolygonHit(const Point &point, BfObject *object);    
+   bool checkForPolygonHit(const Point &point, BfObject *object);
 
    void findHitItemOnDock();     // Sets mDockItemHit
    S32 findHitPlugin();
@@ -325,7 +325,7 @@ public:
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState(bool forceSelection = false);     // Save the current state of the editor objects for later undoing
-   void removeUndoState();    // Remove and discard the most recently saved undo state 
+   void removeUndoState();    // Remove and discard the most recently saved undo state
 
    Vector<string> mGameTypeArgs;
 
@@ -459,12 +459,12 @@ public:
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
    // Helpers for doing batch deletes
-   void doneDeleteingWalls(); 
+   void doneDeleteingWalls();
    void doneDeleting();
 
    // Run a script, and put resulting objects in database
    void runScript(GridDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
-   void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
+   void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
 
    string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
    void onPluginExecuted(const Vector<string> &args);

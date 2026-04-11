@@ -136,8 +136,8 @@ public:
 
    TNL_DECLARE_CLASS(Teleporter);
 
-   TNL_DECLARE_RPC(s2cAddDestination, (Point));   
-   TNL_DECLARE_RPC(s2cClearDestinations, ());   
+   TNL_DECLARE_RPC(s2cAddDestination, (Point));
+   TNL_DECLARE_RPC(s2cClearDestinations, ());
 
 
    ///// Editor Methods

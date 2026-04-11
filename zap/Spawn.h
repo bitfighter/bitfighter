@@ -38,7 +38,7 @@ public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
    AbstractSpawn(const AbstractSpawn &copy);                // Copy constructor
    virtual ~AbstractSpawn();                                // Destructor
-   
+
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
@@ -146,7 +146,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class AsteroidSpawn : public ItemSpawn    
+class AsteroidSpawn : public ItemSpawn
 {
    typedef ItemSpawn Parent;
 

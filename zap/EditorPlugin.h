@@ -41,7 +41,7 @@ public:
    string getRequestedBinding();
 
    const char *getErrorMessagePrefix();
-     
+
    bool runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem> > &menuItems);    // Get menu def from the plugin
 
    // Lua methods

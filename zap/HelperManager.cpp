@@ -57,7 +57,7 @@ void HelperManager::onPlayerQuit()
 void HelperManager::onGameOver()
 {
    if(mHelperStack.contains(&mTeamShuffleHelper))   // Exit Shuffle helper to keep things from getting too crashy
-      exitHelper(&mTeamShuffleHelper); 
+      exitHelper(&mTeamShuffleHelper);
 }
 
 
@@ -228,7 +228,7 @@ void HelperManager::doneClosingHelper()
 }
 
 
-// We will darken certain areas of the screen when the helper is active.  This computes how much.  
+// We will darken certain areas of the screen when the helper is active.  This computes how much.
 F32 HelperManager::getDimFactor() const
 {
    static const F32 DIM    = UI::DIM_LEVEL;    // For convenience/readability
@@ -247,7 +247,7 @@ F32 HelperManager::getDimFactor() const
    if(fromDim)
    {
       if(toDim)         // Transitioning from a dim interface to another one... should just stay dim
-         return DIM;    
+         return DIM;
       else
          return mOffDeckHelper->getFraction() * (1 - DIM) + DIM;
    }

@@ -36,7 +36,7 @@ class ClientInfo;
 // We don't need to make all these values available to scripts; set the 2nd value to false for
 // those values that we don't want to share.
 //
-//                                         Make available      Available to scripts as:   Descr in        (note that these descriptions should match the      
+//                                         Make available      Available to scripts as:   Descr in        (note that these descriptions should match the
 //                   Enum:                  to scripts?           ObjType.XXXX enum     documentation:     class name so that the documentation autolinks)
 #define TYPE_NUMBER_TABLE                                                                                        \
    TYPE_NUMBER( BarrierTypeNumber,             true,              "Barrier",             "WallItem"            ) \
@@ -153,9 +153,9 @@ struct DamageInfo
 class EditorObject
 {
 private:
-   bool mSelected;            // True if item is selected                                                                     
-   U32 mSelectedTime;         // The time this object was last selected 
-   bool mLitUp;               // True if user is hovering over the item and it's "lit up"                                     
+   bool mSelected;            // True if item is selected
+   U32 mSelectedTime;         // The time this object was last selected
+   bool mLitUp;               // True if user is hovering over the item and it's "lit up"
    S32 mVertexLitUp;          // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
 
 public:
@@ -170,9 +170,9 @@ public:
    virtual const char *getOnDockName();
    virtual const char *getEditorHelpString();
    virtual const char *getInstructionMsg(S32 attributeCount);        // Message printed below item when it is selected
-   
+
    // For displaying object attributes in lower-left of editor:
-   virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);   
+   virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
@@ -221,7 +221,7 @@ public:
       ServerProcessingUpdatesFromClient,  // On server, when processing moves from the client (only used for Ship)
       ClientIdlingNotLocalShip,           // On client, when object is not our control object (used for all objects)
       ClientIdlingLocalShip,              // On client, when processing local player's ship (only used for Ship)
-      ClientReplayingPendingMoves,  
+      ClientReplayingPendingMoves,
    };
 
 private:
@@ -232,7 +232,7 @@ private:
    U32 mCreationTime = 0;
    S32 mTeam = 0;
 
-   S32 mSerialNumber = 0;         // Autoincremented serial number  
+   S32 mSerialNumber = 0;         // Autoincremented serial number
    S32 mUserAssignedId = 0;       // Id assigned to some objects in the editor
    U8 mOriginalTypeNumber = 0;    // Used during final delete to help database remove the item
 
@@ -259,7 +259,7 @@ public:
    void setCreationTime(U32 creationTime);
 
    void deleteObject(U32 deleteTimeInterval = 0);
-   
+
    void assignNewUserAssignedId();
    void setUserAssignedId(S32 id, bool permitZero);
    S32 getUserAssignedId();
@@ -287,17 +287,17 @@ public:
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
    void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
-   // For a few objects, their renderable outline differs from where the user needs to grab them in the editor... 
+   // For a few objects, their renderable outline differs from where the user needs to grab them in the editor...
    // This primarily affects line items like gofasts and teleporters, where the main item is the outline, but
    // in the editor users want to grab them along their axes/shafts.  The editorHitPoly lets us differentiate
-   // between these two uses of the polygons.  In most cases, the editorHitPoly will just be the object's 
+   // between these two uses of the polygons.  In most cases, the editorHitPoly will just be the object's
    // outline.
    virtual const Vector<Point> *getEditorHitPoly() const;
 
 
    virtual S32 getRenderSortValue();
 
-   // Move related      
+   // Move related
    const Move &getCurrentMove();
    const Move &getLastMove();
    void setCurrentMove(const Move &move);
@@ -313,14 +313,14 @@ public:
    virtual void renderLayer(S32 layerIndex);
    virtual void render();
 
-   virtual void idle(IdleCallPath path);              
+   virtual void idle(IdleCallPath path);
 
-   virtual void writeControlState(BitStream *stream); 
-   virtual void readControlState(BitStream *stream);  
-   virtual F32 getHealth() const;                           
-   virtual bool isDestroyed();                        
+   virtual void writeControlState(BitStream *stream);
+   virtual void readControlState(BitStream *stream);
+   virtual F32 getHealth() const;
+   virtual bool isDestroyed();
 
-   virtual void controlMoveReplayComplete();          
+   virtual void controlMoveReplayComplete();
 
    // These are only here because Projectiles are not MoveObjects -- if they were, this could go there
    void writeCompressedVelocity(const Point &vel, U32 max, BitStream *stream);
@@ -330,7 +330,7 @@ public:
    virtual bool collided(BfObject *otherObject, U32 stateIndex);  // Handles collisions
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);
    bool objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd, F32 &fillCollisionTime);
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
@@ -338,15 +338,15 @@ public:
    void onGhostAddBeforeUpdate(GhostConnection *theConnection);
    bool onGhostAdd(GhostConnection *theConnection);
 
-   void disableCollision();        
-   void enableCollision();         
-   bool isCollisionEnabled() const; 
+   void disableCollision();
+   void enableCollision();
+   bool isCollisionEnabled() const;
 
    //bool collisionPolyPointIntersect(Point point);
    //bool collisionPolyPointIntersect(Vector<Point> points);
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
-   void setScopeAlways();           
+   void setScopeAlways();
 
    void readThisTeam(BitStream *stream);     // xxx editor?
    void writeThisTeam(BitStream *stream);    // xxx editor?
@@ -367,9 +367,9 @@ public:
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua
-   virtual bool canBeHostile();  
-   virtual bool canBeNeutral();  
-   virtual bool hasTeam(); 
+   virtual bool canBeHostile();
+   virtual bool canBeNeutral();
+   virtual bool hasTeam();
 
    virtual bool shouldRender() const;     // Returns true if the item is visible, false if not
 
@@ -400,7 +400,7 @@ public:
    void unselect();
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
-   virtual Point getEditorSelectionOffset(F32 currentScale);  
+   virtual Point getEditorSelectionOffset(F32 currentScale);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    virtual Point getInitialPlacementOffset(U32 gridSize) const;
@@ -411,7 +411,7 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 
-   virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
+   virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem
 
    ///// Dock related
 #ifndef ZAP_DEDICATED
@@ -420,7 +420,7 @@ public:
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
    ///// Dock item rendering methods
-   virtual void renderDock();   
+   virtual void renderDock();
    virtual Point getDockLabelPos();
    virtual void highlightDockItem();
 

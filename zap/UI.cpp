@@ -68,10 +68,10 @@ ClientGame *UserInterface::getGame() const
 }
 
 
-UIManager *UserInterface::getUIManager() const 
-{ 
+UIManager *UserInterface::getUIManager() const
+{
    TNLAssert(mClientGame, "mGame is NULL!");
-   return mClientGame->getUIManager(); 
+   return mClientGame->getUIManager();
 }
 
 
@@ -83,7 +83,7 @@ bool UserInterface::usesEditorScreenMode() const
 
 void UserInterface::activate()
 {
-   onActivate(); 
+   onActivate();
 }
 
 
@@ -155,7 +155,7 @@ void UserInterface::renderConsole() const
 
 static const S32 TitleSize = 30;
 
-void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
+void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr,
                                      const string &messageStr, S32 vertOffset, S32 style) const
 {
    static const FontContext Context = ErrorMsgContext;
@@ -179,7 +179,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
 }
 
 
-void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, 
+void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor,
                                            F32 fillAlpha, const Color &borderColor)
 {
    drawFilledFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
@@ -187,7 +187,7 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 
 
 // Note that title and instr can be NULL
-void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
+void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr,
                                            SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -218,7 +218,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
-      static const S32 HorizBoxPadding = 20;  
+      static const S32 HorizBoxPadding = 20;
       S32 len = message[i]->getWidth() + HorizBoxPadding * 2;
       if(len > maxLen)
          maxLen = len;
@@ -227,7 +227,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    S32 boxwidth = max(UIManager::MessageBoxWrapWidth, maxLen);
    S32 inset = (canvasWidth - boxwidth) / 2;   // Inset for left and right edges of box
 
-   if(style == 1)       
+   if(style == 1)
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
    else if(style == 2)
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
@@ -255,7 +255,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 // Static method
 void UserInterface::dimUnderlyingUI(F32 amount)
 {
-   Renderer::get().setColor(Colors::black, amount); 
+   Renderer::get().setColor(Colors::black, amount);
 
    drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 }
@@ -272,20 +272,20 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 
 
 // These will be overridden in child classes if needed
-void UserInterface::render() 
-{ 
+void UserInterface::render()
+{
    // Do nothing -- probably never even gets called
 }
 
 
 void UserInterface::idle(U32 timeDelta)
-{ 
+{
    mTimeSinceLastInput += timeDelta;
 }
 
 
-void UserInterface::onMouseMoved()                         
-{ 
+void UserInterface::onMouseMoved()
+{
    mTimeSinceLastInput = 0;
 }
 
@@ -325,7 +325,7 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 
    // Handle modified keys
    if(InputCodeManager::isModified(bindingCode))
-      return inputCode == InputCodeManager::getBaseKey(bindingCode) && 
+      return inputCode == InputCodeManager::getBaseKey(bindingCode) &&
              InputCodeManager::checkModifier(InputCodeManager::getModifier(bindingCode));
 
    // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
@@ -343,9 +343,9 @@ const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNam
 class ChatUserInterface;
 class NameEntryUserInterface;
 class DiagnosticUserInterface;
- 
+
 bool UserInterface::onKeyDown(InputCode inputCode)
-{ 
+{
    mTimeSinceLastInput = 0;
 
    bool handled = false;
@@ -354,14 +354,14 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
    if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
-   { 
+   {
       if(uiManager->isCurrentUI<DiagnosticUserInterface>())
          return false;
 
       uiManager->activate<DiagnosticUserInterface>();
 
       playBoop();
-      
+
       handled = true;
    }
    else if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
@@ -376,11 +376,11 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
       handled = true;
    }
-   
+
 #ifndef BF_NO_SCREENSHOTS
    // Screenshot!
    else if(inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_1) ||
-           inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))      
+           inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))
    {
       ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings(), false);
       handled = true;
@@ -424,7 +424,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
             hpos += getStringWidthf(18, "RawBut [%d]", i ) + 5;
          }
    }
-}   
+}
 
 
 void UserInterface::onColorPicked(const Color &color)

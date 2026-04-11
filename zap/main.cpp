@@ -134,7 +134,7 @@ using namespace TNL;
 
 // Weird workaround for linking with SDL2.lib in Visual Studio 2015
 #ifdef _MSC_VER
-#  if _MSC_VER >= 1900 
+#  if _MSC_VER >= 1900
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #  endif
 #endif
@@ -249,7 +249,7 @@ void display()
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
-      // we have two games, we might want to divide the screen into two viewports, configuring each before running the 
+      // we have two games, we might want to divide the screen into two viewports, configuring each before running the
       // associated render method which follows...
       // Each viewport should have an aspect ratio of 1066x600.  The aspect ratio of the entire window will likely need to be different.
       TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");
@@ -283,11 +283,11 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
 #ifndef ZAP_DEDICATED
       // Disconnect any local clients, passing whatever reason string we have
       for(S32 i = 0; i < clientGames->size(); i++)
-         clientGames->get(i)->closeConnectionToGameServer(shutdownReason.c_str());  
+         clientGames->get(i)->closeConnectionToGameServer(shutdownReason.c_str());
 
       if(clientGames->size() > 0)       // If there are any clients running...
          GameManager::deleteServerGame();
-      else                                
+      else
 #endif
          // Either we have no clients, or this is a dedicated build so...
          shutdownBitfighter();    // ...shut down the whole shebang, return to OS, never come back
@@ -367,7 +367,7 @@ void idle()
       deltaT = 0;
 
       if(!dedicated)
-         sleepTime = 0;      
+         sleepTime = 0;
    }
 
 
@@ -419,7 +419,7 @@ void dedicatedServerLoop()
 class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 {
 private:
-   void writeString(const char *string) 
+   void writeString(const char *string)
    {
       gConsole.output(string);
    }
@@ -442,7 +442,7 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 
 
 // Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
-// There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
+// There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter):
 // 1) Hit escape during initial name entry screen
 // 2) Hit escape from the main menu
 // 3) Choose Quit from main menu
@@ -532,16 +532,16 @@ void setupLogging(IniSettings *iniSettings)
    gMainLog.setMsgType(LogConsumer::LogNetBase,            iniSettings->logNetBase);
    gMainLog.setMsgType(LogConsumer::LogUDP,                iniSettings->logUDP);
 
-   gMainLog.setMsgType(LogConsumer::LogFatalError,         iniSettings->logFatalError); 
-   gMainLog.setMsgType(LogConsumer::LogError,              iniSettings->logError); 
-   gMainLog.setMsgType(LogConsumer::LogWarning,            iniSettings->logWarning); 
+   gMainLog.setMsgType(LogConsumer::LogFatalError,         iniSettings->logFatalError);
+   gMainLog.setMsgType(LogConsumer::LogError,              iniSettings->logError);
+   gMainLog.setMsgType(LogConsumer::LogWarning,            iniSettings->logWarning);
    gMainLog.setMsgType(LogConsumer::ConfigurationError,    iniSettings->logConfigurationError);
-   gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->logConnection); 
-   gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->logLevelLoaded); 
-   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
-   //gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator); 
+   gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->logConnection);
+   gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->logLevelLoaded);
+   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle);
+   //gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator);
    gMainLog.setMsgType(LogConsumer::LuaScriptMessage,      iniSettings->luaScriptMessage);      // Used for both bots and levelgens and plugins too!
-   gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->serverFilter); 
+   gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->serverFilter);
 }
 
 
@@ -551,7 +551,7 @@ void createClientGame(GameSettingsPtr settings)
    if(!settings->isDedicatedServer())                      // Create ClientGame object
    {
       // Create a new client, and let the system figure out IP address and assign a port
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), 
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber),
                                               settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
        // Put any saved filename into the editor file entry thingy
@@ -755,14 +755,14 @@ string getUserDataDir()
 #elif defined(TNL_OS_IOS)
    // iOS uses the resources straight from the bundle
    getAppResourcePath(path);  // Directory.h
-   
+
 #elif defined(TNL_OS_WIN32)
    path = string(getenv("APPDATA")) + "\\Bitfighter";
 
 #else
 #  error "Path needs to be defined for this platform"
 #endif
-   
+
    return path;
 }
 
@@ -940,12 +940,12 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // 017:  nothing to update anymore
 
    // 018:
-   if(previousVersion < VERSION_018)  
+   if(previousVersion < VERSION_018)
    {
       // Remove game.ogg  from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
       string offendingFile = joindir(folderManager->musicDir, "game.ogg");
-      
+
       removeFile(offendingFile);
    }
 
@@ -975,7 +975,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
       renameIniKey("Host", "BotsBalanceTeams", "AddRobots");
 
-      // Remove option that is no longer used, added in 019 
+      // Remove option that is no longer used, added in 019
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
 
       // Remove item_select.lua plugin, it was superceded by filter.lua
@@ -1022,7 +1022,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       copyResourcesToUserData();
 }
 
- 
+
 static bool standaloneDetected()
 {
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
@@ -1120,7 +1120,7 @@ int main(int argc, char **argv)
 #endif
 {
    // The following will induce a crash when the silver joystick is plugged in
-   //SDL_Init(0);                               
+   //SDL_Init(0);
    //SDL_JoystickEventState(SDL_ENABLE);
    //SDL_InitSubSystem(SDL_INIT_JOYSTICK);
    //SDL_Joystick *x = SDL_JoystickOpen(0);
@@ -1178,7 +1178,7 @@ int main(int argc, char **argv)
 
    FolderManager *folderManager = settings->getFolderManager();
 
-   // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
+   // Before we go any further, we should get our log files in order.  We know where they'll be, as the
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
 
@@ -1215,8 +1215,8 @@ int main(int argc, char **argv)
 
    // Even dedicated server needs sound these days
    SoundSystem::init(folderManager->sfxDir,
-                     folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  
-   
+                     folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());
+
    if(settings->isDedicatedServer())
    {
 #ifndef ZAP_DEDICATED
@@ -1224,12 +1224,12 @@ int main(int argc, char **argv)
       FontManager::initialize(settings.get(), false);
 #endif
       ServerGame *serverGame = GameManager::getServerGame();
-      
+
       // Now even the dedicated server can make use of playlist files...
       // TODO: test if playlist files work with the dedicated server
       LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));
 
-      // Figure out what levels we'll be playing with, and start hosting  
+      // Figure out what levels we'll be playing with, and start hosting
       initHosting(settings, levelSource, false, true, settings->getSpecified(HOST_ON_DEDICATED));
    }
    else
@@ -1240,7 +1240,7 @@ int main(int argc, char **argv)
 
       SDL_Init(0);                                       // Allows Joystick and VideoSystem to work.
       Joystick::initJoystick(settings.get());            // Initialize joystick system
-      Joystick::enableJoystick(settings.get(), false);   
+      Joystick::enableJoystick(settings.get(), false);
 
 #ifdef TNL_OS_MAC_OSX
       // On OS X, make sure we're in the right directory (again)
@@ -1262,7 +1262,7 @@ int main(int argc, char **argv)
       // Instantiate ClietGame -- this should be done after updateDisplayState() because the client game in turn instantiates some of the
       // user interface code which triggers a long series of cascading events culminating in something somewhere determining the width
       // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of updateDisplayState.  So there.
-      createClientGame(settings);         
+      createClientGame(settings);
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 

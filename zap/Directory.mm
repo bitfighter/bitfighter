@@ -36,10 +36,10 @@ void moveToAppPath()
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
-    
+
     //On load, change to the application directory so we can get to the graphics/sounds/etc...
     [fm changeCurrentDirectoryPath:[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent]];
-    
+
     [pool release];
 }
 
@@ -53,11 +53,11 @@ void prepareFirstLaunchMac()
     NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
     NSString *fullAppSupportPath = [NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName];
-        
+
     //Link preferences
     NSArray *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *prefencesPath = [[documentsPath objectAtIndex:0] stringByAppendingPathComponent:@"Bitfighter Settings"];
-    
+
     [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:NULL];
 
     [pool release];
@@ -78,16 +78,16 @@ void checkForUpdates()
 }
 
 
-// Used for setting -rootdatadir; corresponds to the location from which most 
+// Used for setting -rootdatadir; corresponds to the location from which most
 // resources will be loaded
 void getApplicationSupportPath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
     // OSX used the Application Support directory
     NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     fillPath = std::string([[NSString stringWithFormat:@"%@", [appSupportPaths objectAtIndex:0]] UTF8String]);
-    
+
     [pool release];
 }
 
@@ -96,14 +96,14 @@ void getApplicationSupportPath(std::string &fillPath)
 void getAppResourcePath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
 #ifdef TNL_OS_MAC_OSX
     fillPath = std::string([[NSString stringWithFormat:@"%@",[[NSBundle mainBundle] resourcePath]] UTF8String]);
 #else // TNL_OS_IOS
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     fillPath = std::string([resourcePath UTF8String]);
 #endif
-    
+
     [pool release];
 }
 
@@ -111,10 +111,10 @@ void getAppResourcePath(std::string &fillPath)
 void getBundlePath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
     NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
     fillPath = std::string([bundlePath UTF8String]);
-    
+
     [pool release];
 }
 
@@ -122,10 +122,10 @@ void getBundlePath(std::string &fillPath)
 void getExecutablePath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
     NSString *executablePath = [[NSBundle mainBundle] executablePath];
     fillPath = std::string([executablePath UTF8String]);
-    
+
     [pool release];
 }
 
@@ -136,10 +136,10 @@ void getDocumentsPath(std::string &fillPath)
    // Only needed for iOS (we need some read/write directory)
 #ifdef TNL_OS_IOS
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
     NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     fillPath = std::string([[documentPaths objectAtIndex:0] UTF8String]);
-     
+
     [pool release];
 #endif
 }

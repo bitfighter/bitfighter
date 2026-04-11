@@ -30,7 +30,7 @@ LuaPlayerInfo::~LuaPlayerInfo()
  *
  * @descr The PlayerInfo object contains data about each player, including both
  * humans and robots.
- * 
+ *
  * @code
  *   -- Monitor all spawning ships, and if they're a bot, relocate them to 200,200.
  *   function onShipSpawned(ship)

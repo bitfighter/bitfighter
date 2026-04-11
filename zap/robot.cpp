@@ -41,7 +41,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  * See also the Event page for a list of events you can subscribe to and their
  * corresponding listener funtcitons.
  *
- * As a conveneinece, robots are automatically subscribed to the Tick event, and if they 
+ * As a conveneinece, robots are automatically subscribed to the Tick event, and if they
  * implement a function called onTick(), it will be called every game cycle.  You can unubscribe
  * from this event if you want.
  *
@@ -69,13 +69,13 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  * that this position is pretty much ignored at this point; bot is created, then it is spawned
  * using normal game processes, which means at a spawnPoint or at (0,0) if there are none.
  * Once spawned, a levelgen script can relocate a ship as shown in one of the samples below.
- * 
+ *
  * @param teamIndex Starting Team of the Robot. If unspecified, defaults
  * to balancing teams.
  * @param scriptName The bot script to use. Defaults to the server's default bot.
  * @param scriptArg  Zero or more string arguments to pass to the script.  If there are multiple arguments, just list them sequentially.
- * 
- * @descr Passed arguments are available in the arg table.  
+ *
+ * @descr Passed arguments are available in the arg table.
  *
  * @code
  *   -- Display all the passed arguments
@@ -89,7 +89,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  *    y = tonumber(arg[2])
  *    dest = point.new(x, y)
  * @endcode
- * 
+ *
  * @code
  *   -- ~~~ IN A LEVELGEN SCRIPT THAT HAS SUBSCRIBED TO ShipSpawned EVENTS ~~~
  *   -- Monitor all spawning ships, and if they're a bot, relocate them to 200,200.
@@ -100,8 +100,8 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  *    end
  * @endcode
  */
-Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
-                             LuaScriptRunner() 
+Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
+                             LuaScriptRunner()
 {
    if(L)
    {
@@ -217,13 +217,13 @@ bool Robot::initialize(Point &pos)
 
       Parent::initialize(pos);
 
-      // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
+      // Robots added via robot.new() get intialized.  If the robot is added in a script's main()
       // function, the bot will be reinitialized when the game starts.  This check avoids that.
       if(!isCollisionEnabled())
          enableCollision();
 
       // WarpPositionMask triggers the spinny spawning visual effect
-      setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
+      setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask |
                   MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
       EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
@@ -236,7 +236,7 @@ bool Robot::initialize(Point &pos)
    }
 
    return true;
-} 
+}
 
 
 const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
@@ -349,7 +349,7 @@ void Robot::onAddedToGame(Game *game)
    mClientInfo->setShip(this);
 
    setOwner(mClientInfo);
-   
+
    mHasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
 
@@ -392,7 +392,7 @@ void Robot::killScript()
 // Robot just died
 void Robot::kill()
 {
-   if(mHasExploded) 
+   if(mHasExploded)
       return;
 
    mHasExploded = true;
@@ -417,7 +417,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    if(errorMessage != "")
    {
       string line;
-      
+
       for(S32 i = 0; i < argc; i++)
       {
          if(i > 0)
@@ -443,7 +443,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    S32 team;
 
    if(argc <= 1)
-      team = NO_TEAM;   
+      team = NO_TEAM;
    else
    {
       team = atoi(argv[0]);
@@ -456,7 +456,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    }
 
    setTeam(team);
-   
+
    string scriptName;
 
    if(argc >= 2)
@@ -577,15 +577,15 @@ void Robot::idle(BfObject::IdleCallPath path)
    if(path == ServerIdleMainLoop)
       checkForZones();
 
-   if(path != BfObject::ServerIdleMainLoop)   
-      Parent::idle(path);                       
-   else                         
+   if(path != BfObject::ServerIdleMainLoop)
+      Parent::idle(path);
+   else
    {
       mSendSpawnEffectTimer.update(mCurrentMove.time); // This is to fix robot go spinny, since we skipped Ship::idle(ServerIdleMainLoop)
 
       U32 deltaT = mCurrentMove.time;
 
-      TNLAssert(deltaT != 0, "Time should never be zero!");    
+      TNLAssert(deltaT != 0, "Time should never be zero!");
 
       tickTimer<Robot>(deltaT);
 
@@ -682,7 +682,7 @@ U16 Robot::findClosestZone(const Point &point)
 
 //// Lua methods
 
-//                Fn name               Param profiles                  Profile count                           
+//                Fn name               Param profiles                  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
    METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
@@ -781,14 +781,14 @@ S32 Robot::lua_getAnglePt(lua_State *L)
 
 /**
  * @luafunc bool Robot::canSeePoint(point pt)
- * 
+ *
  * @brief Does this robot have line-of-sight to the given point.
- * 
+ *
  * @descr Line-of-sight is a straight path from the robot to the object without any
  * stationary, collideable objects in the way
- * 
+ *
  * @param pt point to test
- * 
+ *
  * @return `true` if this bot can see the given point, `false` otherwise
  */
 S32 Robot::lua_canSeePoint(lua_State *L)
@@ -803,15 +803,15 @@ S32 Robot::lua_canSeePoint(lua_State *L)
 
 /**
  * @luafunc point Robot::getWaypoint(point p)
- * 
+ *
  * @brief Get next waypoint to head toward in order to move to `p`
- * 
+ *
  * @descr Finds a path from the current position to `p` using the built-in
  * pathing utility. The algorithm will consider teleporters and tries to take
  * the shortest route to `p`.
  *
  * @param p The destination point
- * 
+ *
  * @return The next point to head towards, or `nil` if no path can be found
  */
 
@@ -947,18 +947,18 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
 /**
  * @luafunc Ship Robot::findClosestEnemy(num range)
- * 
+ *
  * @brief Finds the closest enemy ship or robot that is within the specified
  * distance.
- * 
+ *
  * @descr Finds closest enemy within specified distance of the bot. If dist is
  * omitted, this will use standard scanner range, taking into account whether
  * the bot has the Sensor module. To search the entire map, specify -1 for the
  * range.
- * 
+ *
  * @param range (Optional) Radius in which to search. Use -1 to search entire
  * map. If omitted, will use normal scanner range.
- * 
+ *
  * @return Ship object representing closest enemy, or nil if none were found.
  */
 S32 Robot::lua_findClosestEnemy(lua_State *L)
@@ -970,7 +970,7 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
    bool useRange = true;
 
    if(profile == 0)           // Args: None
-      queryRect.expand(getGame()->computePlayerVisArea(this));  
+      queryRect.expand(getGame()->computePlayerVisArea(this));
    else                       // Args: Range
    {
       F32 range = getFloat(L, 1);
@@ -987,14 +987,14 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
    fillVector.clear();
 
    if(useRange)
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
    else
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);   
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      // Ignore self 
-      if(fillVector[i] == this) 
+      // Ignore self
+      if(fillVector[i] == this)
          continue;
 
       // Ignore ship/robot if it's dead or cloaked
@@ -1067,10 +1067,10 @@ S32 Robot::lua_setThrust(lua_State *L)
  * @luafunc Robot::setThrustToPt(point p)
  *
  * @brief Makes the Robot thrust to `p`, stopping when it reaches that point.
- * 
- * @descr Note that you need to keep calling this function every tick; the 
- * ship will advance a bit towards its destination each game cycle, then 
- * stop when it arrives at its destination, even if you continue to call the 
+ *
+ * @descr Note that you need to keep calling this function every tick; the
+ * ship will advance a bit towards its destination each game cycle, then
+ * stop when it arrives at its destination, even if you continue to call the
  * function.  It is not a "set and forget" type of thing.
  *
  * @param p The point move towards.
@@ -1140,11 +1140,11 @@ S32 Robot::lua_fireWeapon(lua_State *L)
 
 /**
  * @luafunc bool Robot::hasWeapon(Weapon weapon)
- * 
+ *
  * @brief Does the robot have the given \ref WeaponEnum.
- * 
+ *
  * @param weapon The \ref WeaponEnum to check.
- * 
+ *
  * @return `true` if the bot has the weapon, `false` if not.
  */
 S32 Robot::lua_hasWeapon(lua_State *L)
@@ -1162,9 +1162,9 @@ S32 Robot::lua_hasWeapon(lua_State *L)
 
 /**
  * @luafunc Robot::fireModule(Module module)
- * 
+ *
  * @brief Activates/fires the given module if it is equipped
- * 
+ *
  * @param module \ref ModuleEnum to fire
  */
 S32 Robot::lua_fireModule(lua_State *L)
@@ -1193,11 +1193,11 @@ S32 Robot::lua_fireModule(lua_State *L)
 
 /**
  * @luafunc bool Robot::hasModule(Module module)
- * 
+ *
  * @brief Does the robot have the given \ref ModuleEnum.
- * 
+ *
  * @param module The \ref ModuleEnum to check
- * 
+ *
  * @return `true` if the bot has the \ref ModuleEnum, `false` if not.
  */
 S32 Robot::lua_hasModule(lua_State *L)
@@ -1215,12 +1215,12 @@ S32 Robot::lua_hasModule(lua_State *L)
 
 /**
  * @luafunc Robot::setLoadoutWeapon(int slot, Weapon weapon)
- * 
+ *
  * @brief Request a new loadout where the given weapon slot is changed to the
  * given weapon. This still requires the bot to change to its new loadout.
- * 
+ *
  * @param slot Weapon slot to set.
- * 
+ *
  * @param weapon \ref WeaponEnum to set.
  */
 S32 Robot::lua_setLoadoutWeapon(lua_State *L)
@@ -1244,12 +1244,12 @@ S32 Robot::lua_setLoadoutWeapon(lua_State *L)
 
 /**
  * @luafunc Robot::setLoadoutModule(int slot, Module module)
- * 
+ *
  * @brief Request a new loadout where the given module slot is changed to the
  * given module. This still requires the bot to change to its new loadout.
- * 
+ *
  * @param slot Module slot to set.
- * 
+ *
  * @param module \ref ModuleEnum to set.
  */
 S32 Robot::lua_setLoadoutModule(lua_State *L)
@@ -1273,9 +1273,9 @@ S32 Robot::lua_setLoadoutModule(lua_State *L)
 
 /**
  * @luafunc Robot::globalMsg(string message)
- * 
+ *
  * @brief Send a message to all players.
- * 
+ *
  * @param message Message to send.
  */
 S32 Robot::lua_globalMsg(lua_State *L)
@@ -1303,9 +1303,9 @@ S32 Robot::lua_globalMsg(lua_State *L)
 // Send message to team (what happens when neutral/hostile robot does this???)
 /**
  * @luafunc Robot::teamMsg(string message)
- * 
+ *
  * @brief Send a message to this Robot's team.
- * 
+ *
  * @param message Message to send.
  */
 S32 Robot::lua_teamMsg(lua_State *L)
@@ -1332,14 +1332,14 @@ S32 Robot::lua_teamMsg(lua_State *L)
 
 /**
  * @luafunc Robot::privateMsg(string message, string playerName)
- * 
+ *
  * @brief Send a private message to a player.
- * 
+ *
  * @descr Currently, no events are fired for private messages, so they cannot
  * be received by bots.
- * 
+ *
  * @param message Message to send.
- * 
+ *
  * @param playerName Name of player to which to send a message.
  */
 // Note that identical code is found in LuaLevelGenerator::lua_privateMsg()
@@ -1360,19 +1360,19 @@ S32 Robot::lua_privateMsg(lua_State *L)
 
 /**
  * @luafunc table Robot::findVisibleObjects(ObjType types, ...)
- * 
+ *
  * @brief Finds all items of the specified type within ship's area of vision.
- * 
+ *
  * @descr This search will exclude the bot itself as well as other cloaked ships
  * in the area (unless this bot has sensor equipped)
- * 
+ *
  * Can specify multiple types.
- * 
+ *
  * @param types One or more \ref ObjTypeEnum specifying what types of objects to
  * find.
- * 
+ *
  * @return A table with any found objects.
- * 
+ *
  * @code
  *   -- Pass one or more object types
  *   function countObjects(objType, ...)
@@ -1460,7 +1460,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
 }
 
 
-static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, 
+static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel,
                                 F32 aimLife, bool ignoreFriendly, bool botHasSensor, F32 &interceptAngle)
 {
    if(target == NULL)
@@ -1546,7 +1546,7 @@ S32 Robot::lua_getFiringSolution(lua_State *L)
 
    F32 interceptAngle;
 
-   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity, 
+   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity,
                           (F32)weap.projLiveTime, false, hasModule(ModuleSensor), interceptAngle))
       return returnFloat(L, interceptAngle);
 
@@ -1573,7 +1573,7 @@ S32 Robot::lua_getInterceptCourse(lua_State *L)
 
    if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, hasModule(ModuleSensor), interceptAngle))
       return returnFloat(L, interceptAngle);
-      
+
    return returnNil(L);
 }
 

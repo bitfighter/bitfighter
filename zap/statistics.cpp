@@ -14,10 +14,10 @@ namespace Zap
 // Constructor
 Statistics::Statistics()
 {
-   mTotalKills = 0;      
+   mTotalKills = 0;
    mTotalFratricides = 0;
-   mTotalDeaths = 0;     
-   mTotalSuicides = 0; 
+   mTotalDeaths = 0;
+   mTotalSuicides = 0;
    mGamesPlayed = 0;
    mLongestKillStreak = 0;
 
@@ -247,7 +247,7 @@ F32 Statistics::getCalculatedRating()
       return 0;
 
    // Standard case
-   else   
+   else
       return ((F32)mTotalKills - deathsDueToEnemyAction) / totalTotalKillsAndDeaths;
 }
 

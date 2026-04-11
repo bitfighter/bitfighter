@@ -48,10 +48,10 @@ public:
 
    HelperMenuType getType();
 
-   void render();                
-   void onActivated();  
+   void render();
+   void onActivated();
 
-   bool processInputCode(InputCode inputCode);   
+   bool processInputCode(InputCode inputCode);
 
    bool isMovementDisabled() const;
 

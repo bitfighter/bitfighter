@@ -77,7 +77,7 @@ bool AbstractTeam::processArguments(S32 argc, const char **argv)
       return false;
 
    setName(argv[1]);
-   
+
    Color color;
    color.read(argv + 2);
 
@@ -93,7 +93,7 @@ string AbstractTeam::toLevelCode() const
 }
 
 
-void AbstractTeam::alterRed(F32 amt) 
+void AbstractTeam::alterRed(F32 amt)
 {
    Color color(getColor());
 
@@ -108,7 +108,7 @@ void AbstractTeam::alterRed(F32 amt)
 }
 
 
-void AbstractTeam::alterGreen(F32 amt) 
+void AbstractTeam::alterGreen(F32 amt)
 {
    Color color(getColor());
 
@@ -123,7 +123,7 @@ void AbstractTeam::alterGreen(F32 amt)
 }
 
 
-void AbstractTeam::alterBlue(F32 amt) 
+void AbstractTeam::alterBlue(F32 amt)
 {
    Color color(getColor());
 
@@ -242,7 +242,7 @@ void Team::incrementPlayerCount()
 }
 
 
-// This should definitely NOT be a public method... 
+// This should definitely NOT be a public method...
 void Team::incrementBotCount()
 {
    mBotCount++;
@@ -279,7 +279,7 @@ REGISTER_LUA_CLASS(Team);
  * team = gameInfo:getLeadingTeam()
  * @endcode
  *
- * 
+ *
  */
 
 
@@ -288,7 +288,7 @@ REGISTER_LUA_CLASS(Team);
  *
  * @brief Get the numerical index of this Team.
  *
- * @return The numerical index of this Team.  Note that the first team has an index of 1, and neutral and hostile "teams" 
+ * @return The numerical index of this Team.  Note that the first team has an index of 1, and neutral and hostile "teams"
  * will have the index of `Team.Neutral` and `Team.Hostile`, respectively.
  */
 S32 Team::lua_getIndex(lua_State *L)
@@ -350,7 +350,7 @@ S32 Team::lua_getPlayerCount(lua_State *L)
  * @endcode
  *
  * @return A table of \link PlayerInfo PlayerInfos\endlink currently on this
- * team. 
+ * team.
  */
 S32 Team::lua_getPlayers(lua_State *L)
 {
@@ -456,12 +456,12 @@ const Color *TeamManager::getTeamColor(S32 index) const
    return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
 }
 
-   
+
 const Color *TeamManager::getTeamHealthBarColor(S32 index) const
 {
    if(index < 0 || index >= mTeams.size())
       return getTeamColor(index);
-   
+
    return &(mTeams[index]->getHealthBarColor());
 }
 

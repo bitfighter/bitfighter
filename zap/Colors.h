@@ -8,10 +8,10 @@
 
 #include "Color.h"
 
-namespace Zap 
+namespace Zap
 {
 
-namespace Colors 
+namespace Colors
 {
    // Basic colors
    const Color red(1,0,0);

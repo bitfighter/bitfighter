@@ -160,7 +160,7 @@ F64 stof(const string &s)
 
 
 // From http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string, replaceAll variant
-string replaceString(const string &strString, const string &from, const string &to) 
+string replaceString(const string &strString, const string &from, const string &to)
 {
    if(from.empty())
       return strString;
@@ -314,7 +314,7 @@ string sanitizeForJson(const char *value)
 }
 
 
-string sanitizeForSql(const string &value)     
+string sanitizeForSql(const string &value)
 {
    return replaceString(replaceString(value, "\\", "\\\\"), "'", "''");
 }
@@ -483,7 +483,7 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 string listToString(const Vector<string> &words, const string &seperator)
 {
    string str = "";
-      
+
    for(S32 i = 0; i < words.size(); i++)
       str += words[i] + ((i < words.size() - 1) ? seperator : "");
 
@@ -565,7 +565,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
    {
       string name = string(dirp->d_name);
 
-      if(extensionCount > 0) 
+      if(extensionCount > 0)
       {
          string extension = lcase(extractExtension(name));
 
@@ -669,7 +669,7 @@ string joindir(const string &path, const string &filename)
    // Otherwise, join with a delimeter.
    return path + getFileSeparator() + filename;
 }
-   
+
 
 // Join without checking for blank parts
 string strictjoindir(const string &part1, const string &part2)
@@ -941,7 +941,7 @@ inline string displayModeToString(DisplayMode mode)
       return "Fullscreen-Stretch";
    if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       return "Fullscreen";
-   
+
    return "Window";
 }
 

@@ -8,7 +8,7 @@
 
 #include "UI.h"
 #include "UILevelInfoDisplayer.h"
-#include "HelperManager.h"   
+#include "HelperManager.h"
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
@@ -210,12 +210,12 @@ public:
    void serverLoadedLevel(const string &levelName);
 
    void render();                         // Render game screen
-  
+
    void renderReticle() const;            // Render crosshairs
    void renderWrongModeIndicator() const;
    void renderProgressBar() const;        // Render level-load progress bar
    void renderShutdownMessage() const;    // Render an alert if server is shutting down
-   void renderLostConnectionMessage() const; 
+   void renderLostConnectionMessage() const;
    void renderSuspendedMessage() const;
    void renderLevelUpMessage(S32 newLevel) const;
    void renderLevelListDisplayer() const;
@@ -225,11 +225,11 @@ public:
    bool isChatting() const;               // Returns true if player is composing a chat message
 
    void resetCommandersMap();             // Turn off commander's map when connecting to server
-   F32 getCommanderZoomFraction() const; 
+   F32 getCommanderZoomFraction() const;
 
    void toggleShowingShipCoords();
-   void toggleShowingObjectIds();  
-   void toggleShowingMeshZones();  
+   void toggleShowingObjectIds();
+   void toggleShowingMeshZones();
    void toggleShowDebugBots();
 
    void addInlineHelpItem(HelpItem item);
@@ -255,7 +255,7 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    void clearDisplayers();
-   
+
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
    bool shouldRenderLevelInfo() const;
@@ -294,8 +294,8 @@ public:
 
    void onTextInput(char ascii);
 
-   void chooseNextWeapon();           
-   void choosePrevWeapon();   
+   void chooseNextWeapon();
+   void choosePrevWeapon();
    void selectWeapon(U32 index);    // Choose weapon by its index
    void activateModule(S32 index);  // Activate a specific module by its index
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
@@ -304,7 +304,7 @@ public:
    void setModuleSecondary(ShipModule module, bool isActive);
 
    void toggleLevelRating();
-   
+
    static string getPersonalRatingString(PersonalRating rating);
    static string getTotalRatingString(S16 rating);
 
@@ -313,7 +313,7 @@ public:
    Point getTimeLeftIndicatorWidthAndHeight() const;
    bool scoreboardIsVisible() const;
 
-   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
+   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);
    void exitHelper();
 
    // Testing methods

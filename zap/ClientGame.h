@@ -94,7 +94,7 @@ public:
    bool isTestServer() const;
 
    GameConnection *getConnectionToServer() const;
-   
+
    void setConnectionToServer(GameConnection *connection);
 
    ClientInfo *getClientInfo() const;
@@ -108,7 +108,7 @@ public:
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
 
    void requestLoadoutPreset(S32 index);
-   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString, 
+   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
                                                                        const char *msgToShowIfLoadoutsAreTheSame);
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
@@ -234,7 +234,7 @@ public:
    bool inReturnToGameCountdown() const;
 
 
-   void deleteLevelGen(LuaLevelGenerator *levelgen); 
+   void deleteLevelGen(LuaLevelGenerator *levelgen);
 
    // Check for permissions
    bool hasOwner(const char *failureMessage);
@@ -274,7 +274,7 @@ public:
    void gotWrongPassword();
 
    void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
-   void gotQueryResponse(const Address &address, S32 serverId, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+   void gotQueryResponse(const Address &address, S32 serverId, const Nonce &nonce, const char *serverName, const char *serverDescr,
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    void shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator);

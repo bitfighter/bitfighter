@@ -19,7 +19,7 @@
 using namespace TNL;
 using namespace std;
 
-namespace Zap 
+namespace Zap
 {
 
 class LoadoutTracker
@@ -35,7 +35,7 @@ private:
 
 public:
    LoadoutTracker();                            // Constructor
-   LoadoutTracker(const string &loadoutStr);  
+   LoadoutTracker(const string &loadoutStr);
    LoadoutTracker(const Vector<U8> &loadout);
    virtual ~LoadoutTracker();
 

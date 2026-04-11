@@ -45,9 +45,9 @@ public:
 
    // Start timer over, setting timer to the time specified
    template<typename T, typename U>
-   void reset(T newCounter, U newPeriod = 0) 
-   { 
-      reset(static_cast<U32>(newCounter), static_cast<U32>(newPeriod)); 
+   void reset(T newCounter, U newPeriod = 0)
+   {
+      reset(static_cast<U32>(newCounter), static_cast<U32>(newPeriod));
    }
 
 

@@ -19,7 +19,7 @@ namespace Zap
 {
 
 // Constructor
-LevelInfo::LevelInfo()      
+LevelInfo::LevelInfo()
 {
    initialize();
 }
@@ -30,8 +30,8 @@ LevelInfo::LevelInfo(const StringTableEntry &name, GameTypeId type)
 {
    initialize();
 
-   mLevelName = name;  
-   mLevelType = type; 
+   mLevelName = name;
+   mLevelType = type;
 }
 
 
@@ -74,7 +74,7 @@ const char *LevelInfo::getLevelTypeName()
 void LevelInfo::ensureLevelInfoHasValidName()
 {
    if(mLevelName == "")
-      mLevelName = filename;   
+      mLevelName = filename;
 }
 
 
@@ -142,7 +142,7 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
                // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
                TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(list[0].c_str()));
 
-               GameType *gt = dynamic_cast<GameType *>(theObject); 
+               GameType *gt = dynamic_cast<GameType *>(theObject);
                if(gt)
                {
                   levelInfo.mLevelType = gt->getGameTypeId();
@@ -156,7 +156,7 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
                string levelName = list[1];
 
                // Append additional words to levelName
-               for(S32 i = 2; i < list.size(); i++)   
+               for(S32 i = 2; i < list.size(); i++)
                   levelName += " " + list[i];
 
                levelInfo.mLevelName = levelName;
@@ -214,7 +214,7 @@ string LevelSource::getLevelName(S32 index)
    if(index < 0 || index >= mLevelInfos.size())
       return "";
    else
-      return mLevelInfos[index].mLevelName.getString(); 
+      return mLevelInfos[index].mLevelName.getString();
 }
 
 
@@ -247,13 +247,13 @@ Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 {
    Vector<string> levelList;
 
-   // Build our level list by looking at the filesystem 
+   // Build our level list by looking at the filesystem
    const string extList[] = {"level"};
 
-   if(!getFilesFromFolder(levelDir, levelList, extList, ARRAYSIZE(extList)))    // Returns true if error 
+   if(!getFilesFromFolder(levelDir, levelList, extList, ARRAYSIZE(extList)))    // Returns true if error
    {
       logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelDir.c_str());
-      return levelList;   
+      return levelList;
    }
 
    levelList.sort(alphaSort);   // Just to be sure...
@@ -429,7 +429,7 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
    }
 
    if(game->loadLevelFromFile(filename, gameObjectDatabase))
-      return Game::md5.getHashFromFile(filename);   
+      return Game::md5.getHashFromFile(filename);
    else
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
@@ -499,7 +499,7 @@ bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
 string StringLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
 {
    game->loadLevelFromString(mLevelCode, gameObjectDatabase, "");
-   return Game::md5.getHashFromString(mLevelCode); 
+   return Game::md5.getHashFromString(mLevelCode);
 }
 
 

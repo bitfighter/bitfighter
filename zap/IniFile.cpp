@@ -96,7 +96,7 @@ static string expandEnvironmentVariables(const string &value)
       // We have a '$'
       if(i + 1 >= n)
       {
-         // Trailing lone '$' – ignore
+         // Trailing lone '$' ï¿½ ignore
          //out.push_back('$');  <-- if we want to include trailing solo $s, uncomment this line
          ++i;
          continue;
@@ -188,13 +188,13 @@ void CIniFile::ReadFile()
    if(!f.fail())    // This is true if the file cannot be opened or something... in which case we don't want to read the file!
    {
       while(getline(f, line))
-         if(line.length() > 2)                   // Anything shorter can't be useful...  
+         if(line.length() > 2)                   // Anything shorter can't be useful...
             iniLines.push_back(line);
       f.close();
    }
 
    lineCount = iniLines.size();      // Set our INI vector length
-   
+
    // Process our INI lines, will provide sensible defaults for any missing or malformed entries
    for(S32 i = 0; i < lineCount; i++)
       processLine(iniLines[i]);
@@ -362,7 +362,7 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
 {
    S32 sectionId = findSection(section);
 
-   if(sectionId == noID) 
+   if(sectionId == noID)
    {
       if(create)
          sectionId = addSection(section);
@@ -378,7 +378,7 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
 
    S32 valueID = findKey(sectionId, key);
 
-   if(valueID == noID) 
+   if(valueID == noID)
    {
       if(!create)
          return false;
@@ -644,7 +644,7 @@ bool CIniFile::sectionComment(const string &section, const string &comment, bool
 {
    S32 sectionId = findSection(section);
 
-   if(sectionId == noID) 
+   if(sectionId == noID)
    {
       if(create)
          sectionId = S64(addSection(section));
@@ -658,7 +658,7 @@ bool CIniFile::sectionComment(const string &section, const string &comment, bool
       //if(sectionId == noID)
       //   sectionId = findSection(section);
 
-      if(sectionId == noID)     
+      if(sectionId == noID)
          return false;
    }
 

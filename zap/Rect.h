@@ -73,7 +73,7 @@ public:
 
    // Does rect interset rect r?
    bool intersects(const Rect &r);
-   
+
    // Does rect interset or border on rect r?
    bool intersectsOrBorders(const Rect &r);
 

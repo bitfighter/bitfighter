@@ -7,7 +7,7 @@
 #define _VERTEX_STYLES_ENUM_H_
 
 namespace Zap
-{     
+{
 
 enum VertexStyles
 {

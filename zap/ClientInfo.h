@@ -30,7 +30,7 @@ class LuaPlayerInfo;
 
 
 
-// This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
+// This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course,
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
 // But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
 // Note that this comment is probably out of date.
@@ -63,7 +63,7 @@ public:
 
    static const S32 MaxKillStreakLength = 4095;
    // After canceling /idle command, this is the delay penalty
-   static const U32 SPAWN_UNDELAY_TIMER_DELAY = FIVE_SECONDS; 
+   static const U32 SPAWN_UNDELAY_TIMER_DELAY = FIVE_SECONDS;
 
 private:
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
@@ -136,7 +136,7 @@ public:
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();
 
-   bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
+   bool isSpawnDelayed();              // Returns true if spawn has actually been delayed
    virtual void setSpawnDelayed(bool spawnDelayed) = 0;
 
    virtual bool isPlayerInactive();                // Server only
@@ -185,7 +185,7 @@ public:
 
    virtual bool isRobot() const = 0;
 
-   Statistics *getStatistics();      // Return pointer to statistics tracker 
+   Statistics *getStatistics();      // Return pointer to statistics tracker
 
    LuaPlayerInfo *getPlayerInfo();
 
@@ -279,9 +279,9 @@ private:
 
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+                    U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role,
                     bool isSpawnDelayed, bool isBusy);
-   virtual ~RemoteClientInfo();      
+   virtual ~RemoteClientInfo();
    // Destructor
    void initialize();
 

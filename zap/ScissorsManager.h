@@ -9,7 +9,7 @@
 #include "Point.h"
 #include "ConfigEnum.h"          // For DisplayMode def
 #include "tnlTypes.h"
-using namespace TNL; 
+using namespace TNL;
 
 
 namespace Zap

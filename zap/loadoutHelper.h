@@ -75,9 +75,9 @@ public:
    void pregameSetup(bool engineerEnabled);     // Set things up
    HelperMenu::HelperMenuType getType();
 
-   void render();                
-   void onActivated();  
-   bool processInputCode(InputCode inputCode);   
+   void render();
+   void onActivated();
+   bool processInputCode(InputCode inputCode);
 
    void activateHelp(UIManager *uiManager);  // Open help to an appropriate page
    void onWidgetClosed();

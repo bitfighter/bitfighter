@@ -20,7 +20,7 @@ using namespace std;
 using namespace TNL;
 
 
-#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor   
+#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor
 
 
 namespace Zap
@@ -170,7 +170,7 @@ public:
 
       // TODO: If this fires, we can replace the 2 with lua_gettop(L) in the runCmd call below
       // If it never fires, we can delete this assert.  I'm 99.9% sure it's fine.  -CE 3/13/2021
-      TNLAssert(lua_gettop(L) == 2, "Unexpected number of items on stack");      
+      TNLAssert(lua_gettop(L) == 2, "Unexpected number of items on stack");
 
       // Note that we don't care if this generates an error... if it does the error handler will
       // print a nice message, then call killScript().
@@ -184,7 +184,7 @@ public:
       S32 stackDepth = lua_gettop(L);
 
       lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());   // Push REGISTRY[scriptId] onto stack            -- registry table
-      lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var 
+      lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var
       T var = getVal<T>(-1);
       lua_pop(L, 1);
       lua_pop(L, 1);
@@ -284,7 +284,7 @@ const luaL_Reg class_::luaMethods[] =              \
 
  #define LUA_FUNARGS_ITEM(class_, name, profiles, profileCount) \
 { #name, {profiles, profileCount } },
- 
+
 
 #define GENERATE_LUA_FUNARGS_TABLE(class_, table_)  \
 using namespace LuaArgs;                            \
@@ -296,9 +296,9 @@ const LuaFunctionProfile class_::functionArgs[] =   \
 
 // Generates something like the following (without the comment block, of course!):
 // const LuaFunctionProfile Teleporter::functionArgs[] =
-//    |---------------- LuaFunctionProfile ------------------|     
+//    |---------------- LuaFunctionProfile ------------------|
 //    |- Function name -|-------- LuaFunctionArgList --------|
-//    |                 |-argList -|- # elements in argList -|  
+//    |                 |-argList -|- # elements in argList -|
 // {
 //    { "addDest",    {{{ PT,  END }},         1             } },
 //    { "delDest",    {{{ INT, END }},         1             } },

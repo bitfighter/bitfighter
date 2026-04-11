@@ -39,8 +39,8 @@ public:
    void setSelectedEngineeredObject(U32 objectType);
 
    void onActivated();
-   bool processInputCode(InputCode inputCode);   
-   void render();                
+   bool processInputCode(InputCode inputCode);
+   void render();
    void renderDeploymentMarker(const Ship *ship);
 
    bool isChatDisabled() const;

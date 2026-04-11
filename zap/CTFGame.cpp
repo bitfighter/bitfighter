@@ -58,7 +58,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          Vector<StringTableEntry> e;
          e.push_back(clientInfo->getName());
          e.push_back(getGame()->getTeamName(theFlag->getTeam()));
-         
+
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
 
          theFlag->sendHome();

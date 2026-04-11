@@ -31,8 +31,8 @@ public:
    string folder;                   // File's folder
    string mScriptFileName;
    StringTableEntry mLevelName;     // Level "in-game" names
-   
-   GameTypeId mLevelType;      
+
+   GameTypeId mLevelType;
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
    S32 mHosterLevelIndex;           // Max recommended number of players for this level

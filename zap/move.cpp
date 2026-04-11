@@ -41,8 +41,8 @@ Move::~Move()
 
 void Move::initialize()
 {
-   fire = false; 
-   time = 32; 
+   fire = false;
+   time = 32;
    x = 0;
    y = 0;
    angle = 0;
@@ -103,7 +103,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFloat(fabs(y), XYBits);
       stream->writeFlag(y < 0);
 
-      // This needs to be signed, otherwise, the ship can't face up!  
+      // This needs to be signed, otherwise, the ship can't face up!
       // The writeAngle here will be between -2048 and 2048 because the 'angle' is
       // always between -tau/2 and tau/2 due to the output of the various atan2() calls we make
       S32 writeAngle = (S32) floor(radiansToUnit(angle) * (1 << AngleBits) + 0.5f);     // floor(angle / 2pi * 4096 + .5)
@@ -135,11 +135,11 @@ void Move::unpack(BitStream *stream, bool unpackTime)
    if(!stream->readFlag())
    {
       x = stream->readFloat(XYBits);
-      if(stream->readFlag()) 
+      if(stream->readFlag())
          x = -x;
 
       y = stream->readFloat(XYBits);
-      if(stream->readFlag()) 
+      if(stream->readFlag())
          y = -y;
 
       // angle must output between -tau/2 and tau/2
@@ -163,7 +163,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 
 
 // Pack and unpack the move to ensure the effects of rounding are same on client and server
-void Move::prepare()    
+void Move::prepare()
 {
    PacketStream stream;
    pack(&stream, NULL, false);

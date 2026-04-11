@@ -130,7 +130,7 @@ bool LuaScriptRunner::runScript(bool cacheScript)
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
 void LuaScriptRunner::setEnvironment()
-{                                    
+{
    // Grab the script's environment table from the registry, place it on the stack
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Push REGISTRY[scriptId] onto stack           -- function, table
    lua_setfenv(L, -2);                                   // Set that table to be the env for function    -- function
@@ -242,7 +242,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
 
       if(!cacheScript)
          loadCompileScript(mScriptName.c_str());
-      else  
+      else
       {
          bool found = false;
 
@@ -275,12 +275,12 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
 
 
       // If we are here, script loaded and compiled; everything should be dandy.
-      TNLAssert((lua_gettop(L) == 2 && lua_isfunction(L, 1) && lua_isfunction(L, 2)) 
+      TNLAssert((lua_gettop(L) == 2 && lua_isfunction(L, 1) && lua_isfunction(L, 2))
                         || dumpStack(L), "Expected a single function on the stack!");
 
       setEnvironment();
 
-      // The script has been compiled, and the result is sitting on the stack.  The next step is to run it; this executes all the 
+      // The script has been compiled, and the result is sitting on the stack.  The next step is to run it; this executes all the
       // "loose" code and loads the functions into the current environment.  It does not directly execute any of the functions.
       // Any errors are handed off to the stack tracer we pushed onto the stack earlier.
       if(lua_pcall(L, 0, 0, -2))      // Passing 0 args, expecting none back
@@ -376,7 +376,7 @@ void improveErrorMessages_global(string &msg, const string &startStr)
    if(end == string::npos)          // Not found
       return;
 
-   msg.insert(insertPos, ">>> This error could mean that '" + var + 
+   msg.insert(insertPos, ">>> This error could mean that '" + var +
                          "' has a value of nil or that it has not been defined.\r\n");
 }
 
@@ -397,7 +397,7 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
       // Reorder the stack a little
       if(argCount > 0)
       {
-         // top should be 1 in all cases except for sendData() where we duplicate stack args, 
+         // top should be 1 in all cases except for sendData() where we duplicate stack args,
          // in which it should be argCount + 1
          // top = # items on stack - 2 [_stackTracer and function we want to run] - argCount + 1 [top of stack is 1 not 0]
          S32 top = lua_gettop(L) - 2 - argCount + 1;
@@ -432,7 +432,7 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
    if(!error)
    {
       lua_remove(L, -1 - returnValueCount);    // Remove _stackTracer           // -- <<whatever>>, <<return values>>
-      // Currently, the only time <<whatever>> is anything is when we're dealing with onDataReceived, 
+      // Currently, the only time <<whatever>> is anything is when we're dealing with onDataReceived,
       // in which case it will have argCount items.
 
       // Inital starting depth will be same as argCount, except with onDataReceived, in which case it will
@@ -449,9 +449,9 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
 
    if(error == -1)         // Handler was removed after subscription
    {
-      // The only way this can get triggered is if the handler function has been deleted by the time 
-      // we get here (we check for its existence when a script subscribes).  In practice, this has 
-      // probably never happened.  
+      // The only way this can get triggered is if the handler function has been deleted by the time
+      // we get here (we check for its existence when a script subscribes).  In practice, this has
+      // probably never happened.
       string text = "Cannot find Lua function " + string(function ? function : "<unknown>") + "()!\n";
       logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
    }
@@ -514,7 +514,7 @@ bool LuaScriptRunner::startLua(const string &scriptingDir)
 // Prepare a new Lua environment ("L") for use -- called from startLua(), and testing.
 bool LuaScriptRunner::configureNewLuaInstance(lua_State *L)
 {
-   try 
+   try
    {
       lua_atpanic(L, luaPanicked);  // Register our panic function
 
@@ -593,7 +593,7 @@ void LuaScriptRunner::loadCompileSaveScript(const char *filename, const char *re
 // All callers of this script have catch blocks, so we can throw errors if something goes wrong.
 void LuaScriptRunner::loadCompileScript(const char *filename)
 {
-   // luaL_loadfile: Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename. 
+   // luaL_loadfile: Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename.
    // If filename is NULL, then it loads from the standard input. The first line in the file is ignored if it starts with a #.
    // Returns:
    // 0: no errors;
@@ -613,7 +613,7 @@ void LuaScriptRunner::deleteScript(const char *name)
 {
    // If a script is not found, or there is some other problem with the bot (or levelgen), we might get here before our L has been
    // set up.  If L hasn't been defined, there's no point in mucking with the registry, right?
-   if(L)    
+   if(L)
    {
       lua_pushnil(L);                                       //                             -- nil
       lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
@@ -621,11 +621,11 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
-bool LuaScriptRunner::prepareEnvironment()              
+bool LuaScriptRunner::prepareEnvironment()
 {
    if(!L)
    {
-      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), 
+      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(),
                 "Lua interpreter doesn't exist.  Aborting environment setup");
       return false;
    }
@@ -653,8 +653,8 @@ void LuaScriptRunner::killScript()
 }
 
 
-void LuaScriptRunner::logError(const char *format, ...) 
-{ 
+void LuaScriptRunner::logError(const char *format, ...)
+{
    va_list args;
    va_start(args, format);
    char buffer[2048];
@@ -666,8 +666,8 @@ void LuaScriptRunner::logError(const char *format, ...)
 }
 
 
-void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix) 
-{ 
+void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
+{
    // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
 }
@@ -701,7 +701,7 @@ void LuaScriptRunner::registerClasses()
 //   S32 stackDepth = lua_gettop(L);
 //
 //   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());   // Push REGISTRY[scriptId] onto stack            -- registry table
-//   lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var 
+//   lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var
 //   int var = lua_tointeger(L, -1);
 //   lua_pop(L, 1);
 //   lua_pop(L, 1);
@@ -729,7 +729,7 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
       lua_pushstring(L, args[i].c_str());             //                                        -- ..., env_table, "arg", table, string
       lua_rawseti(L, -2, i + 1);                      //                                        -- ..., env_table, "arg", table
    }
-   
+
    lua_settable(L, -3);                               // Save it: env_table["arg"] = table      -- ..., env_table
    lua_pop(L, 1);                                     // Remove environment table from stack    -- ...
 
@@ -737,8 +737,8 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 }
 
 
-// Set up paths so that we can use require to load code in our scripts 
-void LuaScriptRunner::setModulePath()   
+// Set up paths so that we can use require to load code in our scripts
+void LuaScriptRunner::setModulePath()
 {
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
@@ -754,7 +754,7 @@ void LuaScriptRunner::setModulePath()
 }
 
 
-// Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered 
+// Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered
 // a fatal error such as running out of memory.  Best just to shut the whole thing down.
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
@@ -788,8 +788,8 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
 }
 
 
-S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)   
-{ 
+S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)
+{
    EventManager::EventType eventType = getInt2<EventManager::EventType>(L, -1);
 
    if(!mSubscriptions[eventType])
@@ -854,11 +854,11 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    // NOTE: Here's the Lua code we're building and executing to define the
    //       enum.  http://lua-users.org/wiki/ReadOnlyTables
    //
-   // <tname> = setmetatable( {}, { 
-   //      __index = { 
-   //          <name1> = <value1>, 
-   //          }, 
-   //          ... 
+   // <tname> = setmetatable( {}, {
+   //      __index = {
+   //          <name1> = <value1>,
+   //          },
+   //          ...
    //      },
    //      __newindex = function(table, key, value)
    //          error(\"Attempt to modify read-only table\")
@@ -871,7 +871,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    char* ename;
    S32 evalue;
    bool include;
-    
+
    code << tname << " = setmetatable({}, {";
    code << "__index = {";
 
@@ -883,7 +883,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
       evalue = va_arg(args, S32);
       if(include)
          code << ename << "=" << evalue << ",";
-   } 
+   }
    va_end(args);
 
    code << "},";
@@ -917,7 +917,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define TYPE_NUMBER(value, shareWithLua, luaEnumName, e)   luaEnumName, shareWithLua, value,
           TYPE_NUMBER_TABLE
    #  undef TYPE_NUMBER
-      (char*)NULL); 
+      (char*)NULL);
 
 
    // Module enums -- push all, using enum name as the Lua name
@@ -925,7 +925,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define MODULE_ITEM(value, luaEnumName, c, d, e, f, g, h, i)  luaEnumName, true, value,
          MODULE_ITEM_TABLE
    #  undef MODULE_ITEM
-      (char*)NULL); 
+      (char*)NULL);
 
 
    // Weapons
@@ -934,7 +934,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, true, value + ModuleCount,
          WEAPON_ITEM_TABLE
    #  undef WEAPON_ITEM
-      (char*)NULL);  
+      (char*)NULL);
 
 
    // Game Types
@@ -942,7 +942,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define GAME_TYPE_ITEM(value, b, luaEnumName, d, e, f)  luaEnumName, true, value,
           GAME_TYPE_TABLE
    #  undef GAME_TYPE_ITEM
-      (char*)NULL);  
+      (char*)NULL);
 
 
    // Scoring Events
@@ -1079,14 +1079,14 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 //// Lua interface
 /**
  * @luaclass ScriptRunner
- * 
+ *
  * @brief Main class for holding global methods accessible by all script runners
- * 
+ *
  * @descr Script runners include levelgens, robots, and editor plugins. The
  * methods here can be called from all three. However, some may be disabled for
  * a particular script runner.
- * 
- * In a levelgen script, there is an object magically available called 'levelgen' 
+ *
+ * In a levelgen script, there is an object magically available called 'levelgen'
  * that gives you access to these methods.
  */
 
@@ -1159,12 +1159,12 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
 
 /**
  * @luafunc bool ScriptRunner::pointCanSeePoint(point point1, point point2)
- * 
+ *
  * @brief Returns `true` if the two specified points can see one another.
- * 
+ *
  * @param point1 First point.
  * @param point2 Second point.
- * 
+ *
  * @return `true` if objects have a line of sight from one to the other,
  * `false` otherwise.
  */
@@ -1183,19 +1183,19 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
 
 /**
  * @luafunc BfObject ScriptRunner::findObjectById(num id)
- * 
+ *
  * @brief Returns an object with the given id, or nil if none exists.
- * 
+ *
  * @descr Finds an object with the specified user-assigned id. If there are
  * multiple objects with the same id (shouldn't happen, but could, especially if
  * the passed id is 0), this method will return the first object it finds with
  * the given id. Currently, all objects that have not been explicitly assigned
  * an id have an id of 0.
- * 
+ *
  * Note that ids can be assigned in the editor using the ! or # keys.
- * 
+ *
  * @param id id to search for.
- * 
+ *
  * @return The found BfObject, or `nil` if no objects with the specified id
  * could be found.
  */
@@ -1212,7 +1212,7 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 /**
  * @luafunc table ScriptRunner::findAllObjects(ObjType objType, ...)
  *
- * @brief Returns a table containing a list of objects of the specified type 
+ * @brief Returns a table containing a list of objects of the specified type
  * anywhere on the level.
  *
  * @descr Can specify multiple object types.
@@ -1229,7 +1229,7 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
  *   objects = bf:findAllObjects(objType, ...) -- Find all objects of specified type(s)
  *   print(#objects)                           -- Print the number of items found to the console
  * end
- * 
+ *
  * function listZoneIds()
  *    zones = levelgen:findAllObjects(ObjType.GoalZone)
  *    for i = 1, #zones do
@@ -1237,8 +1237,8 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
  *       print(id)
  *    end
  * end
- * 
- * 
+ *
+ *
  * @endcode
  */
 S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
@@ -1527,69 +1527,69 @@ S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
  *
  * @brief Allows scripts to send data to one another.
  *
- * @descr This is a very powerful and flexible function.  Make sure that your event handling 
- * functions have the right parameters for the data you want to send.  If the number of items 
+ * @descr This is a very powerful and flexible function.  Make sure that your event handling
+ * functions have the right parameters for the data you want to send.  If the number of items
  * you want to send varies, a good solution is to wrap them in a table and pass that.
  * This functionality gives you plenty of rope... use it wisely.
- * 
- * It is possible to share simple values or tables between scripts.  When tables are shared, 
+ *
+ * It is possible to share simple values or tables between scripts.  When tables are shared,
  * only a pointer is passed; the table itself is not copied.  This allows you to create <i>shared table</i>.
  *
  * What this means is that all scripts that receive the table via the \link DataReceived Event\endlink event
  * can modify the shared table, and every other script can see those changes instantly.  This allows levelgens and bots
  * to communicate directly without firing further events just by updating a shared table.
- * 
+ *
  * For example, let's assume we have a levelgen script and a bot:
- * 
+ *
  * @code
  * -- bot
  * function onDataReceived(p1) { tbl = p1 } end  -- tbl will be a global (the default in lua), pointing at p1
  * bf:subscribe(Event.DataReceived)              -- Listen for sendData messages
  * @endcode
- * 
+ *
  * @code
  * -- levelgen
  * tbl = {x=10, y=15}   -- Define a table with x and y attributes
  * bf:sendData(tbl)     -- Send the table to all scripts who are subscribed to DataReceived events
  * @endcode
- * 
+ *
  * ... later ...
- * 
+ *
  * @code
  * -- levelgen
  * tbl.x = 20           -- Update the x attribute of tbl
  * @endcode
- * 
+ *
  * @code
  * -- bot
  * print(tbl.x)         -- prints 20
  * tbl.x = 30           -- Updates tbl in the levelgen
  * @endcode
- * 
+ *
  * @code
  * -- levelgen
  * print(tbl.x)         -- prints 30
  * @endcode
- * 
+ *
  * This example can be scaled up to any number of bots, all of which can form a "hive mind".  Any valid manipulation of
  * the shared table, including adding functions, elements, sub-tables, etc. is allowed.
- * 
- * Here is a complete example that uses a shared table to let the levelgen set a destination in a shared table that 
+ *
+ * Here is a complete example that uses a shared table to let the levelgen set a destination in a shared table that
  * bots will fly towards.  Note that the `sendData()` function is only called when a new bot is added.
- * 
+ *
  * First the levelgen code:
- * 
- * @code 
+ *
+ * @code
  * -- Levelgen to direct bots to fly towards a changing destination using shared tables
- *   
+ *
  * sharedDest = {x=0, y=0}
- * 
+ *
  * function main()
  *     bf:subscribe(Event.PlayerJoined)                -- Listen for players (or bots) joining
  *     Timer:scheduleRepeating(changeDest, 3 * 1000)   -- Run changeDest every 2 seconds
  *     dest = 0
  * end
- * 
+ *
  * -- Event handlers
  * function onPlayerJoined(playerInfo)
  *     -- Notify new bots of sharedDest; all robots will get this, but it doesn't hurt if they get it twice
@@ -1599,13 +1599,13 @@ S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
  *         if dest > 4 then dest = dest - 4 end
  *     end
  * end
- * 
+ *
  * -- Called by timer
  * function changeDest()
  *     -- Advance destination
  *     dest = dest + 1
  *     if dest > 4 then dest = 1 end
- * 
+ *
  *     -- Update coordinates
  *     if     dest == 1 then sharedDest.x = 800; sharedDest.y = 0
  *     elseif dest == 2 then sharedDest.x = 800; sharedDest.y = 800
@@ -1614,37 +1614,37 @@ S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
  *     end
  * end
  * @endcode
- * 
+ *
  * And the bot:
- * 
+ *
  * @code
  * -- Bot always moves towards a destination provided by the levelgen via shared table
- * 
+ *
  * -- Set up shared table so we have somewhere to go until we get the onDataReceived event
  * sharedDest = {x=0, y=0}
- * 
+ *
  * function main()
  *     bf:subscribe(Event.DataReceived)  -- Listen for sendData messages
  * end
- * 
+ *
  * function onDataReceived(tbl)
  *     sharedDest = tbl                  -- Hook up shared table
  * end
- * 
+ *
  * function onTick()
  *     bot:setThrustToPt(sharedDest)     -- Always move towards sharedDest
  *     bot:setAngle(sharedDest)          -- Aim in the direction of travel (looks nice)
  * end
  * @endcode
- * 
- * Even though this capability allows almost unlimited low-overhead communication, you may still prefer 
- * to use the sendData function because that will trigger an event handler on the receiver, whereas 
+ *
+ * Even though this capability allows almost unlimited low-overhead communication, you may still prefer
+ * to use the sendData function because that will trigger an event handler on the receiver, whereas
  * unless the script is monitoring values in a shared table, it will have no idea when something
- * changs.  The details of how you design your scripts will determine which approach, or combination 
+ * changs.  The details of how you design your scripts will determine which approach, or combination
  * of approaches, is best.
- * 
- * Note that the sendData function will send data to bots and the levelgen if they are 
- * subscribed to the \link DataReceived Event\endlink event, 
+ *
+ * Note that the sendData function will send data to bots and the levelgen if they are
+ * subscribed to the \link DataReceived Event\endlink event,
  * but it will not be sent back to the sender, even if they are subscribed.
  *
  * @param data Data to be sent (can be zero or more numeric, string, table, or other Lua values)

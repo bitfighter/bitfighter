@@ -105,7 +105,7 @@ class GameSettings
    typedef map<string,UserSettings> UserSettingsMap;
 
 private:
-   // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
+   // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
    string mHostName;             // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
@@ -146,12 +146,12 @@ private:
    F32 getF32(ParamId paramId) const;
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
-      
+
    Vector<LoadoutTracker> mLoadoutPresets;
 
    Vector<string> mConfigurationErrors;
-   Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    
-   Vector<string> getPlaylist();       
+   Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);
+   Vector<string> getPlaylist();
 
 public:
    GameSettings();            // Constructor
@@ -192,7 +192,7 @@ public:
    string getLevelChangePassword();
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
 
-   InputCodeManager *getInputCodeManager(); 
+   InputCodeManager *getInputCodeManager();
 
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
@@ -211,7 +211,7 @@ public:
 
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
-   
+
    static FolderManager *getFolderManager();
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
@@ -232,7 +232,7 @@ public:
    const Color *getWallOutlineColor() const;
 
    void setQueryServerSortColumn(S32 column, bool ascending);
-   S32  getQueryServerSortColumn();   
+   S32  getQueryServerSortColumn();
    bool getQueryServerSortAscending();
 
 

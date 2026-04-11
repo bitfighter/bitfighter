@@ -57,7 +57,7 @@ public:
 
    void cancelArrangedConnectionAttempt();
    void requestArrangedConnection(const Address &remoteAddress);
-   void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, 
+   void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount,
                            U32 playerCount, U32 maxPlayers, U32 infoFlags);
 
    S32 getClientId() const;
@@ -75,19 +75,19 @@ public:
       ByteBufferPtr connectionParameters));
 
 #ifndef ZAP_DEDICATED
-   TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
+   TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted,
                (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
 
-   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated_019, (RangedU32<0, AuthenticationStatusCount> authStatus, 
+   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated_019, (RangedU32<0, AuthenticationStatusCount> authStatus,
                                                      Int<BADGE_COUNT> badges, U16 gamesPlayed, StringPtr correctedName));
 
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
    // Incoming out-of-game chat message from master
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
-   
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));
+
    // For managing list of players in global chat
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
@@ -103,7 +103,7 @@ public:
 
    void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);
 
-   TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated_019, (Vector<U8> id, StringTableEntry name, 
+   TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated_019, (Vector<U8> id, StringTableEntry name,
                                                       RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges,
                                                       U16 gamesPlayed));
    void writeConnectRequest(BitStream *bstream);

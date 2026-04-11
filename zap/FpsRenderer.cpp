@@ -15,7 +15,7 @@
 
 #include "RenderUtils.h"
 
-namespace Zap { 
+namespace Zap {
 
 namespace UI {
 
@@ -132,7 +132,7 @@ void FpsRenderer::render(S32 canvasWidth) const
    // vertex display is green at zero and red at 1000 or more visible vertices
    r.setColor(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
    drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
-   
+
    FontManager::popFontContext();
 }
 

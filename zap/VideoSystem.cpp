@@ -62,7 +62,7 @@ bool VideoSystem::init()
       return false;
    }
 
-   
+
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
    // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.

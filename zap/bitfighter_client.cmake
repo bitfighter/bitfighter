@@ -1,6 +1,6 @@
 #
 # Client OBJECT build - includes resources only compiled into the client
-# 
+#
 
 BF_PLATFORM_SET_EXTRA_SOURCES()
 

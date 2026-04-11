@@ -43,9 +43,9 @@ extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius)
 extern void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 radius);
 
 
-extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, 
+extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor,
                                   const Color &outlineColor, S32 radius, F32 alpha = 1.0);
-extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, 
+extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor,
                                   const Color &outlineColor, F32 radius, F32 alpha = 1.0);
 
 extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
@@ -115,23 +115,23 @@ extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColo
                        bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
 // Renders the ship and all the fixins
-extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
-                       U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
-                       bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
-                       bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel,
+                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha,
+                       U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy,
+                       bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team,
+                       bool boostActive, bool shieldActive, bool repairActive, bool sensorActive,
                        bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
 extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
 
 // Render repair rays to all the repairing objects
-extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   
+extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);
 
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
 extern void drawFourArrows(const Point &pos);
 
-extern void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
+extern void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
                              const Vector<Point> *dests, U32 trackerCount = 100);
 extern void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
@@ -151,9 +151,9 @@ extern void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const 
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 extern void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color);
 
-extern void renderZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);   
+extern void renderZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);
 
-extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
+extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill,
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
 
 extern void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadians = 0.0f);
@@ -166,7 +166,7 @@ extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 
 extern void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
 
-extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
+extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor,
                                S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha);
 
 extern void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, bool teamHasFlag);
@@ -190,7 +190,7 @@ extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const V
 extern void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 
-extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
+extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
                         bool open, F32 glowFraction);
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction);
@@ -213,7 +213,7 @@ extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
 extern void renderRepairItem(const Point &pos);
 extern void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 
-extern void renderEnergyItem(const Point &pos); 
+extern void renderEnergyItem(const Point &pos);
 
 extern void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall);
 extern void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall);
@@ -244,7 +244,7 @@ void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
 //void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 struct PanelGeom;
-void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time, 
+void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time,
                 PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
 
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
@@ -268,13 +268,13 @@ extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
-extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
-                        const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
+extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints,
+                        const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor,
                         const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
                         const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
 
 
-extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color,
                               F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);

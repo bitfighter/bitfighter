@@ -66,7 +66,7 @@ void Teleporter::addDest(const Point &dest)
       setVert(dest, 1);
       updateExtentInDatabase();
    }
-   // If we're the server, update the clients 
+   // If we're the server, update the clients
    if(getGame() && getGame()->isServer())
       s2cAddDestination(dest);
 }
@@ -102,7 +102,7 @@ void Teleporter::clearDests()
    setVert(getPos(), 1);       // Set destination to same as origin
    updateExtentInDatabase();
 
-   // If we're the server, update the clients 
+   // If we're the server, update the clients
    if(getGame() && getGame()->isServer())
       s2cClearDestinations();
 }
@@ -148,11 +148,11 @@ const F32 Teleporter::DamageReductionFactor = 0.5f;
 Teleporter::Teleporter(lua_State *L)
 {
    initialize(Point(0,0), Point(0,0), NULL);
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { LINE, END } }, 3 };
-      
+
       S32 profile = checkArgList(L, constructorArgList, "Teleporter", "constructor");
 
       if(profile > 0)
@@ -162,7 +162,7 @@ Teleporter::Teleporter(lua_State *L)
 
 
 // Constructor used by engineer
-Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) : 
+Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) :
       Engineerable()
 {
    initialize(pos, dest, engineeringShip);
@@ -234,7 +234,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       else
       {
          if(argc < 8)
-         {  
+         {
             argv[argc] = argv2[i];
             argc++;
          }
@@ -257,7 +257,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
    // Note that editor handles multi-dest teleporters as separate single dest items, so this only runs on server!
-   if(game->isServer())    
+   if(game->isServer())
    {
       foundObjects.clear();
       game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
@@ -270,7 +270,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
             tel->addDest(dest);
 
             // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
-            delete this;    // Since this is really part of a different teleporter, delete this one 
+            delete this;    // Since this is really part of a different teleporter, delete this one
             return true;    // There will only be one!
          }
       }
@@ -387,7 +387,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    if(stream->writeFlag(updateMask & (InitMask | GeomMask)))
    {
       getOrigin().write(stream);     // Location of intake
-      
+
       S32 dests = getDestCount();
 
       stream->writeInt(dests, 16);
@@ -395,7 +395,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       for(S32 i = 0; i < dests; i++)
          getDest(i).write(stream);
    }
-   
+
    // If we're not destroyed and health has changed
    if(!stream->writeFlag(mHasExploded))
    {
@@ -453,7 +453,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       for(U32 i = 0; i < count; i++)
          read(i, stream);
-      
+
       computeExtent();
       generateOutlinePoints();
 
@@ -547,7 +547,7 @@ void Teleporter::doTeleport()
    if(getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
       return;
 
-   Rect queryRect(getOrigin(), TRIGGER_RADIUS);     
+   Rect queryRect(getOrigin(), TRIGGER_RADIUS);
 
    foundObjects.clear();
    findObjects((TestFunc)isShipType, foundObjects, queryRect);
@@ -636,9 +636,9 @@ bool Teleporter::collide(BfObject *otherObject)
       Ship *ship = static_cast<Ship *>(otherObject);
 
       // Check if the center of the ship is closer than TRIGGER_RADIUS -- this is equivalent to testing if
-      // the ship is entirely within the outer radius of the teleporter.  Therefore, ships can almost entirely 
+      // the ship is entirely within the outer radius of the teleporter.  Therefore, ships can almost entirely
       // overlap the teleporter before triggering the teleport.
-      if((getOrigin() - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))  
+      if((getOrigin() - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))
          return false;     // Too far -- teleport not activated!
 
       // Check for players within a square box around the teleporter.  Not all these ships will teleport; the actual determination is made
@@ -651,7 +651,7 @@ bool Teleporter::collide(BfObject *otherObject)
 
    // Only engineered teleports have collision with projectiles
    if(isProjectileType(otherObjectType))
-      return mEngineered;        
+      return mEngineered;
 
    return false;
 }
@@ -680,8 +680,8 @@ void Teleporter::generateOutlinePoints()
    F32 x = getOrigin().x;
    F32 y = getOrigin().y;
 
-   for(S32 i = 0; i < sides; i++)    
-      mOutlinePoints[i] = Point(TELEPORTER_RADIUS * cos(i * Float2Pi / sides + FloatHalfPi) + x, 
+   for(S32 i = 0; i < sides; i++)
+      mOutlinePoints[i] = Point(TELEPORTER_RADIUS * cos(i * Float2Pi / sides + FloatHalfPi) + x,
                                 TELEPORTER_RADIUS * sin(i * Float2Pi / sides + FloatHalfPi) + y);
 }
 
@@ -765,15 +765,15 @@ void Teleporter::render()
          radiusFraction = 1;
 
       else if(cooldown > TeleporterExpandTime - TeleporterCooldown + mTeleporterCooldown)
-         radiusFraction = F32(cooldown - TeleporterExpandTime + TeleporterCooldown - mTeleporterCooldown) / 
+         radiusFraction = F32(cooldown - TeleporterExpandTime + TeleporterCooldown - mTeleporterCooldown) /
                           F32(TeleporterCooldown - TeleporterExpandTime);
 
       else if(mTeleporterCooldown < TeleporterExpandTime)
-         radiusFraction = F32(mTeleporterCooldown - cooldown + TeleporterExpandTime - TeleporterCooldown) / 
+         radiusFraction = F32(mTeleporterCooldown - cooldown + TeleporterExpandTime - TeleporterCooldown) /
                           F32(mTeleporterCooldown + TeleporterExpandTime - TeleporterCooldown);
 
       else if(cooldown < TeleporterExpandTime)
-         radiusFraction = F32(TeleporterExpandTime - cooldown) / 
+         radiusFraction = F32(TeleporterExpandTime - cooldown) /
                           F32(TeleporterExpandTime);
       else
          radiusFraction = 0;
@@ -784,11 +784,11 @@ void Teleporter::render()
       U32 halfPeriod = mExplosionTimer.getPeriod() / 2;
 
       if(mExplosionTimer.getCurrent() > halfPeriod)
-         radiusFraction = 2.f - F32(mExplosionTimer.getCurrent() - halfPeriod) / 
+         radiusFraction = 2.f - F32(mExplosionTimer.getCurrent() - halfPeriod) /
                                 F32(halfPeriod);
 
       else
-         radiusFraction = 2 * F32(mExplosionTimer.getCurrent()) / 
+         radiusFraction = 2 * F32(mExplosionTimer.getCurrent()) /
                               F32(halfPeriod);
 
       // Add ending explosion
@@ -804,7 +804,7 @@ void Teleporter::render()
 
       F32 zoomFraction = getGame()->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction, 
+      renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction,
                        (F32)TELEPORTER_RADIUS, 1.0, getDestList(), trackerCount);
    }
 
@@ -906,7 +906,7 @@ void Teleporter::onGeomChanged()
 
    // Update the dest manager.  We need this for rendering in preview mode.
    setDest(0, getVert(1));
-}   
+}
 
 
 U32 Teleporter::getDelay()
@@ -965,9 +965,9 @@ bool Teleporter::canBeNeutral() { return false; }
  *
  * @descr A Teleporter represents the basic teleporter object. Every teleporter
  * has an intake location and one or more destinations. When a ship enters the
- * teleporter, a destination will be chosen randomly if there is more than one. 
+ * teleporter, a destination will be chosen randomly if there is more than one.
  */
-//               Fn name                       Param profiles         Profile count                           
+//               Fn name                       Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, addDest,       ARRAYDEF({ { PT,   END }                }), 1 ) \
    METHOD(CLASS, delDest,       ARRAYDEF({ { INT,  END }                }), 1 ) \
@@ -989,7 +989,7 @@ GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
 const char *Teleporter::luaClassName = "Teleporter";
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
-/** 
+/**
  * @luafunc Teleporter::addDest(point dest)
  *
  * @brief Adds a destination to the teleporter.
@@ -998,7 +998,7 @@ REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
  * destination.
  *
  * Example:
- * @code 
+ * @code
  *   t = Teleporter.new()
  *   t:addDest(100,150)
  *   levelgen:addItem(t)  -- or plugin:addItem(t) in a plugin
@@ -1017,12 +1017,12 @@ S32 Teleporter::lua_addDest(lua_State *L)
 
 /**
  * @luafunc Teleporter::delDest(int index)
- * 
+ *
  * @brief Removes a destination from the teleporter.
- * 
+ *
  * @param index The index of the destination to delete. If you specify an
  * invalid index, will generate an error.
- * 
+ *
  * @note Remember that in Lua, indices start with 1!
  */
 S32 Teleporter::lua_delDest(lua_State *L)
@@ -1160,7 +1160,7 @@ S32 Teleporter::lua_setDelay(lua_State *L)
  * @brief Sets teleporter geometry; differs from standard conventions.
  * @descr In this case, geometry represents both Teleporter's location and those
  * of all destinations.  The first point specified will be used to set the
- * location. If two or more points are supplied, all existing destinations will be deleted, 
+ * location. If two or more points are supplied, all existing destinations will be deleted,
  * and the remaining points will be used to define new destinations.
  *
  * Note that in the editor, teleporters can only have a single destination.
@@ -1222,15 +1222,15 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
 
 /**
  * @luafunc Geom Teleporter::getGeom()
- * 
+ *
  * @brief Gets teleporter geometry; differs from standard conventions.
- * 
+ *
  * @descr In this case, geometry represents both Teleporter's location and those
  * of all destinations. The first point in the Geom will be the teleporter's
  * intake location. Each destination will be represented by an additional point.
  * In the editor, all teleporters are simple lines, and will return geometries
  * with two points -- an origin and a destination.
- * 
+ *
  * @return geo geometry: New geometry for Teleporter.
  */
 S32 Teleporter::lua_getGeom(lua_State *L)
@@ -1245,5 +1245,5 @@ S32 Teleporter::lua_getGeom(lua_State *L)
    return returnPoints(L, &points);
 }
 
-   
+
 };

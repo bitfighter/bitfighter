@@ -9,7 +9,7 @@
 #include "UIEditor.h"         // For PluginInfo def
 
 #include "ClientGame.h"       // For usage with getGame()
-#include "barrier.h"     
+#include "barrier.h"
 #include "BotNavMeshZone.h"   // For Border class def
 #include "gameObjectRender.h"
 #include "DisplayManager.h"
@@ -177,15 +177,15 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
 
    // Prepare special instructions
-   ControlStringsEditor helpBindLeft[] = 
-   { 
+   ControlStringsEditor helpBindLeft[] =
+   {
       { "Help",               "[[Help]]"       },
       { "Team Editor",        "[[TeamEditor]]" }
    };
 
    pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
-   
-   ControlStringsEditor helpBindRight[] = 
+
+   ControlStringsEditor helpBindRight[] =
    {
       { "Game Params Editor", "[[GameParameterEditor]]" },
       { "Lobby Chat",         "[[OutOfGameChat]]"       }
@@ -371,7 +371,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
       mSymbolSets1Right.render(y);
    }
    else
-   {      
+   {
       mSymbolSets2Left.render(y);
       mSymbolSets2Right.render(y);
    }

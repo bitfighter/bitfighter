@@ -188,7 +188,7 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
       activateGhosting();
       rpcReadyForNormalGhosts_remote(mGhostingSequence);
       setScopeObject(&mNetObj);
-      mEventClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Essentially a count of RPCs 
+      mEventClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Essentially a count of RPCs
       mEventClassBitSize = getNextBinLog2(mEventClassCount);
       mGhostClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject);
       mGhostClassBitSize = getNextBinLog2(mGhostClassCount);

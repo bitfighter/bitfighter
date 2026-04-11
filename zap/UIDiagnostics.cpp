@@ -19,7 +19,7 @@
 #include "version.h"
 
 #include "GameManager.h"
-#include "ServerGame.h"          
+#include "ServerGame.h"
 
 #include "Colors.h"
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
@@ -99,7 +99,7 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
       // Do nothing -- no global chat from diagnostics screen... it's perverse!
    }
    else if(Parent::onKeyDown(inputCode))
-   { 
+   {
       // Do nothing -- key handled
    }
    else if(inputCode == KEY_ESCAPE)
@@ -149,22 +149,22 @@ static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
 
    names.push_back("INI Dir:");
    vals.push_back(folderManager->iniDir.c_str());
-      
+
    names.push_back("Log Dir:");
    vals.push_back(folderManager->logDir.c_str());
-      
+
    names.push_back("Lua Dir:");
    vals.push_back(folderManager->luaDir.c_str());
-      
+
    names.push_back("Robot Dir:");
    vals.push_back(folderManager->robotDir.c_str());
 
    names.push_back("Shader Dir:");
    vals.push_back(folderManager->shaderDir.c_str());
-      
+
    names.push_back("Screenshot Dir:");
    vals.push_back(folderManager->screenshotDir.c_str());
-      
+
    names.push_back("SFX Dir:");
    vals.push_back(folderManager->sfxDir.c_str());
 
@@ -292,8 +292,8 @@ static S32 showNameDescrBlock(const string &hostName, const string &hostDescr, S
 static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bool leftcol)
 {
    Renderer& r = Renderer::get();
-   drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", 
-                                              game->getSettings()->getMasterServerList()->size() > 0 ? 
+   drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s",
+                                              game->getSettings()->getMasterServerList()->size() > 0 ?
                                                          game->getSettings()->getMasterServerList()->get(0).c_str() : "None");
 
    ypos += textsize + gap;
@@ -301,7 +301,7 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
    if(game->getConnectionToMaster() && game->getConnectionToMaster()->isEstablished())
    {
       r.setColor(Colors::MasterServerBlue);
-      drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]", 
+      drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]",
                                              game->getConnectionToMaster()->getMasterName().c_str() );
    }
    else
@@ -324,7 +324,7 @@ void DiagnosticUserInterface::render()
    r.setColor(Colors::red);
    drawStringf(  3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d",       mCurPage + 1, NUM_PAGES);
- 
+
    drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(getGame()->getSettings(), BINDING_DIAG));
 
    r.setColor(0.7f);
@@ -374,9 +374,9 @@ void DiagnosticUserInterface::render()
 
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
-                                  clientInfo->getName().getString(), 
-                                  clientInfo->isAuthenticated() ? 
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)",
+                                  clientInfo->getName().getString(),
+                                  clientInfo->isAuthenticated() ?
                                        string("Verified - " + itos(clientInfo->getBadges())).c_str() : "Not verified");
 
       ypos += textsize + gap;
@@ -385,9 +385,9 @@ void DiagnosticUserInterface::render()
 
       ypos += textsize + gap;
       drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", inputMode.c_str());
-  
+
       ypos += textsize + gap;
-      
+
       S32 index = GameSettings::UseControllerIndex;
 
       bool joystickDetected = GameSettings::DetectedControllerList.size() > 0;
@@ -508,19 +508,19 @@ void DiagnosticUserInterface::render()
 
          JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(BUTTON_DPAD_UP),   InputCodeManager::getState(BUTTON_DPAD_DOWN),
-               InputCodeManager::getState(BUTTON_DPAD_LEFT), InputCodeManager::getState(BUTTON_DPAD_RIGHT), 
+               InputCodeManager::getState(BUTTON_DPAD_LEFT), InputCodeManager::getState(BUTTON_DPAD_RIGHT),
                "DPad", "(Menu Nav)");
          hpos += 65;
 
          JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(STICK_1_UP),   InputCodeManager::getState(STICK_1_DOWN),
-               InputCodeManager::getState(STICK_1_LEFT), InputCodeManager::getState(STICK_1_RIGHT), 
+               InputCodeManager::getState(STICK_1_LEFT), InputCodeManager::getState(STICK_1_RIGHT),
                "L Stick", "(Move)");
          hpos += 65;
 
          JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(STICK_2_UP),   InputCodeManager::getState(STICK_2_DOWN),
-               InputCodeManager::getState(STICK_2_LEFT), InputCodeManager::getState(STICK_2_RIGHT), 
+               InputCodeManager::getState(STICK_2_LEFT), InputCodeManager::getState(STICK_2_RIGHT),
                "R Stick", "(Fire)");
          hpos += 55;
 
@@ -594,12 +594,12 @@ void DiagnosticUserInterface::render()
                                                                     "None - anyone can change" : settings->getLevelChangePassword().c_str());
       ypos += textsize + gap;
 
-      
-      drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ? 
+
+      drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ?
                                                                      "None - no one can get admin" : settings->getAdminPassword().c_str());
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", settings->getServerPassword() == "" ? 
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", settings->getServerPassword() == "" ?
                                                                              "None needed to play" : settings->getServerPassword().c_str());
 
       ypos += textsize + gap;
@@ -618,45 +618,45 @@ void DiagnosticUserInterface::render()
 
       if(conn)
       {
-         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%", 
-                                     conn->getSimulatedSendLatency(), 
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
+                                     conn->getSimulatedSendLatency(),
                                      conn->getSimulatedSendPacketLoss() * 100);
 
          ypos += textsize + gap;
 
-         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Rcv. Lag/Pkt. Loss:", "%dms/%2.0f%%", 
-                                     conn->getSimulatedReceiveLatency(), 
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Rcv. Lag/Pkt. Loss:", "%dms/%2.0f%%",
+                                     conn->getSimulatedReceiveLatency(),
                                      conn->getSimulatedReceivePacketLoss() * 100);
       }
       else     // No connection? Use settings in settings.
       {
-         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%", 
-                                     settings->getSimulatedLag(), 
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
+                                     settings->getSimulatedLag(),
                                      settings->getSimulatedLoss() * 100);
 
          ypos += textsize + gap;
       }
 
       ypos += textsize + gap;
-      
+
 
       // Dump out names of loaded levels...
       r.setColor(Colors::white);
       string allLevels = "Levels: ";
 
       if(!GameManager::getServerGame())
-         allLevels += " >>> Level list won't be resolved until you start hosting <<<"; 
+         allLevels += " >>> Level list won't be resolved until you start hosting <<<";
       else
          for(S32 i = 0; i < GameManager::getServerGame()->getLevelCount(); i++)
             allLevels += string(GameManager::getServerGame()->getLevelNameFromIndex(i).getString()) + "; ";
 
       U32 i, j, k;
       i = j = k = 0;
-      
+
       for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
-         while(getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < 
-               DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length()) 
+         while(getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) <
+               DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length())
          {
             i++;
          }
@@ -682,12 +682,12 @@ void DiagnosticUserInterface::render()
 
          F32 rad = 10;
          F32 smallSize = .6f;
-            
+
          r.pushMatrix();
          r.scale(i ? smallSize : 1);
          y *= (i ? 1/smallSize : 1);
 
-         
+
          F32 rm2 = rad - 2;
          F32 r3 = rad * .333f;
          F32 rm23 = rm2 * .333f;

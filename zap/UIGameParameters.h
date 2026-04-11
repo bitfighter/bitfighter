@@ -44,7 +44,7 @@ public:
 ////////////////////////////////////
 
 // By subclassing MenuUserInterface, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
-class GameParamUserInterface : public MenuUserInterface     
+class GameParamUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 

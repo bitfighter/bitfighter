@@ -14,8 +14,8 @@
 using namespace TNL;
 
 
-namespace Zap { 
-   
+namespace Zap {
+
 class ClientGame;
 
 namespace UI {

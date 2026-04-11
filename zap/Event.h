@@ -20,7 +20,7 @@ class ClientGame;
 class UserInterface;
 
 
-class Event 
+class Event
 {
 private:
    static bool mAllowTextInput;   // Flag to allow text translation pass-through

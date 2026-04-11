@@ -11,7 +11,7 @@
 
 using namespace TNL;
 
-namespace Zap 
+namespace Zap
 {
 
 class GameType;

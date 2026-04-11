@@ -27,7 +27,7 @@ namespace Zap
 using namespace std;
 
 // Constructor
-TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)  
+TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)
 {
    title = "ENTER TEXT:";
    instr1 = "";
@@ -153,7 +153,7 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 
 // Constructor
-LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Parent(game)     
+LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Parent(game)
 {
    title = "ENTER LEVEL TO EDIT:";
    instr1 = "Enter an existing level, or create your own!";
@@ -227,7 +227,7 @@ bool LevelNameEntryUserInterface::setLevelIndex()
 bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
-   { 
+   {
       // Do nothing -- key handled
    }
    else if(inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
@@ -235,7 +235,7 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
       if(mLevels.size() == 0)
          return true;
 
-      if(!mFoundLevel)           // If we have a partially entered name, just simulate hitting tab 
+      if(!mFoundLevel)           // If we have a partially entered name, just simulate hitting tab
       {
          completePartial();      // Resets mFoundLevel
          if(!mFoundLevel)
@@ -293,10 +293,10 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
 
    playBoop();
    getUIManager()->activate(ui, false);
-   
+
    // Get that baby into the INI file
    getGame()->getSettings()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());             
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }
@@ -409,7 +409,7 @@ void ServerAccessPasswordEntryUserInterface::setAddressToConnectTo(const Address
 ////////////////////////////////////////
 
 // Constructor
-ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
+ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game) : Parent(game)
 {
    title = "ENTER SERVER PASSWORD:";
    instr1 = "";
@@ -428,7 +428,7 @@ ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
 
 
 // Constructor
-LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
+LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)
 {
    title = "ENTER PASSWORD:";
    instr1 = "";

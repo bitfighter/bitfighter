@@ -11,7 +11,7 @@
 #include "masterConnection.h"
 #include "robot.h"
 #include "stringUtils.h"
-#include "SlipZone.h"  
+#include "SlipZone.h"
 #include "Teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
@@ -178,7 +178,7 @@ GameSettingsPtr Game::getSettingsPtr() const
 
 S32    Game::getBotCount() const                          { TNLAssert(false, "Not implemented for this class!"); return 0; }
 Robot *Game::findBot(const char *id)                      { TNLAssert(false, "Not implemented for this class!"); return NULL; }
-string Game::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)     
+string Game::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)
                                                           { TNLAssert(false, "Not implemented for this class!"); return "";    }
 
 void   Game::kickSingleBotFromLargestTeamWithBots()  { TNLAssert(false, "Not implemented for this class!"); }
@@ -243,8 +243,8 @@ S32 Game::getRobotCount() const
 
 
 ClientInfo *Game::getClientInfo(S32 index) const
-{ 
-   return mClientInfos[index]; 
+{
+   return mClientInfos[index];
 }
 
 
@@ -255,8 +255,8 @@ const Vector<RefPtr<ClientInfo> > *Game::getClientInfos()
 
 
 // ClientInfo will be a RemoteClientInfo in ClientGame and a FullClientInfo in ServerGame
-void Game::addToClientList(ClientInfo *clientInfo) 
-{ 
+void Game::addToClientList(ClientInfo *clientInfo)
+{
    // Adding the same ClientInfo twice is never The Right Thing To Do
    //
    // NOTE - This can happen when a Robot line is found in a level file.  For some reason
@@ -273,7 +273,7 @@ void Game::addToClientList(ClientInfo *clientInfo)
       mRobotCount++;
    else
       mPlayerCount++;
-}     
+}
 
 
 // Helper function for other find functions
@@ -281,7 +281,7 @@ S32 Game::findClientIndex(const StringTableEntry &name)
 {
    for(S32 i = 0; i < mClientInfos.size(); i++)
    {
-      if(mClientInfos[i]->getName() == name) 
+      if(mClientInfos[i]->getName() == name)
          return i;
    }
 
@@ -321,8 +321,8 @@ void Game::removeFromClientList(ClientInfo *clientInfo)
 }
 
 
-void Game::clearClientList() 
-{ 
+void Game::clearClientList()
+{
    mClientInfos.clear();   // ClientInfos are refPtrs, so this will delete them
 
    mRobotCount = 0;
@@ -344,7 +344,7 @@ ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 Ship *Game::findShip(const StringTableEntry &clientName)
 {
    ClientInfo *clientInfo = findClientInfo(clientName);
-   
+
    if(clientInfo)
       return clientInfo->getShip();
    else
@@ -425,7 +425,7 @@ StringTableEntry Game::getTeamName(S32 teamIndex) const
 S32 Game::getTeamIndex(const StringTableEntry &playerName)
 {
    ClientInfo *clientInfo = findClientInfo(playerName);              // Returns NULL if player can't be found
-   
+
    return clientInfo ? clientInfo->getTeamIndex() : TEAM_NEUTRAL;    // If we can't find the team, let's call it neutral
 }
 
@@ -479,17 +479,17 @@ F32 Game::getShipAccelModificationFactor(const Ship *ship) const
 void Game::teleporterDestroyed(Teleporter *teleporter)
 {
    if(teleporter)
-      teleporter->onDestroyed();       
+      teleporter->onDestroyed();
 }
 
 
-S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            } 
+S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            }
 AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamManager->getTeam(team);             }
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
-S32 Game::getTeamIndexFromTeamName(const char *teamName) const 
-{ 
+S32 Game::getTeamIndexFromTeamName(const char *teamName) const
+{
    for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
       if(stricmp(teamName, getTeamName(i).getString()) == 0)
          return i;
@@ -522,21 +522,21 @@ void Game::countTeamPlayers() const
       S32 teamIndex = clientInfo->getTeamIndex();
 
       if(teamIndex >= 0 && teamIndex < getTeamCount())
-      { 
+      {
          // Robot could be neutral or hostile, skip out-of-range team numbers
          TNLAssert(dynamic_cast<Team *>(getTeam(teamIndex)), "Invalid team");
-         Team *team = static_cast<Team *>(getTeam(teamIndex));            
+         Team *team = static_cast<Team *>(getTeam(teamIndex));
 
          if(clientInfo->isRobot())
             team->incrementBotCount();
          else
             team->incrementPlayerCount();
 
-         // The following bit won't work on the client... 
+         // The following bit won't work on the client...
          if(isServer())
          {
             const F32 BASE_RATING = .1f;
-            team->addToRatingSum(max(clientInfo->getCalculatedRating(), BASE_RATING));    
+            team->addToRatingSum(max(clientInfo->getCalculatedRating(), BASE_RATING));
          }
       }
    }
@@ -655,7 +655,7 @@ bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
    loadLevelFromString(contents, database, filename);
 
 #ifdef SAM_ONLY
-   // In case the level crash the game trying to load, want to know which file is the problem. 
+   // In case the level crash the game trying to load, want to know which file is the problem.
    logprintf("Loading %s", filename.c_str());
 #endif
 
@@ -766,11 +766,11 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       }
       else
          logprintf(LogConsumer::LogLevelError, "Could not create a GameType");
-      
+
       return;
    }
 
-   if(getGameType() && processLevelParam(argc, argv, lineNum)) 
+   if(getGameType() && processLevelParam(argc, argv, lineNum))
    {
       // Do nothing here -- all the action is in the if statement
    }
@@ -778,7 +778,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    {
       // Do nothing here -- all the action is in the if statement
    }
-   
+
    else
    {
       string objName;
@@ -825,7 +825,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
       // ProcessArguments() might delete this object (this happens with multi-dest teleporters), so isValid() could be false
       // even when the object is entirely legit
-      if(validArgs && object.isValid())  
+      if(validArgs && object.isValid())
       {
          object->setUserAssignedId(id, false);
          object->addToGame(this, database);
@@ -867,7 +867,7 @@ bool Game::processLevelParam(S32 argc, const char **argv, S32 lineNum)
 
    else if(!stricmp(argv[0], "LevelName"))
       onReadLevelNameParam(argc, argv);
-   
+
    else if(!stricmp(argv[0], "LevelDescription"))
       onReadLevelDescriptionParam(argc, argv);
 
@@ -942,7 +942,7 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 
 
 void Game::onReadSpecialsParam(S32 argc, const char **argv, S32 lineNum)
-{         
+{
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
          logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s (line %d)", argv[i], lineNum);
@@ -1033,7 +1033,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          if(!mNameToAddressThread)
          {
             if(mHaveTriedToConnectToMaster && masterServerList->size() >= 2)
-            {  
+            {
                // Rotate the list so as to try each one until we find one that works...
                masterServerList->push_back(string(masterServerList->get(0)));  // don't remove string(...), or else this line is a mystery why push_back an empty string.
                masterServerList->erase(0);
@@ -1058,7 +1058,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
-   
+
                mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
                delete mNameToAddressThread;
                mNameToAddressThread = NULL;
@@ -1137,7 +1137,7 @@ void Game::addToDeleteList(BfObject *theObject, U32 delay)
 // Cycle through our pending delete list, and either delete an object or update its timer
 void Game::processDeleteList(U32 timeDelta)
 {
-   for(S32 i = 0; i < mPendingDeleteObjects.size(); i++) 
+   for(S32 i = 0; i < mPendingDeleteObjects.size(); i++)
       if(timeDelta > mPendingDeleteObjects[i].delay)
       {
          BfObject *g = mPendingDeleteObjects[i].theObject;
@@ -1239,7 +1239,7 @@ string Game::makeUnique(const char *name)
             dSprintf(numstr, ARRAYSIZE(numstr), ".%d", index);
 
             // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
-            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
+            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr);
             proposedName = string(name).substr(0, maxNamePos) + numstr;     // Make sure name won't grow too long
 
             index++;
@@ -1345,7 +1345,7 @@ void Game::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 
 
 const Color *Game::getObjTeamColor(const BfObject *obj) const
-{ 
+{
    return mGameType->getTeamColor(obj);
 }
 
@@ -1503,21 +1503,21 @@ bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim)
 }
 
 
-U32 Game::getMaxPlayers() const 
+U32 Game::getMaxPlayers() const
 {
    TNLAssert(false, "Not implemented for this class!");
    return 0;
 }
 
-   
+
 void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId)
 {
    TNLAssert(false, "Not implemented for this class!");
 }
 
 
-void Game::gotQueryResponse(const Address &address, S32 serverId, 
-                            const Nonce &nonce, const char *serverName, const char *serverDescr, 
+void Game::gotQueryResponse(const Address &address, S32 serverId,
+                            const Nonce &nonce, const char *serverName, const char *serverDescr,
                             U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    TNLAssert(false, "Not implemented for this class!");
@@ -1543,7 +1543,7 @@ void Game::quitEngineerHelper()
 }
 
 
-bool Game::isDedicated() const  
+bool Game::isDedicated() const
 {
    return false;
 }

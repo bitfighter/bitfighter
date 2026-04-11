@@ -22,7 +22,7 @@ private:
    typedef Item Parent;
 
    static const F32 EngineeredItemRadius;
-   
+
    void computeExtent();
 
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
@@ -105,12 +105,12 @@ public:
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist,
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, Point &anchor, Point &normal);
 
    // Pass NULL if there is no excludedWallList
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist,
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
@@ -122,7 +122,7 @@ public:
    virtual WallSegment *getEndSegment();
    virtual void setEndSegment(WallSegment *endSegment);
 
-   //// Is item sufficiently snapped?  
+   //// Is item sufficiently snapped?
    void setSnapped(bool snapped);
    bool isSnapped() const;
 
@@ -165,7 +165,7 @@ class ForceField : public BfObject
 
 private:
    Point mStart, mEnd;
-   Vector<Point> mOutline;    
+   Vector<Point> mOutline;
 
    Timer mDownTimer;
    bool mFieldUp;
@@ -205,7 +205,7 @@ public:
    const Vector<Point> *getOutline() const;
 
    static Vector<Point> computeGeom(const Point &start, const Point &end);
-   static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
+   static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,
                                  Point &end, DatabaseObject **collObj);
 
    void render();
@@ -231,7 +231,7 @@ private:
 
    void initialize();
 
-   Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;  
+   Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
 
    F32 getSelectionOffsetMagnitude();
 
@@ -243,9 +243,9 @@ public:
    virtual ~ForceFieldProjector();                                                        // Destructor
 
    ForceFieldProjector *clone() const;
-   
+
    const Vector<Point> *getCollisionPoly() const;
-   
+
    static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal);
 
@@ -339,7 +339,7 @@ public:
 
    Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
    static Vector<Point> getTurretGeometry(const Point &anchor, const Point &normal);
-   
+
    const Vector<Point> *getCollisionPoly() const;
    const Vector<Point> *getOutline() const;
 

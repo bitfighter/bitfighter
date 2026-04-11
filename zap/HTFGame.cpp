@@ -310,7 +310,7 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
-   
+
    Ship *ship = getGame()->getLocalPlayerShip();
 
    if(!ship) {
@@ -327,7 +327,7 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
    for(S32 i = 0; i < flags->size(); i++)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
-      
+
       if(flag->getMount() != ship)
          continue;
 

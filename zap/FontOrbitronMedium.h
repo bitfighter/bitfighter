@@ -3176,22 +3176,22 @@ SFG_StrokeChar chr_126 = { 404 * fact, 1, chr_126_strip };
 
 
 
-static const SFG_StrokeChar *orbitronMediumChars[] = { 
-   0,	0,	0,	0,	0,	0,	0,	0, 
-   0,	0,	0,	0,	0,	0,	0,	0, 
-   0,	0,	0,	0,	0,	0,	0,	0, 
-   0,	0,	0,	0,	0,	0,	0,	0, 
-   &chr_32,	&chr_33,	&chr_34,	&chr_35,	&chr_36,	&chr_37,	&chr_38,	&chr_39, 
-   &chr_40,	&chr_41,	&chr_42,	&chr_43,	&chr_44,	&chr_45,	&chr_46,	&chr_47, 
-   &chr_48,	&chr_49,	&chr_50,	&chr_51,	&chr_52,	&chr_53,	&chr_54,	&chr_55, 
-   &chr_56,	&chr_57,	&chr_58,	&chr_59,	&chr_60,	&chr_61,	&chr_62,	&chr_63, 
-   &chr_64,	&chr_65,	&chr_66,	&chr_67,	&chr_68,	&chr_69,	&chr_70,	&chr_71, 
-   &chr_72,	&chr_73,	&chr_74,	&chr_75,	&chr_76,	&chr_77,	&chr_78,	&chr_79, 
-   &chr_80,	&chr_81,	&chr_82,	&chr_83,	&chr_84,	&chr_85,	&chr_86,	&chr_87, 
-   &chr_88,	&chr_89,	&chr_90,	&chr_91,	&chr_92,	&chr_93,	0,	&chr_95, 
-   &chr_96,	&chr_97,	&chr_98,	&chr_99,	&chr_100,	&chr_101,	&chr_102,	&chr_103, 
-   &chr_104,	&chr_105,	&chr_106,	&chr_107,	&chr_108,	&chr_109,	&chr_110,	&chr_111, 
-   &chr_112,	&chr_113,	&chr_114,	&chr_115,	&chr_116,	&chr_117,	&chr_118,	&chr_119, 
+static const SFG_StrokeChar *orbitronMediumChars[] = {
+   0,	0,	0,	0,	0,	0,	0,	0,
+   0,	0,	0,	0,	0,	0,	0,	0,
+   0,	0,	0,	0,	0,	0,	0,	0,
+   0,	0,	0,	0,	0,	0,	0,	0,
+   &chr_32,	&chr_33,	&chr_34,	&chr_35,	&chr_36,	&chr_37,	&chr_38,	&chr_39,
+   &chr_40,	&chr_41,	&chr_42,	&chr_43,	&chr_44,	&chr_45,	&chr_46,	&chr_47,
+   &chr_48,	&chr_49,	&chr_50,	&chr_51,	&chr_52,	&chr_53,	&chr_54,	&chr_55,
+   &chr_56,	&chr_57,	&chr_58,	&chr_59,	&chr_60,	&chr_61,	&chr_62,	&chr_63,
+   &chr_64,	&chr_65,	&chr_66,	&chr_67,	&chr_68,	&chr_69,	&chr_70,	&chr_71,
+   &chr_72,	&chr_73,	&chr_74,	&chr_75,	&chr_76,	&chr_77,	&chr_78,	&chr_79,
+   &chr_80,	&chr_81,	&chr_82,	&chr_83,	&chr_84,	&chr_85,	&chr_86,	&chr_87,
+   &chr_88,	&chr_89,	&chr_90,	&chr_91,	&chr_92,	&chr_93,	0,	&chr_95,
+   &chr_96,	&chr_97,	&chr_98,	&chr_99,	&chr_100,	&chr_101,	&chr_102,	&chr_103,
+   &chr_104,	&chr_105,	&chr_106,	&chr_107,	&chr_108,	&chr_109,	&chr_110,	&chr_111,
+   &chr_112,	&chr_113,	&chr_114,	&chr_115,	&chr_116,	&chr_117,	&chr_118,	&chr_119,
    &chr_120,	&chr_121,	&chr_122,	&chr_123,	&chr_124,	&chr_125,	&chr_126,	0
 };
 

@@ -9,7 +9,7 @@
 
 #include "Colors.h"
 
-   
+
 namespace Zap
 {
 
@@ -65,7 +65,7 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
          {
             const F32 SPREAD_FACTOR = 40.0f;    // Larger = broader spread
             Point velPerp(projVel.y, -projVel.x);
-            velPerp.normalize(SPREAD_FACTOR); 
+            velPerp.normalize(SPREAD_FACTOR);
             (new Projectile(weapon, firePos, projVel,           shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());

@@ -19,7 +19,7 @@
 #include "MathUtils.h"
 
 
-namespace Zap 
+namespace Zap
 {
 
 using namespace LuaArgs;
@@ -27,7 +27,7 @@ using namespace LuaArgs;
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
-// Constructor -- used when weapon is fired  
+// Constructor -- used when weapon is fired
 Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
 {
    initialize(type, pos, vel, shooter);
@@ -169,7 +169,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    bool preCollided = mCollided;
    mCollided = stream->readFlag();
-   
+
    if(mCollided)
       hitShip = stream->readFlag();
 
@@ -256,7 +256,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
       while(timeLeft > 0.01f && loopcount != 0)    // This loop is to prevent slow bounce on low frame rate / high time left
       {
          loopcount--;
-         
+
          startPos = getPos();
 
          // Calculate where projectile will be at the end of the current interval
@@ -283,7 +283,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          Point surfNormal;
 
          // Do the search
-         while(true)  
+         while(true)
          {
             hitObject = findObjectLOS((TestFunc)isWeaponCollideableType, RenderState, startPos, endPos, collisionTime, surfNormal);
 
@@ -360,7 +360,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
                if(hitObject->isMoveObject())
                {
-                  MoveObject *obj = static_cast<MoveObject *>(hitObject);  
+                  MoveObject *obj = static_cast<MoveObject *>(hitObject);
 
                   startPos = getPos();
 
@@ -525,9 +525,9 @@ bool Projectile::shouldRender() const
  *
  * @brief Bullet or missile object.
  *
- * @descr Projectile represents most bullets or missile objects in Bitfighter. 
+ * @descr Projectile represents most bullets or missile objects in Bitfighter.
  */
-//               Fn name    Param profiles  Profile count                           
+//               Fn name    Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getRad,    ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
@@ -552,9 +552,9 @@ REGISTER_LUA_SUBCLASS(Projectile, BfObject);
  * @return The radius of the projectile.
  */
 S32 Projectile::lua_getRad(lua_State *L)
-{ 
+{
    return returnFloat(L, getRadius());
-} 
+}
 
 
 /**
@@ -563,8 +563,8 @@ S32 Projectile::lua_getRad(lua_State *L)
  * @return A point representing the projectile's velocity.
  */
 S32 Projectile::lua_getVel(lua_State *L)
-{ 
-   return returnPoint(L, getActualVel()); 
+{
+   return returnPoint(L, getActualVel());
 }
 
 
@@ -572,12 +572,12 @@ S32 Projectile::lua_getVel(lua_State *L)
  * @luafunc WeaponEnum Projectile::getWeapon()
  *
  * @brief Returns the index of the weapon used to fire the projectile. See
- * the \ref WeaponEnum enum for valid values. 
+ * the \ref WeaponEnum enum for valid values.
  *
  * @return The index of the weapon used to fire the projectile.
  */
 S32 Projectile::lua_getWeapon(lua_State *L)
-{ 
+{
    return returnWeaponType(L, mWeaponType);
 }
 
@@ -668,7 +668,7 @@ void Burst::idle(IdleCallPath path)
    GameConnection *gc = NULL;
 
 #ifndef ZAP_DEDICATED
-   if(isGhost())   // Fix effect of ship getting ahead of burst on laggy client  
+   if(isGhost())   // Fix effect of ship getting ahead of burst on laggy client
    {
       U32 objAge = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
@@ -677,14 +677,14 @@ void Burst::idle(IdleCallPath path)
 
       collisionDisabled = objAge < 250 && gc && gc->getControlObject();
 
-      if(collisionDisabled) 
+      if(collisionDisabled)
          gc->getControlObject()->disableCollision();
    }
 #endif
 
    Parent::idle(path);
 
-   if(collisionDisabled) 
+   if(collisionDisabled)
       gc->getControlObject()->enableCollision();
 
    // Do some drag...  no, not that kind of drag!
@@ -746,8 +746,8 @@ bool Burst::collided(BfObject *hitObject, U32 stateIndex)
    if(isGhost())
       return false;
 
-   // If a burst hits a ship (or turret, or ff proj), it should explode immediately.  But we can't have 
-   // it explode on contact with the shooter because the way a burst shows down, it is really quite 
+   // If a burst hits a ship (or turret, or ff proj), it should explode immediately.  But we can't have
+   // it explode on contact with the shooter because the way a burst shows down, it is really quite
    // difficult to use without injuring oneself.  So we must make an exception for the shooter.
    if(isWithHealthType(hitObject->getObjectTypeNumber()) && mShooter != hitObject)
    {
@@ -793,7 +793,7 @@ void Burst::doExplosion(const Point &pos)
 // Server only
 void Burst::explode(const Point &pos)
 {
-   if(mExploded) 
+   if(mExploded)
       return;
 
    // Must set exploded to true immediately here or we risk a stack overflow when two
@@ -853,14 +853,14 @@ bool Burst::shouldRender() const
 /**
  * @luafunc Burst::Burst()
  * @luaclass Burst
- * 
+ *
  * @brief Grenade-like exploding object.
- * 
+ *
  * @descr Note that Bursts explode when their velocity is too low. Be sure to
  * set the Burst's velocity if you don't want it to explode immediately after it
- * is created. 
+ * is created.
  */
-//               Fn name    Param profiles  Profile count                           
+//               Fn name    Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
 
@@ -901,11 +901,11 @@ Mine::Mine(const Point &pos, BfObject *planter) : Burst(pos, Point(0,0), planter
 Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
 {
    initialize(Point(0,0));
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
-      
+
       S32 profile = checkArgList(L, constructorArgList, "Mine", "constructor");
 
       if(profile == 1)
@@ -1155,14 +1155,14 @@ bool Mine::hasTeam()        { return false; }
 bool Mine::canBeHostile()   { return false; }
 bool Mine::canBeNeutral()   { return false; }
 
-bool Mine::canAddToEditor() { return true; }     
+bool Mine::canAddToEditor() { return true; }
 
 
 
 /////
 // Lua interface
 
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(Mine, LUA_METHODS);
@@ -1197,7 +1197,7 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
 
       S32 profile = checkArgList(L, constructorArgList, "SpyBug", "constructor");
-      
+
       if(profile == 1)
       {
          setPos(L, 1);
@@ -1240,7 +1240,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
    setTeam(atoi(argv[0]));
 
    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
-   if(!Parent::processArguments(2, &argv[1], game))    
+   if(!Parent::processArguments(2, &argv[1], game))
       return false;
 
    return true;
@@ -1350,7 +1350,7 @@ void SpyBug::renderItem(const Point &pos)
             (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
          visible = true;
    }
-   else    
+   else
       visible = true;      // We get here in editor when in preview mode
 
 
@@ -1389,7 +1389,7 @@ bool SpyBug::hasTeam()        { return true;  }
 bool SpyBug::canBeHostile()   { return false; }
 bool SpyBug::canBeNeutral()   { return true;  }
 
-bool SpyBug::canAddToEditor() { return true;  }  
+bool SpyBug::canAddToEditor() { return true;  }
 
 
 
@@ -1423,13 +1423,13 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
  * @luafunc SpyBug::SpyBug()
  * @luafunc SpyBug::SpyBug(point pos, int team)
  * @luaclass SpyBug
- * 
+ *
  * @brief Monitors a section of the map and will show enemy ships there.
- * 
+ *
  * @descr Can only be used/created if the Sensor module is selected.  Makes
  * surrounding areas of the commander's map visible to player and teammates.
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(SpyBug, LUA_METHODS);
@@ -1513,7 +1513,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
       if(shooter->getObjectTypeNumber() == TurretTypeNumber)
          mStyle = SeekerStyleTurret;  // Forces Seeker to use Turret style
    }
-      
+
    mAcquiredTarget = NULL;
    mReassessTargetTimer = ReassessTargetTime;
 
@@ -1735,13 +1735,13 @@ void Seeker::emitMovementSparks()
 
    F32 cosTh = cos(th);
    F32 sinTh = sin(th);
-  
+
 
    Point emissionPoint(center.x * cosTh + center.y * sinTh,
                        center.y * cosTh + center.x * sinTh);
 
    emissionPoint *= warpInScale;
- 
+
    mTrail.update(getRenderPos() + emissionPoint, UI::SeekerProfile);
 
 #endif
@@ -1898,7 +1898,7 @@ BfObject *Seeker::getShooter() const {return mShooter; }
 void Seeker::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(!shouldRender())  
+   if(!shouldRender())
       return;
 
    S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
@@ -1921,7 +1921,7 @@ bool Seeker::canAddToEditor() { return false; }    // No seekers in the editor!
 /**
  * @luafunc Seeker::Seeker()
  * @luaclass Seeker
- * 
+ *
  * @brief Guided projectile that homes in on enemy players.
  */
 //               Fn name    Param profiles  Profile count
@@ -1939,10 +1939,10 @@ REGISTER_LUA_SUBCLASS(Seeker, MoveObject);
 
 /**
  * @luafunc Seeker::getWeapon()
- * 
+ *
  * @brief Returns the index of the weapon used to fire the projectile. See the
- * \ref WeaponEnum enum for valid values. 
- * 
+ * \ref WeaponEnum enum for valid values.
+ *
  * @return int The index of the weapon used to fire the projectile.
  */
 S32 Seeker::lua_getWeapon(lua_State *L) { return returnWeaponType(L, mWeaponType); }

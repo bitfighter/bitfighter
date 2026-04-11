@@ -28,7 +28,7 @@ using namespace LuaArgs;
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime, bool isOpen), (nextChangeTime, isOpen), 
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime, bool isOpen), (nextChangeTime, isOpen),
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusChangeAtTime = nextChangeTime;
@@ -58,7 +58,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 {
    if(msgIndex == NexusMsgScore)
    {
-      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
+      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!",
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
       getGame()->playSoundEffect(SFXFlagCapture);
 
@@ -131,7 +131,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string NexusGameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + ftos(F32(mNexusClosedTime) / (60.f * 1000.f)) + " " + 
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + ftos(F32(mNexusClosedTime) / (60.f * 1000.f)) + " " +
                                          ftos(F32(mNexusOpenTime) / 1000.f, 3)  + " " + itos(getWinningScore());
 }
 
@@ -147,7 +147,7 @@ S32 NexusGameType::getNexusTimeLeftMs() const
 
 bool NexusGameType::nexusShouldChange()
 {
-   if(mNexusChangeAtTime == 0)     
+   if(mNexusChangeAtTime == 0)
       return false;
 
    return getNexusTimeLeftMs() <= 0;
@@ -198,7 +198,7 @@ bool NexusGameType::isCarryingItems(Ship *ship)
       if(!mountedItem)        // Could be null when a player drop their flags and gets destroyed at the same time
          continue;
 
-      if(mountedItem->getObjectTypeNumber() == FlagTypeNumber)      
+      if(mountedItem->getObjectTypeNumber() == FlagTypeNumber)
       {
          FlagItem *flag = static_cast<FlagItem *>(mountedItem);
          if(flag->getFlagCount() > 0)
@@ -256,7 +256,7 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismoun
             ste = &dropManyString;
             e.push_back(itos(flagCount).c_str());
          }
-      
+
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
       }
    }
@@ -268,7 +268,7 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismoun
 Vector<string> NexusGameType::getGameParameterMenuKeys()
 {
    Vector<string> items = Parent::getGameParameterMenuKeys();
-   
+
    // Remove Win Score, replace it with some Nexus specific items
    for(S32 i = 0; i < items.size(); i++)
       if(items[i] == "Win Score")
@@ -299,7 +299,7 @@ shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
                                                                  "Always", "Time that the Nexus will remain open"));
 
    else if(key == "Nexus Win Score")
-      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, S32_MAX, "points", 
+      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, S32_MAX, "points",
                                                       "", "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(key);
 }
@@ -313,7 +313,7 @@ bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       mNexusOpenTime = menuItem->getIntValue() * 1000;
    else if(key == "Nexus Win Score")
       setWinningScore(menuItem->getIntValue());
-   else 
+   else
       return Parent::saveMenuItem(menuItem, key);
 
    return true;
@@ -347,7 +347,7 @@ void NexusGameType::shipTouchNexus(Ship *ship, NexusZone *theNexus)
    if(flagsReturned > 0 && scorer)
    {
       if(!isGameOver())  // Avoid flooding messages on game over.
-         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), flag->getFlagCount(), 
+         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), flag->getFlagCount(),
                       getEventScore(TeamScore, ReturnFlagsToNexus, flag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
 
@@ -376,7 +376,7 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 
    s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);     // Send info about Nexus hours of business
    s2cSetNexusTimer(mNexusChangeAtTime, mNexusIsOpen);      // Send info about current state of Nexus
-   
+
    NetObject::setRPCDestConnection(NULL);
 }
 
@@ -406,7 +406,7 @@ void NexusGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
 
-   if(isGhost()) 
+   if(isGhost())
       idle_client(deltaT);
    else
       idle_server(deltaT);
@@ -464,7 +464,7 @@ void NexusGameType::idle_server(U32 deltaT)
 {
    if(nexusShouldChange())
    {
-      if(mNexusIsOpen) 
+      if(mNexusIsOpen)
          closeNexus(mNexusChangeAtTime);
       else
          openNexus(mNexusChangeAtTime);
@@ -738,9 +738,9 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *touchedFlag)
       // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
       NexusZone *nexus = static_cast<NexusZone *>(ship->isInZone(NexusTypeNumber));
 
-      if(nexus)         
+      if(nexus)
          shipTouchNexus(ship, nexus);
-   }   
+   }
 }
 
 
@@ -834,7 +834,7 @@ void NexusFlagItem::dropFlags(U32 flags)
    {
       for(U32 i = MAX_DROP_FLAGS; i > 0; i--)
       {
-         // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left, 
+         // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left,
          // and the last loop is (i == 1), dropping exact amount using only limited FlagItems
          U32 flagValue = flags / i;
 
@@ -867,7 +867,7 @@ void NexusFlagItem::dismount(DismountMode dismountMode)
       dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
 
       // Now delete the flag itself
-      removeFromDatabase(false);   
+      removeFromDatabase(false);
       deleteObject();
    }
    else
@@ -943,12 +943,12 @@ NexusZone::NexusZone(lua_State *L)
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "NexusZone", "constructor");
-         
+
       if(profile == 1)
          setGeom(L, 1);
    }
@@ -1024,8 +1024,8 @@ void NexusZone::processArguments_ArchaicZapFormat(S32 argc, const char **argv, F
    addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
    addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
    addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
-   
-   updateExtentInDatabase(); 
+
+   updateExtentInDatabase();
 }
 
 
@@ -1146,7 +1146,7 @@ bool NexusZone::collide(BfObject *hitObject)
  * schedule or status of any NexusZone will have the same effect on all
  * NexusZones in the game.
  */
-//               Fn name         Param profiles     Profile count                           
+//               Fn name         Param profiles     Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setOpen,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
    METHOD(CLASS, isOpen,        ARRAYDEF({{          END }}), 1 ) \
@@ -1175,7 +1175,7 @@ REGISTER_LUA_SUBCLASS(NexusZone, Zone);
  * the same value for all Nexus zones in a game at any given time.
  */
 S32 NexusZone::lua_isOpen(lua_State *L)
-{ 
+{
    if(!mGame)
       return returnBool(L, false);
 
@@ -1185,7 +1185,7 @@ S32 NexusZone::lua_isOpen(lua_State *L)
       return returnBool(L, static_cast<NexusGameType *>(gameType)->mNexusIsOpen);
    else
       return returnBool(L, false);     // If not a Nexus game, Nexus will never be open
-}  
+}
 
 
 /**
@@ -1199,7 +1199,7 @@ S32 NexusZone::lua_isOpen(lua_State *L)
  * all Nexus items in a game.
 */
 S32 NexusZone::lua_setOpen(lua_State *L)
-{ 
+{
    checkArgList(L, functionArgs, "NexusZone", "setOpen");
 
    if(!mGame)
@@ -1209,17 +1209,17 @@ S32 NexusZone::lua_setOpen(lua_State *L)
 
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
-  
+
    static_cast<NexusGameType *>(gameType)->setNexusState(getBool(L, 1));
 
    return 0;
-}  
+}
 
 
 /**
  * @luafunc NexusZone::setOpenTime(int seconds)
- * 
- * @brief Set the time (in seconds) that the Nexus should remain open. 
+ *
+ * @brief Set the time (in seconds) that the Nexus should remain open.
  *
  * @descr Pass 0 if the Nexus should never close, causing the Nexus to remain
  * open permanently. Passing a negative time will generate an error.
@@ -1240,7 +1240,7 @@ S32 NexusZone::lua_setOpenTime(lua_State *L)
 
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
-  
+
    static_cast<NexusGameType *>(gameType)->setNewOpenTime(S32(getInt(L, 1)));
 
    return 0;
@@ -1250,7 +1250,7 @@ S32 NexusZone::lua_setOpenTime(lua_State *L)
 /**
  * @luafunc NexusZone::setClosedTime(int seconds)
  *
- * @brief Set the time (in seconds) that the Nexus will remain closed. 
+ * @brief Set the time (in seconds) that the Nexus will remain closed.
  *
  * @descr Pass 0 if the Nexus should never open, causing the Nexus to remain
  * closed permanently. Passing a negative time will generate an error.
@@ -1274,7 +1274,7 @@ S32 NexusZone::lua_setClosedTime(lua_State *L)
 
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
-  
+
    static_cast<NexusGameType *>(gameType)->setNewClosedTime(S32(getInt(L, 1)));
 
    return 0;

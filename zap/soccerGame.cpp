@@ -42,12 +42,12 @@ SoccerGameType::~SoccerGameType()
 TNL_IMPLEMENT_NETOBJECT(SoccerGameType);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
-   (U32 msgIndex, StringTableEntry scorerName, RangedU32<0, GameType::gMaxTeamCount> rawTeamIndex, Point scorePos), 
+   (U32 msgIndex, StringTableEntry scorerName, RangedU32<0, GameType::gMaxTeamCount> rawTeamIndex, Point scorePos),
    (msgIndex, scorerName, rawTeamIndex, scorePos),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    // Before calling this RPC, we subtracted FirstTeamNumber, so we need to add it back here...
-   S32 teamIndex = (S32)rawTeamIndex + GameType::FirstTeamNumber;      
+   S32 teamIndex = (S32)rawTeamIndex + GameType::FirstTeamNumber;
    string msg;
    S32 scorerTeam = TEAM_NEUTRAL;
    string txtEffect = "Goal!";      // Will work for most cases, may be changed below
@@ -98,7 +98,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
       }
       else if(msgIndex == SoccerMsgScoreOwnGoal)
       {
-         msg = string(scorerName.getString()) + " scored an own-goal, giving the other team" + 
+         msg = string(scorerName.getString()) + " scored an own-goal, giving the other team" +
                      (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
          txtEffect = "Own Goal!";
       }
@@ -228,7 +228,7 @@ GameTypeId SoccerGameType::getGameTypeId() const { return SoccerGame; }
 const char *SoccerGameType::getShortName() const { return "S"; }
 
 static const char *instructions[] = { "Push the ball into the",  "opposing team's goal!" };
-const char **SoccerGameType::getInstructionString() const { return instructions; } 
+const char **SoccerGameType::getInstructionString() const { return instructions; }
 
 HelpItem SoccerGameType::getGameStartInlineHelpItem() const { return SGameStartItem; }
 
@@ -479,7 +479,7 @@ bool SoccerBallItem::canBeNeutral() { return false; }
 
 
 const Color *SoccerBallItem::getColor() const
-{ 
+{
    return getGame()->getTeamColor(TEAM_NEUTRAL);
 }
 
@@ -509,11 +509,11 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
 
       setActualVel(getActualVel() * accelFraction);
    }
-   
+
    else if(getActualVel().lenSquared() > 0)  // Add some friction to the soccer ball
    {
       F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
-   
+
       setActualVel(getActualVel() * accelFraction);
    }
 
@@ -646,11 +646,11 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 /**
  * @luaclass SoccerBallItem
- * 
+ *
  * @brief Target object used in Soccer games
  */
 // No soccerball specific methods!
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(SoccerBallItem, LUA_METHODS);

@@ -92,7 +92,7 @@ static S32 getComponentRectWidth(S32 textWidth)
 S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
+   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1,
                                          IndicatorFontSize, lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
@@ -140,13 +140,13 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    Renderer& r = Renderer::get();
 
    // If if we have no module, then this loadout has never been set, and there is nothing to render
-   if(!loadout.isValid())  
+   if(!loadout.isValid())
       return 0;
 
    S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
    FontManager::pushFontContext(LoadoutIndicatorContext);
-   
+
    // First, the weapons
    for(auto i = 0; i < ShipWeaponCount; i++)
    {

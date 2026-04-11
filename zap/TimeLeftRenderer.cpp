@@ -16,7 +16,7 @@
 #include "RenderUtils.h"
 
 
-namespace Zap { 
+namespace Zap {
 
 namespace UI {
 
@@ -73,7 +73,7 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
    Game *game = gameType->getGame();
 //   bool core = gameType->getGameTypeId() == CoreGame;
 
-   S32 ypos = bottom - bigScoreTextSize;      
+   S32 ypos = bottom - bigScoreTextSize;
 
    S32 maxWidth = render ? renderHeadlineScores(game, ypos) : 0;   // Use max score width to vertically align symbols
    S32 xpos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth - 18;
@@ -129,7 +129,7 @@ static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 }
 
 
-// Render 1 or 2 scores: Either render the current client on the bottom (if only one player); 
+// Render 1 or 2 scores: Either render the current client on the bottom (if only one player);
 // or renders player on top and the 2nd player on the bottom (if player is winning);
 // or leader on top and player second (if player is losing)
 S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bottom, bool render) const
@@ -149,7 +149,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    const S32 textgap = 4;
    const S32 oneAdjFact = 2;
 
-   S32 ypos = bottom - textsize; 
+   S32 ypos = bottom - textsize;
 
    /// Render player score
    bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
@@ -169,7 +169,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    bool renderTwoNames = hasSecondLeader || !localClientIsLeader;
 
    // Slide the first entry up if there will be a second entry
-   S32 firstNameOffset = renderTwoNames ? (textsize + textgap) : 0;    
+   S32 firstNameOffset = renderTwoNames ? (textsize + textgap) : 0;
 
    topName  = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
    topScore = gameType->getLeadingPlayerScore();
@@ -197,7 +197,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
       }
 
       //botScore = (Platform::getRealMilliseconds() / 500 % 10 )* 2;
-      
+
       botOneFixFactor = botScore % 10 == 1 ? oneAdjFact : 0;
       botScoreStr = itos(botScore);
       botScoreLen = getStringWidth(textsize, botScoreStr.c_str()) + botOneFixFactor;
@@ -230,7 +230,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 }
 
 
-// Returns y-coord of top of display, and width of display, which we can use to position other elements 
+// Returns y-coord of top of display, and width of display, which we can use to position other elements
 // If render is true, will draw display, if false, will only calculate dimensions
 Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) const
 {
@@ -264,7 +264,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    const S32 grayLinePos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
    const S32 smallTextRPos = grayLinePos - grayLineHorizPadding;                // Right-align the stacked text here
-   
+
    // Left and top coordinates of the time display
    const S32 timeLeft = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth;
    const S32 timeTop  = mScreenInfo->getGameCanvasHeight() - timeTextSize - TimeLeftIndicatorMargin;
@@ -281,8 +281,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
       renderer.setColor(Colors::red);
       // Align with bottom of time
-      wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
-                        itos(gameType->getWinningScore()).c_str()); 
+      wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus,
+                        itos(gameType->getWinningScore()).c_str());
 
       renderer.setColor(Colors::white);
       if(gameType->isTimeUnlimited())

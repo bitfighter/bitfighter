@@ -70,7 +70,7 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      mModulePrimaryActive[i]   = loadout.mModulePrimaryActive[i];  
+      mModulePrimaryActive[i]   = loadout.mModulePrimaryActive[i];
       mModuleSecondaryActive[i] = loadout.mModuleSecondaryActive[i];
    }
 
@@ -115,7 +115,7 @@ void LoadoutTracker::setLoadout(const Vector<U8> &items)
 void LoadoutTracker::setLoadout(const string &loadoutStr)
 {
    // If we have a loadout string, try to get something useful out of it.
-   // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
+   // Note that even if we are able to parse the loadout successfully, it might still be invalid for a
    // particular server or gameType... engineer, for example, is not allowed everywhere.
    if(loadoutStr == "")
       return;
@@ -310,7 +310,7 @@ Vector<U8> LoadoutTracker::toU8Vector() const
 }
 
 
-bool LoadoutTracker::operator == (const LoadoutTracker &other) const 
+bool LoadoutTracker::operator == (const LoadoutTracker &other) const
 {
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) != other.getModule(i))
@@ -324,7 +324,7 @@ bool LoadoutTracker::operator == (const LoadoutTracker &other) const
 }
 
 
-bool LoadoutTracker::operator != (const LoadoutTracker &other) const 
+bool LoadoutTracker::operator != (const LoadoutTracker &other) const
 {
    return !(*this == other);
 }

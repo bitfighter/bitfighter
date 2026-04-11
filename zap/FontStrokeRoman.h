@@ -481,7 +481,7 @@ static const SFG_StrokeVertex ch48st0[] =
 
 static const SFG_StrokeVertex ch48st1[] =
 {
- //{19.2657f,4.7619f}, // slash 
+ //{19.2657f,4.7619f}, // slash
  //{57.361f,95.2381f},
 
  {28,20}, // short slash

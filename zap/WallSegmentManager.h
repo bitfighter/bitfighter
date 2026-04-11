@@ -28,7 +28,7 @@ private:
    GridDatabase *mWallSegmentDatabase;
    GridDatabase *mWallEdgeDatabase;
 
-   static bool mBatchUpdatingGeom;     
+   static bool mBatchUpdatingGeom;
 
    void rebuildEdges();
    void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
@@ -43,7 +43,7 @@ public:
    const Vector<Point> *getWallEdgePoints() const;
    const Vector<Point> *getSelectedWallEdgePoints() const;
 
-   static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
+   static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when
    static void endBatchGeomUpdate(GridDatabase *db, bool modifiedWalls);   // this method is called
 
    void onWallGeomChanged(GridDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber);
@@ -71,7 +71,7 @@ public:
    //void invalidateIntersectingSegments(GridDatabase *gameDatabase, BfObject *item);      // unused
 
    // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(GridDatabase *gameDatabase, BfObject *item); 
+   void computeWallSegmentIntersections(GridDatabase *gameDatabase, BfObject *item);
 
    void recomputeAllWallGeometry(GridDatabase *gameDatabase);
 

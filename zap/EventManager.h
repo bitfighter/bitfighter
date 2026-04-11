@@ -25,7 +25,7 @@ class Robot;
 class Ship;
 class Zone;
 
-struct Subscription; 
+struct Subscription;
 
 class EventManager
 {
@@ -35,8 +35,8 @@ class EventManager
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
  *
- * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelgens\endlink, and the 
- * @ref events "Subscribing to Events" page.  
+ * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelgens\endlink, and the
+ * @ref events "Subscribing to Events" page.
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
@@ -83,7 +83,7 @@ private:
 
    //void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
    bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, S32 argCount, ScriptContext context);
-      
+
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
    static bool mConstructed;
@@ -107,7 +107,7 @@ public:
    void unsubscribe(LuaScriptRunner *subscriber, EventType eventType);
 
     // Used when bot dies, and we know there won't be subscription conflicts
-   void unsubscribeImmediate(LuaScriptRunner *subscriber, EventType eventType); 
+   void unsubscribeImmediate(LuaScriptRunner *subscriber, EventType eventType);
    void update();                                                      // Act on events sitting in the pending lists
 
    // We'll have several different signatures for this one...

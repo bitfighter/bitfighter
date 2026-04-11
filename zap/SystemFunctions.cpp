@@ -55,7 +55,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    {
       logprintf(LogConsumer::ServerFilter, "----------\n"
                                            "Bitfighter server started");
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", settings->getHostName().c_str(), 
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", settings->getHostName().c_str(),
                                                                             settings->getHostDescr().c_str());
 
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelCount());
@@ -89,7 +89,7 @@ void shutdownBitfighter();    // Forward declaration
 // If we can't load any levels, here's the plan...
 void abortHosting_noLevels(ServerGame *serverGame)
 {
-   if(serverGame->isDedicated())  
+   if(serverGame->isDedicated())
    {
       FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->levelDir.c_str();
@@ -124,7 +124,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
       errUI->setInstr("Press [[Esc]] to continue");
 
       uiManager->activate<ErrorMessageUserInterface>();
-      uiManager->disableLevelLoadDisplay(false); 
+      uiManager->disableLevelLoadDisplay(false);
    }
 
    if(clientGames->size() == 0)
@@ -157,7 +157,7 @@ bool writeToConsole()
 
       *stdout = *m_fpCRTOut;
 
-      //// If clear is not done, any cout statement before AllocConsole will 
+      //// If clear is not done, any cout statement before AllocConsole will
       //// cause, the cout after AllocConsole to fail, so this is very important
       // But here, we're not using AllocConsole...
       //std::cout.clear();
@@ -165,8 +165,8 @@ bool writeToConsole()
    catch ( ... )
    {
       return false;
-   } 
-#endif    
+   }
+#endif
    return true;
 }
 

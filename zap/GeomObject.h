@@ -32,7 +32,7 @@ public:
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
-   
+
    Point getVert(S32 index) const;
    string geomToLevelCode() const;
 };
@@ -41,7 +41,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class GeomObject 
+class GeomObject
 {
 private:
    GeometryContainer mGeometry;
@@ -87,7 +87,7 @@ public:
    virtual const Vector<Point> *getOutline() const;
            const Vector<Point> *getFill()    const;
 
-   void reverseWinding();     
+   void reverseWinding();
 
    virtual Rect calcExtents();
    bool hasGeometry() const;

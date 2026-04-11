@@ -9,7 +9,7 @@
 #include "SlideOutWidget.h"      // Parent
 #include <string>
 
-using namespace TNL; 
+using namespace TNL;
 using namespace std;
 
 
