@@ -25,7 +25,7 @@ LineEditor::LineEditor(U32 maxLength, string value, U32 displayedCharacters)
    mPrompt     = "";
    mMasked     = false;
    mMatchIndex = -1;
-   mCursorOffset = mLine.length();
+   mCursorOffset = (U32)mLine.length();
    mDisplayedCharacters = displayedCharacters;
 }
 
@@ -139,7 +139,7 @@ S32 LineEditor::getCursorOffset() const
 void LineEditor::setString(const string &str)
 {
    mLine.assign(str.substr(0, mMaxLen));
-   mCursorOffset = mLine.length();
+   mCursorOffset = (U32)mLine.length();
 }
 
 
@@ -328,7 +328,7 @@ bool LineEditor::handleKey(InputCode inputCode)
       string left = mLine.substr(0, spacePos);
       string right = mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
       setString(left + right);
-      mCursorOffset = left.length();
+      mCursorOffset = (U32)left.length();
       return true;
    }
 
@@ -344,7 +344,7 @@ bool LineEditor::handleKey(InputCode inputCode)
          mCursorOffset = 0;
          break;
       case KEY_END:
-         mCursorOffset = mLine.length();
+         mCursorOffset = (U32)mLine.length();
          break;
       case KEY_LEFT:
          mCursorOffset = max(0, (int) mCursorOffset - 1);

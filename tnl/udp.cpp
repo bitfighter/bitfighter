@@ -220,7 +220,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
    //   return;
    //)
    init();
-   mPlatformSocket = INVALID_SOCKET;
+   mPlatformSocket = (S32)INVALID_SOCKET;
    mTransportProtocol = bindAddress.transport;
 
    const char *socketType;
@@ -228,18 +228,18 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
    if(bindAddress.transport == IPProtocol)
    {
       socketType = "UDP";
-      mPlatformSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      mPlatformSocket = (S32)socket(AF_INET, SOCK_DGRAM, 0);
    }
    else if(bindAddress.transport == TCPProtocol)
    {
       socketType = "TCP";
-      mPlatformSocket = socket(AF_INET, SOCK_STREAM, 0);
+      mPlatformSocket = (S32)socket(AF_INET, SOCK_STREAM, 0);
    }
 #if !defined(NO_IPX_SUPPORT)
    else if(bindAddress.transport == IPXProtocol)
    {
       socketType = "IPX";
-      mPlatformSocket = socket(AF_IPX, SOCK_DGRAM, NSPROTO_IPX);
+      mPlatformSocket = (S32)socket(AF_IPX, SOCK_DGRAM, NSPROTO_IPX);
    }
 #endif
    else
@@ -315,7 +315,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
       {
          logprintf(LogConsumer::LogError, "Error prevented successful initialization of %s socket.", socketType);
          closesocket(mPlatformSocket);
-         mPlatformSocket = INVALID_SOCKET;
+         mPlatformSocket = (S32)INVALID_SOCKET;
       }
    }
    //TNL_JOURNAL_WRITE_BLOCK(Socket::Socket,

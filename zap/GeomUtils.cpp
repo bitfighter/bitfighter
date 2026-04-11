@@ -2004,7 +2004,7 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 static bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
 {
    // Test winding, is either pos, neg, or zero
-   int windTest = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+   int windTest = (S32)((p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y));
 
    return (windTest > 0);  // 0 is colinear, but we don't care
 }
@@ -2032,10 +2032,10 @@ static void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Poin
    F32 cosTheta = vec1.dot(vec2);
 
    // Bounds checking with weird floating values
-   if (cosTheta > 1.0)
-      cosTheta = 1.0;
-   else if(cosTheta < -1.0)
-      cosTheta = -1.0;
+   if (cosTheta > 1.0f)
+      cosTheta = 1.0f;
+   else if(cosTheta < -1.0f)
+      cosTheta = -1.0f;
 
    F32 subtendedAngle = acosf(cosTheta);
    F32 halfAngle = subtendedAngle * 0.5;
@@ -2218,19 +2218,19 @@ static void pushPolyNode(lua_State *L, const PolyNode *node)
    lua_setfield(L, -2, "hole");                   // -- node
 
    // set the points
-   lua_createtable(L, node->Contour.size(), 0);   // -- node, points
+   lua_createtable(L, (int)node->Contour.size(), 0);   // -- node, points
    for(U32 i = 1; i <= node->Contour.size(); i++)
    {
       const Path &poly = node->Contour;
       lua_pushnumber(L, i);                       // -- node, points, i
-      luaPushPoint(L, poly[i - 1].X * CLIPPER_SCALE_FACT_INVERSE, poly[i - 1].Y * CLIPPER_SCALE_FACT_INVERSE);
+      luaPushPoint(L, (F32)poly[i - 1].X * CLIPPER_SCALE_FACT_INVERSE, (F32)poly[i - 1].Y * CLIPPER_SCALE_FACT_INVERSE);
                                                   // -- node, points, i, p
       lua_settable(L, -3);                        // -- node, points
    }
    lua_setfield(L, -2, "points");                 // -- node
 
    // set the children
-   lua_createtable(L, node->Childs.size(), 0);    // -- node, childs
+   lua_createtable(L, (int)node->Childs.size(), 0);    // -- node, childs
    for(U32 i = 1; i <= node->Childs.size(); i++)
    {
       lua_pushnumber(L, i);                       // -- node, childs, i
@@ -2400,7 +2400,7 @@ S32 lua_offsetPolygons(lua_State *L)
 {
    checkArgList(L, "Geom", "offsetPolygons");
 
-   F32 amount = lua_tonumber(L, 1);
+   F32 amount = (F32)lua_tonumber(L, 1);
    Vector<Vector<Point> > input = getPolygons(L, 2);
 
    lua_pop(L, 2);

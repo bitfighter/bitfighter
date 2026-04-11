@@ -81,10 +81,10 @@ S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S
 
    S32 height = getTransitionPos(fromHeight, toHeight);
 
-   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top, 
-                          DisplayManager::getScreenInfo()->getGameCanvasWidth(), getTransitionPos(height, 0));
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, (F32)top,
+                          (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)getTransitionPos(height, 0));
 
-   return top - fromHeight * (1 - mScrollTimer.getFraction());
+   return S32(top - fromHeight * (1 - mScrollTimer.getFraction()));
 }
 
 
@@ -97,10 +97,10 @@ S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32
    S32 height = getTransitionPos(fromHeight, toHeight);
 
    S32 vertBuffer = 2;  // A little extra space to avoid clipping lines at the top of our clip area
-   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top + getTransitionPos(height, 0) - vertBuffer, 
-                          DisplayManager::getScreenInfo()->getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, (F32)(top + getTransitionPos(height, 0) - vertBuffer),
+                          (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)(getTransitionPos(0, height) + 2 * vertBuffer));
 
-   return top + fromHeight * mScrollTimer.getFraction();
+   return S32(top + fromHeight * mScrollTimer.getFraction());
 }
 
 

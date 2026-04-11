@@ -1567,19 +1567,19 @@ void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *
 
 void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
-   doRenderFlag(pos.x, pos.y, 1.0, flagColor, mastColor, alpha);
+   doRenderFlag(pos.x, pos.y, 1.0f, flagColor, mastColor, alpha);
 }
 
 
 void renderFlag(const Point &pos, const Color *flagColor)
 {
-   doRenderFlag(pos.x, pos.y, 1.0, flagColor, NULL, 1);
+   doRenderFlag(pos.x, pos.y, 1.0f, flagColor, NULL, 1.0f);
 }
 
 
 void renderFlag(const Point &pos, F32 scale, const Color *flagColor)
 {
-   doRenderFlag(pos.x, pos.y, scale, flagColor, NULL, 1);
+   doRenderFlag(pos.x, pos.y, scale, flagColor, NULL, 1.0f);
 }
 
 
@@ -2463,7 +2463,7 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
 void renderTestItem(const Point &pos, S32 size, F32 alpha)
 {
    Vector<Point> pts;
-   calcPolygonVerts(pos, TestItem::TEST_ITEM_SIDES, (F32)size, 0, pts);
+   calcPolygonVerts(pos, TestItem::TEST_ITEM_SIDES, (F32)size, 0.0f, pts);
    renderTestItem(pts, alpha);
 }
 
@@ -2482,7 +2482,7 @@ void renderDefaultAsteroid(const Point &pos, S32 design, F32 scaleFact, F32 alph
 
    r.pushMatrix();
    r.translate(pos);
-   r.scale(scaleFact * ASTEROID_SCALING_FACTOR);
+   r.scale((F32)(scaleFact * ASTEROID_SCALING_FACTOR));
 
    r.setColor(Color(.7), alpha);  // Default gray
 

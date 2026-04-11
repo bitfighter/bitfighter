@@ -318,7 +318,7 @@ namespace Zap
          S32 profile = checkArgList(L, constructorArgList, "WallItem", "constructor");
          if(profile == 1)
          {
-            setWidth(lua_tointeger(L, -1));     // Grab this before it gets popped
+            setWidth((S32)lua_tointeger(L, -1));     // Grab this before it gets popped
             lua_pop(L, 1);                      // Clean up stack for setGeom, which only expects points
             lua_setGeom(L);
          }
@@ -601,7 +601,7 @@ namespace Zap
 
       checkArgList(L, functionArgs, "WallItem", "setWidth");
 
-      setWidth(getInt(L, 1));
+      setWidth((S32)getInt(L, 1));
 
       return 0;
    }
