@@ -414,10 +414,13 @@ void parseString(const string &inputString, Vector<string> &words, char seperato
 // Splits inputString into a series of words using the specified separator; does not consider quotes; trims words
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
+   words.clear();
+
+   if(!inputString || inputString[0] == 0)
+      return;
+
    string word;
    S32 isn = 0;      // Where we are in the inputString we're parsing
-
-   words.clear();
 
    while(inputString[isn] != 0)
    {
@@ -1058,4 +1061,3 @@ bool alphaNumberSort(const string &a, const string &b)
 }
 
 };
-
