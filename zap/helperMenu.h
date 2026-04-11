@@ -77,7 +77,7 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
+   void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count,
                      const OverlayMenuItem *prevItems, S32 prevCount,
                      S32 widthOfButtons, S32 widthOfTextBlock,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
@@ -122,7 +122,7 @@ public:
 
 
    // For testing
-   static InputCode getInputCodeForOption(const OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut);  
+   static InputCode getInputCodeForOption(const OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut);
 };
 
 

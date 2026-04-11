@@ -30,7 +30,7 @@ private:
    Color mHealthBarColor;
 
 protected:
-   
+
    S32 mTeamIndex;           // Team index of this team according to the level file and game
 
 public:
@@ -58,8 +58,8 @@ public:
    void alterGreen(F32 amt);
    void alterBlue(F32 amt);
 
-   virtual S32 getPlayerBotCount() const = 0; 
-   virtual S32 getPlayerCount() const = 0;      
+   virtual S32 getPlayerBotCount() const = 0;
+   virtual S32 getPlayerCount() const = 0;
    virtual S32 getBotCount() const = 0;
 };
 
@@ -81,7 +81,7 @@ class FlagSpawn;
 
 // Class for managing teams in the game
 class Team : public AbstractTeam
-{  
+{
 private:
    StringTableEntry mName;
 
@@ -89,7 +89,7 @@ private:
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
    S32 mScore;
-   F32 mRatingSum; 
+   F32 mRatingSum;
 
    Vector<Point> mItemSpawnPoints;
    Vector<FlagSpawn *> mFlagSpawns;    // List of places for team flags to spawn
@@ -100,7 +100,7 @@ public:
 
    void setName(const char *name);
    void setName(StringTableEntry name);
-  
+
    StringTableEntry getName() const;
 
    S32 getScore();

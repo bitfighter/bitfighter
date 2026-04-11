@@ -36,7 +36,7 @@ private:
 
    static Timer mBlinkTimer;
 
-   // For tab expansion 
+   // For tab expansion
    Vector<string> mMatchList;
    S32 mMatchIndex;
    void buildMatchList(const Vector<string> *candidates, const string &partial);
@@ -80,7 +80,7 @@ public:
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle
    void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
 
-   // For tab expansion 
+   // For tab expansion
    void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender, bool wrapQuotes = true);
 
    S32 getMaxLen();

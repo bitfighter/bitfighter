@@ -22,7 +22,7 @@ std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGL
 {
    GLint logLength;
    std::string log;
-   
+
    // Resize string first
    glGet_iv(static_cast<GLuint>(object), GL_INFO_LOG_LENGTH, &logLength);
    log.resize(logLength);
@@ -86,7 +86,7 @@ U32 Shader::compileShader(const std::string& shaderPath, const std::string& shad
 
    const char *shaderFiles[] = { shaderCode.c_str() };
    const GLint shaderFilesLength[] = { shaderLength };
-   
+
    // Compile
    glShaderSource(shader, 1, shaderFiles, shaderFilesLength);
    glCompileShader(shader);

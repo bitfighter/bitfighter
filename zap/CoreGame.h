@@ -100,7 +100,7 @@ public:
 
 static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
 
-struct PanelGeom 
+struct PanelGeom
 {
    Point vert[CORE_PANELS];            // Panel 0 stretches from vert 0 to vert 1
    Point mid[CORE_PANELS];             // Midpoint of Panel 0 is mid[0]
@@ -225,7 +225,7 @@ public:
    const char *getOnScreenName();
 
    F32 getEditorRadius(F32 currentScale);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);    
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    bool canBeHostile();
@@ -240,7 +240,7 @@ public:
 
    S32 lua_getCurrentHealth(lua_State *L);    // Current health = FullHealth - damage sustained
    S32 lua_getFullHealth(lua_State *L);       // Health with no damange
-   S32 lua_setFullHealth(lua_State *L);     
+   S32 lua_setFullHealth(lua_State *L);
    S32 lua_setTeam(lua_State *L);
 
    S32 lua_getRotationSpeed(lua_State *L);

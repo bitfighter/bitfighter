@@ -56,7 +56,7 @@ void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 // In game radius -- these are never displayed or interacted with; radius doesn't matter
 F32 AbstractSpawn::getRadius()
 {
-   return 1;      
+   return 1;
 }
 
 
@@ -216,7 +216,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 
 string Spawn::toLevelCode() const
 {
-   // Spawn <team> <x> <y> 
+   // Spawn <team> <x> <y>
    return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
@@ -253,12 +253,12 @@ void Spawn::renderDock()
 // Lua interface
 /**
  * @luaclass Spawn
- * 
+ *
  * @brief Marks locations where ships and robots should spawn.
- * 
+ *
  * @geom The geometry of Spawns is a single point.
  */
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_METHODS_TABLE(Spawn, LUA_METHODS);
@@ -326,7 +326,7 @@ void ItemSpawn::renderDock()                                                    
  *
  * @geom The geometry of all ItemSpawns is a single point.
  */
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSpawnTime, ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setSpawnTime, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
@@ -357,12 +357,12 @@ S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
 
 /**
  * @luafunc ItemSpawn::setSpawnTime(num seconds)
- * 
+ *
  * @brief Sets time between item emission events, in seconds.
- * 
+ *
  * @descr Note that setting the spawn time also resets the timer, so that the
  * next item will be spawned after time seconds.
- * 
+ *
  * @param seconds Spawn time in seconds.
  */
 S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
@@ -377,9 +377,9 @@ S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 
 /**
  * @luafunc ItemSpawn::spawnNow()
- * 
+ *
  * @brief Force the ItemSpawn to spawn an item immediately.
- * 
+ *
  * @descr This method also resets the spawn timer.
  */
 S32 ItemSpawn::lua_spawnNow(lua_State *L)
@@ -415,7 +415,7 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, NUM, END }}, 3 };
@@ -538,7 +538,7 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setPos(pos);      // Also sets object extent
       readThisTeam(stream);
    }
-   
+
 }
 
 
@@ -577,7 +577,7 @@ bool AsteroidSpawn::processArguments(S32 argc, const char** argv, Game* game)
    Point pos;
    pos.read(argv);
    pos *= game->getLegacyGridSize();
-   for (S32 i = 0; i < argc; i++) 
+   for (S32 i = 0; i < argc; i++)
    {
       char firstChar = argv[i][0];    // First character of arg
 
@@ -617,12 +617,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(AsteroidSpawn, s2cSetTimeUntilSpawn, (S32 millis), (
 // Lua interface
 /**
  * @luaclass AsteroidSpawn
- * 
+ *
  * @brief Spawns \link Asteroid Asteroids\endlink at regular intervals.
- * 
+ *
  * @geom The geometry of AsteroidSpawns is a single point.
  */
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_METHODS_TABLE(AsteroidSpawn, LUA_METHODS);
@@ -659,7 +659,7 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
    {
       //                                  Profile:         0          1                 2                          3
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }, { PT, TEAM_INDX, NUM, END }}, 4 };
-      
+
       S32 profile = checkArgList(L, constructorArgList, "FlagSpawn", "constructor");
 
       if(profile >= 1)
@@ -668,7 +668,7 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
       if(profile >= 2)
          setTeam(L, 2);
 
-      if(profile == 3)      
+      if(profile == 3)
          setRespawnTime(S32(getInt(L, 3)));
    }
 }
@@ -696,7 +696,7 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
 
    setTeam(atoi(argv[0]));
 
-   
+
    return Parent::processArguments(argc - 1, argv + 1, game);     // then read the rest of the args
 }
 
@@ -768,22 +768,22 @@ void FlagSpawn::renderDock()
 // Lua interface
 /**
  * @luaclass FlagSpawn
- * 
+ *
  * @brief Spawns \link FlagItem Flags\endlink at regular intervals during Nexus
  * games, serves as starting point for flags and soccer balls in other games.
- * 
+ *
  * @descr During Nexus games, FlagSpawn acts like any other ItemSpawn, emitting
  * flags at regular intervals. During games that use flags (such as
  * ZoneControl), FlagSpawns mark locations where flags can be returned to when
  * flags are "sent home". In Soccer games, marks the location that the \link
  * SoccerBallItem SoccerBall\endlink is returned to after a goal is scored.
- * 
+ *
  * Note that in flag games, any place a flag starts will become a FlagSpawn, and
  * in Soccer, the location the SoccerBall starts will become a FlagSpawn.
- * 
+ *
  * @geom The geometry of FlagSpawns is a single point.
  */
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_METHODS_TABLE(FlagSpawn, LUA_METHODS);

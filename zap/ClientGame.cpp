@@ -95,7 +95,7 @@ ClientGame::~ClientGame()
    cleanUp();                          // Among other things, will delete all teams
 
    //delete mUserInterfaceData;
-   delete mUIManager; 
+   delete mUIManager;
    delete mConnectionToServer.getPointer();
 }
 
@@ -112,7 +112,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    getUIManager()->activateGameUI();
 
    GameConnection *gameConnection = new GameConnection(this, true);
- 
+
    setConnectionToServer(gameConnection);
 
    gameConnection->connectLocal(getNetInterface(), remoteInterface);
@@ -120,7 +120,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
    // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
    // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
-   TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()), 
+   TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()),
                "This should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
 
    GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
@@ -135,10 +135,10 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
    // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
    // Do we need this for joining a remote game?
-   setActiveTeamManager(&mTeamManager);    
+   setActiveTeamManager(&mTeamManager);
 
    mClientInfo->setRole(ClientInfo::RoleNone);        // Start out with no permissions, server will upgrade if the proper pws are provided
-   
+
    MasterServerConnection *connToMaster = getConnectionToMaster();
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
@@ -155,7 +155,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
       setConnectionToServer(gameConnection);
 
       // Connect to a remote server, but not via the master server
-      gameConnection->connect(getNetInterface(), remoteAddress);  
+      gameConnection->connect(getNetInterface(), remoteAddress);
    }
 }
 
@@ -177,7 +177,7 @@ void ClientGame::closeConnectionToGameServer(const char *reason)
    // is zapped when attempting to leave the game
    mClientInfo->setSpawnDelayed(false);
 
-   onGameReallyAndTrulyOver();  
+   onGameReallyAndTrulyOver();
 }
 
 
@@ -425,7 +425,7 @@ void ClientGame::switchTeams()
       getUIManager()->reactivateGameUI();    // Jump back into the game (this option takes place immediately)
    }
    else     // More than 2 teams, need to present menu to choose
-      getUIManager()->showMenuToChangeTeamForPlayer(getPlayerName());  
+      getUIManager()->showMenuToChangeTeamForPlayer(getPlayerName());
 }
 
 
@@ -444,7 +444,7 @@ void ClientGame::undelaySpawn()
 
 // Provide access to these annoying bools
 bool ClientGame::isSpawnDelayed() const
-{ 
+{
    return getClientInfo()->isSpawnDelayed();
 }
 
@@ -458,7 +458,7 @@ S32 ClientGame::getLevelThreshold(S32 val)
    //switch(val)
    //{
    //   // This many games | Just achieved this level
-   //   case 20:             return 1;         
+   //   case 20:             return 1;
    //   case 50:             return 2;
    //   case 100:            return 3;
    //   case 200:            return 4;
@@ -619,7 +619,7 @@ class EditorUserInterface;
 void ClientGame::levelIsNotReallyInTheDatabase()
 {
    setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
-   logprintf(LogConsumer::LogLevelError, "Level %s is marked as being in the database, but Pleiades does not recognize it!", 
+   logprintf(LogConsumer::LogLevelError, "Level %s is marked as being in the database, but Pleiades does not recognize it!",
                                           getCurrentLevelFileName().c_str());
 
    // If we are locally hosting, show an error message
@@ -633,7 +633,7 @@ void ClientGame::levelIsNotReallyInTheDatabase()
    }
 
    // Almost the same as above... maybe we can get rid of the above?
-   else if(mUIManager->isCurrentUI<EditorUserInterface>() || mUIManager->cameFrom<EditorUserInterface>())     
+   else if(mUIManager->isCurrentUI<EditorUserInterface>() || mUIManager->cameFrom<EditorUserInterface>())
    {
       string msg = "This level has a LevelDatabaseId line in it, which means we expect to find it "
          "in Pleiades, but it is not there.  I will remove the LevelDatabaseId line from the file (you'll "
@@ -728,7 +728,7 @@ void ClientGame::requestLoadoutPreset(S32 index)
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
    // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
    // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-   conn->c2sRequestLoadout(loadout.toU8Vector());    
+   conn->c2sRequestLoadout(loadout.toU8Vector());
 }
 
 
@@ -748,7 +748,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       return;
    }
 
-   // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
+   // If we're in a loadout zone, don't show any message -- new loadout will become active immediately,
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
    if(ship->isInZone(LoadoutZoneTypeNumber))
       return;
@@ -758,7 +758,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    // Show new loadout
    displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
-   displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
+   displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" :
                                                            "Changes will be activated when you respawn");
 }
 
@@ -925,8 +925,8 @@ void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEn
    else if(assignedName == fromName)                     // From this player
       mUIManager->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
 
-   else  
-      TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
+   else
+      TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you");
 }
 
 
@@ -1009,7 +1009,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    addToClientList(clientInfo);
 
    // Find which client is us (could return NULL if our clientInfo hasn't yet been sent)
-   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName()); 
+   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName());
 
    // A localClient may be an in-process client, or another process on the same machine.  In other words,
    // clientInfo will not always be the same as findClientInfo(mClientInfo->getName())
@@ -1025,16 +1025,16 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
       S32 level = getLevelThreshold(getClientInfo()->getGamesPlayed());
 
       // True only if we are on a levelup threshold and we haven't already seen this message
-      bool showLevelUpMessage = level != NONE && 
+      bool showLevelUpMessage = level != NONE &&
                                 !mSettings->getUserSettings(getClientInfo()->getName().getString())->levelupItemsAlreadySeen[level];
 
-      mClientInfo->setShowLevelUpMessage(level); 
+      mClientInfo->setShowLevelUpMessage(level);
 
       // We want to trigger the spawn delay mechanism to carve out time to show the levelup message
       if(showLevelUpMessage)
          requestSpawnDelayed(false);
    }
-         
+
    // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
    // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
    if(isLocalClient && getUIManager()->isInScoreboardMode())
@@ -1073,7 +1073,7 @@ void ClientGame::onGameReallyAndTrulyOver()
    clearClientList();                   // Erase all info we have about fellow clients
 
    // Kill any objects lingering in the database, such as forcefields
-   getGameObjDatabase()->removeEverythingFromDatabase();    
+   getGameObjDatabase()->removeEverythingFromDatabase();
 
    // Inform the UI
    getUIManager()->onGameOver();
@@ -1158,7 +1158,7 @@ PersonalRating ClientGame::toggleLevelRating()
    getConnectionToMaster()->c2mSetLevelRating(mLevelDatabaseId, normalizedPlayerRating);
 
    // 2) Alert Pleiades with an http request
-   
+
    LevelDatabaseRateThread::LevelRating ratingEnum = LevelDatabaseRateThread::getLevelRatingEnum(mPlayerLevelRating);
    RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(this, ratingEnum);
    getSecondaryThread()->addEntry(rateThread);
@@ -1205,7 +1205,7 @@ void ClientGame::connectionToServerRejected(const char *reason)
 
 void ClientGame::setMOTD(const char *motd)
 {
-   getUIManager()->setMOTD(motd); 
+   getUIManager()->setMOTD(motd);
 }
 
 
@@ -1221,14 +1221,14 @@ void ClientGame::setNeedToUpgrade(bool needToUpgrade)
    getUIManager()->setNeedToUpgrade(needToUpgrade);
 }
 
-   
+
 void ClientGame::displayCmdChatMessage(const char *format, ...) const
 {
    va_list args;
-   char message[MAX_CHAT_MSG_LENGTH]; 
+   char message[MAX_CHAT_MSG_LENGTH];
 
    va_start(args, format);
-   vsnprintf(message, sizeof(message), format, args); 
+   vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
    getUIManager()->displayMessage(Colors::cmdChatColor, message);
@@ -1238,12 +1238,12 @@ void ClientGame::displayCmdChatMessage(const char *format, ...) const
 void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) const
 {
    va_list args;
-   char message[MAX_CHAT_MSG_LENGTH]; 
+   char message[MAX_CHAT_MSG_LENGTH];
 
    va_start(args, format);
-   vsnprintf(message, sizeof(message), format, args); 
+   vsnprintf(message, sizeof(message), format, args);
    va_end(args);
-    
+
    getUIManager()->displayMessage(msgColor, message);
 }
 
@@ -1276,11 +1276,11 @@ void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32
 }
 
 
-void ClientGame::gotQueryResponse(const Address &address, S32 serverId, 
-                                  const Nonce &nonce, const char *serverName, const char *serverDescr, 
+void ClientGame::gotQueryResponse(const Address &address, S32 serverId,
+                                  const Nonce &nonce, const char *serverName, const char *serverDescr,
                                   U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   getUIManager()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount, 
+   getUIManager()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount,
                                     maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
@@ -1291,9 +1291,9 @@ void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const
 }
 
 
-void ClientGame::cancelShutdown() 
-{ 
-   getUIManager()->cancelShutdown(); 
+void ClientGame::cancelShutdown()
+{
+   getUIManager()->cancelShutdown();
 }
 
 
@@ -1313,7 +1313,7 @@ bool ClientGame::hasAdmin(const char *failureMessage)
 {
    if(mClientInfo->isAdmin())
       return true;
-   
+
    displayErrorMessage(failureMessage);
    return false;
 }
@@ -1324,7 +1324,7 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 {
    if(mClientInfo->isLevelChanger())
       return true;
-   
+
    displayErrorMessage(failureMessage);
    return false;
 }
@@ -1416,7 +1416,7 @@ bool ClientGame::isOnMuteList(const string &name)
    for(S32 i = 0; i < mMuteList.size(); i++)
       if(mMuteList[i] == name)
          return true;
-   
+
    return false;
 }
 
@@ -1496,7 +1496,7 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
       // Save the password so the user need not enter it again the next time they're on this server
       if(type == GameConnection::LevelChangePassword)
          mSettings->saveLevelChangePassword(gc->getServerName(), words[1]);
-         
+
       else if(type == GameConnection::AdminPassword)
          mSettings->saveAdminPassword(gc->getServerName(), words[1]);
 
@@ -1587,7 +1587,7 @@ bool ClientGame::checkName(string &name)
 
 
 // Pass this request on to the UIManager
-void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
+void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr,
                                    const Vector<StringTableEntry> &messages) const
 {
    getUIManager()->displayMessageBox(title, instr, messages);
@@ -1607,12 +1607,12 @@ void ClientGame::resetInGameHelpMessages()
 
 
 // Established connection is terminated.  Compare to onConnectTerminate() below.
-void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, 
+void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason,
                                         const char *reasonStr, bool wasFullyConnected)
 {
-   // Calling clearClientList can fix cases of extra names appearing on score board when connecting to server 
+   // Calling clearClientList can fix cases of extra names appearing on score board when connecting to server
    // after getting disconnected for reasons other then "SelfDisconnect"
-   clearClientList();  
+   clearClientList();
    unsuspendGame();
 
    getUIManager()->onConnectionTerminated(serverAddress, reason, reasonStr);    // Let the UI know
@@ -1740,11 +1740,11 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       if(argc >= 2)
       {
-         WallItem *wallItem = new WallItem();  
+         WallItem *wallItem = new WallItem();
          wallItem->initializeEditor();        // Only runs unselectVerts
-        
+
          wallItem->processArguments(argc, argv, this);
-         
+
          if(wallItem->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
             delete wallItem;
          else
@@ -1761,8 +1761,8 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(argc >= 2)
       {
-         PolyWall *polywall = new PolyWall();  
-         
+         PolyWall *polywall = new PolyWall();
+
          S32 skipArgs = 0;
          if(!stricmp(argv[0], "BarrierMakerS"))
          {
@@ -1774,11 +1774,11 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          polywall->initializeEditor();     // Only runs unselectVerts
 
          bool ok = polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
-         
+
          if(ok && polywall->getVertCount() >= 2)
             ok = addPolyWall(polywall, database);
 
-         if(!ok) 
+         if(!ok)
          {
             logprintf(LogConsumer::LogLevelError, "Invalid PolyWall geometry detected (line %d)", lineNum);
             delete polywall;
@@ -1801,8 +1801,8 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       getUIManager()->readRobotLine(robotLine);
    }
-      
-   else 
+
+   else
       return false;
 
    return true;

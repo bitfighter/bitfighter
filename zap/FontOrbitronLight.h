@@ -3161,23 +3161,23 @@ SFG_StrokeChar chr_ol_126 = { 404 * fact, 1, chr_ol_126_strip };
 
 
 
-static const SFG_StrokeChar *ol_chars[] = { 
-   0, 0, 0, 0, 0, 0, 0, 0, 
-   0, 0, 0, 0, 0, 0, 0, 0, 
-   0, 0, 0, 0, 0, 0, 0, 0, 
-   0, 0, 0, 0, 0, 0, 0, 0, 
-   &chr_ol_32, &chr_ol_33, &chr_ol_34, &chr_ol_35, &chr_ol_36, &chr_ol_37, &chr_ol_38, &chr_ol_39, 
-   &chr_ol_40, &chr_ol_41, &chr_ol_42, &chr_ol_43, &chr_ol_44, &chr_ol_45, &chr_ol_46, &chr_ol_47, 
-   &chr_ol_48, &chr_ol_49, &chr_ol_50, &chr_ol_51, &chr_ol_52, &chr_ol_53, &chr_ol_54, &chr_ol_55, 
-   &chr_ol_56, &chr_ol_57, &chr_ol_58, &chr_ol_59, &chr_ol_60, &chr_ol_61, &chr_ol_62, &chr_ol_63, 
-   &chr_ol_64, &chr_ol_65, &chr_ol_66, &chr_ol_67, &chr_ol_68, &chr_ol_69, &chr_ol_70, &chr_ol_71, 
-   &chr_ol_72, &chr_ol_73, &chr_ol_74, &chr_ol_75, &chr_ol_76, &chr_ol_77, &chr_ol_78, &chr_ol_79, 
-   &chr_ol_80, &chr_ol_81, &chr_ol_82, &chr_ol_83, &chr_ol_84, &chr_ol_85, &chr_ol_86, &chr_ol_87, 
-   &chr_ol_88, &chr_ol_89, &chr_ol_90, &chr_ol_91, &chr_ol_92, &chr_ol_93, 0, &chr_ol_95, 
-   &chr_ol_96, &chr_ol_97, &chr_ol_98, &chr_ol_99, &chr_ol_100,   &chr_ol_101,   &chr_ol_102,   &chr_ol_103, 
-   &chr_ol_104,   &chr_ol_105,   &chr_ol_106,   &chr_ol_107,   &chr_ol_108,   &chr_ol_109,   &chr_ol_110,   &chr_ol_111, 
-   &chr_ol_112,   &chr_ol_113,   &chr_ol_114,   &chr_ol_115,   &chr_ol_116,   &chr_ol_117,   &chr_ol_118,   &chr_ol_119, 
-   &chr_ol_120,   &chr_ol_121,   &chr_ol_122,   &chr_ol_123,   &chr_ol_124,   &chr_ol_125,   &chr_ol_126,   0, 
+static const SFG_StrokeChar *ol_chars[] = {
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   &chr_ol_32, &chr_ol_33, &chr_ol_34, &chr_ol_35, &chr_ol_36, &chr_ol_37, &chr_ol_38, &chr_ol_39,
+   &chr_ol_40, &chr_ol_41, &chr_ol_42, &chr_ol_43, &chr_ol_44, &chr_ol_45, &chr_ol_46, &chr_ol_47,
+   &chr_ol_48, &chr_ol_49, &chr_ol_50, &chr_ol_51, &chr_ol_52, &chr_ol_53, &chr_ol_54, &chr_ol_55,
+   &chr_ol_56, &chr_ol_57, &chr_ol_58, &chr_ol_59, &chr_ol_60, &chr_ol_61, &chr_ol_62, &chr_ol_63,
+   &chr_ol_64, &chr_ol_65, &chr_ol_66, &chr_ol_67, &chr_ol_68, &chr_ol_69, &chr_ol_70, &chr_ol_71,
+   &chr_ol_72, &chr_ol_73, &chr_ol_74, &chr_ol_75, &chr_ol_76, &chr_ol_77, &chr_ol_78, &chr_ol_79,
+   &chr_ol_80, &chr_ol_81, &chr_ol_82, &chr_ol_83, &chr_ol_84, &chr_ol_85, &chr_ol_86, &chr_ol_87,
+   &chr_ol_88, &chr_ol_89, &chr_ol_90, &chr_ol_91, &chr_ol_92, &chr_ol_93, 0, &chr_ol_95,
+   &chr_ol_96, &chr_ol_97, &chr_ol_98, &chr_ol_99, &chr_ol_100,   &chr_ol_101,   &chr_ol_102,   &chr_ol_103,
+   &chr_ol_104,   &chr_ol_105,   &chr_ol_106,   &chr_ol_107,   &chr_ol_108,   &chr_ol_109,   &chr_ol_110,   &chr_ol_111,
+   &chr_ol_112,   &chr_ol_113,   &chr_ol_114,   &chr_ol_115,   &chr_ol_116,   &chr_ol_117,   &chr_ol_118,   &chr_ol_119,
+   &chr_ol_120,   &chr_ol_121,   &chr_ol_122,   &chr_ol_123,   &chr_ol_124,   &chr_ol_125,   &chr_ol_126,   0,
 };
 
 const SFG_StrokeFont fgStrokeOrbitronLight = { (char*)"Orbitron-Light", 128, 10, ol_chars };

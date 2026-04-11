@@ -105,13 +105,13 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 }
 
 // Thinking...
-//class SymbolShape 
+//class SymbolShape
 //{
 //   void render(S32 x, S32 y);
 //};
 //
 //
-//class Symbol 
+//class Symbol
 //{
 //   SymbolShape shape;
 //   string label;

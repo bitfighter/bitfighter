@@ -140,7 +140,7 @@ shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key)
    else if(key == "Point Earn Rate")
       return shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, MaxMenuScore,
                                                              "points per minute", "", "Rate player holding the flag accrues points"));
-   else 
+   else
       return Parent::getMenuItem(key);
 }
 
@@ -151,7 +151,7 @@ bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       mFlagReturnTimer = menuItem->getIntValue() * 1000;
    else if(key == "Point Earn Rate")
       setFlagScore(menuItem->getIntValue());
-   else 
+   else
       return Parent::saveMenuItem(menuItem, key);
 
    return true;
@@ -159,7 +159,7 @@ bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 #endif
 
 
-void RabbitGameType::setFlagScore(S32 pointsPerMinute)     
+void RabbitGameType::setFlagScore(S32 pointsPerMinute)
 {
    mFlagScoreTimer = U32(F32(ONE_MINUTE) / pointsPerMinute);   // Convert to ms per point
 }
@@ -208,7 +208,7 @@ const Color *RabbitGameType::getTeamColor(const BfObject *object) const
 {
    // Neutral flags are orange in Rabbit
    if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
-      return &Colors::orange50;  
+      return &Colors::orange50;
 
    // In team game, ships use team color
    if(isShipType(object->getObjectTypeNumber()) && !isTeamGame())
@@ -241,7 +241,7 @@ bool RabbitGameType::shipHasFlag(const Ship *ship) const
 void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
-   
+
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
@@ -414,7 +414,7 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
    if(!isGameOver())  // Avoid flooding messages on game over.
       s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getClientInfo()->getName());
-   updateScore(killerShip, RabbitKilled); 
+   updateScore(killerShip, RabbitKilled);
 }
 
 

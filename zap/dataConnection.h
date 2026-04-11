@@ -65,7 +65,7 @@ public:
 class GameSettings;
 struct FolderManager;
 
-class DataSender 
+class DataSender
 {
 private:
    bool mDone;
@@ -78,7 +78,7 @@ public:
    DataSender();        // Constructor
    virtual ~DataSender();
 
-   SenderStatus initialize(DataSendable *connection, FolderManager *folderManager, string filename, FileType fileType);   
+   SenderStatus initialize(DataSendable *connection, FolderManager *folderManager, string filename, FileType fileType);
 
    bool isDone();
    void sendNextLine();
@@ -94,7 +94,7 @@ class DataConnection : public EventConnection, public DataSendable
 private:
    ActionType mAction;        // Action user wants to undertake
    FileType mFileType;
-   string mFilename;          
+   string mFilename;
    string mPassword;          // Password supplied by user
    FILE *mOutputFile;         // Where we'll save any incoming data
 

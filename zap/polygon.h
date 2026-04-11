@@ -22,7 +22,7 @@ private:
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    virtual void renderDock();
-   void highlightDockItem(); 
+   void highlightDockItem();
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.
    // This makes placement seem more natural.

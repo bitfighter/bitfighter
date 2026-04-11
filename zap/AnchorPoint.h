@@ -15,7 +15,7 @@ using namespace std;
 
 
 enum AnchorType {
-   ScreenAnchor,  
+   ScreenAnchor,
    MapAnchor
 };
 
@@ -25,7 +25,7 @@ struct AnchorPoint
    Point pos;
    AnchorType anchorType;
    AnchorPoint(const Point &p, AnchorType t) : pos(p) { anchorType = t; }     // Sorry, can't bear to make a .cpp for just this!!!
-   AnchorPoint() { anchorType = ScreenAnchor; }     
+   AnchorPoint() { anchorType = ScreenAnchor; }
 
 };
 
@@ -34,5 +34,5 @@ struct AnchorPoint
 }
 
 
-#endif   
+#endif
 

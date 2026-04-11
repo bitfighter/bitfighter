@@ -21,7 +21,7 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 // Define static consts
 const Color *AbstractInstructionsUserInterface::txtColor = &Colors::cyan;
-const Color *AbstractInstructionsUserInterface::keyColor = &Colors::white;     
+const Color *AbstractInstructionsUserInterface::keyColor = &Colors::white;
 const Color *AbstractInstructionsUserInterface::secColor = &Colors::yellow;
 const Color *AbstractInstructionsUserInterface::groupHeaderColor = &Colors::red;
 
@@ -34,15 +34,15 @@ using UI::SymbolStringSet;
 // Constructor
 AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) :
                                        Parent(clientGame),
-                                       mSpecialKeysInstrLeft(LineGap), 
-                                       mSpecialKeysBindingsLeft(LineGap), 
-                                       mSpecialKeysInstrRight(LineGap), 
+                                       mSpecialKeysInstrLeft(LineGap),
+                                       mSpecialKeysBindingsLeft(LineGap),
+                                       mSpecialKeysInstrRight(LineGap),
                                        mSpecialKeysBindingsRight(LineGap),
-                                       mWallInstr(LineGap),  
+                                       mWallInstr(LineGap),
                                        mWallBindings(LineGap)
 {
    mGameSettings = clientGame->getSettings();
-   
+
 }
 
 
@@ -182,14 +182,14 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
       else
       {
          symbols.clear();
-         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].command, 
+         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].command,
                                    symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString instrs(symbols);
          instrs.render(cmdCol, ypos, UI::AlignmentLeft);
 
          symbols.clear();
-         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].binding, 
+         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].binding,
                                    symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString keys(symbols);

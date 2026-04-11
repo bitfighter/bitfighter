@@ -42,7 +42,7 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
    { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL, NULL },
    { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL, NULL },
    { KEY_7, BUTTON_TRIGGER_LEFT, true, WeaponRailgun,"Railgun",    UNSEL_COLOR, "", NULL, NULL },
-};      
+};
 
 
 static string preset1, preset2, preset3,  // Static so that the c_str() pointers we use will stick around
@@ -142,7 +142,7 @@ void LoadoutHelper::onActivated()
    mShowingPresets = false;       // Start in regular mode -- press activation key again to enter preset mode
 
    // Rebuild the text of the preset items we'll show -- user may have defined new presets since last visit
-   rebuildPresetItems();         
+   rebuildPresetItems();
 }
 
 
@@ -153,7 +153,7 @@ void LoadoutHelper::render()
    if(mShowingPresets)
    {
       Vector<OverlayMenuItem> &prevItems = showingModules ? mModuleMenuItems : mWeaponMenuItems;
-      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), 
+      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(),
                    prevItems.address(), prevItems.size(), mPresetButtonsWidth, mPresetItemsDisplayWidth);
    }
    else
@@ -202,7 +202,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
          break;
 
    // Does key correspond to a menu item being displayed?  No?
-   if(index == menuItems.size() || !menuItems[index].showOnMenu)     
+   if(index == menuItems.size() || !menuItems[index].showOnMenu)
    {
       // Since this isn't a menu option, maybe it is a request to avance loadout menu to the presets display.
       // Put this inside here so if joystick users remap the loadout button, maybe they can use the preset menu.
@@ -235,7 +235,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    // Make sure user doesn't select the same loadout item twice
    bool alreadyUsed = false;
-	
+
    if(mCurrentIndex < ShipModuleCount)    // We're working with modules
    {                                      // (note... braces required here!)
       for(S32 i = 0; i < mCurrentIndex && !alreadyUsed; i++)
@@ -279,15 +279,15 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       if(conn)
       {
          if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-            getGame()->displayShipDesignChangedMessage(loadout, "Selected loadout: ", 
+            getGame()->displayShipDesignChangedMessage(loadout, "Selected loadout: ",
                                                                 "Modifications canceled: new ship design same as the current");
 
          // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
          // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
          // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-         conn->c2sRequestLoadout(loadout.toU8Vector());     
+         conn->c2sRequestLoadout(loadout.toU8Vector());
       }
-      exitHelper();     
+      exitHelper();
    }
 
    return true;
@@ -298,7 +298,7 @@ void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
 {
    mShowingPresets = true;
 
-   // The menu will be getting larger to accomodate the presets, which are wider than the standard 
+   // The menu will be getting larger to accomodate the presets, which are wider than the standard
    // loadout menu.  Here we'll calculate the width of the loadout menu and the preset menu.
    S32 currDisplayWidth = getCurrentDisplayWidth(mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
    S32 futureDisplayWidth = getTotalDisplayWidth(mPresetButtonsWidth, mPresetItemsDisplayWidth);
@@ -313,8 +313,8 @@ void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
 }
 
 
-InputCode LoadoutHelper::getActivationKey() 
-{ 
+InputCode LoadoutHelper::getActivationKey()
+{
    GameSettings *settings = getGame()->getSettings();
    return settings->getInputCodeManager()->getBinding(BINDING_LOADOUT);
 }

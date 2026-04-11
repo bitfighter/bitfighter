@@ -7,7 +7,7 @@
 #define _FONT_CONTEXT_ENUM_H_
 
 namespace Zap
-{     
+{
    enum FontContext {
       BigMessageContext,       // Press any key to respawn, etc.
       HelpItemContext,         // In-game help messages
@@ -32,7 +32,7 @@ namespace Zap
       TeamShuffleContext,      // For /shuffle command
       ChatMessageContext,      // Font for rendering in-game chat messages
       OldSkoolContext,         // Render things like in the good ol' days
-      TimeLeftHeadlineContext, // Big text on indicator in lower right corner of game  
+      TimeLeftHeadlineContext, // Big text on indicator in lower right corner of game
       TimeLeftIndicatorContext // Smaller text on same indicator
    };
 

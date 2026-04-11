@@ -157,7 +157,7 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Poin
    Point perpendic(start.y - tip.y, tip.x - start.x);
    perpendic.normalize();
 
-   
+
    S32 index = 0;
 
    for(S32 i = 0; i < 2; i++)
@@ -214,8 +214,8 @@ void SpeedZone::onGeomChanging()
 }
 
 
-void SpeedZone::onGeomChanged()   
-{  
+void SpeedZone::onGeomChanged()
+{
    generatePoints(getVert(0), getVert(1), mPolyBounds, mOutline);
    Parent::onGeomChanged();
 }
@@ -294,7 +294,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
       else
       {
          if(argc < 8)
-         {  
+         {
             argv[argc] = argv2[i];
             argc++;
          }
@@ -403,7 +403,7 @@ bool SpeedZone::collide(BfObject *hitObject)
       {
          ClientGame *client = static_cast<ClientGame *>(getGame());
          GameConnection *gc = client->getConnectionToServer();
-         if(gc && gc->getControlObject() != hitObject) 
+         if(gc && gc->getControlObject() != hitObject)
             return false;
       }
 #endif
@@ -515,7 +515,7 @@ void SpeedZone::idle(BfObject::IdleCallPath path)
 
 U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & InitMask))    
+   if(stream->writeFlag(updateMask & InitMask))
    {
       Point pos = getVert(0);
       Point dir = getVert(1);
@@ -557,7 +557,7 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       preparePoints();
    }
 
-   if(stream->readFlag()) 
+   if(stream->readFlag())
       SoundSystem::playSoundEffect(SFXGoFastOutside, getVert(0), getVert(0));
 }
 
@@ -579,11 +579,11 @@ bool SpeedZone::canBeNeutral() { return false; }
  * @luafunc SpeedZone::SpeedZone()
  * @luafunc SpeedZone::SpeedZone(Geom lineGeom)
  * @luafunc SpeedZone::SpeedZone(Geom lineGeom, int speed)
- * 
+ *
  * @luaclass SpeedZone
- * 
+ *
  * @brief Propels ships at high speed.
- * 
+ *
  * @descr SpeedZones are game objects that propel ships around a level. Each
  * SpeedZone has a direction point that is only used for aiming the SpeedZone.
  * The speed at which ships are flung can be set with the setSpeed() method.
@@ -591,13 +591,13 @@ bool SpeedZone::canBeNeutral() { return false; }
  * the ship to the SpeedZone's center before propelling them. This allows level
  * designers to control the exact path a ship will take, which can be useful if
  * there is a target that the ships should hit.
- * 
+ *
  * Note that a SpeedZone's setGeom() method will take two points. The first will
  * be the SpeedZone's location, the second represents its direction. The
  * distance between the two points is not important; only the angle between them
  * matters.
  */
-//               Fn name     Param profiles       Profile count                           
+//               Fn name     Param profiles       Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setDir,      ARRAYDEF({{ PT,      END }}), 1 ) \
    METHOD(CLASS, getDir,      ARRAYDEF({{          END }}), 1 ) \
@@ -616,7 +616,7 @@ const char *SpeedZone::luaClassName = "SpeedZone";
 REGISTER_LUA_SUBCLASS(SpeedZone, BfObject);
 
 
-/** 
+/**
  * @luafunc SpeedZone::setDir(point dest)
  *
  * @brief Sets the direction of the SpeedZone.
@@ -624,7 +624,7 @@ REGISTER_LUA_SUBCLASS(SpeedZone, BfObject);
  * @param dest A point which the speed zone should aim at
  *
  * Example:
- * @code 
+ * @code
  *   s = SpeedZone.new()
  *   s:setDir(100,150)
  *   levelgen:addItem(s)  -- or plugin:addItem(s) in a plugin
@@ -650,7 +650,7 @@ S32 SpeedZone::lua_setDir(lua_State *L)
  * @descr The distance between the returned point and the object's location is
  * not important; only the angle between them matters.
  *
- * @return A point object representing the SpeedZone's direction. 
+ * @return A point object representing the SpeedZone's direction.
  */
 S32 SpeedZone::lua_getDir(lua_State *L)
 {

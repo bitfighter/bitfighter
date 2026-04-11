@@ -50,9 +50,9 @@ LuaLevelGenerator::~LuaLevelGenerator()
 }
 
 
-const char *LuaLevelGenerator::getErrorMessagePrefix() 
-{ 
-   return "***LEVELGEN ERROR***"; 
+const char *LuaLevelGenerator::getErrorMessagePrefix()
+{
+   return "***LEVELGEN ERROR***";
 }
 
 
@@ -154,11 +154,11 @@ static const StringTableEntry levelControllerName = "LevelController";
  * @luafunc void LuaLevelGenerator::subscribe(Event event)
  *
  * @brief Let the level listen for and respond to the specified event.
- * 
+ *
  * @descr When the specified event is fired, the level can respond by implementing a specially
  * named listener function. See @ref events "Subscribing to Events" for more information.
  * See also the Event page for a list of events you can subscribe to and their
- * corresponding listener funtcitons.  
+ * corresponding listener funtcitons.
  *
  * @param event Event to subscribe to.
  */
@@ -169,7 +169,7 @@ static const StringTableEntry levelControllerName = "LevelController";
   *
   * @brief Stop listening for the specified event.
   *
-  * @descr After unsubscribing from the event, the corresponding listener function will no longer be 
+  * @descr After unsubscribing from the event, the corresponding listener function will no longer be
   * called when the event is fired.
   *
   * @param event Event to unsubscribe from.

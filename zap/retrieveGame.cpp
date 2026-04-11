@@ -147,7 +147,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       Vector<StringTableEntry> e;
       e.push_back(s->getClientInfo()->getName());
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, 
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture,
                        (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
@@ -229,7 +229,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
          // Neutral and team flags are returned
-         if(flag->getTeam() == s->getTeam() || flag->getTeam() == TEAM_NEUTRAL) 
+         if(flag->getTeam() == s->getTeam() || flag->getTeam() == TEAM_NEUTRAL)
          {
             // Someone may still be carrying a flag around when another team scores
             if(flag->isMounted())

@@ -67,7 +67,7 @@ public:
    virtual void setWidth(S32 width);
    virtual void setWidth(S32 width, S32 min, S32 max);
    virtual S32 getWidth() const;
-   void changeWidth(S32 amt);  
+   void changeWidth(S32 amt);
 
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...

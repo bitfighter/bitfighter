@@ -73,7 +73,7 @@ Point BotNavMeshZone::getCenter()
 }
 
 
-void BotNavMeshZone::renderLayer(S32 layerIndex)    
+void BotNavMeshZone::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)
@@ -163,24 +163,24 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
    /////////////////////////////
    // Based on recast's interpretation of code by Eric Lengyel:
    // http://www.terathon.com/code/edges.php
-   
+
    int maxEdgeCount = mesh.npolys*mesh.nvp;
    unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(mesh.nverts + maxEdgeCount), RC_ALLOC_TEMP);
    if (!firstEdge)      // Allocation went bad
       return false;
    unsigned short* nextEdge = firstEdge + mesh.nverts;
    int edgeCount = 0;
-   
+
    rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
    if (!edges)
    {
       rcFree(firstEdge);
       return false;
    }
-   
+
    for(int i = 0; i < mesh.nverts; i++)
       firstEdge[i] = RC_MESH_NULL_IDX;
-   
+
    // First process edges where 1st node < 2nd node
    for(int i = 0; i < mesh.npolys; ++i)
    {
@@ -199,7 +199,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
 
          unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
 
-         if (v0 < v1)      
+         if (v0 < v1)
          {
             rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
             edge.vert[0] = v0;
@@ -208,13 +208,13 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
             edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later -- the fact that both are the same is used as a marker
 
             nextEdge[edgeCount] = firstEdge[v0];        // Next edge on the previous vert now points to whatever was in firstEdge previously
-            firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
+            firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert
 
             edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
          }
       }
    }
-   
+
    // Now process edges where 2nd node is > 1st node
    for(int i = 0; i < mesh.npolys; ++i)
    {
@@ -232,7 +232,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
 
          unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
 
-         if(v0 > v1)      
+         if(v0 > v1)
          {
             for(unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
             {
@@ -306,10 +306,10 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
          }
       }
    }
-   
+
    rcFree(firstEdge);
    rcFree(edges);
-   
+
    return true;
 }
 
@@ -333,7 +333,7 @@ static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabas
       poly = zone->getOutline();
 
       if(zone && polygonCircleIntersect(poly->address(), poly->size(), centerPoint, radius * radius, c))
-         return zone;   
+         return zone;
    }
 
    return NULL;
@@ -345,7 +345,7 @@ static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabas
 #endif
 
 
-// Populate allZones -- we'll use this for efficiency, saving us the trouble of repeating this operation in multiple places.  
+// Populate allZones -- we'll use this for efficiency, saving us the trouble of repeating this operation in multiple places.
 // We can retrieve them using BotNavMeshZone::getBotZones().
 void BotNavMeshZone::populateZoneList(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones)
 {
@@ -1077,7 +1077,7 @@ F32 AStar::heuristic(const Vector<BotNavMeshZone *> *zones, S32 fromZone, S32 to
 }
 
 
-// Returns a path, including the startZone and targetZone 
+// Returns a path, including the startZone and targetZone
 Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZone, S32 targetZone, const Point &target)
 {
    // Because of these variables...
@@ -1086,13 +1086,13 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
    // ...these arrays can be reused without further initialization
    static U16 whichList[MAX_ZONES];       // Record whether a zone is on the open or closed list
-   static S16 openList[MAX_ZONES + 1]; 
-   static S16 openZone[MAX_ZONES]; 
-   static S16 parentZones[MAX_ZONES]; 
+   static S16 openList[MAX_ZONES + 1];
+   static S16 openZone[MAX_ZONES];
+   static S16 parentZones[MAX_ZONES];
 
-   static F32 Fcost[MAX_ZONES];   
-   static F32 Gcost[MAX_ZONES];    
-   static F32 Hcost[MAX_ZONES];   
+   static F32 Fcost[MAX_ZONES];
+   static F32 Gcost[MAX_ZONES];
+   static F32 Hcost[MAX_ZONES];
 
    S16 numberOfOpenListItems = 0;
    bool foundPath;
@@ -1106,9 +1106,9 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
    // more efficient for the zone counts we typically see in Bitfighter levels.
    if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
    {
-      for(S32 i = 0; i < MAX_ZONES; i++) 
+      for(S32 i = 0; i < MAX_ZONES; i++)
          whichList[i] = 0;
-      onClosedList = 0;   
+      onClosedList = 0;
    }
    onClosedList = onClosedList + 2; // Changing the values of onOpenList and onClosed list is faster than redimming whichList() array
    onOpenList = onClosedList - 1;
@@ -1126,9 +1126,9 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
    {
       if(numberOfOpenListItems == 0)      // List is empty, we're done
       {
-         foundPath = false; 
+         foundPath = false;
          break;
-      }  
+      }
       else
       {
          // The open list is not empty, so take the first cell off of the list.
@@ -1137,38 +1137,38 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
          if(parentZone == targetZone)
          {
-            foundPath = true; 
+            foundPath = true;
             break;
          }
 
          whichList[parentZone] = onClosedList;   // add the item to the closed list
-         numberOfOpenListItems--;   
+         numberOfOpenListItems--;
 
          //   Open List = Binary Heap: Delete this item from the open list, which
          // is maintained as a binary heap. For more information on binary heaps, see:
          //   http://www.policyalmanac.org/games/binaryHeaps.htm
-            
+
          //   Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
          openList[1] = openList[numberOfOpenListItems + 1];   // Move the last item in the heap up to slot #1
-         S16 v = 1; 
+         S16 v = 1;
 
          //   Loop until the new item in slot #1 sinks to its proper spot in the heap.
          while(true) // ***
          {
-            S16 u = v;      
+            S16 u = v;
             if (2 * u + 1 < numberOfOpenListItems) // if both children exist
             {
                // Check if the F cost of the parent is greater than each child,
                // and select the lowest of the two children
-               if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+               if(Fcost[openList[u]] >= Fcost[openList[2*u]])
                   v = 2 * u;
-               if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
-                  v = 2 * u + 1;      
+               if(Fcost[openList[v]] >= Fcost[openList[2*u+1]])
+                  v = 2 * u + 1;
             }
             else if (2 * u < numberOfOpenListItems) // if only child (#1) exists
             {
-                // Check if the F cost of the parent is greater than child #1   
-               if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+                // Check if the F cost of the parent is greater than child #1
+               if(Fcost[openList[u]] >= Fcost[openList[2*u]])
                   v = 2 * u;
             }
 
@@ -1176,7 +1176,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
             {
                S16 temp = openList[u];
                openList[u] = openList[v];
-               openList[v] = temp;         
+               openList[v] = temp;
             }
             else
                break; // ...otherwise, exit loop
@@ -1197,13 +1197,13 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
             //   Check if zone is already on the closed list (items on the closed list have
             //   already been considered and can now be ignored).
-            if(whichList[zoneID] == onClosedList) 
+            if(whichList[zoneID] == onClosedList)
                continue;
 
             //   Add zone to the open list if it's not already on it
             TNLAssert(newOpenListItemID < MAX_ZONES, "Too many nav zones... try increasing MAX_ZONES!");
-            if(whichList[zoneID] != onOpenList && newOpenListItemID < MAX_ZONES) 
-            {   
+            if(whichList[zoneID] != onOpenList && newOpenListItemID < MAX_ZONES)
+            {
                // Create a new open list item in the binary heap
                newOpenListItemID = newOpenListItemID + 1;   // Give each new item a unique id
                S32 m = numberOfOpenListItems + 1;
@@ -1213,13 +1213,13 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
                Hcost[openList[m]] = heuristic(zones, zoneID, targetZone);
                Gcost[zoneID] = Gcost[parentZone] + zone.distTo;
                Fcost[openList[m]] = Gcost[zoneID] + Hcost[openList[m]];
-               parentZones[zoneID] = parentZone; 
+               parentZones[zoneID] = parentZone;
 
                // Move the new open list item to the proper place in the binary heap.
                // Starting at the bottom, successively compare to parent items,
                // swapping as needed until the item finds its place in the heap
                // or bubbles all the way to the top (if it has the lowest F cost).
-               while(m > 1 && Fcost[openList[m]] <= Fcost[openList[m/2]]) 
+               while(m > 1 && Fcost[openList[m]] <= Fcost[openList[m/2]])
                {
                   S16 temp = openList[m/2];
                   openList[m/2] = openList[m];
@@ -1232,21 +1232,21 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
                numberOfOpenListItems++;
             }
 
-            // If zone is already on the open list, check to see if this 
-            //   path to that cell from the starting location is a better one. 
+            // If zone is already on the open list, check to see if this
+            //   path to that cell from the starting location is a better one.
             //   If so, change the parent of the cell and its G and F costs.
 
             else // zone was already on the open list
             {
                // Figure out the G cost of this possible new path
                S32 tempGcost = (S32)(Gcost[parentZone] + zone.distTo);
-               
+
                // If this path is shorter (G cost is lower) then change
                // the parent cell, G cost and F cost.
                if(tempGcost < Gcost[zoneID])
                {
                   parentZones[zoneID] = parentZone; // Change the square's parent
-                  Gcost[zoneID] = (F32)tempGcost;        // and its G cost         
+                  Gcost[zoneID] = (F32)tempGcost;        // and its G cost
 
                   // Because changing the G cost also changes the F cost, if
                   // the item is on the open list we need to change the item's
@@ -1255,40 +1255,40 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
                   for(S32 i = 1; i <= numberOfOpenListItems; i++) // Look for the item in the heap
                   {
-                     if(openZone[openList[i]] == zoneID) 
+                     if(openZone[openList[i]] == zoneID)
                      {
                         Fcost[openList[i]] = Gcost[zoneID] + Hcost[openList[i]]; // Change the F cost
-                        
+
                         // See if changing the F score bubbles the item up from it's current location in the heap
                         S32 m = i;
-                        while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]]) 
+                        while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]])
                         {
                            S16 temp = openList[m/2];
                            openList[m/2] = openList[m];
                            openList[m] = temp;
                            m = m/2;
                         }
-                   
-                        break; 
-                     } 
+
+                        break;
+                     }
                   }
                }
 
-            } // else if whichList(zoneID) = onOpenList   
+            } // else if whichList(zoneID) = onOpenList
          } // for loop looping through neighboring zones list
-      }  
+      }
 
       // If target is added to open list then path has been found.
       if(whichList[targetZone] == onOpenList)
       {
-         foundPath = true; 
+         foundPath = true;
          break;
       }
    }
 
    // Save the path if it exists
    if(!foundPath)
-   {      
+   {
       TNLAssert(path.size() == 0, "Expected empty path!");
       return path;
    }
@@ -1305,7 +1305,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
    path.push_back(target);                               // First point is the actual target itself
    path.push_back(zones->get(targetZone)->getCenter());  // Second is the center of the target's zone
-      
+
    S32 zone = targetZone;
 
    while(zone != startZone)

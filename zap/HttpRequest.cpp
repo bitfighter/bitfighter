@@ -26,9 +26,9 @@ const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 const string HttpRequest::LevelDatabaseBaseUrl = "bitfighter.org/pleiades";
 
 HttpRequest::HttpRequest(const string &url)
-   : mUrl(url), 
-     mMethod("GET"), 
-     mResponseCode(0), 
+   : mUrl(url),
+     mMethod("GET"),
+     mResponseCode(0),
      mTimeout(THREE_SECONDS)
 {
    mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
@@ -73,13 +73,13 @@ bool HttpRequest::send()
       mError = "Connect error";
 	   return false;
    }
-   
+
    if(!mSocket->isWritable(FIVE_SECONDS))
    {
       mError = "Socket not writable";
 	   return false;
    }
- 
+
    buildRequest();
    if(!sendRequest(mRequest))
    {

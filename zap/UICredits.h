@@ -12,7 +12,7 @@ namespace Zap
 {
 
 
-struct CreditsInfo 
+struct CreditsInfo
 {
    Vector<const char *> lines;
    F32 pos;

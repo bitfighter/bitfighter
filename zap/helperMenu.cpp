@@ -62,7 +62,7 @@ InputCode HelperMenu::getInputCodeForOption(const OverlayMenuItem *items, S32 it
 }
 
 
-void HelperMenu::onActivated()    
+void HelperMenu::onActivated()
 {
    mHorizLabelOffset = 0;
 
@@ -85,8 +85,8 @@ InputCode HelperMenu::getActivationKey()
 
 
 // Exit helper mode by entering play mode
-void HelperMenu::exitHelper() 
-{ 
+void HelperMenu::exitHelper()
+{
    onDeactivated();
    mClientGame->getUIManager()->getUI<GameUserInterface>()->exitHelper();
 }
@@ -113,7 +113,7 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 // Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
-void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
+void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count,
                               const OverlayMenuItem *prevItems, S32 prevCount,
                               S32 widthOfButtons, S32 widthOfTextBlock,
                               const char **legendText, const Color **legendColors, S32 legendCount)
@@ -140,12 +140,12 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    const S32 topPadding        = MENU_PADDING;
    const S32 titleHeight       = TITLE_FONT_SIZE + grayLineBuffer ;
    const S32 itemsHeight       = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + grayLineBuffer;
-   const S32 legendHeight      = (hasLegend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0); 
+   const S32 legendHeight      = (hasLegend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0);
    const S32 instructionHeight = MENU_LEGEND_FONT_SIZE;
    const S32 bottomPadding     = MENU_PADDING;
 
    // Total height of the menu
-   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;     
+   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;
 
    S32 yPos = MENU_TOP + topPadding;
    S32 newBottom = MENU_TOP + totalHeight;
@@ -174,7 +174,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Draw the title (above gray line)
    r.setColor(baseColor);
-   
+
    FontManager::pushFontContext(HelperMenuHeadlineContext);
    drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
    FontManager::popFontContext();
@@ -189,10 +189,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Draw menu items (below gray line)
    drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, mHorizLabelOffset);
-   drawMenuItems(items,     count,     yPos,     menuBottom, true,  0);      
+   drawMenuItems(items,     count,     yPos,     menuBottom, true,  0);
 
    // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
-   yPos += itemsHeight; 
+   yPos += itemsHeight;
 
    // Adjust for any transition that might be going on that is changing the overall menu height.  menuBottom is the rendering location
    // of the bottom fo the menu, newBottom is the target bottom location after the transition has ocurred.
@@ -290,21 +290,21 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
       // Render key in white, or, if there is a legend, in the color of the adjacent item
       const Color *buttonOverrideColor = items[i].buttonOverrideColor;
-      
+
       const Color *itemColor = items[i].itemColor;
 
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
-      JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
+      JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2,
                                              (F32)yPos - 1, code, buttonOverrideColor);
       renderer.setColor(*itemColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
-      S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name);
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
-         renderer.setColor(*items[i].helpColor);    
+         renderer.setColor(*items[i].helpColor);
          xPos += textWidth + ButtonLabelGap;
          drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
       }
@@ -322,14 +322,14 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
-      drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE, 
+      drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE,
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
 
       static const SymbolString JoystickInstructions(
-            "Press [[Back]] to cancel", 
-            mClientGame->getSettings()->getInputCodeManager(), MenuHeaderContext, 
+            "Press [[Back]] to cancel",
+            mClientGame->getSettings()->getInputCodeManager(), MenuHeaderContext,
             MENU_LEGEND_FONT_SIZE, false, AlignmentCenter);
 
       JoystickInstructions.render(Point(xPos + 4, yPos));
@@ -386,10 +386,10 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
    // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
    // from the loadout menu.
-   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_BACK || 
+   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_BACK ||
       (getActivationKeyClosesHelper() && getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
-      exitHelper();      
+      exitHelper();
 
       if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
          mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
@@ -423,7 +423,7 @@ bool HelperMenu::isMovementDisabled() const { return false; }
 bool HelperMenu::isChatDisabled() const     { return true;  }
 
 
-void HelperMenu::idle(U32 deltaT) 
+void HelperMenu::idle(U32 deltaT)
 {
    // Idle the parent classes
    Slider::idle(deltaT);

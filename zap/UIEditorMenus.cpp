@@ -41,7 +41,7 @@ QuickMenuUI::~QuickMenuUI()
 
 void QuickMenuUI::initialize()
 {
-   mTopOfFirstMenuItem = -1;    
+   mTopOfFirstMenuItem = -1;
    mDisableHighlight = false;
 }
 
@@ -103,7 +103,7 @@ void QuickMenuUI::render()
    // Keep the menu on screen, no matter where the item being edited is located
    S32 keepingItOnScreenAdjFactorX = 0;
    S32 keepingItOnScreenAdjFactorY = 0;
-   
+
    if(naturalLeft < 0)
        keepingItOnScreenAdjFactorX = -1 * naturalLeft;
    else if(naturalRight > DisplayManager::getScreenInfo()->getGameCanvasWidth())
@@ -122,8 +122,8 @@ void QuickMenuUI::render()
    S32 right = naturalRight + keepingItOnScreenAdjFactorX;
 
    // Background rectangle
-   drawFilledRect(left,  naturalTop    + keepingItOnScreenAdjFactorY, 
-                  right, naturalBottom + keepingItOnScreenAdjFactorY, 
+   drawFilledRect(left,  naturalTop    + keepingItOnScreenAdjFactorY,
+                  right, naturalBottom + keepingItOnScreenAdjFactorY,
                   Color(.1), Color(.5));
 
    // Now that the background has been drawn, adjust left and right to create the inset for the menu item highlights
@@ -188,7 +188,7 @@ void QuickMenuUI::render()
    S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
 
    // Amount help "sticks out" beyond menu box:
-   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2; 
+   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2;
    if(xoff > 0)
       instrXPos += max(xoff - left, min(DisplayManager::getScreenInfo()->getGameCanvasWidth() - xoff - right, 0));
 
@@ -229,7 +229,7 @@ void QuickMenuUI::onDisplayModeChange()
    getUIManager()->getUI<EditorUserInterface>()->onDisplayModeChange();   // This is intended to run the same method in the editor
 
    // Reposition menu on screen, keeping same relative position as before
-   Point pos(mMenuLocation.x * DisplayManager::getScreenInfo()->getGameCanvasWidth() /DisplayManager::getScreenInfo()->getPrevCanvasWidth(), 
+   Point pos(mMenuLocation.x * DisplayManager::getScreenInfo()->getGameCanvasWidth() /DisplayManager::getScreenInfo()->getPrevCanvasWidth(),
              mMenuLocation.y * DisplayManager::getScreenInfo()->getGameCanvasHeight() / DisplayManager::getScreenInfo()->getPrevCanvasHeight());
 
    setMenuCenterPoint(pos);
@@ -323,40 +323,40 @@ string EditorAttributeMenuUI::getTitle()
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 selectedObjCount = ui->getItemSelectedCount();
-   return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mAssociatedObject->getPrettyNamePlural() : 
+   return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mAssociatedObject->getPrettyNamePlural() :
                                                                mAssociatedObject->getOnScreenName());
 }
 
 
-void EditorAttributeMenuUI::startEditingAttrs(BfObject *object) 
-{ 
-   mAssociatedObject = object; 
+void EditorAttributeMenuUI::startEditingAttrs(BfObject *object)
+{
+   mAssociatedObject = object;
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    Point center = (mAssociatedObject->getVert(0) + mAssociatedObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
-   setMenuCenterPoint(center);  
+   setMenuCenterPoint(center);
 
    EditorAttributeMenuItemBuilder::startEditingAttrs(this, object);
 }
 
 
-void EditorAttributeMenuUI::doneEditing() 
+void EditorAttributeMenuUI::doneEditing()
 {
    doneEditingAttrs(mAssociatedObject);
 }
 
 
-void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object) 
+void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 {
-   // Has to be object, not mAssociatedObject... this gets run once for every selected item of same type as mAssociatedObject, 
+   // Has to be object, not mAssociatedObject... this gets run once for every selected item of same type as mAssociatedObject,
    // and we need to make sure that those objects (passed in as object), get updated
-   EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);     
+   EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);
 
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
-   if(object == mAssociatedObject)   
-      getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mAssociatedObject); 
+   if(object == mAssociatedObject)
+      getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mAssociatedObject);
 }
 
 
@@ -386,7 +386,7 @@ void PluginMenuUI::setTitle(const string &title)
 void PluginMenuUI::doneEditing()
 {
    Vector<string> responses;
-   
+
    getMenuResponses(responses);              // Fills responses
    responses.erase(responses.size() - 1);    // Remove last arg, which corresponds to our "save and quit" menu item
 

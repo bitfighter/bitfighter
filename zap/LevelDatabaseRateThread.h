@@ -28,7 +28,7 @@ public:
    LEVEL_RATING(PlusOne,  "up" )          /* 0 */     \
    LEVEL_RATING(Neutral,  "neutral" )     /* 1 */     \
    LEVEL_RATING(MinusOne, "down" )        /* 2 */     \
-                                                      
+
 
    enum LevelRating {
 #define LEVEL_RATING(val, b) val,
@@ -40,7 +40,7 @@ public:
 
 
    static const string RatingStrings[];
-      
+
    static const string LevelDatabaseRateUrl;
    LevelDatabaseRateThread(ClientGame* game, LevelRating rating);
    virtual ~LevelDatabaseRateThread();

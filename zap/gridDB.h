@@ -72,7 +72,7 @@ public:
    bool getExtentSet() const;
 
    void setExtent(const Rect &extentRect);
-   
+
 
    virtual const Vector<Point> *getCollisionPoly() const;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
@@ -173,10 +173,10 @@ public:
 
    void dumpObjects();     // For debugging purposes
 
-   
+
    Rect getExtents();      // Get the combined extents of every object in the database
 
-   WallSegmentManager *getWallSegmentManager() const;      
+   WallSegmentManager *getWallSegmentManager() const;
 
    void addToDatabase(DatabaseObject *databaseObject);
    void addToDatabase(const Vector<DatabaseObject *> &objects);

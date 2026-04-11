@@ -65,9 +65,9 @@ public:
 
    static Vector<QuickChatNode> nodeTree;
 
-   void render();                
-   void onActivated();  
-   bool processInputCode(InputCode inputCode);   
+   void render();
+   void onActivated();
+   bool processInputCode(InputCode inputCode);
    bool isMovementDisabled() const;
 };
 

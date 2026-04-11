@@ -50,7 +50,7 @@ void SlideOutWidget::idle(U32 deltaT)
 
 
 // User requested widget to open
-void SlideOutWidget::onActivated() 
+void SlideOutWidget::onActivated()
 {
    S32 currDisplayWidth = 0;
    mActivationDirection = true;     // Normal
@@ -97,17 +97,17 @@ S32 SlideOutWidget::getTotalDisplayWidth() const
 
 
 // Gets run when opening animation is complete
-void SlideOutWidget::onWidgetOpened() 
-{ 
-   /* Do nothing */ 
+void SlideOutWidget::onWidgetOpened()
+{
+   /* Do nothing */
 }
 
 
 // Gets run when closing animation is complete
-void SlideOutWidget::onWidgetClosed() 
-{ 
+void SlideOutWidget::onWidgetClosed()
+{
    // Do nothing
-}  
+}
 
 
 S32 SlideOutWidget::getWidth() const
@@ -136,7 +136,7 @@ void SlideOutWidget::adjustAnimationTimer()
    U32 distToGo = abs(mWidth - mStartingOffset);
    U32 timeNeeded = U32(distToGo / WidgetSpeed);
 
-   mAnimationTimer.reset(timeNeeded);  
+   mAnimationTimer.reset(timeNeeded);
 }
 
 
@@ -201,7 +201,7 @@ void SlideOutWidget::setAnimationTime(U32 period)
 void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
 {
    Renderer& renderer = Renderer::get();
-   const S32 CornerSize = 15;      
+   const S32 CornerSize = 15;
 
    S32 left   = ulx;
    S32 right  = ulx + width;

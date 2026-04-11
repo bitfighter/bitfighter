@@ -24,7 +24,7 @@ private:
    Vector<Point> mPolyBounds, mOutline;
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
    bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
-   
+
    // Take our basic inputs, pos and dir, and expand them into a three element
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
@@ -47,7 +47,7 @@ public:
 
    explicit SpeedZone(lua_State *L = NULL);     // Combined C++/Lua constructor
    virtual ~SpeedZone();               // Destructor
-      
+
    SpeedZone *clone() const;
 
    static const U16 minSpeed;      // How slow can you go?
@@ -82,7 +82,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   ///// Editor methods 
+   ///// Editor methods
    Color getEditorRenderColor();
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);

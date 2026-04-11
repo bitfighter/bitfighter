@@ -95,8 +95,8 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
          mPackUnpackShipEnergyMeter = true;
          mEventClassCount &= ~0x1000;
       }
-      if(data[0] != CS_PROTOCOL_VERSION || 
-         mEventClassCount > NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent) || 
+      if(data[0] != CS_PROTOCOL_VERSION ||
+         mEventClassCount > NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent) ||
          mGhostClassCount > NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject))
       {
          fclose(mFile); // Wrong version, warn about this problem?
@@ -185,7 +185,7 @@ void GameRecorderPlayback::updateSpectate()
       if(mClientInfoSpectating.isNull())
          mClientInfoSpectating = infos[0];
    }
-   
+
    if(mClientInfoSpectating.isValid())
    {
       mClientInfoSpectatingName = mClientInfoSpectating->getName();
@@ -275,7 +275,7 @@ void GameRecorderPlayback::restart()
 
 // --------
 
-static void processPlaybackSelectionCallback(ClientGame *game, U32 index)             
+static void processPlaybackSelectionCallback(ClientGame *game, U32 index)
 {
    game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
 }
@@ -367,7 +367,7 @@ void PlaybackSelectUserInterface::processSelection(U32 index)
 
 // --------
 
-static void processPlaybackDownloadCallback(ClientGame *game, U32 index)             
+static void processPlaybackDownloadCallback(ClientGame *game, U32 index)
 {
    game->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->processSelection(index);
 }
@@ -511,7 +511,7 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
    {
       F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
       F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
-      
+
       if(y >= btn_y && y <= btn_y + btn_h)
       {
          if(x >= btn0_x && x <= btn0_x + btn_w)
@@ -634,7 +634,7 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
    }
 
    // Cheap way to avoid letting the client move objects, because of pause/slow motion/fast forward
-   getGame()->setGameSuspended_FromServerMessage(true); 
+   getGame()->setGameSuspended_FromServerMessage(true);
 }
 
 

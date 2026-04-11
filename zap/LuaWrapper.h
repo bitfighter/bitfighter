@@ -50,8 +50,8 @@ extern "C"
 }
 #endif // LUAW_NO_EXTERN_C
 
-#include "LuaBase.h"   
-#include "LuaException.h"   
+#include "LuaBase.h"
+#include "LuaException.h"
 
 #include <string>
 #include <vector>
@@ -709,9 +709,9 @@ int luaW_gc(lua_State* L)
 }
 
 // Takes two tables and registers them with Lua to the table on the top of the
-// stack. 
+// stack.
 //
-// This function is only called from LuaWrapper internally. 
+// This function is only called from LuaWrapper internally.
 inline void luaW_registerfuncs(lua_State* L, const luaL_Reg defaulttable[], const luaL_Reg table[])
 {
     // ... T
@@ -728,9 +728,9 @@ inline void luaW_registerfuncs(lua_State* L, const luaL_Reg defaulttable[], cons
 #endif
 }
 
-// Initializes the LuaWrapper tables used to track internal state. 
+// Initializes the LuaWrapper tables used to track internal state.
 //
-// This function is only called from LuaWrapper internally. 
+// This function is only called from LuaWrapper internally.
 inline void luaW_initialize(lua_State* L)
 {
     // Ensure that the LuaWrapper table is set up
@@ -741,14 +741,14 @@ inline void luaW_initialize(lua_State* L)
         lua_pushvalue(L, -1); // ... nil {} {}
         lua_setfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // ... nil LuaWrapper
 
-        // Create a storage table 
+        // Create a storage table
         lua_newtable(L); // ... LuaWrapper nil {}
         lua_setfield(L, -2, LUAW_STORAGE_KEY); // ... nil LuaWrapper
 
         // Create a holds table
         lua_newtable(L); // ... LuaWrapper {}
         lua_setfield(L, -2, LUAW_HOLDS_KEY); // ... nil LuaWrapper
-        
+
         // Create the usingProxy table -- make it a weak table
         lua_newtable(L); // ... nil LuaWrapper {}
         lua_setfield(L, -2, LUAW_USING_PROXY_KEY); // ... nil LuaWrapper
@@ -793,17 +793,17 @@ inline void luaW_initialize(lua_State* L)
 // but still represent the same object. For cases like that, you may specify an
 // identifier function which is responsible for pushing a key representing your
 // object on to the stack.
-// 
+//
 // luaW_register will set table as the new value of the global of the given
 // name. luaW_setfuncs is identical to luaW_register, but it does not set the
 // table globally.  As with luaL_register and luaL_setfuncs, both funcstions
 // leave the new table on the top of the stack.
 // Allocator -> constructor, Deallocator => destructor
 template <typename T>
-void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table, 
-                   const luaL_Reg* metatable, 
-                   T* (*allocator)(lua_State*)         = luaW_defaultallocator<T>, 
-                   void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, 
+void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table,
+                   const luaL_Reg* metatable,
+                   T* (*allocator)(lua_State*)         = luaW_defaultallocator<T>,
+                   void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>,
                    void (*identifier)(lua_State*, T*)  = luaW_defaultidentifier<T>)
 {
     luaW_initialize(L);
@@ -818,12 +818,12 @@ void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table,
         { "new", luaW_new<T> },
         { NULL, NULL }
     };
-    const luaL_Reg defaultmetatable[] = 
-    { 
-        { "__index",    luaW_index<T> }, 
-        { "__newindex", luaW_newindex<T> }, 
-        { "__gc",       luaW_gc<T> }, 
-        { NULL,         NULL } 
+    const luaL_Reg defaultmetatable[] =
+    {
+        { "__index",    luaW_index<T> },
+        { "__newindex", luaW_newindex<T> },
+        { "__gc",       luaW_gc<T> },
+        { NULL,         NULL }
     };
 
     // Set up per-type tables
@@ -953,19 +953,19 @@ void luaW_extend(lua_State* L)
 // to make your methods available.
 // And with that, your class will be registered with LuaWrapper.
 //
-// A quick overview of how the registration system works is REGISTER_LUA_CLASS and REGISTER_LUA_SUBCLASS 
-// are actually dummy declarations that during initialization, build lists of registration functions 
-// called registrationFunctions and extensionFunctions.  When you actually create your L object and 
-// want to register your methods with it, calling registerClass() uses those lists to call the 
-// appropriate LuaW registration/extension methods.  
+// A quick overview of how the registration system works is REGISTER_LUA_CLASS and REGISTER_LUA_SUBCLASS
+// are actually dummy declarations that during initialization, build lists of registration functions
+// called registrationFunctions and extensionFunctions.  When you actually create your L object and
+// want to register your methods with it, calling registerClass() uses those lists to call the
+// appropriate LuaW registration/extension methods.
 class LuaW_Registrar
 {
 private:
    typedef void (*luaW_regFunc)(lua_State *);
 
-   struct ClassParent { 
-      const char *name;   
-      const char *parent; 
+   struct ClassParent {
+      const char *name;
+      const char *parent;
    };
 
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
@@ -1025,7 +1025,7 @@ private:
    }
 
 
-   // Helper function -- move function from unorderdClassList to orderedClassList list 
+   // Helper function -- move function from unorderdClassList to orderedClassList list
    static void moveToOrderedList(int i)
    {
       getOrderedClassList().push_back(getUnorderedClassList()[i].name);
@@ -1038,7 +1038,7 @@ private:
    {
       std::size_t itemsRemainingInList;
 
-      itemsRemainingInList = getUnorderedClassList().size();     
+      itemsRemainingInList = getUnorderedClassList().size();
 
       // Iterate through unordered objects -- these should all have parents that are already in orderedClassList
       while(itemsRemainingInList > 0)
@@ -1060,7 +1060,7 @@ private:
             for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
                moveToOrderedList(i);
 
-         itemsRemainingInList = getUnorderedClassList().size();   
+         itemsRemainingInList = getUnorderedClassList().size();
       }  // end while
    }
 
@@ -1226,7 +1226,7 @@ public:
 // TODO- Convert everything to use the above, rename it, and get rid of this one -- what? i don't understand ~raptor
 #define  LUAW_DECLARE_CLASS(className) \
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
-   className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; } 
+   className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; }
 
 
 
@@ -1237,12 +1237,12 @@ public:
 
 
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
-// Wraps a standard method (one that takes L as a single parameter) within a proxy check. 
+// Wraps a standard method (one that takes L as a single parameter) within a proxy check.
 template <typename T, int (T::*methodName)(lua_State * )>
 int luaW_doMethod(lua_State *L)
 {
    T *w = luaW_check<T>(L, 1);
-   if(w) 
+   if(w)
    {
       lua_remove(L, 1);
       return (w->*methodName)(L);

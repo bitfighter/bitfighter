@@ -83,9 +83,9 @@ public:
       T *ui = nullptr;
       auto it = mUis.find(typeinfo);
 
-      // Whenver we do a [] lookup on the map, if the key isn't found, a nullptr entry is added, so sometimes we'll 
+      // Whenver we do a [] lookup on the map, if the key isn't found, a nullptr entry is added, so sometimes we'll
       // see a nullptr if we previously looked for something that wasn't there.
-      if(it == mUis.end() || mUis[typeinfo] == nullptr) {      
+      if(it == mUis.end() || mUis[typeinfo] == nullptr) {
          // We need to create the pointer first, then move it, otherwise we get type issues during compilation
          auto ptr = make_unique<T>(mGame);
          ui = ptr.get();
@@ -148,9 +148,9 @@ public:
    void setClientGame(ClientGame *clientGame);
    void reactivatePrevUI();
    void reactivate(const UserInterface *ui);
-   
+
    void activateGameUI();
-   void reactivateGameUI(); 
+   void reactivateGameUI();
 
    bool hasPrevUI();
    void clearPrevUIs();
@@ -210,7 +210,7 @@ public:
    // QueryServersUI:
    void gotServerListFromMaster(const Vector<ServerAddr> &serverList);
    void gotPingResponse (const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
-   void gotQueryResponse(const Address &address, S32 serverId, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+   void gotQueryResponse(const Address &address, S32 serverId, const Nonce &nonce, const char *serverName, const char *serverDescr,
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
    string getLastSelectedServerName();
 
@@ -251,7 +251,7 @@ public:
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
-   
+
    void addInlineHelpItem(HelpItem item);
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void removeInlineHelpItem(HelpItem item, bool markAsSeen);

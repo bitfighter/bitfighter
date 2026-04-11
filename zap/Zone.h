@@ -35,9 +35,9 @@ public:
    virtual const char *getOnDockName();
    virtual const char *getOnScreenName();
 
-   bool hasTeam();      
-   bool canBeHostile(); 
-   bool canBeNeutral(); 
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
    virtual string toLevelCode() const;
 

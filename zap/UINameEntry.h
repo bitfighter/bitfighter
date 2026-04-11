@@ -24,7 +24,7 @@ protected:
    const char *title;
    const char *instr1;
    const char *instr2;
-   
+
    bool resetOnActivate;
    LineEditor lineEditor;
 

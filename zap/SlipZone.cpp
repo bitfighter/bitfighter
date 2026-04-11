@@ -154,7 +154,7 @@ const Vector<Point> *SlipZone::getCollisionPoly() const
 }
 
 
-bool SlipZone::collide(BfObject *hitObject) 
+bool SlipZone::collide(BfObject *hitObject)
 {
    if(!isGhost() && isShipType(hitObject->getObjectTypeNumber()))
    {

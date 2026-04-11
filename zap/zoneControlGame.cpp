@@ -110,10 +110,10 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    if(oldTeam >= 0)                             // Zone is being captured from another team
    {
-      if(zoneCount <= MAX_ZONES_TO_NOTIFY)  
+      if(zoneCount <= MAX_ZONES_TO_NOTIFY)
       {
          static StringTableEntry takeString("%e0 captured a zone from team %e1!");
-         
+
          e.push_back(s->getClientInfo()->getName());
          e.push_back(getGame()->getTeamName(oldTeam));
 
@@ -150,7 +150,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    e.clear();
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
-   
+
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
       GameConnection *gc = getGame()->getClientInfo(i)->getConnection();
@@ -306,7 +306,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
             if(zone->getTeam() != whichTeamHasFlag)
                renderObjectiveArrow(zone, zone->getColor(), canvasWidth, canvasHeight, 0.4f);
 
-            //      Zone recently changed hands   &&        Zone is not neutral      &&  Zone is not local player's team 
+            //      Zone recently changed hands   &&        Zone is not neutral      &&  Zone is not local player's team
             else if(zone->didRecentlyChangeTeam() && zone->getTeam() != TEAM_NEUTRAL && zone->getTeam() != ship->getTeam())
             {
                // Render a blinky arrow for a recently captured zone

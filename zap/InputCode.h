@@ -126,7 +126,7 @@ namespace Zap
    SPECIAL_BINDING( BINDING_SCREENSHOT_1,       "Screenshot_1",     keyScreenshot1,    "PrntScrn")  \
    SPECIAL_BINDING( BINDING_SCREENSHOT_2,       "Screenshot_2",     keyScreenshot2,    "Ctrl+Q")    \
 /*-------------------------------------------------------------------------------------------------*/
-   
+
 
 enum BindingNameEnum {
 #define BINDING(enumName, b, c, d, e, f) enumName,
@@ -246,7 +246,7 @@ public:
    static string getBindingName(BindingNameEnum binding);
    static string getEditorBindingName(EditorBindingNameEnum binding);
    static string getSpecialBindingName(SpecialBindingNameEnum binding);
-   
+
    InputCode getKeyBoundToBindingCodeName(const string &name) const;
    string getEditorKeyBoundToBindingCodeName(const string &name) const;
    string getSpecialKeyBoundToBindingCodeName(const string &name) const;
@@ -266,8 +266,8 @@ private:
 public:
    static string getCurrentInputString(InputCode inputCode);
 
-   static bool checkModifier(InputCode mod1);            
-   static bool checkModifier(InputCode mod1, InputCode mod2);            
+   static bool checkModifier(InputCode mod1);
+   static bool checkModifier(InputCode mod1, InputCode mod2);
    static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);
 
    static bool isValidInputString(const string &inputString);
@@ -304,7 +304,7 @@ public:
 
    static S16 inputCodeToControllerButton(InputCode inputCode);
 
-   InputCode getBinding(BindingNameEnum bindingName) const; 
+   InputCode getBinding(BindingNameEnum bindingName) const;
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);

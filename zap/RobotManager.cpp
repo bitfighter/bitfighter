@@ -34,7 +34,7 @@ RobotManager::~RobotManager()
 // Called when level changes or is reset
 void RobotManager::onLevelChanged()
 {
-   mManagerActive = true;    
+   mManagerActive = true;
 }
 
 
@@ -238,7 +238,7 @@ void RobotManager::moreBots()
    }
 
    // If teams all have the same number of players, neededBotCount will be 0 ==> add a bot to each team
-   if(neededBotCount == 0)       
+   if(neededBotCount == 0)
       for(S32 i = 0; i < teamCount; i++)
          addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
 
@@ -363,15 +363,15 @@ void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
 bool RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass)
 {
    for(S32 i = 0; i < mRobots.size(); i++)
-      if(mRobots[i]->getTeam() == teamIndex && (mRobots[i]->getClientInfo()->getClientClass() == botClass || 
+      if(mRobots[i]->getTeam() == teamIndex && (mRobots[i]->getClientInfo()->getClientClass() == botClass ||
                                                 botClass == ClientInfo::ClassAnyBot))
       {
          TNLAssert(teamIndex == mRobots[i]->getClientInfo()->getTeamIndex(), "Inconsistent team info!");
-            
+
          deleteBot(i);
 
          mAutoLevelTeams = false;
-         return true; 
+         return true;
       }
 
    return false;
@@ -397,4 +397,4 @@ void RobotManager::clearMoves()
 }
 
 
-} 
+}

@@ -78,10 +78,10 @@ AbstractChat::~AbstractChat()
 
 Color AbstractChat::getColor(string name)
 {
-   if(mFromColors.count(name) == 0)    
-      mFromColors[name] = getNextColor();          
+   if(mFromColors.count(name) == 0)
+      mFromColors[name] = getNextColor();
 
-   return mFromColors[name]; 
+   return mFromColors[name];
 }
 
 
@@ -96,8 +96,8 @@ void AbstractChat::newMessage(const string &from, const string &message, bool is
    Color color;
 
    if(fromSelf)
-      color = Colors::white;                  
-   else                                       
+      color = Colors::white;
+   else
    {
       if(mFromColors.count(from) == 0)        // See if we have a color for this nick
          mFromColors[from] = getNextColor();  // If not, get one
@@ -144,7 +144,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 
          string msg = "----- Player " + string(playerNick.getString()) + " left the conversation -----";
          newMessage(mGame->getClientInfo()->getName().getString(), msg, false, true, true);
-         
+
          SoundSystem::playSoundEffect(SFXPlayerLeftGlobalChat, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Me make sound!
          break;
       }
@@ -329,7 +329,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
       GameUserInterface *gameUI = mGame->getUIManager()->getUI<GameUserInterface>();
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor,
-         "Private message from %s: Press [%s] to enter chat mode", 
+         "Private message from %s: Press [%s] to enter chat mode",
          sender, gameUI->getInputCodeString(mGame->getSettings(), BINDING_OUTGAMECHAT));
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);

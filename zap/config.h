@@ -39,7 +39,7 @@ class GameSettings;
 struct CmdLineSettings;
 
 
-struct FolderManager 
+struct FolderManager
 {
    // Constructors
    FolderManager();
@@ -64,9 +64,9 @@ struct FolderManager
    string fontsDir;
    string recordDir;
 
-   void resolveDirs(GameSettings *settings);                                  
+   void resolveDirs(GameSettings *settings);
    void resolveDirs(const string &root);
-   void resolveLevelDir(GameSettings *settings);                                 
+   void resolveLevelDir(GameSettings *settings);
    string resolveLevelDir(const string &levelDir);
 
    string findLevelFile(const string &filename) const;
@@ -96,7 +96,7 @@ struct CmdLineSettings
    virtual ~CmdLineSettings();
 
    void init();
-   
+
    bool dedicatedMode;     // Will server be dedicated?
 
    string server;
@@ -205,8 +205,8 @@ public:
 
 
    string masterAddress;            // Default address of our master server
-   string name;                     // Player name (none by default)    
-   string password;                 // Player password (none by default) 
+   string name;                     // Player name (none by default)
+   string password;                 // Player password (none by default)
    string defaultName;              // Name used if user hits <enter> on name entry screen
    string lastPassword;
    string lastEditorName;           // Name of file most recently edited by the user
@@ -251,7 +251,7 @@ public:
    // Server display settings in join menu
    S32 queryServerSortColumn;
    bool queryServerSortAscending;
-      
+
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
    // Game window location when in windowed mode
@@ -278,16 +278,16 @@ public:
    bool logNetBase;
    bool logUDP;
 
-   bool logFatalError;        
-   bool logError;             
-   bool logWarning;    
+   bool logFatalError;
+   bool logError;
+   bool logWarning;
    bool logConfigurationError;
-   bool logConnection;        
-   bool logLevelLoaded;    
+   bool logConnection;
+   bool logLevelLoaded;
    bool logLevelError;
    bool logLuaObjectLifecycle;
    bool luaScriptMessage;
-   bool serverFilter;  
+   bool serverFilter;
    bool logStats;
 
    string mySqlStatsDatabaseServer;

@@ -161,8 +161,8 @@ void UIColorPicker::render()
 
 
    colorArray[0]  = r2;  colorArray[1]  = g2;  colorArray[2]  = b2;
-   colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2; 
-   colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0; 
+   colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2;
+   colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0;
    colorArray[12] = 0;   colorArray[13] = 0;   colorArray[14] = 0;
    renderer.renderColored(colorBrightnessPoints, colorArray, 4, RenderType::TriangleFan);
 
@@ -246,7 +246,7 @@ void UIColorPicker::render()
 
    // Loadout zone
    static const Point pointAry[] = { Point(x, y), Point(x + h, y), Point(x + h, y + h), Point(x, y + h) };
-   static const Vector<Point> o(pointAry, ARRAYSIZE(pointAry)); 
+   static const Vector<Point> o(pointAry, ARRAYSIZE(pointAry));
    Vector<Point> f;     // fill
    Triangulate::Process(o, f);
    renderLoadoutZone(this, &o, &f, Point(x + h/2, y + h/2), 0);

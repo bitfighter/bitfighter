@@ -10,7 +10,7 @@
 
 using namespace TNL;
 
-namespace Zap 
+namespace Zap
 {
 
 class ClientGame;
@@ -30,7 +30,7 @@ private:
 
    U32 mPing[FPS_AVG_COUNT];
    F32 mPingAvg;
-   
+
    U32 mRecalcFPSTimer;          // Controls recalcing FPS running average
    U32 mFrameIndex;
 

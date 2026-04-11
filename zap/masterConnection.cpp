@@ -24,7 +24,7 @@ TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
 
 // Constructor
-MasterServerConnection::MasterServerConnection(Game *game)   
+MasterServerConnection::MasterServerConnection(Game *game)
 {
    mGame = game;
    mHostOnServerAvailable = false;
@@ -98,7 +98,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
 
    // The master server sends out an empty list to signify and "end of transmission".  We'll build up a
    // list of servers here until we get that final EOT list, and then send the entire list to the UI.
-   // We need to do this because the UI will look for servers that it knows about that are not on the master 
+   // We need to do this because the UI will look for servers that it knows about that are not on the master
    // list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
    // don't happen to be on that part.
    if(ipList.size() > 0)
@@ -116,7 +116,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
                            (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList))
 {
    if(mGame->isServer())
@@ -132,7 +132,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
 
    // The master server sends out an empty list to signify and "end of transmission".  We'll build up a
    // list of servers here until we get that final EOT list, and then send the entire list to the UI.
-   // We need to do this because the UI will look for servers that it knows about that are not on the master 
+   // We need to do this because the UI will look for servers that it knows about that are not on the master
    // list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
    // don't happen to be on that part.
    // Note that for every entry in ipList, there will be a corresponding entry in serverIdList.
@@ -167,7 +167,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_023,
 
 	// The master server sends out an empty list to signify and "end of transmission".  We'll build up a
 	// list of servers here until we get that final EOT list, and then send the entire list to the UI.
-	// We need to do this because the UI will look for servers that it knows about that are not on the master 
+	// We need to do this because the UI will look for servers that it knows about that are not on the master
 	// list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
 	// don't happen to be on that part.
 	// Note that for every entry in ipList, there will be a corresponding entry in serverIdList.
@@ -216,12 +216,12 @@ S32 MasterServerConnection::getClientId() const
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection,
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
    if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
-      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!", 
+      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!",
                 Address(possibleAddresses[0]).toString());
 
       const char *NotAServer = "Not a server";
@@ -245,12 +245,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    b->takeOwnership();
 
    // Let the server know we're accepting the connection, and pass back our buffer of random data (b)
-   s2mAcceptArrangedConnection(requestId, localAddress, b);    
+   s2mAcceptArrangedConnection(requestId, localAddress, b);
    GameConnection *conn = new GameConnection();
 
    conn->setNetAddress(fullPossibleAddresses[0]);
 
-   logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", 
+   logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s",
              Address(fullPossibleAddresses[0]).toString());
 
    U32 bufferSize = sizeof(data) - 2 * Nonce::NonceSize;
@@ -265,10 +265,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
 #ifndef ZAP_DEDICATED
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted,
                            (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
 {
-   if(!mGame->isServer() && requestId == mCurrentQueryId && 
+   if(!mGame->isServer() && requestId == mCurrentQueryId &&
                   connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
    {
       logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
@@ -328,8 +328,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 
 // The master server has looked at our name and password, and determined if we're in the database properly.  Here's its reply.
 // The ClientInfo that gets filled here is the FullClientInfo that lives on he client, and describes the player to themselves.
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated_019, 
-                                    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated_019,
+                                    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges,
                                      U16 gamesPlayed, StringPtr correctedName))
 {
    if(mGame->isServer())
@@ -346,7 +346,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated_019,
       if(gc)
          gc->c2sSetAuthenticated();    // Tell server that the client is (or claims to be) authenticated
    }
-   else 
+   else
       clientGame->getClientInfo()->setAuthenticated(false, NO_BADGES, 0);
 }
 #endif
@@ -366,7 +366,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vec
       ClientInfo *clientInfo = mGame->getClientInfo(i);
 
       // Robots don't have valid clientId, so this will never match a bot
-      if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    
+      if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
@@ -397,9 +397,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vec
                mGame->updateClientChangedName(clientInfo, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
-         {  
+         {
             // Client gets two bites at the apple, to cover rare race condition
-            if(clientInfo->getConnection()->getAuthenticationCounter() > 1)  
+            if(clientInfo->getConnection()->getAuthenticationCounter() > 1)
                clientInfo->setAuthenticated(false, NO_BADGES, 0);
             else
                clientInfo->getConnection()->resetAuthenticationTimer();
@@ -468,7 +468,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> groupNames, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> groupNames,
                            Vector<string> names, Vector<string> scores))
 {
    if(mGame->isServer())
@@ -509,7 +509,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendTotalLevelRating, (U32
       else
          clientGame->gotTotalLevelRating(rating);
    }
-      
+
 }
 #endif
 
@@ -626,7 +626,7 @@ void MasterServerConnection::onConnectionEstablished()
 
 
 // A still-being-established connection has been terminated
-void MasterServerConnection::onConnectionTerminated(TerminationReason reason, const char *reasonStr)   
+void MasterServerConnection::onConnectionTerminated(TerminationReason reason, const char *reasonStr)
 {
 #ifndef ZAP_DEDICATED
    if(!mGame->isServer())
@@ -639,7 +639,7 @@ void MasterServerConnection::onConnectionTerminated(TerminationReason reason, co
 
 
 // A still-being-established connection has been terminated
-void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
+void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)
 {
 #ifndef ZAP_DEDICATED
    if(!mGame->isServer())

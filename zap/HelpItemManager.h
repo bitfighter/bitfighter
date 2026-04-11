@@ -122,7 +122,7 @@
 using namespace TNL;
 using namespace std;
 
-namespace Zap { 
+namespace Zap {
 
    enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d, e, f, g) value,
@@ -153,7 +153,7 @@ struct HighlightItem
    };
 
    U8    type;
-   Whose whose; 
+   Whose whose;
 };
 
 
@@ -231,7 +231,7 @@ public:
    static bool shouldRender(const ClientGame *game);
 
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
-   void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false); 
+   void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);
    void addInlineHelpItemForced(S32 helpItemId);
 
    void removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 weight = 0xFF);
@@ -246,7 +246,7 @@ public:
 
    void onGameStarting();        // Reset things for a new level
    void addStartingHelpItemsToQueue(const ClientGame *game);
-   
+
    void loadAlreadySeenLevelupMessageList();
    void saveAlreadySeenLevelupMessageList();
 

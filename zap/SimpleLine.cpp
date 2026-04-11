@@ -12,14 +12,14 @@ namespace Zap
 
 // Constructor
 SimpleLine::SimpleLine()
-{ 
+{
    setNewGeometry(geomSimpleLine);
 }
 
 
 // Destructor
 SimpleLine::~SimpleLine()
-{ 
+{
    // Do nothing
 }
 
@@ -48,7 +48,7 @@ void SimpleLine::renderDock()
 const F32 INITIAL_ITEM_LENGTH = 1.0;
 
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
-void SimpleLine::newObjectFromDock(F32 gridSize) 
+void SimpleLine::newObjectFromDock(F32 gridSize)
 {
 #ifndef ZAP_DEDICATED
    setVert(Point(0,0), 0);
@@ -62,8 +62,8 @@ void SimpleLine::newObjectFromDock(F32 gridSize)
 // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
 // In this case, we'll drag these items by their slender midriff.
 Point SimpleLine::getInitialPlacementOffset(U32 gridSize)  const
-{ 
-   return Point(INITIAL_ITEM_LENGTH * gridSize / 2, 0); 
+{
+   return Point(INITIAL_ITEM_LENGTH * gridSize / 2, 0);
 }
 
 

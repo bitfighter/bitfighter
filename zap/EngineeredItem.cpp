@@ -158,7 +158,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    switch(objectType)
    {
       case EngineeredTurret:
-         bounds = Turret::getTurretGeometry(mDeployPosition, mDeployNormal);   
+         bounds = Turret::getTurretGeometry(mDeployPosition, mDeployNormal);
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       case EngineeredForceField:
@@ -218,11 +218,11 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
          break;
       }
    }
-   
+
    if(!collision)
    {
       // Check for collision with forcefields that could be projected from those projectors.
-      // Projectors up to two forcefield lengths away must be considered because the end of 
+      // Projectors up to two forcefield lengths away must be considered because the end of
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
@@ -385,7 +385,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       default:
          return false;
    }
-   
+
    Engineerable *engineerable = dynamic_cast<Engineerable *>(deployedObject);
 
    if((!deployedObject || !engineerable) && !clientInfo->isRobot())  // Something went wrong
@@ -459,7 +459,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
    mOriginalTeam = getTeam();
    if(mOriginalTeam == TEAM_NEUTRAL)      // Neutral object starts with no health and can be repaired and claimed by anyone
       mHealth = 0;
-   
+
    Point pos;
    pos.read(argv + 1);
    pos *= game->getLegacyGridSize();
@@ -541,7 +541,7 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist,
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, Point &anchor, Point &normal)
 {
@@ -550,7 +550,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
 
 
 // Static function
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist,
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, TestFunc testFunc, Point &anchor, Point &normal)
 {
@@ -1026,7 +1026,7 @@ void EngineeredItem::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points
 
 static const F32 MAX_SNAP_DISTANCE = 100.0f;    // Max distance to look for a mount point
 
-// Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
+// Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.
 // findDeployPoint() is version used during deployment of engineerered item.
 void EngineeredItem::findMountPoint(Game *game, const Point &pos)
 {
@@ -1043,15 +1043,15 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
       setPos(anchor + normal);
       mAnchorNormal.set(normal);
    }
-   
-   computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
+
+   computeObjectGeometry();                                    // Fills mCollisionPolyPoints
    computeExtent();                                            // Uses mCollisionPolyPoints
 }
 
 
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList)
-{  
+{
    Point anchor, nrml;
    DatabaseObject *mountSeg = NULL;
 
@@ -1059,7 +1059,7 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
                                        MAX_SNAP_DISTANCE, excludedWallList,
                                        true, (TestFunc)isWallType, anchor, nrml);
 
-   // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
+   // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location
    // while the segment is being dragged around, some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
@@ -1089,10 +1089,10 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
 // Lua interface
 /**
  * @luaclass EngineeredItem
- * 
+ *
  * @brief Parent class representing mountable items such as Turret and
  * ForceFieldProjector.
- * 
+ *
  * @descr EngineeredItem is a container class for wall-mountable items.
  * Currently, all EngineeredItems can be constructed with the Engineering
  * module, can be destroyed by enemy fire, and can be healed (and sometimes
@@ -1101,11 +1101,11 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
  * When health falls below a certain threshold (see getDisabledThrehold()), the
  * item becomes inactive and must be repaired or regenerate itself to be
  * functional again.
- * 
+ *
  * If an EngineeredItem has a heal rate greater than zero, it will slowly repair
  * damage to iteself. For more info see setHealRate()
  */
-//               Fn name              Param profiles  Profile count                           
+//               Fn name              Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isActive,             ARRAYDEF({{       END }}), 1 ) \
    METHOD(CLASS, getMountAngle,        ARRAYDEF({{       END }}), 1 ) \
@@ -1128,63 +1128,63 @@ REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 /**
  * @luafunc bool EngineeredItem::isActive()
- * 
+ *
  * @brief Determine if the item is active (i.e. its health is above the
  * disbaledThreshold).
- * 
+ *
  * @descr A player can activate an inactive item by repairing it. To set whether
  * an EngineeredItem as active or disabled, use setHealth()
- * 
+ *
  * @return Returns `true` if the item is active, or `false` if it is disabled
  */
 S32 EngineeredItem::lua_isActive(lua_State *L)
-{ 
-   return returnBool(L, isEnabled()); 
+{
+   return returnBool(L, isEnabled());
 }
 
 
 /**
  * @luafunc num EngineeredItem::getMountAngle()
- * 
+ *
  * @brief Gets the angle (in radians) at which the item is mounted.
- * 
+ *
  * @return Returns the mount angle, in radians.
  */
 S32 EngineeredItem::lua_getMountAngle(lua_State *L)
-{ 
-   return returnFloat(L, mAnchorNormal.ATAN2()); 
+{
+   return returnFloat(L, mAnchorNormal.ATAN2());
 }
 
 
 /**
  * @luafunc num EngineeredItem::getHealth()
- * 
- * @brief Returns health of the item. 
- * 
+ *
+ * @brief Returns health of the item.
+ *
  * @descr Health is specified as a number between 0 and 1 where 0 is completely
  * dead and 1 is totally healthy.
- * 
+ *
  * @return Returns a value between 0 and 1 indicating the health of the item.
  */
 S32 EngineeredItem::lua_getHealth(lua_State *L)
-{ 
-   return returnFloat(L, mHealth);     
+{
+   return returnFloat(L, mHealth);
 }
 
 
 /**
  * @luafunc EngineeredItem::setHealth(num health)
- * 
- * @brief Set the current health of the item. 
- * 
+ *
+ * @brief Set the current health of the item.
+ *
  * @descr Health is specified as a number between 0 and 1 where 0 is completely
  * dead and 1 is totally healthy.  Values outside this range will be clamped to
  * the valid range.
- * 
+ *
  * @param health The item's new health, between 0 and 1.
  */
 S32 EngineeredItem::lua_setHealth(lua_State *L)
-{ 
+{
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
    F32 newHealth = getFloat(L, 1);
    checkHealthBounds();
@@ -1207,12 +1207,12 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
 
 /**
  * @luafunc num EngineeredItem::getDisabledThreshold()
- * 
- * @brief Gets the health threshold below which the item becomes disabled. 
- * 
+ *
+ * @brief Gets the health threshold below which the item becomes disabled.
+ *
  * @descr The value will always be between 0 and 1. This value is constant and
  * will be the same for all \link EngineeredItem EngineeredItems\endlink.
- * 
+ *
  * @return Health threshold below which the item will be disabled.
  */
 S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
@@ -1223,13 +1223,13 @@ S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 
 /**
  * @luafunc int EngineeredItem::getHealRate()
- * 
- * @brief Gets the item's healRate. 
- * 
+ *
+ * @brief Gets the item's healRate.
+ *
  * @descr The specified heal rate will be the time, in seconds, it takes for the
  * item to repair itself by 10.  If an EngineeredItem is assigned to the neutral
  * team, it will not heal itself.
- * 
+ *
  * @return The item's heal rate
  */
 S32 EngineeredItem::lua_getHealRate(lua_State *L)
@@ -1240,14 +1240,14 @@ S32 EngineeredItem::lua_getHealRate(lua_State *L)
 
 /**
  * @luafunc EngineeredItem::setHealRate(int healRate)
- * 
- * @brief Sets the item's heal rate. 
- * 
+ *
+ * @brief Sets the item's heal rate.
+ *
  * @descr The specified `healRate` will be the time, in seconds, it takes for
  * the item to repair itself by 10. In practice, a heal rate of 1 makes an item
  * effectively unkillable. If the item is assigned to the neutral team, it will
  * not heal itself.  Passing a negative value will generate an error.
- * 
+ *
  * @param healRate The new heal rate. Specify 0 to disable healing.
  */
 S32 EngineeredItem::lua_setHealRate(lua_State *L)
@@ -1267,9 +1267,9 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
 
 /**
  * @luafunc bool EngineeredItem::getEngineered()
- * 
+ *
  * @brief Get whether the item can be totally destroyed
- * 
+ *
  * @return `true` if the item can be destroyed.
  */
 S32 EngineeredItem::lua_getEngineered(lua_State *L)
@@ -1280,9 +1280,9 @@ S32 EngineeredItem::lua_getEngineered(lua_State *L)
 
 /**
  * @luafunc EngineeredItem::setEngineered(bool engineered)
- * 
+ *
  * @brief Sets whether the item can be destroyed when its health reaches zero.
- * 
+ *
  * @param engineered `true` to make the item destructible, `false` to make it
  * permanent
  */
@@ -1590,7 +1590,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
+   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(),
                                     start, mAnchorNormal, forceFieldEnd, &collObj))
    {
       setEndSegment(dynamic_cast<WallSegment *>(collObj));
@@ -1615,7 +1615,7 @@ void ForceFieldProjector::onGeomChanged()
 // Lua interface
 
 // No custom ForceFieldProjector methods
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(ForceFieldProjector, LUA_METHODS);
@@ -1709,7 +1709,7 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
 // This is only created server-side
-ForceField::ForceField(S32 team, Point start, Point end) 
+ForceField::ForceField(S32 team, Point start, Point end)
 {
    setTeam(team);
 
@@ -1903,7 +1903,7 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end)
 
 
 // Pass in a database containing walls or wallsegments
-bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,  
+bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,
                                    Point &end, DatabaseObject **collObj)
 {
    F32 time;
@@ -1915,7 +1915,7 @@ bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, c
 
    if(*collObj)
    {
-      end.set(start + (end - start) * time); 
+      end.set(start + (end - start) * time);
       return true;
    }
 
@@ -1968,7 +1968,7 @@ Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Turret", "constructor");
-      
+
       if(profile == 1 )
       {
          setPos(L, 1);
@@ -2061,7 +2061,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
             argc1++;
          }
       }
-      
+
    }
 
    bool returnBool = EngineeredItem::processArguments(argc1, argv1, game);
@@ -2122,7 +2122,7 @@ F32 Turret::getEditorRadius(F32 currentScale)
 {
    if(mSnapped)
       return 25 * currentScale;
-   else 
+   else
       return Parent::getEditorRadius(currentScale);
 }
 
@@ -2236,7 +2236,7 @@ void Turret::idle(IdleCallPath path)
       if(isMountableItemType(fillVector[i]->getObjectTypeNumber()))
          if(static_cast<MountableItem *>(fillVector[i])->isMounted())
             continue;
-      
+
       BfObject *potential = static_cast<BfObject *>(fillVector[i]);
       if(potential->getTeam() == getTeam())     // Is target on our team?
          continue;                              // ...if so, skip it!
@@ -2277,7 +2277,7 @@ void Turret::idle(IdleCallPath path)
 
       // Skip this target if there's a friendly object in the way
       if(hitObject && hitObject->getTeam() == getTeam() &&
-        (hitObject->getPos() - aimPos).lenSquared() < delta.lenSquared())         
+        (hitObject->getPos() - aimPos).lenSquared() < delta.lenSquared())
          continue;
 
       F32 dist = delta.len();
@@ -2292,7 +2292,7 @@ void Turret::idle(IdleCallPath path)
 
    if(!bestTarget)      // No target, nothing to do
       return;
- 
+
    // Aim towards the best target.  Note that if the turret is at one extreme of its range, and the target is at the other,
    // then the turret will rotate the wrong-way around to aim at the target.  If we were to detect that condition here, and
    // constrain our turret to turning the correct direction, that would be great!!
@@ -2322,7 +2322,7 @@ void Turret::idle(IdleCallPath path)
       {
          bestDelta.normalize();
          Point velocity;
-         
+
          // String handling in C++ is such a mess!!!
          string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " turret";
          mKillString = killer.c_str();
@@ -2432,8 +2432,8 @@ bool Turret::canBeHostile() { return true; }
 bool Turret::canBeNeutral() { return true; }
 
 
-void Turret::onGeomChanged() 
-{ 
+void Turret::onGeomChanged()
+{
    mCurrentAngle = mAnchorNormal.ATAN2();       // Keep turret pointed away from the wall... looks better like that!
    Parent::onGeomChanged();
 }
@@ -2443,10 +2443,10 @@ void Turret::onGeomChanged()
 // Lua interface
 /**
  * @luaclass Turret
- * 
+ *
  * @brief Mounted gun that shoots at enemy ships and other objects.
  */
-//               Fn name     Param profiles  Profile count                           
+//               Fn name     Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getAimAngle,  ARRAYDEF({{      END }}), 1 ) \
    METHOD(CLASS, setAimAngle,  ARRAYDEF({{ NUM, END }}), 1 ) \
@@ -2465,9 +2465,9 @@ REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
 /**
  * @luafunc num Turret::getAimAngle()
- * 
+ *
  * @brief Returns the angle (in radians) at which the Turret is aiming.
- * 
+ *
  * @return The angle (in radians) at which the Turret is aiming.
  */
 S32 Turret::lua_getAimAngle(lua_State *L)
@@ -2478,9 +2478,9 @@ S32 Turret::lua_getAimAngle(lua_State *L)
 
 /**
  * @luafunc Turret::setAimAngle(num angle)
- * 
+ *
  * @brief Sets the angle (in radians) where the Turret should aim.
- * 
+ *
  * @param angle Angle (in radians) where the turret should aim.
  */
 S32 Turret::lua_setAimAngle(lua_State *L)

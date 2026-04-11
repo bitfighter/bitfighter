@@ -39,8 +39,8 @@ public:
    const char *getShortName() const;
    const char **getInstructionString() const;
    HelpItem getGameStartInlineHelpItem() const;
-   
-   bool isFlagGame() const; 
+
+   bool isFlagGame() const;
    bool isTeamGame() const;
    bool canBeTeamGame()  const;
    bool canBeIndividualGame() const;

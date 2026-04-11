@@ -11,8 +11,8 @@
 #include "FontContextEnum.h"
 #include "freeglut_stroke.h"     // Our stroke font handler -- include here to resolve namespace grief
 
-extern "C" { 
-#  include "../fontstash/fontstash.h" 
+extern "C" {
+#  include "../fontstash/fontstash.h"
 }
 
 #include <string>
@@ -28,7 +28,7 @@ namespace Zap
 class BfFont;
 class GameSettings;
 
-class FontManager 
+class FontManager
 {
 
 private:
@@ -66,7 +66,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BfFont 
+class BfFont
 {
 private:
    bool mIsStrokeFont;

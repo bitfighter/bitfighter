@@ -214,7 +214,7 @@ S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
 {
    if(index < 0)
       return 0;
-   
+
    if(index > getMaxFirstItemIndex())
       return getMaxFirstItemIndex();
 
@@ -249,7 +249,7 @@ static void renderMenuInstructions(GameSettings *settings)
    if(settings->getInputMode() == InputModeKeyboard)
    {
       static const SymbolString KeyboardInstructions(
-            "[[Up Arrow]], [[Down Arrow]] to choose | [[Enter]] to select | [[Esc]] exits menu", 
+            "[[Up Arrow]], [[Down Arrow]] to choose | [[Enter]] to select | [[Esc]] exits menu",
             settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
 
       KeyboardInstructions.render(Point(canvasWidth / 2, y + size));
@@ -257,7 +257,7 @@ static void renderMenuInstructions(GameSettings *settings)
    else
    {
       static const SymbolString JoystickInstructions(
-            "[[DPad Up]],  [[Dpad Down]] to choose | [[Start]] to select | [[Back]] exits menu", 
+            "[[DPad Up]],  [[Dpad Down]] to choose | [[Start]] to select | [[Back]] exits menu",
             settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
 
       JoystickInstructions.render(Point(canvasWidth / 2, y + size));
@@ -323,13 +323,13 @@ void MenuUserInterface::render()
 
    FontManager::pushFontContext(MenuHeaderContext);
 
-   // Title 
+   // Title
    if(mMenuTitle.length() != 0) // This check is to fix green dot from zero length underline on some systems including linux software renderer (linux command: LIBGL_ALWAYS_SOFTWARE=1 ./bitfighter)
    {
       r.setColor(Colors::green);
       drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
    }
-   
+
    // Subtitle
    r.setColor(mMenuSubTitleColor);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle.c_str());
@@ -358,10 +358,10 @@ void MenuUserInterface::render()
       S32 textsize = getTextSize(size);
       S32 gap = getGap(size);
       S32 highlightVertOffset = 3;
-      
+
       // Highlight selected item
       if(selectedIndex == i + offset)
-         drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact            + highlightVertOffset, 
+         drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact            + highlightVertOffset,
                                canvasWidth, y + textsize + gap / 2 - shrinkfact + highlightVertOffset);
 
       S32 indx = i + offset;
@@ -474,7 +474,7 @@ void MenuUserInterface::onMouseMoved()
 
 S32 MenuUserInterface::getSelectedMenuItem()
 {
-   S32 mouseY = (S32)DisplayManager::getScreenInfo()->getMousePos()->y;   
+   S32 mouseY = (S32)DisplayManager::getScreenInfo()->getMousePos()->y;
 
    S32 cumHeight = getYStart();
 
@@ -491,7 +491,7 @@ S32 MenuUserInterface::getSelectedMenuItem()
       cumHeight += height;
 
       if(mouseY < cumHeight)
-         return i + mFirstVisibleItem;     
+         return i + mFirstVisibleItem;
 
       cumHeight += getGap(size) / 2;
    }
@@ -660,10 +660,10 @@ S32 MenuUserInterface::getTotalMenuItemHeight()
 bool MenuUserInterface::processKeys(InputCode inputCode)
 {
    inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
-   
+
    if(Parent::onKeyDown(inputCode))
-   { 
-      // Do nothing 
+   {
+      // Do nothing
    }
    else if(U32(selectedIndex) >= U32(mMenuItems.size()))  // Probably empty menu... Can only go back.
    {
@@ -995,7 +995,7 @@ void MainMenuUserInterface::onActivate()
 // Set the MOTD we received from the master
 void MainMenuUserInterface::setMOTD(const char *motd)
 {
-   strncpy(mMOTD, motd, MOTD_LEN);     
+   strncpy(mMOTD, motd, MOTD_LEN);
 
    motdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
@@ -1164,13 +1164,13 @@ static void setDisplayModeCallback(ClientGame *game, U32 mode)
 // Used below and by UIEditor
 MenuItem *getWindowModeMenuItem(U32 displayMode)
 {
-   Vector<string> opts;   
+   Vector<string> opts;
    // These options are aligned with the DisplayMode enum
    opts.push_back("WINDOWED");
    opts.push_back("FULLSCREEN STRETCHED");
    opts.push_back("FULLSCREEN");
 
-   return new ToggleMenuItem("DISPLAY MODE:", opts, displayMode, true, 
+   return new ToggleMenuItem("DISPLAY MODE:", opts, displayMode, true,
                              setDisplayModeCallback, "Set the game mode to windowed or fullscreen", KEY_G);
 }
 
@@ -1182,16 +1182,16 @@ void OptionsMenuUserInterface::setupMenus()
 
    GameSettings *settings = getGame()->getSettings();
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "INPUT", inputCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "INPUT", inputCallback,
                         "Joystick settings, Remap keys", KEY_I));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & MUSIC", soundOptionsSelectedCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & MUSIC", soundOptionsSelectedCallback,
                         "Change sound and music related options", KEY_S));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "IN-GAME HELP", inGameHelpSelectedCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "IN-GAME HELP", inGameHelpSelectedCallback,
                         "Change settings related to in-game tutorial/help", KEY_H));
 
-   addMenuItem(new YesNoMenuItem("AUTOLOGIN:", !settings->shouldShowNameEntryScreenOnStartup(), 
+   addMenuItem(new YesNoMenuItem("AUTOLOGIN:", !settings->shouldShowNameEntryScreenOnStartup(),
                                  "If selected, you will automatically log in "
                                  "on start, bypassing the first screen", KEY_A));
 
@@ -1207,7 +1207,7 @@ void OptionsMenuUserInterface::setupMenus()
    opts.push_back("HIGH");
    opts.push_back("VERY HIGH");
 
-   addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, settings->getIniSettings()->connectionSpeed + 2, true, 
+   addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, settings->getIniSettings()->connectionSpeed + 2, true,
                                   setConnectionSpeedCallback, "Speed of your connection, if your ping goes too high, try slower speed.",  KEY_E));
 #endif
 }
@@ -1273,7 +1273,7 @@ static void addControllerOptions(Vector<string> *opts)
 {
    opts->clear();
    opts->push_back("Keyboard");
-   
+
    map<S32,string>::iterator it;
    for(it = GameSettings::DetectedControllerList.begin();
          it != GameSettings::DetectedControllerList.end(); it++)
@@ -1345,7 +1345,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 void InputOptionsMenuUserInterface::setupMenus()
 {
    clearMenuItems();
-   
+
    Vector<string> opts;
 
    GameSettings *settings = getGame()->getSettings();
@@ -1360,12 +1360,12 @@ void InputOptionsMenuUserInterface::setupMenus()
    if(inputMode == InputModeJoystick)
       inputMode += GameSettings::UseControllerIndex;
 
-   addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
-                                  opts, 
+   addMenuItem(new ToggleMenuItem("PRIMARY INPUT:",
+                                  opts,
                                   inputMode,
-                                  true, 
-                                  setInputModeCallback, 
-                                  "Specify whether you want to play with your keyboard or joystick", 
+                                  true,
+                                  setInputModeCallback,
+                                  "Specify whether you want to play with your keyboard or joystick",
                                   KEY_P, KEY_I));
 
    INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
@@ -1380,7 +1380,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 
    RelAbs mode = settings->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode");
 
-   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, (U32)mode, true, 
+   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, (U32)mode, true,
                                   setControlsCallback, "Set controls to absolute (normal) or relative (like a tank) mode", KEY_C));
 }
 
@@ -1389,7 +1389,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 void InputOptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
-   getUIManager()->reactivatePrevUI();      
+   getUIManager()->reactivatePrevUI();
 }
 
 
@@ -1467,7 +1467,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
    for(S32 i = 0; i <= 10; i++)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
-   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
+   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false,
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
    if(settings->getSpecified(NO_MUSIC))
@@ -1476,12 +1476,12 @@ void SoundOptionsMenuUserInterface::setupMenus()
       addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
                                      setMusicVolumeCallback, "Set music volume", KEY_M));
 
-   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
+   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false,
                                   setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
    opts.clear();
    opts.push_back("DISABLED");      // No == 0
    opts.push_back("ENABLED");       // Yes == 1
-   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)settings->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), true, 
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)settings->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), true,
                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 }
 
@@ -1535,7 +1535,7 @@ void InGameHelpOptionsUserInterface::setupMenus()
    bool showingInGameHelp = settings->getShowingInGameHelp();
    addMenuItem(new YesNoMenuItem("SHOW IN-GAME HELP:", showingInGameHelp, "Show help/tutorial messages in game", KEY_H));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "RESET HELP MESSAGES", resetMessagesCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "RESET HELP MESSAGES", resetMessagesCallback,
                            "Reset all help/tutorial messages to their unseen state", KEY_R));
 }
 
@@ -1546,7 +1546,7 @@ void InGameHelpOptionsUserInterface::onEscape()
    bool show = getMenuItem(0)->getIntValue() == 1;    // 1 ==> Yes
 
    getGame()->setShowingInGameHelp(show);
-   
+
    getGame()->getSettings()->setShowingInGameHelp(show);
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 
@@ -1722,21 +1722,21 @@ void ServerPasswordsMenuUserInterface::setupMenus()
    GameSettings *settings = getGame()->getSettings();
 
    LevelChangePwItemIndex =
-   addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
-                                     "<Anyone can change levels>", 
-                                     "Grants access to change the levels, and set duration and winning score", 
+   addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(),
+                                     "<Anyone can change levels>",
+                                     "Grants access to change the levels, and set duration and winning score",
                                      MAX_PASSWORD_LENGTH, KEY_L));
 
    AdminPwItemIndex =
-   addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
-                                     "<No remote admin access>", 
-                                     "Allows you to kick/ban players, change their teams, and set most server parameters", 
+   addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),
+                                     "<No remote admin access>",
+                                     "Allows you to kick/ban players, change their teams, and set most server parameters",
                                      MAX_PASSWORD_LENGTH, KEY_A));
 
    ConnectionPwItemIndex =
-   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), 
-                                     "<Anyone can connect>", 
-                                     "If the Connection password is set, players need to know it to join the server", 
+   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(),
+                                     "<Anyone can connect>",
+                                     "If the Connection password is set, players need to know it to join the server",
                                      MAX_PASSWORD_LENGTH, KEY_C));
 }
 
@@ -1781,10 +1781,10 @@ NameEntryUserInterface::~NameEntryUserInterface()
 }
 
 
-void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationReason reason) 
-{ 
-   mReason = reason; 
-   mMenuTitle = ""; 
+void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationReason reason)
+{
+   mReason = reason;
+   mMenuTitle = "";
 }
 
 
@@ -1830,7 +1830,7 @@ void NameEntryUserInterface::setupMenu()
    mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LastName"), 
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LastName"),
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
 
    getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
@@ -1868,11 +1868,11 @@ void NameEntryUserInterface::renderExtras() const
 
    row++;
 
-   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
+   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size,
             "A password is only needed if you are using a reserved name.  You can reserve your");
    row++;
 
-   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
+   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size,
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
 
 
@@ -1970,11 +1970,11 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
          "Add robots and adjust their settings", KEY_R));
 
-   addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
+   addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(),
                                      "<Bitfighter Host>", "Server name shown in the game lobby",
                                      MaxServerNameLen,  KEY_N));
 
-   addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
+   addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),
                                      "<Empty>", "Server description shown in the game lobby",
                                      MaxServerDescrLen, KEY_D));
 
@@ -1997,7 +1997,7 @@ void HostMenuUserInterface::setupMenus()
 void HostMenuUserInterface::onEscape()
 {
    saveSettings();
-   getUIManager()->reactivatePrevUI();     
+   getUIManager()->reactivatePrevUI();
 }
 
 
@@ -2093,7 +2093,7 @@ static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 static void restartGameCallback(ClientGame *game, U32 unused)
 {
    game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
-   game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
+   game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming!
 }
 
 
@@ -2125,9 +2125,9 @@ void GameMenuUserInterface::buildMenu()
 {
    clearMenuItems();
    GameSettings *settings = getGame()->getSettings();
-   
+
    // Save input mode so we can see if we need to display alert if it changes
-   lastInputMode = settings->getInputMode();  
+   lastInputMode = settings->getInputMode();
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
    addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, BINDING_HELP)));
@@ -2269,8 +2269,8 @@ void LevelMenuUserInterface::onActivate()
       bool found = false;
 
       for(S32 j = 0; j < getMenuItemCount(); j++)
-         if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), "") == 0 || 
-            strcmp(gc->mLevelInfos[i].getLevelTypeName(), getMenuItem(j)->getPrompt().c_str()) == 0)     
+         if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), "") == 0 ||
+            strcmp(gc->mLevelInfos[i].getLevelTypeName(), getMenuItem(j)->getPrompt().c_str()) == 0)
          {
             found = true;
             break;            // Skip over levels with blank names or duplicate entries
@@ -2330,7 +2330,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
    // Player has demonstrated ability to add bots... no need to show help item
    game->getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(AddBotsItem, true);
 
-   // Back to the game!   
+   // Back to the game!
    game->getUIManager()->reactivateGameUI();
 }
 
@@ -2398,7 +2398,7 @@ LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
 }
 
 
-static void processLevelSelectionCallback(ClientGame *game, U32 index)             
+static void processLevelSelectionCallback(ClientGame *game, U32 index)
 {
    game->getUIManager()->getUI<LevelMenuSelectUserInterface>()->processSelection(index);
 }
@@ -2406,7 +2406,7 @@ static void processLevelSelectionCallback(ClientGame *game, U32 index)
 
 const U32 UPLOAD_LEVELS_BIT = 0x80000000;
 
-void LevelMenuSelectUserInterface::processSelection(U32 index)     
+void LevelMenuSelectUserInterface::processSelection(U32 index)
 {
    Parent::onActivate();
    GameConnection *gc = getGame()->getConnectionToServer();
@@ -2451,7 +2451,7 @@ void LevelMenuSelectUserInterface::onActivate()
    if(!strcmp(category.c_str(), UPLOAD_LEVELS))
    {
       // Get all the playable levels in levelDir
-      mLevels = getGame()->getSettings()->getLevelList();     
+      mLevels = getGame()->getSettings()->getLevelList();
 
       for(S32 i = 0; i < mLevels.size(); i++)
       {
@@ -2459,7 +2459,7 @@ void LevelMenuSelectUserInterface::onActivate()
          addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
- 
+
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
       if(gc->mLevelInfos[i].mLevelName == "")   // Skip levels with blank names --> but all should have names now!
@@ -2498,7 +2498,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 
    if(inputString == "")
       return false;
-   
+
    mNameSoFar.append(inputString);
 
    string mNameSoFarLc = lcase(mNameSoFar);
@@ -2601,7 +2601,7 @@ PlayerMenuUserInterface::~PlayerMenuUserInterface()
 }
 
 
-static void playerSelectedCallback(ClientGame *game, U32 index) 
+static void playerSelectedCallback(ClientGame *game, U32 index)
 {
    game->getUIManager()->getUI<PlayerMenuUserInterface>()->playerSelected(index);
 }
@@ -2655,9 +2655,9 @@ void PlayerMenuUserInterface::render()
       strncpy(c, clientInfo->getName().getString(), 1);        // Grab first char of name for a shortcut key
 
       // Will be used to show admin/player/robot prefix on menu
-      PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
+      PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);
 
-      PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, 
+      PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback,
                                                    InputCodeManager::stringToInputCode(c), pt);
       newItem->setUnselectedColor(*getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
@@ -2699,25 +2699,25 @@ TeamMenuUserInterface::~TeamMenuUserInterface()
 }
 
 
-static void processTeamSelectionCallback(ClientGame *game, U32 index)        
+static void processTeamSelectionCallback(ClientGame *game, U32 index)
 {
    game->getUIManager()->getUI<TeamMenuUserInterface>()->processSelection(index);
 }
 
 
-void TeamMenuUserInterface::processSelection(U32 index)        
+void TeamMenuUserInterface::processSelection(U32 index)
 {
    // Make sure user isn't just changing to the team they're already on...
    if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
    {
       // Check if was initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
-      if(getUIManager()->getPrevUI() == getUIManager()->getUI<PlayerMenuUserInterface>())        
+      if(getUIManager()->getPrevUI() == getUIManager()->getUI<PlayerMenuUserInterface>())
       {
          StringTableEntry e(nameToChange.c_str());
          getGame()->changePlayerTeam(e, index);    // Index will be the team index
       }
       else                                         // Came from player changing own team
-         getGame()->changeOwnTeam(index); 
+         getGame()->changeOwnTeam(index);
    }
 
    getUIManager()->reactivateGameUI();             // Back to the game!
@@ -2738,7 +2738,7 @@ void TeamMenuUserInterface::render()
       strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key
 
       bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
-      
+
       addMenuItem(new TeamMenuItem(i, team, processTeamSelectionCallback, InputCodeManager::stringToInputCode(c), isCurrent));
    }
 

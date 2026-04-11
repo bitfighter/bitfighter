@@ -56,9 +56,9 @@ GENERATE_LUA_METHODS_TABLE(LuaGameInfo, LUA_METHODS);
 
 /**
  * @luaclass GameInfo
- * 
+ *
  * @brief Get information about the current game.
- * 
+ *
  * @descr You can get information about the current game with the GameInfo
  * object. You only need get this object once, then you can use it as often as
  * you like. It will always reflect the latest data. You can get this object
@@ -70,15 +70,15 @@ REGISTER_LUA_CLASS(LuaGameInfo);
 
 /**
  * @luafunc GameType GameInfo::getGameType()
- * 
+ *
  * @brief Get the \ref GameTypeEnum of the current game.
- * 
+ *
  * @descr For possible values, see \ref GameTypeEnum.
- * 
+ *
  * @code
  *   print(info:getGameType() == GameType.CTFGameType) -- true when playing CTF
  * @endcode
- * 
+ *
  * @return A member of \ref GameTypeEnum.
  */
 S32 LuaGameInfo::lua_getGameType(lua_State *L)
@@ -160,9 +160,9 @@ S32 LuaGameInfo::lua_getLeadingTeam(lua_State *L) { return returnInt (L, mServer
 
 /**
  * @luafunc int GameInfo::getTeamCount()
- * 
+ *
  * @brief Get the number of teams in the game.
- * 
+ *
  * @return The number of teams in the game.
  */
 S32 LuaGameInfo::lua_getTeamCount(lua_State *L) { return returnInt (L, mServerGame->getTeamCount()); }
@@ -247,7 +247,7 @@ S32 LuaGameInfo::lua_getEventScore(lua_State *L)
  * @return A table containing the PlayerInfo for each player (and robot) in
  * the game
  */
-S32 LuaGameInfo::lua_getPlayers(lua_State *L) 
+S32 LuaGameInfo::lua_getPlayers(lua_State *L)
 {
    ServerGame *game = mServerGame;
 
@@ -261,7 +261,7 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
 
       if(clientInfo->getPlayerInfo() == NULL || clientInfo->isRobot())     // Skip defunct players and bots
          continue;
-      
+
       clientInfo->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
@@ -292,7 +292,7 @@ S32 LuaGameInfo::lua_getTeam(lua_State *L)
    checkArgList(L, functionArgs, "GameInfo", "getTeam");
 
    S32 index = getTeamIndex(L, 1);
-   
+
    if(U32(index) >= U32(mServerGame->getTeamCount())) // Out of range index?
       return returnNil(L);
 

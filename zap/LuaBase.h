@@ -21,7 +21,7 @@
 #include <vector>
 #include <map>
 
-#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor   
+#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor
 
 using namespace std;
 using namespace TNL;
@@ -95,7 +95,7 @@ namespace LuaArgs
    LUA_ARG_TYPE_ITEM( MOVOBJ,      "MoveObject"                                           ) \
    LUA_ARG_TYPE_ITEM( BFOBJ,       "BfObject (or child class)"                            ) \
    LUA_ARG_TYPE_ITEM( ANY,         "Any combination of 0 or more arguments"               ) \
-      
+
 
    // Create the enum declaration
    enum LuaArgType {
@@ -229,7 +229,7 @@ struct LuaFunctionArgList {
 // This is an asociation of a LuaFunctionArgList with the function name it is associated with
 struct LuaFunctionProfile {
    const char         *functionName;
-   LuaFunctionArgList  functionArgList;   
+   LuaFunctionArgList  functionArgList;
 };
 
 

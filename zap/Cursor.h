@@ -12,20 +12,20 @@
 
 struct SDL_Cursor;
 
-namespace Zap 
+namespace Zap
 {
 
-struct Cursor 
+struct Cursor
 {
 private:
    void reverseBits();           // Reverse order of bits in an array of bytes
    SDL_Cursor *toSDL();          // Convert to SDL format
 
-public:     
+public:
    // These fields have to be public to initialize them inline in Cursors.cpp
    U32 width, height;
    U32 hotX, hotY;
-   U8 bits[128];   
+   U8 bits[128];
    U8 maskBits[128];
 
    static void init();                    // Initialize all cursors

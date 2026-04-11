@@ -24,7 +24,7 @@ enum MenuItemTypes {
    ToggleMenuItemType,
    CounterMenuItemType,
    TimeCounterMenuItemType,
-   TextEntryMenuItemType,   
+   TextEntryMenuItemType,
    PlayerMenuItemType,
    TeamMenuItemType,
    FloatCounterMenuItemType
@@ -58,7 +58,7 @@ private:
 protected:
    string mDisplayVal;     // Text displayed on menu
    string mHelp;           // An optional help string
-      
+
    MenuUserInterface *mMenu;
 
    Color mSelectedColor;
@@ -75,9 +75,9 @@ public:
    // Constructors
    MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
    MenuItem(const string &displayVal);
-   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const string &help, 
+   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const string &help,
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
+   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help,
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~MenuItem();       // Destructor
@@ -110,7 +110,7 @@ public:
 
    MenuItemSize getSize();
    void setSize(MenuItemSize size);
-   
+
    virtual const char *getSpecialEditingInstructions();
    virtual S32 getIntValue() const;
    virtual string getValueForWritingToLevelFile() const;
@@ -192,13 +192,13 @@ class ToggleMenuItem : public ValueMenuItem
 
 private:
    string getOptionText() const;    // Helper function
-   
+
 protected:
    U32 mIndex;
    bool mWrap;
 
 public:
-   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap,
                   void (*callback)(ClientGame *, U32), const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~ToggleMenuItem();  // Destructor
 
@@ -208,7 +208,7 @@ public:
    virtual void setValueIndex(U32 index);
    virtual S32 getIntValue() const;
    virtual void setIntValue(S32 value);
-   
+
    virtual string getValue() const;
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
@@ -280,7 +280,7 @@ protected:
    string mUnits;
    string mMinMsg;
 
-   virtual void increment(S32 fact = 1); 
+   virtual void increment(S32 fact = 1);
    virtual void decrement(S32 fact = 1);
    virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
    virtual void backspace();
@@ -288,8 +288,8 @@ protected:
    virtual string getUnits() const;
 
 public:
-   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
-                   const string &units, const string &minMsg, 
+   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal,
+                   const string &units, const string &minMsg,
                    const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~CounterMenuItem();  // Destructor
@@ -398,7 +398,7 @@ protected:
    virtual string getUnits() const;
 
 public:
-   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~TimeCounterMenuItem();
 
@@ -420,7 +420,7 @@ protected:
    virtual S32 getBigIncrement();
 
 public:
-   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~TimeCounterMenuItemSeconds();
 
@@ -449,7 +449,7 @@ protected:
 
 public:
    // Contstuctor
-   TextEntryMenuItem(const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, 
+   TextEntryMenuItem(const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen,
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~TextEntryMenuItem();  // Destructor
@@ -497,7 +497,7 @@ class MaskedTextEntryMenuItem : public TextEntryMenuItem
    typedef TextEntryMenuItem Parent;
 
 public:
-   MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
+   MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen,
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~MaskedTextEntryMenuItem();
 };
@@ -555,7 +555,7 @@ class TeamMenuItem : public MenuItem
 {
 private:
    AbstractTeam *mTeam;
-   bool mIsCurrent;                 // Is this a player's current team? 
+   bool mIsCurrent;                 // Is this a player's current team?
    string getOptionText() const;    // Helper function
 
 public:

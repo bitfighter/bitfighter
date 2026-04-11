@@ -23,7 +23,7 @@ bool WallSegmentManager::mBatchUpdatingGeom = false;
 WallSegmentManager::WallSegmentManager()
 {
    // These deleted in the destructor
-   mWallSegmentDatabase = new GridDatabase(false);      
+   mWallSegmentDatabase = new GridDatabase(false);
    mWallEdgeDatabase    = new GridDatabase(false);
 }
 
@@ -83,7 +83,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
    rebuildEdges();         // Rebuild all edges for all walls
 
    // This block is a modified version of updateAllMountedItems that homes in on a particular segment
-   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
+   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we
    // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
    fillVector.clear();
    editorObjectDatabase->findObjects((TestFunc)isEngineeredType, fillVector);
@@ -137,10 +137,10 @@ void WallSegmentManager::rebuildEdges()
    mWallEdgePoints.clear();
 
    // Run clipper --> fills mWallEdgePoints from mWallSegments
-   clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
+   clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);
    mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
 
-   // Create a WallEdge object from the clipped wall geometry.  We'll add it to the WallEdgeDatabase, which will 
+   // Create a WallEdge object from the clipped wall geometry.  We'll add it to the WallEdgeDatabase, which will
    // delete the object when it is ulitmately removed.
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
    {
@@ -169,7 +169,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
 
 // Given a wall, build all the segments and related geometry; also manage any affected mounted items
 // Operates only on passed wall segment -- does not alter others
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject, 
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject,
                                                         const Vector<DatabaseObject *> &engrObjects)
 {
 #ifndef ZAP_DEDICATED
@@ -207,7 +207,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
 
    // Traditional walls will be represented by a series of rectangles, each representing a "puffed out" pair of sequential vertices
-   else     
+   else
    {
       TNLAssert(dynamic_cast<WallItem *>(wall), "Expected an WallItem!");
       WallItem *wallItem = static_cast<WallItem *>(wall);
@@ -233,7 +233,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    }
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 i = 0; i < toBeRemounted.size(); i++)  
+   for(S32 i = 0; i < toBeRemounted.size(); i++)
       toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager(), NULL);
 
 #endif
@@ -263,7 +263,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSe
 // Called by WallItems and PolyWalls when their geom changes
 void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 {
-   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
+   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we
    // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
    fillVector.clear();
    database->findObjects((TestFunc)isEngineeredType, fillVector);
@@ -276,7 +276,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 }
 
 
-// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
+// Called when a wall segment has somehow changed.  All current and previously intersecting segments
 // need to be recomputed.  This only operates on the specified item.  rebuildEdges() will need to be run separately.
 void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, BfObject *item)
 {
@@ -348,8 +348,8 @@ void WallSegmentManager::rebuildSelectedOutline()
    }
 
    // If no walls are selected we can skip a lot of work, butx removing this check will not change the result
-   if(selectedSegments.size() == 0)          
-      mSelectedWallEdgePoints.clear();    
+   if(selectedSegments.size() == 0)
+      mSelectedWallEdgePoints.clear();
    else
       clipAllWallEdges(&selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }

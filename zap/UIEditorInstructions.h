@@ -54,7 +54,7 @@ public:
    void renderScripting() const;
 
    S32 getPageCount() const;
- 
+
    bool onKeyDown(InputCode inputCode);
 
    void nextPage();

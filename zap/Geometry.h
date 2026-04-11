@@ -118,7 +118,7 @@ public:
    F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
-   void unpackGeom(GhostConnection *connection, BitStream *stream); 
+   void unpackGeom(GhostConnection *connection, BitStream *stream);
    void setGeom(const Vector<Point> &points);
 
    string geomToLevelCode() const;
@@ -141,11 +141,11 @@ private:
 
 protected:
    Vector<Point> mPolyBounds;
-      
-   bool mAnyVertsSelected;
-   Vector<bool> mVertSelected; 
 
-   void checkIfAnyVertsSelected();     
+   bool mAnyVertsSelected;
+   Vector<bool> mVertSelected;
+
+   void checkIfAnyVertsSelected();
 
 public:
    PolylineGeometry();           // Constructor
@@ -178,7 +178,7 @@ public:
    virtual F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
-   void unpackGeom(GhostConnection *connection, BitStream *stream); 
+   void unpackGeom(GhostConnection *connection, BitStream *stream);
    void setGeom(const Vector<Point> &points);
 
    string geomToLevelCode() const;

@@ -52,7 +52,7 @@ class FxManager
       F32 size;
       F32 growthRate;
       S32 ttl;    // Milliseconds
-      
+
       void idle(U32 timeDelta);
       void render() const;
    };
@@ -64,7 +64,7 @@ class FxManager
 
    static const U32 MAX_SPARKS = 8192;    // Make this an even number
 
-   U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS 
+   U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS
    U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we last overwrote
 
    Spark mSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS

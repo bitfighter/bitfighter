@@ -108,9 +108,9 @@ private:
 
    bool mouseInHeaderRow(const Point *pos);
 
-   void addServersToPingList(const Vector<ServerAddr> &serverList); 
+   void addServersToPingList(const Vector<ServerAddr> &serverList);
    void forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster);
-   void sort();                                                
+   void sort();
 
 public:
    explicit QueryServersUserInterface(ClientGame *game);       // Constructor
@@ -143,7 +143,7 @@ public:
          ReceivedQuery,
       };
 
-      ServerRef(S32 serverId, const Address &address, const string& serverName, State state, bool isLocalServer); 
+      ServerRef(S32 serverId, const Address &address, const string& serverName, State state, bool isLocalServer);
       virtual ~ServerRef();
 
       State state;
@@ -204,7 +204,7 @@ public:
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken, S32 serverId);
-   void gotQueryResponse(const Address &theAddress, S32 serverId, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
+   void gotQueryResponse(const Address &theAddress, S32 serverId, const Nonce &clientNonce, const char *serverName, const char *serverDescr,
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    void gotServerListFromMaster(const Vector<ServerAddr> &serverList);

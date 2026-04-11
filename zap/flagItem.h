@@ -117,13 +117,13 @@ public:
 	static const char *luaClassName;
 	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
-   
+
    S32 lua_isInInitLoc(lua_State *L);      // Is flag in it's initial location?
    S32 lua_getFlagCount(lua_State *L);
 
    // Override some parent methods
    S32 lua_isInCaptureZone(lua_State *L);
-   S32 lua_getCaptureZone(lua_State *L);   
+   S32 lua_getCaptureZone(lua_State *L);
 };
 
 

@@ -62,9 +62,9 @@ template<> ColorEntryMode Setting<ColorEntryMode>::fromString(const string &val)
 
 // Constructor
 AbstractSetting::AbstractSetting(const string &name, const string &key, const string &section, const string &comment):
-   mName(name), 
-   mIniKey(key), 
-   mIniSection(section), 
+   mName(name),
+   mIniKey(key),
+   mIniSection(section),
    mComment(comment)
 {
    // Do nothing

@@ -20,13 +20,13 @@ TNL_IMPLEMENT_CLASS(Zone);    // Allows classes to be autoconstructed by name
 
 
 // Combined Lua / C++ constructor)
-Zone::Zone(lua_State *L)   
+Zone::Zone(lua_State *L)
 {
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Zone", "constructor");
-         
+
       if(profile == 1)
          setGeom(L, 1);
    }
@@ -155,10 +155,10 @@ bool Zone::collide(BfObject *hitObject)
  * @luafunc Zone::Zone()
  * @luafunc Zone::Zone(Geom poly)
  * @luaclass Zone
- * 
+ *
  * @brief Invisible objects, used mainly for generating events.
  */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS,  containsPoint,           ARRAYDEF({{ PT, END }}),        1 ) \
 
@@ -172,7 +172,7 @@ REGISTER_LUA_SUBCLASS(Zone, BfObject);
 
 /**
  * @luafunc bool Zone::containsPoint(point p)
- * 
+ *
  * @brief
  * Check whether `p` lies inside of this Zone.
  *
@@ -184,7 +184,7 @@ REGISTER_LUA_SUBCLASS(Zone, BfObject);
  * subpolygon.
  *
  * @param p The point to check.
- * 
+ *
  * @return `true` if `p` lies within the zone, `false` otherwise
  */
 int Zone::lua_containsPoint(lua_State *L)

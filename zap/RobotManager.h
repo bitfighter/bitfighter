@@ -17,7 +17,7 @@ using namespace TNL;
 
 namespace Zap
 {
-  
+
 class ServerGame;
 class Robot;
 
@@ -28,7 +28,7 @@ private:
 
    bool mManagerActive;          // True when the manager is active
    bool mAutoLevelTeams;         // When true, bots will be added/removed to make sure all teams are even
-   
+
    S32 mTargetPlayerCount;       // Target number of bots and players; actual count may be higher when mAutoLevelTeams is true
    ServerGame *mGame;
 
@@ -45,7 +45,7 @@ public:
    static S32 getMaxBots(GameSettings *settings, bool isAdmin);
 
    // These are public only for access by tests
-   static S32 findMinPlayers(S32 players, S32 teams);   
+   static S32 findMinPlayers(S32 players, S32 teams);
    static S32 getMaxPlayersPerBalancedTeam(S32 players, S32 teams);
 
 

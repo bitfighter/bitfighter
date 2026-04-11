@@ -122,7 +122,7 @@ public:
    S32 lua_getInterceptCourse(lua_State *L);
 
    S32 lua_fireWeapon(lua_State *L);
-   S32 lua_hasWeapon(lua_State *L);  
+   S32 lua_hasWeapon(lua_State *L);
 
    S32 lua_fireModule(lua_State *L);
    S32 lua_hasModule(lua_State *L);

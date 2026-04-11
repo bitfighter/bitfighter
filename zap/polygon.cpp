@@ -14,7 +14,7 @@ namespace Zap
 
 // Constructor
 PolygonObject::PolygonObject()
-{  
+{
    setNewGeometry(geomPolygon);
 }
 
@@ -27,11 +27,11 @@ PolygonObject::~PolygonObject()
 
 
 // Tell the geometry that things have changed
-void PolygonObject::onGeomChanged() 
-{ 
-   onPointsChanged(); 
+void PolygonObject::onGeomChanged()
+{
+   onPointsChanged();
    Parent::onGeomChanged();
-}  
+}
 
 
 void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
@@ -52,9 +52,9 @@ void PolygonObject::renderDock()
 }
 
 
-void PolygonObject::highlightDockItem() 
-{   
-   renderPolyHighlight(); 
+void PolygonObject::highlightDockItem()
+{
+   renderPolyHighlight();
 }
 
 
@@ -83,10 +83,10 @@ void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 tea
    F32 w = 20;    // Half the width
 
    clearVerts();
-   addVert(point + Point(-w, 0)); 
-   addVert(point + Point( w, 0)); 
-   addVert(point + Point( w, h)); 
-   addVert(point + Point(-w, h)); 
+   addVert(point + Point(-w, 0));
+   addVert(point + Point( w, 0));
+   addVert(point + Point( w, h));
+   addVert(point + Point(-w, h));
 
    Parent::prepareForDock(game, point, teamIndex);
 #endif
@@ -115,8 +115,8 @@ void PolygonObject::newObjectFromDock(F32 gridSize)
 
 // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
 Point PolygonObject::getInitialPlacementOffset(U32 gridSize) const
-{ 
-   return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
+{
+   return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2);
 }
 
 

@@ -40,7 +40,7 @@ public:
    GoalZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
@@ -55,14 +55,14 @@ public:
    void onAddedToGame(Game *theGame);
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
-   
+
    bool isFlashing();
    void setFlashCount(S32 i);
 
    S32 getScore();
    //bool hasFlag();
    void setHasFlag(bool hasFlag);
-   
+
    ClientInfo *getCapturer();
    void setCapturer(ClientInfo *clientInfo);
 
@@ -75,9 +75,9 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
-   bool hasTeam();      
-   bool canBeHostile(); 
-   bool canBeNeutral(); 
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
 
 
    string toLevelCode() const;

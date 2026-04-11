@@ -7,8 +7,8 @@
  *	This is my wrapper-class to create
  *	a MD5 Hash from a string and a file.
  *
- *	This code is completly free, you 
- *	can copy it, modify it, or do 
+ *	This code is completly free, you
+ *	can copy it, modify it, or do
  *	what ever you want with it.
  *
  *	Feb. 2005
@@ -25,11 +25,11 @@
 class md5wrapper
 {
 	private:
-	
+
 		/*
 		 * internal hash function, calling
 		 * the basic methods from md5.h
-		 */	
+		 */
 		std::string hashit(std::string text);
 
 		/*
@@ -45,12 +45,12 @@ class md5wrapper
 
 		//destructor
 		virtual ~md5wrapper();
-		
+
 		/*
 		 * creates a MD5 hash from
 		 * "text" and returns it as
 		 * string
-		 */	
+		 */
 		std::string getHashFromString(std::string text);
 		std::string getHashFromString(const char *text);
 
@@ -60,9 +60,9 @@ class md5wrapper
 
 		/*
 		 * creates a MD5 hash from
-		 * a file specified in "filename" and 
+		 * a file specified in "filename" and
 		 * returns it as string
-		 */	
+		 */
 		std::string getHashFromFile(std::string filename);
 };
 

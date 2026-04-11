@@ -210,10 +210,10 @@ public:
 
    string toLevelCode() const;
 
-   bool hasTeam();     
+   bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
-   
+
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    //// Lua interface

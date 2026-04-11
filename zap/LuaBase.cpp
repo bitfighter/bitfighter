@@ -97,7 +97,7 @@ S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const 
          bool ok = false;
 
          if(stackPos < stackDepth)
-         {  
+         {
             stackPos++;
             ok = checkLuaArgs(L, candidateArgList[j], stackPos);
          }
@@ -112,7 +112,7 @@ S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const 
       if(validProfile && (stackPos == stackDepth))
          return i;
    }
-   
+
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
    // If we want a stack trace for parameter errors, we need to force it here... not sure how, exactly
    string luaError = "Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
@@ -142,13 +142,13 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
       S32 pointsFound = 0;
       lua_pushnil(L);                     // First key
       while(lua_next(L, stackPos) != 0)   // Traverse table
-      { 
+      {
          if(!luaIsPoint(L, -1))          // Is it a point?  If not, cleanup and bail
          {
-            lua_pop(L, 2);                
+            lua_pop(L, 2);
             return false;
          }
-         lua_pop(L, 1); 
+         lua_pop(L, 1);
          pointsFound++;
       }
       return pointsFound >= minNumberOfPoints;
@@ -192,7 +192,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          return ok;
       }
 
-      case STR:               
+      case STR:
          return lua_isstring(L, stackPos);
 
       case STRS:
@@ -206,13 +206,13 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          return ok;
       }
 
-      case BOOL:               
+      case BOOL:
          return lua_isboolean(L, stackPos);
 
       case PT:
          if(luaIsPoint(L, stackPos))
             return true;
-         
+
          return false;
 
       // SIMPLE_LINE: A pair of points, or a table containing two points
@@ -316,7 +316,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
             return (i >= 0 && i < EventManager::EventTypes);
          }
          return false;
-               
+
       case BFOBJ:
          return luaW_is<BfObject>(L, stackPos);
 
@@ -482,15 +482,15 @@ static string stringify(lua_State *L, S32 index)
    if(t > LUA_TTHREAD || t < -1)
       return "Invalid object type id " + itos(t);
 
-   switch (t) 
+   switch (t)
    {
       case LUA_TNIL:
          return "(nil)";
       case LUA_TSTRING:
          return "string: " + string(lua_tostring(L, index));
-      case LUA_TBOOLEAN:  
+      case LUA_TBOOLEAN:
          return "boolean: " + string(lua_toboolean(L, index) ? "true" : "false");
-      case LUA_TNUMBER:    
+      case LUA_TNUMBER:
          return "number: " + itos(S32(lua_tonumber(L, index)));
       default:
          char outString[32];
@@ -513,12 +513,12 @@ bool dumpTable(lua_State *L, S32 tableIndex, const char *msg)
       tableIndex -= 1;
                                                             // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
    lua_pushnil(L);      // First key                        // -- ... table nil
-   while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]      
+   while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]
    {
-      string key = stringify(L, -2);                  
-      string val = stringify(L, -1);                  
+      string key = stringify(L, -2);
+      string val = stringify(L, -1);
 
-      logprintf("%s - %s", key.c_str(), val.c_str());        
+      logprintf("%s - %s", key.c_str(), val.c_str());
       lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
    }
 
@@ -706,7 +706,7 @@ S32 luaTableCopy(lua_State *L)
    {
                                // -- t_old, t_new, mt
       lua_setmetatable(L, -2); // -- t_old, t_new
-   } 
+   }
    lua_remove(L, -2);          // -- t_new
    return 1;
 }
@@ -784,13 +784,13 @@ S32 returnPoints(lua_State *L, const Vector<Point> *points)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not clean!");
 
    // Create an empty table with enough space reserved
-   lua_createtable(L, points->size(), 0);                  //                                -- table                                                   
+   lua_createtable(L, points->size(), 0);                  //                                -- table
    S32 tableIndex = 1;     // Table will live on top of the stack, at index 1
 
    for(S32 i = 0; i < points->size(); i++)
    {
       luaPushPoint(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
-      lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point                                      
+      lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point
    }
 
    return 1;

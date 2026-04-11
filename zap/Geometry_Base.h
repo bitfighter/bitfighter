@@ -11,7 +11,7 @@
 
 namespace TNL
 {
-   class GhostConnection; 
+   class GhostConnection;
    class BitStream;
 }
 
@@ -22,12 +22,12 @@ using namespace TNL;
 namespace Zap
 {
 
-enum GeomType {           
-   geomPoint,        // One point      
-   geomSimpleLine,   // Two points   
+enum GeomType {
+   geomPoint,        // One point
+   geomSimpleLine,   // Two points
    geomPolyLine,     // Many points
    geomPolygon,      // Many points, closed loop
-   geomNone,         // Singularity   
+   geomNone,         // Singularity
 };
 
 
@@ -65,7 +65,7 @@ public:
    virtual const Vector<Point> *getFill() const;
    virtual Point getCentroid() const;
    virtual F32 getLabelAngle() const;
-                                                            
+
    virtual void packGeom(GhostConnection *connection, BitStream *stream);
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream);
    virtual void setGeom(const Vector<Point> &points);

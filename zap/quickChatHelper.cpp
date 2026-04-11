@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "quickChatHelper.h"     
+#include "quickChatHelper.h"
 
 #include "UI.h"      // For playBoop()
 
@@ -90,7 +90,7 @@ void QuickChatHelper::render()
    {
       TNLAssert(menuItems->size() > 0, "Should have some items here!");
 
-      r.setColor(Colors::red); 
+      r.setColor(Colors::red);
       drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
@@ -98,8 +98,8 @@ void QuickChatHelper::render()
    {
       // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
       const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
-      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), 
-                   oldItem, oldMenuItems->size(), 
+      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(),
+                   oldItem, oldMenuItems->size(),
                    mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth,
                    quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
    }
@@ -109,7 +109,7 @@ void QuickChatHelper::render()
 void QuickChatHelper::onActivated()
 {
    // Need to do this here because user may have toggled joystick and keyboard modes
-   mQuickChatButtonsWidth = getWidthOfButtons();   
+   mQuickChatButtonsWidth = getWidthOfButtons();
 
    // Before we activate the helper, we need to tell it what its width will be
    setExpectedWidth(getTotalDisplayWidth(mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth));
@@ -188,7 +188,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    // Then draw bottom up...
    while(walk != mCurNode)
-   {  
+   {
       // When we're using a controller, don't present options with no defined controller key
       if(nodeTree[walk].depth == matchLevel && (showKeys || nodeTree[walk].buttonCode != KEY_UNKNOWN) )
       {

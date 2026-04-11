@@ -66,7 +66,7 @@ private:
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
-  
+
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
 
@@ -76,7 +76,7 @@ protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;
 
-   Vector<SafePtr<MountableItem> > mMountedItems;   
+   Vector<SafePtr<MountableItem> > mMountedItems;
 
    LoadoutTracker mLoadout;
 
@@ -156,7 +156,7 @@ public:
    virtual bool canAddToEditor();
    const char *getOnScreenName();
 
-   void selectNextWeapon();                   
+   void selectNextWeapon();
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
 
@@ -191,10 +191,10 @@ public:
    bool shouldRender() const;
 
    // Constructor
-   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
+   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor
    explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
    virtual ~Ship();                                                                // Destructor
-                                             
+
    bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparitor, but accounting for differences btwn client and server
 
    F32 getHealth() const;

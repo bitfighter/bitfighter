@@ -218,7 +218,7 @@ S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
    while(U8 c = *string++)
       if(c < font->Quantity)
       {
-         if(c == '\n')  // EOL; reset the length of this line 
+         if(c == '\n')  // EOL; reset the length of this line
          {
             if(length < lineLength)
                length = lineLength;

@@ -19,7 +19,7 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 
 // Constructor
-EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, 
+EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs,
                            GridDatabase *gridDatabase, Game *game)
 {
    mScriptName = scriptName;
@@ -58,7 +58,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
    // to run it.  This is inefficient; however, it makes our architecture cleaner, and it is in a higly performance
    // insensitive area, so it will probably be ok.
 
-   // First check if function exists... if it does not, there will be no menu items, so we can return false.  
+   // First check if function exists... if it does not, there will be no menu items, so we can return false.
    // This is not an error condition.
    if(!loadFunction(L, getScriptId(), "getArgsMenu"))
    {
@@ -72,10 +72,10 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
    static const S32 numResults = 4;
    bool error = runCmd("getArgsMenu", 0, numResults);
 
-   if(error)        
+   if(error)
    {
       clearStack(L);
-      return true;     
+      return true;
    }
 
    // We specified that we expect 'numResults' items back; this means that
@@ -191,7 +191,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
 
    // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
    // The lua_pushnil then pushed the table to -2, where it is currently located
-   // lua_next pops a key from the stack, and pushes a key-value pair from the table at the given index 
+   // lua_next pops a key from the stack, and pushes a key-value pair from the table at the given index
    // (the "next" pair after the given key).  When iteration is finished, lua_next returns 0.
    while(lua_next(L, -2))     // -2 is our table                                                             -- menuName table table nextIndex menuItem
    {
@@ -203,7 +203,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
          // Reproduce with code like this in a plugin
          //function getArgs()
          //   local items = { }  -- Create an empty table to hold our menu items
-         //   
+         //
          //   -- Create the menu items we need for this script, adding them to our items table
          //   table.insert(items, ToggleMenuItem:new("Run mode:", { "One", "Two", "Mulitple" }, 1, false, "Specify run mode" ))
          //   table.insert(items, Point:new(1,2))
@@ -238,9 +238,9 @@ void EditorPlugin::killScript()
 //// Lua methods
 /**
  * @luaclass EditorPlugin
- * 
+ *
  * @brief Main object for running methods related to editor plugins.
- * 
+ *
  * @descr The current editor plugin is always available in a global variable
  * called 'plugin'.
  */
@@ -248,7 +248,7 @@ const char *EditorPlugin::luaClassName = "EditorPlugin";
 
 REGISTER_LUA_CLASS(EditorPlugin);
 
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getGridSize,        ARRAYDEF({{ END          }                    }), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END          }                    }), 1 ) \
@@ -269,9 +269,9 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 
 /**
  * @luafunc num EditorPlugin::getGridSize()
- * 
+ *
  * @brief Returns the current Grid Size setting.
- * 
+ *
  * @return The current GridSize setting in the editor.
  */
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
@@ -280,7 +280,7 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
    if(clientGame)
       returnFloat(L, clientGame->getUIManager()->getUI<EditorUserInterface>()->getGridSize());
 
-   return returnNil(L);    
+   return returnNil(L);
 }
 
 
@@ -288,13 +288,13 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
 
 /**
  * @luafunc table EditorPlugin::getSelectedObjects()
- * 
+ *
  * @brief Returns a list of all selected objects in the editor.
- * 
+ *
  * @descr
  * The following code sample shows how to visit each object selected in
  * the editor. Here, we nudge every selected item 100 pixels to the right.
- * 
+ *
  * @code
  *   local t = plugin:getSelectedObjects()  -- Get every selected object
  *
@@ -308,7 +308,7 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
  * This result is sorted by the time at which the objects was selected,
  * so '%t[1]' will always be the first selected object and '%t[#%t]' will
  * always be the last.
- * 
+ *
  * @return Table containing all the objects that are currently selected in
  * the editor, ordered by selection time.
  */
@@ -324,7 +324,7 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
    for(S32 i = 0; i < count; i++)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
-         
+
       if(obj && obj->isSelected())
       {
          // This mask is a combination of the object's selection time (in the
@@ -352,9 +352,9 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
 
 /**
  * @luafunc table EditorPlugin::getAllObjects()
- * 
+ *
  * @brief Returns a table of all objects in the editor.
- * 
+ *
  * @return Lua table containing all the objects in the editor.
  */
 S32 EditorPlugin::lua_getAllObjects(lua_State *L)
@@ -382,7 +382,7 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::showMessage(string msg, bool good)
- * 
+ *
  * @brief
  * Display a big message on-screen.
  *
@@ -421,7 +421,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::setDisplayCenter(point pos)
- * 
+ *
  * @brief
  * Center editor window on specified point.
  *
@@ -448,17 +448,17 @@ S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::setDisplayZoom(num zoom)
- * 
+ *
  * @brief
  * Zoom the display to the specified zoom level.
  *
  * @descr
- * Zooms the display to the specified level.  Will not change the center point.  
+ * Zooms the display to the specified level.  Will not change the center point.
  * Editor will override specified zoom if it exceeds internal limits, specified by
  * internal constants MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
  * Current starting zoom is 0.5.
  *
- * @note Note that the lower zoom values correspond to a wider, more zoomed-out view. 
+ * @note Note that the lower zoom values correspond to a wider, more zoomed-out view.
  * @note Dividing the zoom by 2 will result in twice the width and height being displayed.
  *
  * @param zoom Zoom level to zoom to.
@@ -481,14 +481,14 @@ S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::setDisplayExtents(point pt1, point pt2)
- * 
+ *
  * @brief
  * Set the display to the specified bounding box.
  *
  * @descr
- * Sets the display window to the specified bounding box.  If the bounding box is a 
+ * Sets the display window to the specified bounding box.  If the bounding box is a
  * different aspect ratio than the screen, will center the bounding box on the screen.
- * It doesn't matter which points are in which corners, 
+ * It doesn't matter which points are in which corners,
  * as long as pt1 and pt2 are diagonally opposed on the bounding box.
  *
  * When setting the bounding box, the display will zoom out a bit to make the fit look less cramped.
@@ -503,11 +503,11 @@ S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
  *    local objects = plugin:getSelectedObjects()
  *    local ext = sd.mergeExtents(objects)
  *	   plugin:setDisplayExtents(point.new(ext.minx, ext.miny), point.new(ext.maxx, ext.maxy))
- * end   
+ * end
  * @endcode
  *
- * @param pt1 
- * @param pt2 
+ * @param pt1
+ * @param pt2
  */
 S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 {
@@ -527,7 +527,7 @@ S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::getDisplayCenter()
- * 
+ *
  * @brief
  * Get the center of the current display window.
  *
@@ -541,13 +541,13 @@ S32 EditorPlugin::lua_getDisplayCenter(lua_State *L)
 
    Point center = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayCenter();
 
-   return returnPoint(L, center);  
+   return returnPoint(L, center);
 }
 
 
 /**
  * @luafunc EditorPlugin::getDisplayZoom()
- * 
+ *
  * @brief
  * Gets the current zoom level of the display.
  *
@@ -572,7 +572,7 @@ S32 EditorPlugin::lua_getDisplayZoom(lua_State *L)
 
 /**
  * @luafunc EditorPlugin::getDisplayExtents()
- * 
+ *
  * @brief
  * Get the corners of the current editor window.
  *

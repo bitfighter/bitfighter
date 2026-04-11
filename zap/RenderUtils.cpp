@@ -166,7 +166,7 @@ S32 drawStringr(S32 x, S32 y, S32 size, const char *string)
    return (S32)len;
 }
 
-   
+
 S32 drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string)
 {
    drawString(x, y, size, string);
@@ -247,7 +247,7 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
 
       keyStart = str.find("[", pos);
    }
-   
+
    // Draw any remaining bits of our string
    r.setColor(bodyColor);
    drawString(x, y, size, str.substr(keyEnd).c_str());
@@ -311,7 +311,7 @@ F32 drawCenteredString(F32 x, F32 y, F32 size, const char *string)
 
 S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...)
 {
-   makeBuffer; 
+   makeBuffer;
    return (S32) drawCenteredString(y, size, buffer);
 }
 
@@ -368,7 +368,7 @@ S32 drawCenteredString2Colf(S32 y, S32 size, bool leftCol, const char *format, .
    return drawCenteredString2Col(y, size, leftCol, buffer);
 }
 
-   
+
 S32 get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downstream
 {
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -379,7 +379,7 @@ S32 get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downs
 //extern void glColor(const Color &c, float alpha = 1.0);
 
 // Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
-S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
+S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
                                           const char *leftStr, const char *rightStr)
 {
    return drawCenteredStringPair(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, ypos, size, leftColor, rightColor, leftStr, rightStr);
@@ -387,7 +387,7 @@ S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Col
 
 
 // Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
-S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
+S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
                                           const char *leftStr, const char *rightStr)
 {
    S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
@@ -403,7 +403,7 @@ S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext
 }
 
 
-S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
+S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
                                          const char *leftStr, const char *rightStr)
 {
    Renderer& r = Renderer::get();
@@ -682,7 +682,7 @@ void renderUpArrow(const Point &center, S32 size)
    F32 bot = center.y + offset;
    F32 capHeight = size * 0.39f;    // An artist need provide no explanation
 
-   F32 vertices[] = { center.x, top,     center.x,             bot, 
+   F32 vertices[] = { center.x, top,     center.x,             bot,
                       center.x, top,     center.x - capHeight, top + capHeight,
                       center.x, top,     center.x + capHeight, top + capHeight
                     };
@@ -698,7 +698,7 @@ void renderDownArrow(const Point &center, S32 size)
    F32 bot = center.y + offset;
    F32 capHeight = size * 0.39f;    // An artist need provide no explanation
 
-   F32 vertices[] = { center.x, top,     center.x,             bot, 
+   F32 vertices[] = { center.x, top,     center.x,             bot,
                       center.x, bot,     center.x - capHeight, bot - capHeight,
                       center.x, bot,     center.x + capHeight, bot - capHeight
                     };
@@ -714,7 +714,7 @@ void renderLeftArrow(const Point &center, S32 size)
    F32 right = center.x + offset;
    F32 capHeight = size * 0.39f;    // An artist need provide no explanation
 
-   F32 vertices[] = { left, center.y,     right,            center.y, 
+   F32 vertices[] = { left, center.y,     right,            center.y,
                       left, center.y,     left + capHeight, center.y - capHeight,
                       left, center.y,     left + capHeight, center.y + capHeight
                     };
@@ -730,7 +730,7 @@ void renderRightArrow(const Point &center, S32 size)
    F32 right = center.x + offset;
    F32 capHeight = size * 0.39f;    // An artist need provide no explanation
 
-   F32 vertices[] = { left,  center.y,     right,             center.y, 
+   F32 vertices[] = { left,  center.y,     right,             center.y,
                       right, center.y,     right - capHeight, center.y - capHeight,
                       right, center.y,     right - capHeight, center.y + capHeight
                     };
@@ -739,7 +739,7 @@ void renderRightArrow(const Point &center, S32 size)
 }
 
 
-// Given a string, break it up such that no part is wider than width.  
+// Given a string, break it up such that no part is wider than width.
 void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines)
 {
    FontManager::pushFontContext(context);
@@ -771,7 +771,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
       {
          wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
          start = i + 1;
-         potentialBreakPoint = start + 1;  
+         potentialBreakPoint = start + 1;
       }
       else if(str[i] == ' ')
          potentialBreakPoint = i;

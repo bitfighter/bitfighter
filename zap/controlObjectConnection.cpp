@@ -132,10 +132,10 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
    if(isConnectionToServer())
    {
       S8 firstSendIndex = highSendIndex[0];
-      
-      // Cast to S8 appears to be needed here, even though they are both already S8, 
+
+      // Cast to S8 appears to be needed here, even though they are both already S8,
       // somehow the compiler converts them to 32 bit, screwing up the S8 overflow
-      if(S8(firstSendIndex - firstMoveIndex) < 0)   
+      if(S8(firstSendIndex - firstMoveIndex) < 0)
          firstSendIndex = firstMoveIndex;
 
       bstream->writeInt(getControlCRC(), CLIENTCONTROLBITS);
@@ -235,7 +235,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    }
    else     // Is connection to server (i.e. we're on the client, I think)
    {
-      bool controlObjectValid = bstream->readFlag();     
+      bool controlObjectValid = bstream->readFlag();
 
       mCompressPointsRelative = controlObjectValid;
       //mGameUserInterface.receivedControlUpdate(false);
@@ -419,7 +419,7 @@ void ControlObjectConnection::readCompressedPoint(Point &p, BitStream *stream)
 void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
 {
    mMoveTimeCredit += timeAmount;
-   
+
    if(mMoveTimeCredit > MaxMoveTimeCredit)
    {
       // Prevent unlimited shield when client is freezing, slow, or lagging (or some cheater has triggered a breakpoint in rabbit!)

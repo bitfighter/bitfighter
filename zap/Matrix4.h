@@ -37,4 +37,4 @@ public:
 
 }
 
-#endif // _MATRIX4_H_ 
+#endif // _MATRIX4_H_

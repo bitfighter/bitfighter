@@ -30,4 +30,4 @@ public:
 
 }
 
-#endif // _GL2RINGBUFFER_H_ 
+#endif // _GL2RINGBUFFER_H_

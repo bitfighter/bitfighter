@@ -67,9 +67,9 @@ KeyDefMenuUserInterface::~KeyDefMenuUserInterface()
 
 
 // Some constants used for positioning menu items and coordinating mouse position
-static S32 offset = 5; 
+static S32 offset = 5;
 static S32 yStart = UserInterface::vertMargin + 115;
-static S32 height = 30; 
+static S32 height = 30;
 static S32 firstItemInCol2 = 0;     // Set in onActivate()
 
 
@@ -92,7 +92,7 @@ void KeyDefMenuUserInterface::onActivate()
    else
       mMenuTitle = "Define Keys: [Keyboard]";
 
-   mMenuSubTitleColor = Colors::white;   
+   mMenuSubTitleColor = Colors::white;
 
    menuItems.clear();
 
@@ -242,8 +242,8 @@ void KeyDefMenuUserInterface::render()
 		S32 xPos = (menuItems[i].column - 1) * Column_Width + horizMargin * 2;
 
       if(selectedIndex == i)       // Highlight selected item
-         drawFilledRect(xPos - horizMargin, y, 
-                        xPos + Column_Width - horizMargin, y + height + 1, 
+         drawFilledRect(xPos - horizMargin, y,
+                        xPos + Column_Width - horizMargin, y + height + 1,
                         Colors::blue40, Colors::blue);
 
       // Draw item text
@@ -260,10 +260,10 @@ void KeyDefMenuUserInterface::render()
       }
       else
       {
-         bool dupe = isDuplicate(i, menuItems); 
+         bool dupe = isDuplicate(i, menuItems);
          const Color *color = dupe ? &Colors::red : NULL;
 
-         JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
+         JoystickRender::renderControllerButton(F32(xPos), F32(y + offset),
                getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
       }
    }

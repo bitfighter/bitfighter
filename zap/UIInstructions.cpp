@@ -62,7 +62,7 @@ static const TypeDescr typeDescriptions[] = {
 
 
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : 
+InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) :
    Parent(game),
                                                                          mLoadoutInstructions(LineGap),
                                                                          mPageHeaders(LineGap),
@@ -82,8 +82,8 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) :
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 
    // Prepare special instructions
-   const ControlStringsEditor helpBindLeft[] = 
-   { 
+   const ControlStringsEditor helpBindLeft[] =
+   {
       { "Help",              "[[Help]]"    },
       { "Mission",           "[[Mission]]" }
    };
@@ -91,8 +91,8 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) :
    pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
 
 
-   const ControlStringsEditor helpBindRight[] = 
-   { 
+   const ControlStringsEditor helpBindRight[] =
+   {
       { "Lobby Chat",        "[[OutOfGameChat]]" },
       { "Display FPS / Lag", "[[FPS]]"           },
       { "Diagnostics",       "[[Diagnostics]]"   }
@@ -132,7 +132,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
 {
    // Needs to be here so if user changes their bindings, we'll see the new ones when we reload!
 
-   ControlStringsEditor controlsKeyboardLeft[] = 
+   ControlStringsEditor controlsKeyboardLeft[] =
    {
          { "Move ship",             "[[ShipUp]]"          },
          { " ",                     "[[MOVEMENT_LDR]]"    },
@@ -149,7 +149,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
 
    };
 
-   ControlStringsEditor controlsGamepadLeft[] = 
+   ControlStringsEditor controlsGamepadLeft[] =
    {
          { "Move Ship",             "Left Joystick"       },
          { "Aim Ship/Fire Weapon",  "Right Joystick"      },
@@ -164,7 +164,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
    };
 
    // These controls will work for both joystick and keyboard users
-   ControlStringsEditor controlsRight[] = 
+   ControlStringsEditor controlsRight[] =
    {
          { "Cycle current weapon",          "[[SelNextWeapon]]" },
          { "Select weapon 1",               "[[SelWeapon1]]"    },
@@ -198,7 +198,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
    helpBindRightCount = ARRAYSIZE(controlsRight);
 
 
-   SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
+   SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap),
                        keysInstrRight(LineGap), keysBindingsRight(LineGap);
 
    // Add some headers to our 4 columns
@@ -275,29 +275,29 @@ void InstructionsUserInterface::render()
          renderPageGameIndicators();
          break;
       case InstructionAdvancedCommands:
-         renderPageCommands(InstructionAdvancedCommands - FIRST_COMMAND_PAGE, 
+         renderPageCommands(InstructionAdvancedCommands - FIRST_COMMAND_PAGE,
                             "Tip: Define QuickChat items to quickly enter commands (see INI file for details)");
          break;
       case InstructionSoundCommands:
          renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);            // Sound control commands
          break;
       case InstructionLevelCommands:
-         renderPageCommands(InstructionLevelCommands - FIRST_COMMAND_PAGE, 
-                            "Level change permissions are required to use these commands");  
+         renderPageCommands(InstructionLevelCommands - FIRST_COMMAND_PAGE,
+                            "Level change permissions are required to use these commands");
          break;
       case InstructionBotCommands:
-         renderPageCommands(InstructionBotCommands - FIRST_COMMAND_PAGE, 
-                            "Level change permissions are required to use these commands");  
+         renderPageCommands(InstructionBotCommands - FIRST_COMMAND_PAGE,
+                            "Level change permissions are required to use these commands");
          break;
       case InstructionAdminCommands:
-         renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
+         renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE,
                             "Admin permissions are required to use these commands");   // Admin commands
-         break;                                                                        
-      case InstructionOwnerCommands:                                                   
-         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,             
+         break;
+      case InstructionOwnerCommands:
+         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,
                             "Owner permissions are required to use these commands");   // Owner commands
-         break;                                                                        
-      case InstructionDebugCommands:                                                   
+         break;
+      case InstructionDebugCommands:
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);            // Debug commands
          break;
 
@@ -393,10 +393,10 @@ static const char *loadoutInstructions2[] = {
 
 
 // Converts the blocks of text above into SymbolStrings for nicer rendering
-static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, const Color *headerColor, const Color *bodyColor, 
+static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, const Color *headerColor, const Color *bodyColor,
                            const InputCodeManager *inputCodeManager, UI::SymbolStringSet &instrBlock)
 {
-   Vector<SymbolShapePtr> symbols;     
+   Vector<SymbolShapePtr> symbols;
 
    for(S32 i = 0; i < blockSize; i++)
    {
@@ -433,7 +433,7 @@ void InstructionsUserInterface::initPage2()
    // Add some space separating the two sections
    mLoadoutInstructions.add(SymbolString::getBlankSymbol(0, 30));
 
-   initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan, 
+   initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan,
                getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 }
 
@@ -444,9 +444,9 @@ void InstructionsUserInterface::initPageHeaders()
 
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
-   mPageHeaders.add(SymbolString("Use [[Tab]] to expand a partially typed command", 
+   mPageHeaders.add(SymbolString("Use [[Tab]] to expand a partially typed command",
                     inputCodeManager, HelpContext, FontSize, true, AlignmentLeft));
-   mPageHeaders.add(SymbolString("Enter a cmd by pressing [[Command]], or by typing one at the chat prompt", 
+   mPageHeaders.add(SymbolString("Enter a cmd by pressing [[Command]], or by typing one at the chat prompt",
                     inputCodeManager, HelpContext, FontSize, true, AlignmentLeft));
 }
 
@@ -722,7 +722,7 @@ const char *gGameObjectInfo[] = {
    /* 28 */   "GoFast",        "Makes ship go fast"
 };
 
-static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
+static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
@@ -823,7 +823,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 0);
             renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
 
-            r.setColor(Colors::white); 
+            r.setColor(Colors::white);
             drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Regular)");
 
             y = -y;
@@ -872,7 +872,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o), 
+               renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o),
                                        Platform::getRealMilliseconds() % 5000 > 2500, 0);
             }
             break;
@@ -887,7 +887,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
+               renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o),
                   false, 0, 0, 0);
             }
             break;
@@ -916,7 +916,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          case 27:    // Core
             {
                F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
-               
+
                Point pos(0,0);
                U32 time = Platform::getRealMilliseconds();
 
@@ -938,7 +938,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                renderSpeedZone(speedZoneRenderPoints, Platform::getRealMilliseconds());
             }
             break;
-         default: 
+         default:
             TNLAssert(false, "Unhandled case!");
       }
       r.popMatrix();
@@ -1009,7 +1009,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       }
 
       // Check if we've just changed sections... if so, draw a horizontal line ----------
-      if(chatCmds[i].helpGroup > section)      
+      if(chatCmds[i].helpGroup > section)
       {
          r.setColor(Colors::gray40);
 
@@ -1021,7 +1021,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       }
 
       r.setColor(cmdColor);
-      
+
       // Assemble command & args from data in the chatCmds struct
       string cmdString = "/" + chatCmds[i].cmdName;
       string args = "";
@@ -1054,7 +1054,7 @@ void InstructionsUserInterface::initGameTypesPage()
 {
    S32 tabStop = 160;
    bool foundTeamGame = false;
-   
+
    Vector<UI::SymbolShapePtr> symbols;
 
    string header = "Bitfighter has " + itos(S32(ARRAYSIZE(typeDescriptions))) + " primary game types.";
@@ -1150,7 +1150,7 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       nextPage();
    }
-   
+
    else if(checkInputCode(BINDING_HELP, inputCode))
       nextPage();
    else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)

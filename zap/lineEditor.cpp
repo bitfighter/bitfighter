@@ -119,7 +119,7 @@ string LineEditor::getDisplayString() const
       offsetCharacters *= chunkSize;
    }
 
-   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : 
+   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) :
                     mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
 }
 
@@ -167,7 +167,7 @@ char LineEditor::at(U32 pos) const
       return 0;
 
    return mLine.at(pos);
-} 
+}
 
 
 // Given a list of potential match candidates, and a partially typed string, find all candidates that are potential matches
@@ -222,7 +222,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
    static const U32 chunkSize = 10;
    S32 offset;
-   
+
    if(mMasked)
    {
       offset = getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
@@ -240,7 +240,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
          offsetCharacters = (mCursorOffset - mDisplayedCharacters) / chunkSize + 1;
          offsetCharacters *= chunkSize;
       }
-      
+
       offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
@@ -264,8 +264,8 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset)
 }
 
 
-bool LineEditor::addChar(const char c) 
-{ 
+bool LineEditor::addChar(const char c)
+{
    if(c == 0)
       return false;
 
@@ -281,7 +281,7 @@ bool LineEditor::addChar(const char c)
       // %s are banned because of their use in this function: ChatDisplay::substitueVars(), and it could cause
       // confusion if a player referred to another player and got a variable substitiution instead.  We could/should probably
       // either remove or improve that capability, then we can remove the following line.
-      if(c == '%') return false; 
+      if(c == '%') return false;
 
       if(c == ' ' && mLine.c_str()[0] == 0) return false; // Don't let name start with a space.
       break;

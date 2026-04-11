@@ -34,7 +34,7 @@ static const U32 GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME = 8000;      // 8 second
 static const S32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
 static const S32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
 static const S32 SERVER_ENTRY_TEXTSIZE = 14;
-static const S32 SERVER_ENTRY_VERT_GAP = 4; 
+static const S32 SERVER_ENTRY_VERT_GAP = 4;
 static const S32 SERVER_ENTRY_HEIGHT = SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP;
 static const S32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
 static const S32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
@@ -71,7 +71,7 @@ QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &add
 {
    this->serverId = serverId;
    this->state = initialState;
-   this->isLocalServer = isLocalServer; 
+   this->isLocalServer = isLocalServer;
 
    pingTimedOut = false;
    everGotQueryResponse = false;
@@ -148,8 +148,8 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 ////////////////////////////////////////
 
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : 
-   UserInterface(game), 
+QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
+   UserInterface(game),
    ChatParent(game)
 {
    mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
@@ -191,9 +191,9 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    S32 ypos = BANNER_HEIGHT - 30;
 
    Button prevButton = Button(getGame(), horizMargin, ypos, textsize, 4, "PREV", Colors::white, Colors::yellow, prevButtonClickedCallback);
-   Button nextButton = Button(getGame(), DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 50, ypos, 
+   Button nextButton = Button(getGame(), DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 50, ypos,
                               textsize, 4, "NEXT", Colors::white, Colors::yellow, nextButtonClickedCallback);
-   
+
    buttons.push_back(prevButton);
    buttons.push_back(nextButton);
 
@@ -243,7 +243,7 @@ void QueryServersUserInterface::onActivate()
       servers.push_back(s);
    }
 #endif
-   
+
    mHighlightColumn = mSortColumn;
    pendingPings = 0;
    pendingQueries = 0;
@@ -272,10 +272,10 @@ void QueryServersUserInterface::contactEveryone()
    {
       Address address(pingList->get(i).c_str());
       getGame()->getNetInterface()->sendPing(address, mLocalServerNonce);
-   } 
+   }
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer) 
+   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer)
    {
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
@@ -318,7 +318,7 @@ static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Addre
 
 
 // Returns index of found server, -1 if it found none
-static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList, 
+static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList,
                                    const Address &address, S32 serverId)
 {
    for(S32 i = 0; i < serverList.size(); i++)
@@ -342,7 +342,7 @@ static S32 findServerByServerId(const Vector<QueryServersUserInterface::ServerRe
 
 
 // Returns index of found server, -1 if it found none
-static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address, 
+static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address,
                                          const Nonce &nonce, QueryServersUserInterface::ServerRef::State state)
 {
    for(S32 i = 0; i < serverList.size(); i++)
@@ -376,7 +376,7 @@ static void saveServerListToIni(GameSettings *settings, const Vector<ServerAddr>
    if(serverListFromMaster.size() != 0)
    {
       Vector<string> &prevServerList = settings->getIniSettings()->prevServerListFromMaster;
-      prevServerList.clear();    // Only clear the saved list if we have something to add... 
+      prevServerList.clear();    // Only clear the saved list if we have something to add...
 
       for(S32 i = 0; i < serverListFromMaster.size(); i++)
          prevServerList.push_back(Address(serverListFromMaster[i].ipAddress).toString());
@@ -430,12 +430,12 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       // Most of the time, this will be a local network server, and isLocal will be true.  It will only be false if we
       // are having problems connecting to the master and we broadcast our own set of pings to previously seen
       // servers.
-      bool isLocal = nonce == mLocalServerNonce;     
+      bool isLocal = nonce == mLocalServerNonce;
 
       // If we already know about the server, move along.
       // Pass 0 here to disable id check... we're only interested in IP address matches at this point -- if we have
       // a remote server with the same ID, we want to clobber it below.
-      if(findServerByAddressOrId(servers, address, serverId) != -1)     
+      if(findServerByAddressOrId(servers, address, serverId) != -1)
          return;
 
       // See if we've already been told about server with this serverId by the master... if so, we'll remove that
@@ -458,7 +458,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       s.isLocalServer = isLocal;
 
       servers.push_back(s);
-   } 
+   }
 
    else  // From a ping sent to a remote server
    {
@@ -479,8 +479,8 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
 }
 
 
-void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 serverId, const Nonce &clientNonce, 
-                                                 const char *serverName, const char *serverDescr, U32 playerCount, 
+void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 serverId, const Nonce &clientNonce,
+                                                 const char *serverName, const char *serverDescr, U32 playerCount,
                                                  U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    for(S32 i = 0; i < servers.size(); i++)
@@ -499,7 +499,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          s.everGotQueryResponse = true;
 
          // If serverId has changed, it means this is a locally hosted server that we first saw before it contacted
-         // the master to get a serverId.  We want to make sure we don't have another version of this same server from 
+         // the master to get a serverId.  We want to make sure we don't have another version of this same server from
          // the master.  Find the dupe and kill it.
          // When a server restarts, serverid becomes different, often before getting the new list from master.
          if(s.serverId != serverId && serverId != 0 && s.isLocalServer)
@@ -516,7 +516,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          s.serverId = serverId;
 
          // Record time our last query was received, so we'll know when to send again
-         s.lastSendTime = Platform::getRealMilliseconds();     
+         s.lastSendTime = Platform::getRealMilliseconds();
 
          if(s.isLocalServer)
             s.pingTimedOut = false;    // Cures problem with local servers incorrectly displaying ?s for first 15 seconds
@@ -529,7 +529,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          }
       }
    }
-      
+
    mShouldSort = true;
 }
 
@@ -692,8 +692,8 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
-      S32 indx = S32(floor((DisplayManager::getScreenInfo()->getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
-                     getFirstServerIndexOnCurrentPage() ); // fixes mouse offset problem by removing this part: - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0) 
+      S32 indx = S32(floor((DisplayManager::getScreenInfo()->getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) +
+                     getFirstServerIndexOnCurrentPage() ); // fixes mouse offset problem by removing this part: - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0)
 
       // Bounds checking and such
       if(indx < 0)
@@ -706,7 +706,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
          indx = getFirstServerIndexOnCurrentPage();
       else if(indx > getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1)
          indx = getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1;
-      
+
       return indx;
    }
    else
@@ -856,7 +856,7 @@ void QueryServersUserInterface::render()
 
    // Instructions at bottom of server selection section
    r.setColor(Colors::white);
-   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
+   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE,
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
    if(servers.size())      // There are servers to display...
@@ -869,7 +869,7 @@ void QueryServersUserInterface::render()
          selectedIndex = 0;
       }
 
-      S32 colwidth = columns[1].xStart - columns[0].xStart;    
+      S32 colwidth = columns[1].xStart - columns[0].xStart;
 
       // Color background of local servers
       S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
@@ -905,7 +905,7 @@ void QueryServersUserInterface::render()
             // Render server description at bottom
             r.setColor(s.msgColor);
             U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2;
-            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
+            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());
          }
 
          // Truncate server name to fit in the first column...
@@ -1028,7 +1028,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP);
    drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
 
-   // Column headers (will partially overwrite horizontal lines) 
+   // Column headers (will partially overwrite horizontal lines)
    S32 x1 = max(columns[mSortColumn].xStart - 3, 1);    // Going to 0 makes line look too thin...
    S32 x2;
    if(mSortColumn == columns.size() - 1)
@@ -1039,11 +1039,11 @@ void QueryServersUserInterface::renderColumnHeaders()
    drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Colors::gray20, Colors::white);
 
    // And now the column header text itself
-   for(S32 i = 0; i < columns.size(); i++) 
+   for(S32 i = 0; i < columns.size(); i++)
       drawString(columns[i].xStart, COLUMN_HEADER_TOP + 3, COLUMN_HEADER_TEXTSIZE, columns[i].name);
 
    // Highlight selected column
-   if(mHighlightColumn != mSortColumn) 
+   if(mHighlightColumn != mSortColumn)
    {
       // And render a box around the column under the mouse, if different
       x1 = max(columns[mHighlightColumn].xStart - 3, 1);
@@ -1099,7 +1099,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    const S32 ypos1 = ypos - lines * (fontsize + fontgap) - msgboxMargin;
    const S32 ypos2 = ypos + msgboxMargin;
 
-   const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin; 
+   const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin;
    const S32 xpos2 = (canvasWidth + strwid) / 2 + msgboxMargin;
 
    static const S32 CORNER_INSET = 15;
@@ -1146,7 +1146,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       // Toggle half-height servers, full-height servers, full chat overlay
 
       mShowChat = !mShowChat;
-      if(mShowChat) 
+      if(mShowChat)
       {
          ChatUserInterface *ui = getUIManager()->getUI<ChatUserInterface>();
          ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
@@ -1201,11 +1201,11 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
-               getGame()->joinRemoteGame(servers[currentIndex].serverAddress, !servers[currentIndex].isLocalServer && 
+               getGame()->joinRemoteGame(servers[currentIndex].serverAddress, !servers[currentIndex].isLocalServer &&
                     (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
 
                // Save this because we'll need the server name when connecting.  Kind of a hack.
-               mLastSelectedServerName = servers[currentIndex].serverName;    
+               mLastSelectedServerName = servers[currentIndex].serverName;
 
                // ...and clear out the server list so we don't do any more pinging
                servers.clear();
@@ -1271,7 +1271,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
          Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
          mItemSelectedWithMouse = false;
       }
-      else if(inputCode == KEY_PAGEDOWN) 
+      else if(inputCode == KEY_PAGEDOWN)
       {
          advancePage();
 
@@ -1304,7 +1304,7 @@ void QueryServersUserInterface::backPage()
 void QueryServersUserInterface::advancePage()
 {
    mPage++;
-   if(mPage > getLastPage())  
+   if(mPage > getLastPage())
       mPage = 0;                 // First page
 
    recalcCurrentIndex();
@@ -1321,7 +1321,7 @@ void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 }
 
 
-void QueryServersUserInterface::onMouseDragged() 
+void QueryServersUserInterface::onMouseDragged()
 {
    const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();    // (used in some of the macro expansions)
 
@@ -1338,7 +1338,7 @@ void QueryServersUserInterface::onMouseDragged()
       else if(mServersPerPage > MAX_SERVERS_PER_PAGE)
          mServersPerPage = MAX_SERVERS_PER_PAGE;
 
-      mMessageDisplayCount = (BOTTOM_OF_CHAT_WINDOW - getDividerPos() - 4) / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) - 1;         
+      mMessageDisplayCount = (BOTTOM_OF_CHAT_WINDOW - getDividerPos() - 4) / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) - 1;
    }
 }
 
@@ -1669,14 +1669,14 @@ void Button::render(F32 mouseX, F32 mouseY) const
 
    // Sit there and look unobtrusive
    else
-      color = mFgColor;    
+      color = mFgColor;
 
    static const S32 INSET = 4;
 
    drawFilledFancyBox(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, INSET, mBgColor, 1.0f, color);
    drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
- 
+
 
 
 };

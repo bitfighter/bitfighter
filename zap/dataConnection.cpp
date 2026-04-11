@@ -28,7 +28,7 @@ FileType getResourceType(const char *fileType)
 
    return INVALID_RESOURCE_TYPE;
 }
-   
+
 
 static string getFullFilename(const FolderManager *configDirs, string filename, FileType fileType)
 {
@@ -52,11 +52,11 @@ static string getFullFilename(const FolderManager *configDirs, string filename, 
 
 static string getOutputFolder(FolderManager *folderManager, FileType filetype)
 {
-   if(filetype == BOT_TYPE) 
+   if(filetype == BOT_TYPE)
       return folderManager->robotDir;
-   else if(filetype == LEVEL_TYPE) 
+   else if(filetype == LEVEL_TYPE)
       return folderManager->levelDir;
-   else if(filetype == LEVELGEN_TYPE) 
+   else if(filetype == LEVELGEN_TYPE)
       return folderManager->levelDir;
    else return "";
 }
@@ -194,7 +194,7 @@ SenderStatus DataSender::initialize(DataSendable *connection, FolderManager *fol
       if(file.gcount() > 0)
       {
          buffer[file.gcount()] = '\0';     // Null terminate
-         mLines.push_back(buffer); 
+         mLines.push_back(buffer);
       }
    }
    file.close();
@@ -314,9 +314,9 @@ TNL_IMPLEMENT_NETCONNECTION(DataConnection, NetClassGroupGame, true);
 
 // Client sends this message to set up the coming transfer.  Server checks for the password, and then, if the client is requesting
 // a file, initiates the transfer.  If client is sending a file, it gets things ready then sends s2cOkToSend to indicate it's ready.
-TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile, 
+TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
                   (StringPtr password, RangedU32<0,(U32)FILE_TYPES> filetype, bool isRequest, StringPtr filename),
-                  (password, filetype, isRequest, filename), 
+                  (password, filetype, isRequest, filename),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
@@ -375,7 +375,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
          return;
       }
 
-      if(mOutputFile) 
+      if(mOutputFile)
          fclose((FILE*)mOutputFile);
 
       mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "w");
@@ -393,7 +393,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 
 
 // Server tells us it's ok to send... so start sending!
-TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (), 
+TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    // Initialize on the client to start sending file we want to send
@@ -409,8 +409,8 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 
 
 // << DataSendable >>
-// Send a chunk of the file -- this gets run on the receiving end       
-TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line), 
+// Send a chunk of the file -- this gets run on the receiving end
+TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    if(mOutputFile)
@@ -422,7 +422,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 
 // << DataSendable >>
 // When client has finished sending its data, it sends a commandComplete message, which triggers the server to disconnect the client
-TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
+TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    disconnect(ReasonNone, "done");     // Terminate connection... should probably send different message depending on status
@@ -456,7 +456,7 @@ void DataConnection::onConnectionEstablished()
             logprintf("Error resolving folder!");      // But... we can save files without needing folder, so log and cary on
 
          //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
-         if(mOutputFile) 
+         if(mOutputFile)
             fclose(mOutputFile);
          mOutputFile = fopen(strictjoindir(folder, mFilename).c_str(), "w");
          if(!mOutputFile)
@@ -485,7 +485,7 @@ void DataConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    {
       if(reason == ReasonError)
          logprintf("Error sending file: %s", reasonMsg);
-      else if(reason == ReasonConnectionsForbidden)                   
+      else if(reason == ReasonConnectionsForbidden)
          logprintf("Data connections are disallowed on this server!");
    }
 }

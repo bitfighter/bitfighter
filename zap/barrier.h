@@ -8,7 +8,7 @@
 
 #include "BfObject.h"
 #include "polygon.h"       // For PolygonObject def
-#include "LineItem.h"   
+#include "LineItem.h"
 
 #include "Point.h"
 #include "tnlVector.h"
@@ -102,7 +102,7 @@ public:
 
    bool constructWalls(Game *theGame) const;
 };
- 
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -141,7 +141,7 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();          // Vertices should not be labeled
    const char *getInstructionMsg(S32 attributeCount);
-   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values); 
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
    bool hasTeam();
    bool canBeHostile();
@@ -247,13 +247,13 @@ private:
   void init(GridDatabase *database, S32 owner);
   bool invalid;              // A flag for marking segments in need of processing
 
-   Vector<Point> mEdges;    
+   Vector<Point> mEdges;
    Vector<Point> mCorners;
    Vector<Point> mTriangulatedFillPoints;
 
 public:
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmentData, F32 width, S32 owner = -1);    // Normal wall segment
-   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
+   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall
    virtual ~WallSegment();
 
    S32 getOwner();
@@ -264,7 +264,7 @@ public:
 
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
-   
+
    void renderFill(const Point &offset, const Color &color);
 
    const Vector<Point> *getCorners();

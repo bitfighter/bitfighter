@@ -30,16 +30,16 @@ namespace Zap
    INSTR_ITEM(InstructionAdminCommands,      "ADMIN COMMANDS")      \
    INSTR_ITEM(InstructionOwnerCommands,      "OWNER COMMANDS")      \
    INSTR_ITEM(InstructionDebugCommands,      "DEBUG COMMANDS")      \
-   BUILD_DEPENDENT_ITEMS         
+   BUILD_DEPENDENT_ITEMS
    /*
    INSTR_ITEM(InstructionScriptingConsole,   "SCRIPTING CONSOLE") \
    */
-#ifdef TNL_DEBUG                                                    
+#ifdef TNL_DEBUG
 #  define BUILD_DEPENDENT_ITEMS\
-      INSTR_ITEM(InstructionTestCommands,        "TEST COMMANDS")      
+      INSTR_ITEM(InstructionTestCommands,        "TEST COMMANDS")
 #else
-#  define BUILD_DEPENDENT_ITEMS 
-#endif 
+#  define BUILD_DEPENDENT_ITEMS
+#endif
 
 
 class InstructionsUserInterface : public AbstractInstructionsUserInterface

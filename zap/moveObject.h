@@ -59,7 +59,7 @@ private:
    MoveStates mMoveStates;
 
    // For maintaining a list of zones the object is currently in
-   Vector<SafePtr<Zone> > mZones1;      
+   Vector<SafePtr<Zone> > mZones1;
    Vector<SafePtr<Zone> > mZones2;
    bool mZones1IsCurrent;        // "Pointer" to one of the above
 
@@ -159,7 +159,7 @@ public:
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
    void checkForZones();                                       // See if object entered or left any zones
-        
+
    void computeImpulseDirection(DamageInfo *damageInfo);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
@@ -280,7 +280,7 @@ public:
 // A class of items that has a more-or-less constant velocity
 class VelocityItem : public MoveItem
 {
-   typedef MoveItem Parent; 
+   typedef MoveItem Parent;
 
 private:
    F32 mInherentSpeed;
@@ -301,7 +301,7 @@ public:
 class Asteroid : public VelocityItem
 {
 
-typedef VelocityItem Parent;    
+typedef VelocityItem Parent;
 
 private:
    S32 mSizeLeft;
@@ -443,7 +443,7 @@ public:
 
 class ResourceItem : public MountableItem
 {
-   typedef MountableItem Parent; 
+   typedef MountableItem Parent;
 
 private:
    void setOutline();

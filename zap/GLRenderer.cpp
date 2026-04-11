@@ -32,7 +32,7 @@ GLRenderer::GLRenderer()
 #  else
       bool success = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
 #  endif
-   
+
    TNLAssert(success, "Unable to load GL functions!");
 #endif
 

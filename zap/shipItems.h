@@ -37,7 +37,7 @@ enum ShipModule {
 #define MODULE_ITEM(a, b, c, d, e, f, g, h, i) a,
    MODULE_ITEM_TABLE
 #undef MODULE_ITEM
-   ModuleCount, 
+   ModuleCount,
    ModuleNone
 };
 

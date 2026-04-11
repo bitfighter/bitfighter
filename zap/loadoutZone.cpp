@@ -24,11 +24,11 @@ TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 */
 
 // Combined Lua / C++ constructor
-LoadoutZone::LoadoutZone(lua_State *L)    
+LoadoutZone::LoadoutZone(lua_State *L)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LoadoutZoneTypeNumber;
-   setTeam(TEAM_NEUTRAL); 
+   setTeam(TEAM_NEUTRAL);
 
    if(L)   // Coming from Lua -- grab params from L
    {
@@ -170,7 +170,7 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
   *  @luaclass LoadoutZone
   *  @brief Provides place for players to change ship configuration.
   */
-//                Fn name                  Param profiles            Profile count                           
+//                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);

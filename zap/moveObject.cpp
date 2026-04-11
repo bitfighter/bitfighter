@@ -39,17 +39,17 @@ MoveStates::~MoveStates()
 }
 
 
-Point MoveStates::getPos(S32 state) const             
+Point MoveStates::getPos(S32 state) const
 {
    TNLAssert(state != ActualState, "Do NOT use getPos with the ActualState!");
-   return mMoveState[state].pos; 
+   return mMoveState[state].pos;
 }
 
 
-void MoveStates::setPos(S32 state, const Point &pos) 
-{ 
+void MoveStates::setPos(S32 state, const Point &pos)
+{
    TNLAssert(state != ActualState, "Do NOT use setPos with the ActualState!");
-   mMoveState[state].pos = pos; 
+   mMoveState[state].pos = pos;
 }
 
 Point MoveStates::getVel(S32 state) const             { return mMoveState[state].vel; }
@@ -63,7 +63,7 @@ void  MoveStates::setAngle(S32 state, F32 angle) { mMoveState[state].angle = ang
 ////////////////////////////////////////
 
 // Constructor
-MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(radius)    
+MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(radius)
 {
    setPosVelAng(pos, Point(0,0), 0);
 
@@ -91,7 +91,7 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    setInitialPosVelAng(getPos(), Point(0,0), 0);
-      
+
    updateExtentInDatabase();
 
    return true;
@@ -116,7 +116,7 @@ void MoveObject::idle(BfObject::IdleCallPath path)
 void MoveObject::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-    
+
 #ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
       setControllingClient(static_cast<ClientGame *>(game)->getConnectionToServer());
@@ -389,7 +389,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
                  hit = true;
             if(hit) break;
          }
- 
+
          if(posDelta.dot(velDelta) < 0)   // moveObjectThatWasHit is closing faster than we are ???
          {
             computeCollisionResponseMoveObject(stateIndex, moveObjectThatWasHit);
@@ -411,10 +411,10 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
             displacerList.push_back(this);
 
             // Only try a limited number of times to avoid dragging the game under the dark waves of infinity
-            if(mHitLimit > 0) 
+            if(mHitLimit > 0)
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
-               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
+               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList);
                mHitLimit--;
             }
          }
@@ -670,13 +670,13 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             chaos *= scale + 1;
 
             if(TNL::Random::readF() > 0.5)
-               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
-                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos + 
+               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint,
+                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos +
                                                                          getVel(stateIndex) * 0.05f, bumpC, 0, UI::SparkTypePoint);
 
             if(TNL::Random::readF() > 0.5)
-               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
-                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * -5 + chaos + 
+               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint,
+                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * -5 + chaos +
                                                                          getVel(stateIndex) * 0.05f, bumpC, 0, UI::SparkTypePoint);
          }
       }
@@ -747,7 +747,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          if (ship->getTeam() != asteroid->getTeam())
          {
             ship->damageObject(&damageInfo);
-         } 
+         }
 
          // Damage asteroid unless a shield is up or asteroid and ship are same team - remove to make asteroids break on collision
          if(!ship->isModulePrimaryActive(ModuleShield) && ship->mSpawnShield.getCurrent() == 0 && ship->getTeam() != asteroid->getTeam())
@@ -763,7 +763,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       moveObjectThatWasHit->mWaitingForMoveToUpdate = true;
 
       //logprintf("Collision sound! %d", stateIndex); // <== why don't we see renderstate here more often?
-      playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);    
+      playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);
 
 //      MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
 //      GameType *gameType = getGame()->getGameType();
@@ -851,7 +851,7 @@ void MoveObject::updateInterpolation()
 }
 
 bool MoveObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
-{  
+{
    point = getPos(stateIndex);
    radius = mRadius;
    return true;
@@ -863,7 +863,7 @@ void MoveObject::onGeomChanged()
    // This is here, to make sure pressing TAB in editor will show correct location for MoveItems
    setActualPos(getVert(0));
    setRenderPos(getVert(0));
-   
+
    Parent::onGeomChanged();
 }
 
@@ -882,10 +882,10 @@ void MoveObject::computeImpulseDirection(DamageInfo *damageInfo)
 // Lua interface
 /**
  * @luaclass MoveObject
- * 
+ *
  * @brief Parent class of most things that move (except bullets).
  */
-//               Fn name Param profiles  Profile count                           
+//               Fn name Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getVel, ARRAYDEF({{     END }}), 1 ) \
    METHOD(CLASS, setVel, ARRAYDEF({{ PT, END }}), 1 ) \
@@ -904,9 +904,9 @@ REGISTER_LUA_SUBCLASS(MoveObject, Item);
 
 /**
  * @luafunc point MoveObject::getVel()
- * 
+ *
  * @brief Get the items's velocity.
- * 
+ *
  * @return The velocity as an axis-aligned vector.
  */
 S32 MoveObject::lua_getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
@@ -914,12 +914,12 @@ S32 MoveObject::lua_getVel(lua_State *L) { return returnPoint(L, getActualVel())
 
 /**
  * @luafunc MoveObject::setVel(point vel)
- * 
+ *
  * @brief Sets the item's velocity.
- * 
+ *
  * @descr As with other functions that take a point as an input, you can also
  * specify the x and y components as numeric arguments.
- * 
+ *
  * @param vel A point representing item's velocity.
  */
 S32 MoveObject::lua_setVel(lua_State *L)
@@ -995,10 +995,10 @@ void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "
 // if setting the mask bits matters one whit
 void MoveItem::setActualPos(const Point &pos)
 {
-   if(pos != MoveObject::getActualPos()) 
+   if(pos != MoveObject::getActualPos())
    {
       setPos(ActualState, pos);
-      setMaskBits(PositionMask);  
+      setMaskBits(PositionMask);
    }
 }
 
@@ -1100,17 +1100,17 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       ((GameConnection *) connection)->readCompressedPoint(pt, stream);
 
-      // Here, we need to set the renderPos BEFORE setting actualPos -- setting actualPos triggers a 
+      // Here, we need to set the renderPos BEFORE setting actualPos -- setting actualPos triggers a
       // recalculation of the object's extent, which, for whatever reason, will extend from the renderPos
       // to the actualPos plus a buffer.  If renderPos is not initialized, we get a weird bounding box which,
-      // under certain circumstances (player has sensor, fires burst, is in level with no walls, etc.), 
+      // under certain circumstances (player has sensor, fires burst, is in level with no walls, etc.),
       // can cause a flickery effect on the client.  Not pleasant!
       if(mInitial)
          setRenderPos(pt);
 
       setActualPos(pt);
 
-      readCompressedVelocity(pt, VEL_POINT_SEND_BITS, stream);   
+      readCompressedVelocity(pt, VEL_POINT_SEND_BITS, stream);
       setActualVel(pt);
 
       positionChanged = true;
@@ -1127,7 +1127,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Not interpolating... just warp the object to its reported location
          mInterpolating = false;
 
-         setRenderPos(MoveObject::getActualPos()); 
+         setRenderPos(MoveObject::getActualPos());
          setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
       }
@@ -1171,7 +1171,7 @@ MountableItem::~MountableItem()
       mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things (mostly for server side)
    LUAW_DESTRUCTOR_CLEANUP;
 }
- 
+
 
 void MountableItem::idle(BfObject::IdleCallPath path)
 {
@@ -1190,7 +1190,7 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       setExtent(mMount->getExtent());     // Update this object's location in the database
    }
 
-   else     // Item is not mounted, idle normally   
+   else     // Item is not mounted, idle normally
        Parent::idle(path);
 
    // Runs on client and server, but only has meaning on server
@@ -1212,32 +1212,32 @@ void MountableItem::render()
 // When starting up a Nexus level, we can get here with a mounted flag that still has the mount set to NULL.  That will
 // break getActualPos() and friends if we don't check for mMount being NULL.  In this situation, there is no "right" position
 // so any that we send will likely be ok.  The results of Parent::getActualPos() are as good as any.
-Point MountableItem::getActualPos() const 
-{ 
-   if(mIsMounted && mMount)   
+Point MountableItem::getActualPos() const
+{
+   if(mIsMounted && mMount)
       return mMount->getActualPos();
    return Parent::getActualPos();
 }
 
 
-Point MountableItem::getRenderPos() const 
-{ 
+Point MountableItem::getRenderPos() const
+{
    if(mIsMounted && mMount)
       return mMount->getRenderPos();
    return Parent::getRenderPos();
 }
 
 
-Point MountableItem::getActualVel() const 
-{ 
+Point MountableItem::getActualVel() const
+{
    if(mIsMounted && mMount)
       return mMount->getActualVel();
    return Parent::getActualVel();
 }
 
 
-Point MountableItem::getRenderVel() const 
-{ 
+Point MountableItem::getRenderVel() const
+{
    if(mIsMounted && mMount)
       return mMount->getRenderVel();
    return Parent::getRenderVel();
@@ -1248,7 +1248,7 @@ U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
+   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set
    {
       S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
 
@@ -1272,7 +1272,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(isMounted)
       {
          Ship *ship = NULL;
-         
+
          if(stream->readFlag())
             ship = static_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
 
@@ -1298,7 +1298,7 @@ bool MountableItem::collide(BfObject *otherObject)
 // unpackUpdate() in the case of all clients
 //
 // theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
-void MountableItem::mountToShip(Ship *ship)     
+void MountableItem::mountToShip(Ship *ship)
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
 
@@ -1338,17 +1338,17 @@ void MountableItem::dismount(DismountMode dismountMode)
       mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
 
 
-   // On the server, we need to update the position of the mounted object to match the position of the ship carrying it.  
+   // On the server, we need to update the position of the mounted object to match the position of the ship carrying it.
    // On client, we'll wait for a message from the server to set the pos, which may have already happened by the time
    // this code is executed.
    if(!isGhost())    // Server
    {
-      setPos(mMount->getActualPos());  
+      setPos(mMount->getActualPos());
       mIsMounted = false;     // For client, wait to set this in unpackUpdate
    }
 
    mMount = NULL;
-      
+
    setMaskBits(MountMask | PositionMask | WarpPositionMask);    // Tell packUpdate() to send item location
 
 
@@ -1381,11 +1381,11 @@ bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
 
 /**
  * @luaclass MountableItem
- * 
- * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems\endlink 
+ *
+ * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems\endlink
  * and \link ResourceItem ResourceItems\endlink).
  */
-//               Fn name       Param profiles  Profile count                           
+//               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getShip,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isOnShip, ARRAYDEF({{ END }}), 1 ) \
@@ -1401,16 +1401,16 @@ REGISTER_LUA_SUBCLASS(MountableItem, MoveObject);
 
 /**
  * @luafunc Ship MountableItem::getShip()
- * 
+ *
  * @brief Get the ship carrying this item, if any.
  * @return The ship this item is mounted to, or nil if item is unmounted.
  */
-S32 MountableItem::lua_getShip(lua_State *L) 
-{ 
+S32 MountableItem::lua_getShip(lua_State *L)
+{
    if(mMount.isValid())
       return returnShip(L, mMount);
-   else 
-      return returnNil(L); 
+   else
+      return returnNil(L);
 }
 
 
@@ -1487,7 +1487,7 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroi
    mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
 
    mKillString = "crashed into an asteroid";
-   
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
@@ -1604,7 +1604,7 @@ const Vector<Point> *Asteroid::getCollisionPoly() const
 void Asteroid::damageObject(DamageInfo *damageInfo)
 {
    if(hasExploded)
-      return; 
+      return;
 
    ClientInfo *shooter = damageInfo->damagingObject->getOwner();
    if(shooter)
@@ -1612,7 +1612,7 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
 
    // Compute impulse direction
    mSizeLeft--;
-   
+
    if(mSizeLeft <= 0)    // Kill small items
    {
       hasExploded = true;
@@ -1750,7 +1750,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
       else
       {
          if(argc < 8)
-         {  
+         {
             argv[argc] = argv2[i];
             argc++;
          }
@@ -1823,10 +1823,10 @@ void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 
 /**
  * @luaclass Asteroid
- * 
+ *
  * @brief Just like the arcade game! Yo!
  */
-//               Fn name       Param profiles  Profile count                           
+//               Fn name       Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSizeIndex, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getSizeCount, ARRAYDEF({{ END }}), 1 ) \
@@ -1844,39 +1844,39 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
 /**
  * @luafunc int Asteroid::getSizeIndex()
- * 
+ *
  * @brief Get this asteroid's current size index.
- * 
+ *
  * @descr Index 1 represents the asteroid's initial size. After it has been
  * broken once, its size index will be 2, and so on. This method will always
  * return an integer between 1 and the value returned by the getSizeCount()
  * method (inclusive).
- * 
+ *
  * @return Index corresponding to the asteroid's current size.
  */
 S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
 
 /**
  * @luafunc int Asteroid::getSizeCount()
- * 
+ *
  * @brief Returns size index of smallest asteroid.
- * 
+ *
  * Remember, bigger indices mean smaller asteroids.
- * 
+ *
  * @return Index of the asteroid's smallest size.
  */
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 /**
  * @luafunc Asteroid::setSize(int size)
- * 
+ *
  * @brief Set the size of the Asteroid.
- * 
+ *
  * Setting the size of an Asteroid will give you (size 1) levels you'll have to
  * destroy. Each level reduction will produce two more asteroids
- * 
+ *
  * @param size The size the asteroid will be set to.
- * 
+ *
  * @note Any size less than 1 will default to size 3. Please be responsible with
  * your size choices.
  */
@@ -1914,7 +1914,7 @@ TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADI
       if(checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
          setPos(L, 1);
    }
-   
+
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
 
@@ -1923,7 +1923,7 @@ TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADI
 
 
 // Destructor
-TestItem::~TestItem() 
+TestItem::~TestItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -2001,11 +2001,11 @@ const Vector<Point> *TestItem::getCollisionPoly() const
  * @luafunc TestItem::TestItem()
  * @luafunc TestItem::TestItem(point pos)
  * @luaclass TestItem
- * 
+ *
  * @brief Large bouncy ball type item.
  */
 #define LUA_METHODS(CLASS, METHOD) \
-   
+
 GENERATE_LUA_FUNARGS_TABLE(TestItem, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(TestItem, LUA_METHODS);
 
@@ -2031,7 +2031,7 @@ ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURC
       if(checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
          setPos(L, 1);
    }
-   
+
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
 
@@ -2040,7 +2040,7 @@ ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURC
 
 
 // Destructor
-ResourceItem::~ResourceItem() 
+ResourceItem::~ResourceItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -2106,8 +2106,8 @@ bool ResourceItem::collide(BfObject *hitObject)
    if( ! (isShipType(hitObject->getObjectTypeNumber())) )
       return true;
 
-   // Ignore collisions that occur to recently dropped items.  Make sure item is ready to be picked up! 
-   if(mDroppedTimer.getCurrent())    
+   // Ignore collisions that occur to recently dropped items.  Make sure item is ready to be picked up!
+   if(mDroppedTimer.getCurrent())
       return false;
 
    if(!isShipType(hitObject->getObjectTypeNumber()))
@@ -2157,12 +2157,12 @@ bool ResourceItem::isItemThatMakesYouVisibleWhileCloaked()
  * @luafunc ResourceItem::ResourceItem()
  * @luafunc ResourceItem::ResourceItem(point pos)
  * @luaclass ResourceItem
- * 
+ *
  * @brief Small bouncy ball type item. In levels where Engineer module is
  * allowed, ResourceItems can be collected and transformed into other items.
  */
 #define LUA_METHODS(CLASS, METHOD) \
-   
+
 GENERATE_LUA_FUNARGS_TABLE(ResourceItem, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(ResourceItem, LUA_METHODS);
 

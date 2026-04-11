@@ -10,7 +10,7 @@
 
 #include "ClientGame.h"
 #include "gameObjectRender.h"
-#include "masterConnection.h"   
+#include "masterConnection.h"
 #include "DisplayManager.h"          // For canvas dimensions
 #include "Renderer.h"
 
@@ -143,8 +143,8 @@ void HighScoresUserInterface::renderWaitingForScores()
       for(S32 i = 0; i < lines.size(); i++)
          symbolSet.add(SymbolString::getSymbolText(lines[i], 30, ErrorMsgContext, &Colors::blue));
 
-      symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));   
-      symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, &Colors::cyan)));   
+      symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));
+      symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, &Colors::cyan)));
 
       symbolSet.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, (DisplayManager::getScreenInfo()->getGameCanvasHeight() - symbolSet.getHeight()) / 2, AlignmentCenter);
    }
@@ -158,7 +158,7 @@ void HighScoresUserInterface::renderWaitingForScores()
 
       // Only render, don't activate so we don't have to deactivate when we get the high scores
       errUI->render();
-   }      
+   }
 }
 
 
@@ -183,10 +183,10 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
 
       scoreGroup.title = string(groupNames[i].getString());
 
-      for(S32 j = 0; j < scoresPerGroup; j++)    
+      for(S32 j = 0; j < scoresPerGroup; j++)
       {
-         currNames .push_back(names [i * scoresPerGroup + j]);    
-         currScores.push_back(scores[i * scoresPerGroup + j]);                      
+         currNames .push_back(names [i * scoresPerGroup + j]);
+         currScores.push_back(scores[i * scoresPerGroup + j]);
       }
 
       scoreGroup.names = currNames;

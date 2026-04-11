@@ -6,7 +6,7 @@
 #ifndef _DISMOUNT_MODES_ENUM_H
 #define _DISMOUNT_MODES_ENUM_H
 
-namespace Zap 
+namespace Zap
 {
 
 // Reasons/modes we might dismount an item

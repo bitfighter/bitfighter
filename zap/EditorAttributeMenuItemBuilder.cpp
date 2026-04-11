@@ -84,7 +84,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
 
             attributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-            CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
+            CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns",
                                                             "Time it takes for each item to be spawned");
             attributeMenuUI->addMenuItem(menuItem);
 
@@ -138,7 +138,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
             attributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
             // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-            CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
+            CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled",
                                                             "Time for this item to heal itself 10%");
             attributeMenuUI->addMenuItem(menuItem);
 
@@ -162,7 +162,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
             attributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
             // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-            CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
+            CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen",
                                                             "Time for this item to reappear after it has been picked up");
 
             attributeMenuUI->addMenuItem(menuItem);
@@ -173,7 +173,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
 
          return attributeMenuUI;
       }
-   
+
       case TextItemTypeNumber:
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
@@ -297,7 +297,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
          static_cast<CoreItem *>(obj)->setRotationSpeed(U32(attributeMenu->getMenuItem(1)->getIntValue()));
          break;
-         
+
       case ForceFieldProjectorTypeNumber:
          static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
          break;

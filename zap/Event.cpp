@@ -43,8 +43,8 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 {
    // Handle special case of editor... would be better handled elsewhere?
 
-   // If we are in the editor, we want to tell setMousePos that we are running in fullscreen stretched mode because it 
-   // will convert the mouse coordinate assuming no black bars at the margins.  
+   // If we are in the editor, we want to tell setMousePos that we are running in fullscreen stretched mode because it
+   // will convert the mouse coordinate assuming no black bars at the margins.
    if(currentUI->usesEditorScreenMode() && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 

@@ -30,7 +30,7 @@ public:
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;
 
-   void renderDock();                       
+   void renderDock();
    // Child classes will call this
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 

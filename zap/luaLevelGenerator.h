@@ -35,7 +35,7 @@ public:
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();
-   
+
    void onScriptInitialized();
    string getScriptName();
 

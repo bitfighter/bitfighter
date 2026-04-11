@@ -46,7 +46,7 @@ TextItem::TextItem(lua_State *L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, STR, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "TextItem", "constructor");
-   
+
       if(profile == 1)
       {
          setGeom(L, 1);
@@ -248,7 +248,7 @@ void TextItem::recalcTextSize()
    const F32 dummyTextSize = 120;
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
-   F32 strWidth = F32(getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
+   F32 strWidth = F32(getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize;
    F32 size = lineLen / strWidth;
 
   setSize(size);
@@ -390,7 +390,7 @@ F32 TextItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32
 void TextItem::onAttrsChanging() { onGeomChanged(); }    // Runs when text is being changed in the editor
 void TextItem::onAttrsChanged()  { onGeomChanged(); }
 void TextItem::onGeomChanging()  { onGeomChanged(); }
-                                 
+
 void TextItem::onGeomChanged()
 {
    recalcTextSize();
@@ -411,21 +411,21 @@ void TextItem::textEditedCallback(string text, BfObject *obj)
  * @luafunc TextItem::TextItem()
  * @luafunc TextItem::TextItem(Geom lineGeom, string text)
  * @luaclass TextItem
- * 
+ *
  * @brief Display text message in level.
- * 
+ *
  * @descr A TextItem displays text in a level. If the TextItem belongs to a
  * team, it is only visible to players on that team. If it is assigned to
  * NeutralTeam (the default), it will be visible to all players. Text is always
  * displayed in the color of the team it belongs to.
- * 
+ *
  * Note that you will likely want to set the text of a new TextItem (see
  * setText()), as, by default, the display string is blank.
- * 
+ *
  * Geometry for a TextItem consists of two points representing the start and end
  * points of the item. Text will be scaled to fit between these points.
  */
-//               Fn name     Param profiles       Profile count                           
+//               Fn name     Param profiles       Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setText,      ARRAYDEF({{ STR, END }}), 1 ) \
    METHOD(CLASS, getText,      ARRAYDEF({{      END }}), 1 ) \
@@ -442,9 +442,9 @@ REGISTER_LUA_SUBCLASS(TextItem, BfObject);
 
 /**
  * @luafunc TextItem::setText(string text)
- * 
+ *
  * @brief Sets the text of a TextItem.
- * 
+ *
  * @param text The text which the TextItem should display.
  */
 S32 TextItem::lua_setText(lua_State *L)
@@ -459,9 +459,9 @@ S32 TextItem::lua_setText(lua_State *L)
 
 /**
  * @luafunc string TextItem::getText()
- * 
+ *
  * @brief Sets the text of a TextItem.
- * 
+ *
  * @return The text which the TextItem is currently displaying.
  */
 S32 TextItem::lua_getText(lua_State *L)

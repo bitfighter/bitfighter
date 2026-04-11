@@ -17,7 +17,7 @@
 
 #include "version.h"
 
-#ifdef TNL_OS_WIN32 
+#ifdef TNL_OS_WIN32
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
 
@@ -37,7 +37,7 @@ namespace Zap
 
 
 enum ParamRequirements {
-   NO_PARAMETERS,      
+   NO_PARAMETERS,
    ONE_OPTIONAL,
    ONE_REQUIRED,
    TWO_REQUIRED,
@@ -50,14 +50,14 @@ struct ParamInfo {
    string paramName;
    ParamRequirements argsRequired;
    CmdLineParams::ParamId paramId;
-   S32 docLevel;     
+   S32 docLevel;
    string paramString;
    string helpString;
    const char *errorMsg;
 };
 
 
-ParamInfo paramDefs[] = {   
+ParamInfo paramDefs[] = {
 // Parameter               Args required   ParamId           Doc. tier  Args                  Help string            Error message (not needed for NO_PARAMETERS)
 
 // Player-oriented options
@@ -83,7 +83,7 @@ ParamInfo paramDefs[] = {
 { "nolevelchangepassword", NO_PARAMETERS,  NO_LEVEL_CHANGE_PASSWORD, 1, "",       "Overrides level change password specified in the INI (or cmd line), and will allow any player to change levels", "" },
 { "hostname",              ONE_REQUIRED,   HOST_NAME,             1, "<string>",  "Set the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
 { "hostdescr",             ONE_REQUIRED,   HOST_DESCRIPTION,      1, "<string>",  "Set a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
-{ "maxplayers",            ONE_REQUIRED,   MAX_PLAYERS_PARAM,     1, "<int>",     "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" }, 
+{ "maxplayers",            ONE_REQUIRED,   MAX_PLAYERS_PARAM,     1, "<int>",     "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" },
 { "hostaddr",              ONE_REQUIRED,   HOST_ADDRESS,          1, "<address>", "Specify host address for the server to listen to when hosting",                        "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)" },
 
 // Specifying levels
@@ -120,7 +120,7 @@ struct DirectiveInfo {
    string paramName;
    ParamRequirements argsRequired;
    CmdLineParams::ParamId paramId;
-   S32 docLevel;     
+   S32 docLevel;
    void (*cmdCallback)(GameSettings *settings, const Vector<string> &args);
    string paramString;
    string helpString;
@@ -128,7 +128,7 @@ struct DirectiveInfo {
 };
 
 
-DirectiveInfo directiveDefs[] = {   
+DirectiveInfo directiveDefs[] = {
 
 // Advanced server management options
 { "getres",  FOUR_REQUIRED,  SEND_RESOURCE, 5, GameSettings::getRes,    "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
@@ -207,12 +207,12 @@ string GameSettings::getHostName()
 }
 
 
-void GameSettings::setHostName(const string &hostName, bool updateINI) 
-{ 
-   mHostName = hostName; 
+void GameSettings::setHostName(const string &hostName, bool updateINI)
+{
+   mHostName = hostName;
 
    if(updateINI)
-      mIniSettings.hostname = hostName; 
+      mIniSettings.hostname = hostName;
 }
 
 
@@ -222,12 +222,12 @@ string GameSettings::getHostDescr()
 }
 
 
-void GameSettings::setHostDescr(const string &hostDescr, bool updateINI) 
-{ 
+void GameSettings::setHostDescr(const string &hostDescr, bool updateINI)
+{
    mHostDescr = hostDescr;
-   
+
    if(updateINI)
-      mIniSettings.hostdescr = hostDescr; 
+      mIniSettings.hostdescr = hostDescr;
 }
 
 
@@ -238,7 +238,7 @@ string GameSettings::getWelcomeMessage() const
 
 
 void GameSettings::setGlobalLevelgenScript(const string &globalLevelScript)
-{ 
+{
       mIniSettings.globalLevelScript = globalLevelScript;
 }
 string GameSettings::getGlobalLevelgenScript() const
@@ -262,12 +262,12 @@ string GameSettings::getServerPassword()
 }
 
 
-void GameSettings::setServerPassword(const string &serverPassword, bool updateINI) 
-{ 
-   mServerPassword = serverPassword; 
+void GameSettings::setServerPassword(const string &serverPassword, bool updateINI)
+{
+   mServerPassword = serverPassword;
 
    if(updateINI)
-      mIniSettings.serverPassword = serverPassword; 
+      mIniSettings.serverPassword = serverPassword;
 }
 
 
@@ -292,12 +292,12 @@ string GameSettings::getAdminPassword()
 }
 
 
-void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI) 
-{ 
-   mAdminPassword = adminPassword; 
+void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI)
+{
+   mAdminPassword = adminPassword;
 
    if(updateINI)
-      mIniSettings.adminPassword = adminPassword; 
+      mIniSettings.adminPassword = adminPassword;
 }
 
 
@@ -307,12 +307,12 @@ string GameSettings::getLevelChangePassword()
 }
 
 
-void GameSettings::setLevelChangePassword(const string &levelChangePassword, bool updateINI) 
-{ 
+void GameSettings::setLevelChangePassword(const string &levelChangePassword, bool updateINI)
+{
    mLevelChangePassword = levelChangePassword;     // Update our working copy
 
    if(updateINI)
-      mIniSettings.levelChangePassword = levelChangePassword; 
+      mIniSettings.levelChangePassword = levelChangePassword;
 }
 
 
@@ -471,7 +471,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
       mIniSettings.lastPassword = password;
 
    mIniSettings.mSettings.setVal("LastName", name);
-   
+
    iniFile.WriteFile();
 }
 
@@ -579,15 +579,15 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 }
 
 
-LoadoutTracker GameSettings::getLoadoutPreset(S32 index) 
-{ 
+LoadoutTracker GameSettings::getLoadoutPreset(S32 index)
+{
    TNLAssert(index >= 0 && index < mLoadoutPresets.size(), "Preset index out of range!") ;
-   return mLoadoutPresets[index]; 
+   return mLoadoutPresets[index];
 }
 
 
 // Caller is responsible for bounds checking index...
-void GameSettings::setLoadoutPreset(const LoadoutTracker *preset, S32 index) 
+void GameSettings::setLoadoutPreset(const LoadoutTracker *preset, S32 index)
 {
    mLoadoutPresets[index] = *preset;
 }
@@ -654,7 +654,7 @@ Vector<string> *GameSettings::getLevelSkipList()
 
 
 InputCodeManager *GameSettings::getInputCodeManager()
-{ 
+{
    return &mInputCodeManager;
 }
 
@@ -687,7 +687,7 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
    // If user specified a list of levels on the command line, use those, unless ignoreCmdLine was set to true
    if(!ignoreCmdLine && mCmdLineParams[CmdLineParams::LEVEL_LIST].size() > 0)
       levelList = mCmdLineParams[CmdLineParams::LEVEL_LIST];
-   else  // Build our level list by looking at the filesystem 
+   else  // Build our level list by looking at the filesystem
       levelList = LevelSource::findAllLevelFilesInFolder(levelDir);
 
 
@@ -730,9 +730,9 @@ static void parameterError(const char *errorMsg)
 }
 
 
-// Fills params with the requisite number of param arguments.  Returns new position along the tokens in cmd line where we should 
+// Fills params with the requisite number of param arguments.  Returns new position along the tokens in cmd line where we should
 // continue parsing.
-static S32 getParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr, 
+static S32 getParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr,
                      const S32 argc, const Vector<string> &argv, const char *errorMsg, Vector<string> &params)
 {
    // Assume "args" starting with "-" are actually subsequent params
@@ -859,7 +859,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       }
    }
 
-   
+
 #ifdef ZAP_DEDICATED
    // Override some settings if we're compiling ZAP_DEDICATED
    mCmdLineParams[DEDICATED].push_back("true");
@@ -914,7 +914,7 @@ void GameSettings::onFinishedLoading()
    cmdLineVal = getString(LOGIN_NAME);
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
-   //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
+   //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry
    mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>("LastName"));
    mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
@@ -1077,10 +1077,10 @@ static string getChunk(U32 len)
 
    // Advance chunkStart to position of first non-space; avoids leading spaces
    chunkStart += chunkText.substr(chunkStart, len + 1).find_first_not_of(' ');
-               
+
    // Create a chunk of text, with the max length we have room for
    string chunk = chunkText.substr(chunkStart, len + 1);
-               
+
    if(chunk.length() >= len)                                // If chunk would fill a full line...
       chunk = chunk.substr(0, chunk.find_last_of(' '));     // ...lop chunk off at last space
 
@@ -1347,7 +1347,7 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
    UserSettingsMap::iterator i = mUserSettings.find(name);
 
    // If the settings don't already exist, create them here
-   if(i == mUserSettings.end())    
+   if(i == mUserSettings.end())
    {
       UserSettings newSettings;
       newSettings.name = name;

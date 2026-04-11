@@ -20,8 +20,8 @@
 
 using namespace TNL;
 
-namespace Zap { 
-   
+namespace Zap {
+
 class InputCodeManager;
 
 namespace UI {
@@ -39,7 +39,7 @@ enum Alignment {
 ////////////////////////////////////////
 
 // Parent for various Shape classes below
-class SymbolShape 
+class SymbolShape
 {
 protected:
    S32 mWidth, mHeight;
@@ -403,7 +403,7 @@ protected:
 public:
    SymbolString(const Vector<shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
    SymbolString(const        shared_ptr<SymbolShape>   &symbol,  Alignment alignment = AlignmentNone);
-   SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
+   SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context,
                 S32 textSize, bool blockMode, Alignment alignment = AlignmentNone);
    SymbolString();                     // Constructor (can't use until you've setSymbols)
    virtual ~SymbolString();            // Destructor
@@ -465,7 +465,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SymbolStringSet 
+class SymbolStringSet
 {
 private:
    S32 mGap;

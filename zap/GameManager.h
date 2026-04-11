@@ -64,6 +64,6 @@ public:
    static HostingModePhase getHostingModePhase();
 };
 
-} 
+}
 
-#endif 
+#endif

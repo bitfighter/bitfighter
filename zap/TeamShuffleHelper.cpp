@@ -63,7 +63,7 @@ void TeamShuffleHelper::shuffle()
 
    for(S32 i = 0; i < clientInfos->size(); i++)
    {
-      while(true)  
+      while(true)
       {
          S32 index = TNL::Random::readI(0, mTeams.size() - 1);
          if(mTeams[index].size() < playersPerTeam)
@@ -86,7 +86,7 @@ void TeamShuffleHelper::onActivated()
 }
 
 
-static F32 TEXT_SIZE_FACTOR = 1.2f;     // Give 20% breathing room for text 
+static F32 TEXT_SIZE_FACTOR = 1.2f;     // Give 20% breathing room for text
 
 void TeamShuffleHelper::calculateRenderSizes()
 {
@@ -117,7 +117,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 
    columnWidth = -1;
    maxColumnWidth = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 100) / cols;
-   rowHeight = (2 * vpad) + S32((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);  
+   rowHeight = (2 * vpad) + S32((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);
 
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
@@ -144,7 +144,7 @@ void TeamShuffleHelper::calculateRenderSizes()
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
-extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, 
+extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor,
                                   const Color &outlineColor, S32 radius, F32 alpha = 1.0);
 
 void TeamShuffleHelper::render()
@@ -167,8 +167,8 @@ void TeamShuffleHelper::render()
          Color c = *getGame()->getTeamColor(teamIndex);
          c *= .2f;
 
-         drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), 
-                               columnWidth, rowHeight, 
+         drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2),
+                               columnWidth, rowHeight,
                                c, *getGame()->getTeamColor(teamIndex), 8);
 
          r.setColor(*getGame()->getTeamColor(teamIndex));
@@ -185,7 +185,7 @@ void TeamShuffleHelper::render()
    r.setColor(Colors::green);
 
    static const UI::SymbolString Instructions(
-         "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel", 
+         "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel",
          getGame()->getSettings()->getInputCodeManager(), TeamShuffleContext, 20, false, AlignmentCenter);
 
    static Point RenderPos(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2,

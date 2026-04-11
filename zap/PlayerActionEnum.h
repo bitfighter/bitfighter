@@ -6,7 +6,7 @@
 #ifndef _PLAYER_ACTION_ENUM_H_
 #define _PLAYER_ACTION_ENUM_H_
 
-namespace Zap 
+namespace Zap
 {
 
 enum PlayerAction {

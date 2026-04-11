@@ -10,9 +10,9 @@
 
 namespace Zap
 {
-   
+
 // Store previous scissors settings
-void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y, F32 width, F32 height) 
+void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y, F32 width, F32 height)
 {
    mManagerEnabled = enable;
 

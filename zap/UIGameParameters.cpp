@@ -114,7 +114,7 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 
       shared_ptr<MenuItem> menuItem;
 
-      if(iter != mMenuItemMap.end())      
+      if(iter != mMenuItemMap.end())
          mMenuItemMap.erase(iter);
    }
 }
@@ -129,7 +129,7 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 
    // Instantiate our gameType object and cast it to GameType
    TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(gameTypes[gtIndex]));
-   GameType *gt = dynamic_cast<GameType *>(theObject);   
+   GameType *gt = dynamic_cast<GameType *>(theObject);
 
    gt->addToGame(game, NULL);    // GameType::addToGame() ignores database (and what would it do with one, anyway?), so we can pass NULL
 
@@ -159,10 +159,10 @@ void GameParamUserInterface::updateMenuItems()
    clearMenuItems();
 
    // Note that on some gametypes instructions[1] is NULL
-   string instructs = string(gameType->getInstructionString()[0]) + 
+   string instructs = string(gameType->getInstructionString()[0]) +
                              (gameType->getInstructionString()[1] ?  string(" ") + gameType->getInstructionString()[1] : "");
 
-   addMenuItem(new ToggleMenuItem("Game Type:",       
+   addMenuItem(new ToggleMenuItem("Game Type:",
                                   gameTypes,
                                   gameTypes.getIndex(gameType->getGameTypeName()),
                                   true,

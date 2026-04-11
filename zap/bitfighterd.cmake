@@ -1,6 +1,6 @@
 #
 # Dedicated server build
-# 
+#
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}

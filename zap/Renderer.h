@@ -103,7 +103,7 @@ public:
    virtual void clearDepth() = 0;
    virtual void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
    virtual void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
-   
+
    virtual void setLineWidth(F32 width) = 0;
    virtual void setPointSize(F32 size) = 0;
    virtual void enableAntialiasing() = 0;

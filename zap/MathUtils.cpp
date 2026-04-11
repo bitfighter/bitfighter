@@ -88,6 +88,6 @@ S32 roundUp(S32 numToRound, S32 multiple)
       return numToRound - remainder;
 
    return numToRound + multiple - remainder;
-} 
+}
 
 };

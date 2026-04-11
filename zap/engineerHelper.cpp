@@ -27,9 +27,9 @@ static OverlayMenuItem engineerItemInfo[] = {
    { KEY_2, BUTTON_2, true,  EngineeredForceField,         "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
    { KEY_3, BUTTON_3, true,  EngineeredTeleporterEntrance, "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
    { KEY_4, BUTTON_4, false, EngineeredTeleporterExit,     "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
-};                                                         
-                                                           
-                                    
+};
+
+
 static const char *engineerInstructions[] = {
    "Aim at a spot on a wall, and activate the module again.",
    "Aim at a spot on a wall, and activate the module again.",
@@ -63,7 +63,7 @@ S32 EngineerHelper::getWidthOfItems() const
 {
    // With this one, the title is wider than the text (at the moment at least), so we should consider the title width.  This
    // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
-   // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
+   // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a
    // much wider menu than necessary.  Add the horizMargin to make things look balanced.
    S32 maxItemWidth = getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
    S32 titleWidth = getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) +
@@ -100,7 +100,7 @@ void EngineerHelper::onActivated()
 void EngineerHelper::render()
 {
    S32 yPos = MENU_TOP + MENU_PADDING;
-   
+
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
       drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0, mEngineerItemsDisplayWidth, mEngineerButtonsWidth);
 
@@ -204,7 +204,7 @@ S32 EngineerHelper::getAnimationTime() const
 {
    if(isMenuBeingDisplayed())
       return Parent::getAnimationTime();
-   
+
    return 0;      // Returning 0 will cause menu to disappear immediately
 }
 
