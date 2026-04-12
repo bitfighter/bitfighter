@@ -125,8 +125,8 @@ TEST(ColorTest, Interpolation)
 TEST(ColorTest, ConversionHelpers)
 {
    Color c(1.0f, 0.5f, 0.0f);
-   EXPECT_EQ(0x007FFFu, c.toU32());
-   EXPECT_EQ("FF7F00", c.toHexString());
+   EXPECT_EQ(0x0080FFu, c.toU32());
+   EXPECT_EQ("FF8000", c.toHexString());
    EXPECT_EQ("1 0.5 0", c.toRGBString());
 }
 

@@ -5,6 +5,7 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/BugReproduction.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
