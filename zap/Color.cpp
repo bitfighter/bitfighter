@@ -63,7 +63,11 @@ Color::Color(U32 rgbInt)
 
 Color::Color(const string &hex)
 {
-   if(hex.length() != 6)
+   string hexStr = hex;
+   if(hexStr.length() > 0 && hexStr[0] == '#')
+      hexStr = hexStr.substr(1);
+
+   if(hexStr.length() != 6)
    {
       r = 0;
       g = 0;
@@ -72,9 +76,9 @@ Color::Color(const string &hex)
       return;
    }
 
-   r = strtol(hex.substr(0,2).c_str(), NULL, 16) / 255.0f;
-   g = strtol(hex.substr(2,2).c_str(), NULL, 16) / 255.0f;
-   b = strtol(hex.substr(4,2).c_str(), NULL, 16) / 255.0f;
+   r = strtol(hexStr.substr(0, 2).c_str(), NULL, 16) / 255.0f;
+   g = strtol(hexStr.substr(2, 2).c_str(), NULL, 16) / 255.0f;
+   b = strtol(hexStr.substr(4, 2).c_str(), NULL, 16) / 255.0f;
 }
 
 
@@ -96,7 +100,21 @@ void Color::interp(float t, const Color &c1, const Color &c2)
 }
 
 void Color::set(const Color &c) { r = c.r;  g = c.g;  b = c.b;  }
-void Color::set(const Color *c) { r = c->r; g = c->g; b = c->b; }
+void Color::set(const Color *c)
+{
+   if(c)
+   {
+      r = c->r;
+      g = c->g;
+      b = c->b;
+   }
+   else
+   {
+      r = 0;
+      g = 0;
+      b = 0;
+   }
+}
 
 void Color::set(const string &s)
 {
