@@ -47,8 +47,8 @@ TEST(PointTest, SetMethods)
 
 TEST(PointTest, ArithmeticOperators)
 {
-   Point p1(1.0f, 2.0f);
-   Point p2(3.0f, 4.0f);
+   const Point p1(1.0f, 2.0f);
+   const Point p2(3.0f, 4.0f);
 
    Point p3 = p1 + p2;
    EXPECT_FLOAT_EQ(4.0f, p3.x);

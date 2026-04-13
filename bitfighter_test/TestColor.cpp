@@ -131,6 +131,18 @@ TEST(ColorTest, ConversionHelpers)
 }
 
 
+TEST(ColorTest, Rounding)
+{
+   // 254.999 / 255.0 is approx 0.999996078
+   // Truncation would result in 254
+   // Rounding should result in 255
+   Color c(254.999f / 255.0f, 254.999f / 255.0f, 254.999f / 255.0f);
+
+   EXPECT_EQ(0xFFFFFFu, c.toU32()) << "Color::toU32() should round to nearest integer";
+   EXPECT_EQ("FFFFFF", c.toHexString()) << "Color::toHexString() should round to nearest integer";
+}
+
+
 TEST(ColorTest, ClampingConversion)
 {
    Color high(2.0f, 5.0f, 10.0f);
