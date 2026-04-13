@@ -528,12 +528,6 @@ XtankArmorInfo xtankArmorInfos[] =
 // Xtank tread types: multipliers applied on top of the per-body base physics.
 // ---------------------------------------------------------------------------
 
-const char *xtankTreadNames[] =
-{
-   "Rubber Trd",
-   "Metal Trd",
-   "Heavy Trd",
-};
 
 XtankTreadInfo xtankTreadInfos[] =
 {
