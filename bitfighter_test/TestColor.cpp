@@ -64,6 +64,11 @@ TEST(ColorTest, IntegerAndHexConstructors)
    EXPECT_FLOAT_EQ(0x34 / 255.0f, fromHex.g);
    EXPECT_FLOAT_EQ(0x56 / 255.0f, fromHex.b);
 
+   Color fromHexWithHash("#123456");
+   EXPECT_FLOAT_EQ(0x12 / 255.0f, fromHexWithHash.r);
+   EXPECT_FLOAT_EQ(0x34 / 255.0f, fromHexWithHash.g);
+   EXPECT_FLOAT_EQ(0x56 / 255.0f, fromHexWithHash.b);
+
    Color invalidHex("12345");
    EXPECT_FLOAT_EQ(0.0f, invalidHex.r);
    EXPECT_FLOAT_EQ(0.0f, invalidHex.g);
@@ -91,7 +96,13 @@ TEST(ColorTest, ReadAndSet)
    EXPECT_FLOAT_EQ(0.4f, c.g);
    EXPECT_FLOAT_EQ(0.6f, c.b);
 
+   c.set(static_cast<const Color *>(NULL));
+   EXPECT_FLOAT_EQ(0.0f, c.r);
+   EXPECT_FLOAT_EQ(0.0f, c.g);
+   EXPECT_FLOAT_EQ(0.0f, c.b);
+
    // Invalid strings should not overwrite an existing valid color.
+   c.set("0.2,0.4,0.6");
    c.set("broken");
    EXPECT_FLOAT_EQ(0.2f, c.r);
    EXPECT_FLOAT_EQ(0.4f, c.g);
@@ -125,8 +136,8 @@ TEST(ColorTest, Interpolation)
 TEST(ColorTest, ConversionHelpers)
 {
    Color c(1.0f, 0.5f, 0.0f);
-   EXPECT_EQ(0x007FFFu, c.toU32());
-   EXPECT_EQ("FF7F00", c.toHexString());
+   EXPECT_EQ(0x0080FFu, c.toU32());      // 0.5 * 255 = 127.5, rounded to 128 (0x80)
+   EXPECT_EQ("FF8000", c.toHexString());
    EXPECT_EQ("1 0.5 0", c.toRGBString());
 }
 

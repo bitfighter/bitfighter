@@ -63,7 +63,11 @@ Color::Color(U32 rgbInt)
 
 Color::Color(const string &hex)
 {
-   if(hex.length() != 6)
+   string hexStr = hex;
+   if(hexStr.length() > 0 && hexStr[0] == '#')
+      hexStr = hexStr.substr(1);
+
+   if(hexStr.length() != 6)
    {
       r = 0;
       g = 0;
@@ -72,9 +76,9 @@ Color::Color(const string &hex)
       return;
    }
 
-   r = strtol(hex.substr(0,2).c_str(), NULL, 16) / 255.0f;
-   g = strtol(hex.substr(2,2).c_str(), NULL, 16) / 255.0f;
-   b = strtol(hex.substr(4,2).c_str(), NULL, 16) / 255.0f;
+   r = strtol(hexStr.substr(0, 2).c_str(), NULL, 16) / 255.0f;
+   g = strtol(hexStr.substr(2, 2).c_str(), NULL, 16) / 255.0f;
+   b = strtol(hexStr.substr(4, 2).c_str(), NULL, 16) / 255.0f;
 }
 
 
@@ -96,7 +100,21 @@ void Color::interp(float t, const Color &c1, const Color &c2)
 }
 
 void Color::set(const Color &c) { r = c.r;  g = c.g;  b = c.b;  }
-void Color::set(const Color *c) { r = c->r; g = c->g; b = c->b; }
+void Color::set(const Color *c)
+{
+   if(c)
+   {
+      r = c->r;
+      g = c->g;
+      b = c->b;
+   }
+   else
+   {
+      r = 0;
+      g = 0;
+      b = 0;
+   }
+}
 
 void Color::set(const string &s)
 {
@@ -124,9 +142,9 @@ string Color::toRGBString() const
 string Color::toHexString() const
 {
    char c[7];
-   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f);
-   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f);
-   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f);
+   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f + 0.5f);
+   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f + 0.5f);
+   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f + 0.5f);
 
    dSprintf(c, sizeof(c), "%.2X%.2X%.2X", ir, ig, ib);
    return c;
@@ -135,9 +153,9 @@ string Color::toHexString() const
 
 U32 Color::toU32() const
 {
-   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f);
-   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f);
-   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f);
+   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f + 0.5f);
+   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f + 0.5f);
+   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f + 0.5f);
 
    return ir | ig << 8 | ib << 16;
 }
