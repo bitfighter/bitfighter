@@ -125,9 +125,21 @@ TEST(ColorTest, Interpolation)
 TEST(ColorTest, ConversionHelpers)
 {
    Color c(1.0f, 0.5f, 0.0f);
-   EXPECT_EQ(0x007FFFu, c.toU32());
-   EXPECT_EQ("FF7F00", c.toHexString());
+   EXPECT_EQ(0x0080FFu, c.toU32());
+   EXPECT_EQ("FF8000", c.toHexString());
    EXPECT_EQ("1 0.5 0", c.toRGBString());
+}
+
+
+TEST(ColorTest, Rounding)
+{
+   // 254.999 / 255.0 is approx 0.999996078
+   // Truncation would result in 254
+   // Rounding should result in 255
+   Color c(254.999f / 255.0f, 254.999f / 255.0f, 254.999f / 255.0f);
+
+   EXPECT_EQ(0xFFFFFFu, c.toU32()) << "Color::toU32() should round to nearest integer";
+   EXPECT_EQ("FFFFFF", c.toHexString()) << "Color::toHexString() should round to nearest integer";
 }
 
 

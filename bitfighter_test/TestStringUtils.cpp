@@ -259,6 +259,16 @@ TEST(StringUtilsTest, toString)
 
 TEST(StringUtilsTest, parseString)
 {
+   Vector<string> words;
+
+   // NULL input - currently would crash
+   parseString((const char*)NULL, words, ',');
+   EXPECT_TRUE(words.empty());
+
+   // Empty string input
+   parseString("", words, ',');
+   EXPECT_TRUE(words.empty());
+
    Vector<string> result = parseString("one two \"three four\" five");
    ASSERT_EQ(4, result.size());
    EXPECT_EQ("one", result[0]);
