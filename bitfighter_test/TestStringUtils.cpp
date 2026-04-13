@@ -638,6 +638,31 @@ TEST(StringUtilsTest, sortingNumericPrefixAlphaSuffix)
 }
 
 
+TEST(StringUtilsTest, formatMessage)
+{
+   Vector<StringTableEntry> e;
+   e.push_back("entry0");
+   e.push_back("entry1");
+
+   Vector<StringPtr> s;
+   s.push_back("ptr0");
+
+   Vector<S32> i;
+   i.push_back(42);
+
+   EXPECT_EQ("entry0 and entry1", formatMessage("%e0 and %e1", e, s, i));
+   EXPECT_EQ("ptr0 is 42", formatMessage("%s0 is %i0", e, s, i));
+   EXPECT_EQ("plain text", formatMessage("plain text", e, s, i));
+   EXPECT_EQ("invalid %x9 tokens", formatMessage("invalid %x9 tokens", e, s, i));
+   EXPECT_EQ("out of range ", formatMessage("out of range %e9", e, s, i));
+
+   // Long string test to ensure no overflow
+   std::string longStr(500, 'a');
+   e.push_back(longStr.c_str());
+   EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+}
+
+
 TEST(StringUtilsTest, s_fprintf)
 {
    string testFile = "test_fprintf.txt";

@@ -14,6 +14,8 @@
 #include "ConfigEnum.h"
 #include "tnlVector.h"     // For Vector
 #include "tnlTypes.h"
+#include "tnlNetStringTable.h"
+#include "tnlString.h"
 
 #include <string>
 #include <map>
@@ -78,6 +80,9 @@ bool isAlNum(char c);
 
 string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
+
+string formatMessage(const char *format, const Vector<StringTableEntry> &e = Vector<StringTableEntry>(),
+                     const Vector<StringPtr> &s = Vector<StringPtr>(), const Vector<S32> &i = Vector<S32>());
 
 bool isControlCharacter(char ch);
 bool containsControlCharacter(const char* str);
