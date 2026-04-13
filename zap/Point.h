@@ -110,7 +110,7 @@ public:
       return Point (x * f, y * f);
    }
 
-   inline Point operator/(const F32 f)
+   inline Point operator/(const F32 f) const
    {
       return Point (x / f, y / f);
    }
@@ -129,12 +129,12 @@ public:
       return *this;
    }
 
-   inline Point operator*(const Point &pt)
+   inline Point operator*(const Point &pt) const
    {
       return Point(x * pt.x, y * pt.y);
    }
 
-   inline Point operator/(const Point &pt)
+   inline Point operator/(const Point &pt) const
    {
       return Point(x / pt.x, y / pt.y);
    }
