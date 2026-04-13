@@ -529,10 +529,10 @@ XtankArmorInfo xtankArmorInfos[] =
 // ---------------------------------------------------------------------------
 
 const char *xtankTreadNames[] =
-    {
-        "Rubber Trd",
-        "Metal Trd",
-        "Heavy Trd",
+{
+   "Rubber Trd",
+   "Metal Trd",
+   "Heavy Trd",
 };
 
 XtankTreadInfo xtankTreadInfos[] =
