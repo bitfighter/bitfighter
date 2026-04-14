@@ -82,9 +82,9 @@ void calcPolygonVerts(const Point &center, S32 sides, F32 radius, F32 angle, Vec
 }
 
 
-static inline S32 isLeft(const Point &p1, const Point &p2, const Point &p )
+static inline F32 isLeft(const Point &p1, const Point &p2, const Point &p )
 {
-    return S32( (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y) );
+    return (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y);
 }
 
 // Fast winding number test for finding if a point is in a polygon.  Adapted from:
@@ -118,9 +118,9 @@ bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &p
 
 // Fast winding number test for finding if a point is in a polygon.  Adapted from:
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
-static inline S32 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
+static inline F64 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
 {
-    return S32( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
+    return (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y);
 }
 
 static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)
@@ -2004,7 +2004,7 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 static bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
 {
    // Test winding, is either pos, neg, or zero
-   S32 windTest = (S32)((p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y));
+   F32 windTest = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
 
    return (windTest > 0);  // 0 is colinear, but we don't care
 }
