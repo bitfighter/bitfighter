@@ -660,6 +660,25 @@ TEST(StringUtilsTest, formatMessage)
    std::string longStr(500, 'a');
    e.push_back(longStr.c_str());
    EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+
+   // Multiple placeholders and mixed types
+   EXPECT_EQ("entry0 entry1 ptr0 42 entry0", formatMessage("%e0 %e1 %s0 %i0 %e0", e, s, i));
+
+   // Boundary cases
+   EXPECT_EQ("%e", formatMessage("%e", e, s, i));
+   EXPECT_EQ("%eX", formatMessage("%eX", e, s, i));
+   EXPECT_EQ("hello %", formatMessage("hello %", e, s, i));
+   EXPECT_EQ("hello %e", formatMessage("hello %e", e, s, i));
+
+   // Empty vectors
+   EXPECT_EQ("test ", formatMessage("test %e0", Vector<StringTableEntry>(), s, i));
+
+   // Large number of placeholders
+   std::string manyPlaceholders;
+   for(int j = 0; j < 100; ++j) manyPlaceholders += "%e0 ";
+   std::string expectedMany;
+   for(int j = 0; j < 100; ++j) expectedMany += "entry0 ";
+   EXPECT_EQ(trim(expectedMany), trim(formatMessage(manyPlaceholders.c_str(), e, s, i)));
 }
 
 
