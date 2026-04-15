@@ -1493,7 +1493,42 @@ TEST(GeomUtilsTest, isConvexConcaveWithCollinear)
    poly.push_back(Point(1, 0));
    poly.push_back(Point(0, -1)); // (0,-1), (0,0), (0,1) are collinear
 
-   // This failed before the fix
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexClockwiseWinding)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(10, 0));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexWithRedundantPoints)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(5, 0));  // Redundant (collinear)
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 5)); // Redundant
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(0, 0));  // Duplicate point
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexConcaveAtEnd)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(2, 2));   // Concave point near the end of the list
+
    EXPECT_FALSE(isConvex(&poly));
 }
 
