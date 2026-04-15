@@ -36,6 +36,92 @@ TEST_F(MoveTest, PackUnpack)
    ASSERT_TRUE(move1.isEqualMove(&move2));
 }
 
+TEST_F(MoveTest, IsAnyModActive)
+{
+   ASSERT_FALSE(move1.isAnyModActive());
+
+   move1.modulePrimary[0] = true;
+   ASSERT_TRUE(move1.isAnyModActive());
+
+   move1.modulePrimary[0] = false;
+   move1.moduleSecondary[ShipModuleCount - 1] = true;
+   ASSERT_TRUE(move1.isAnyModActive());
+}
+
+
+TEST_F(MoveTest, IsEqualMoveDetectsDifferences)
+{
+   move1.set(0.25f, -0.25f, FloatHalfPi);
+   move2 = move1;
+   ASSERT_TRUE(move1.isEqualMove(&move2));
+
+   move2.fire = true;
+   ASSERT_FALSE(move1.isEqualMove(&move2));
+   move2.fire = false;
+
+   move2.modulePrimary[0] = true;
+   ASSERT_FALSE(move1.isEqualMove(&move2));
+   move2.modulePrimary[0] = false;
+
+   move2.moduleSecondary[ShipModuleCount - 1] = true;
+   ASSERT_FALSE(move1.isEqualMove(&move2));
+}
+
+
+TEST_F(MoveTest, PackUnpackWithTime)
+{
+   move1.set(-0.5f, 0.5f, FloatHalfPi);
+   move1.fire = true;
+   move1.modulePrimary[0] = true;
+   move1.moduleSecondary[ShipModuleCount - 1] = true;
+   move1.prepare();
+
+   move1.time = 42;
+
+   PacketStream stream;
+   move1.pack(&stream, NULL, true);
+   stream.setBitPosition(0);
+   move2.unpack(&stream, true);
+
+   ASSERT_TRUE(move1.isEqualMove(&move2));
+   ASSERT_EQ(move1.time, move2.time);
+}
+
+
+TEST_F(MoveTest, PackUnpackWithExtendedTime)
+{
+   move1.set(0.0f, 0.0f, 0.0f);
+   move1.time = Move::MaxMoveTime + 500;
+
+   PacketStream stream;
+   move1.pack(&stream, NULL, true);
+   stream.setBitPosition(0);
+   move2.unpack(&stream, true);
+
+   ASSERT_EQ(move1.time, move2.time);
+}
+
+
+TEST_F(MoveTest, PackWithPreviousEqualMove)
+{
+   Move previous;
+   previous.set(0.5f, -0.5f, -FloatHalfPi);
+   previous.fire = true;
+   previous.modulePrimary[0] = true;
+   previous.moduleSecondary[1] = true;
+
+   move1 = previous;
+
+   PacketStream stream;
+   move1.pack(&stream, &previous, false);
+   stream.setBitPosition(0);
+
+   move2 = previous;
+   move2.unpack(&stream, false);
+
+   ASSERT_TRUE(previous.isEqualMove(&move2));
+}
+
 
 // The Move angle should always be between -pi and pi.  This conforms with
 // the output of the arc-tangent of a triangles coordinates and atan2()
