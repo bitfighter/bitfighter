@@ -1742,14 +1742,14 @@ Point findCentroid(const Vector<Point> &polyPoints)
    area = (p1.x * p2.y - p2.x * p1.y);
    sArea += area;
 
+   x += (p1.x + p2.x) * area;
+   y += (p1.y + p2.y) * area;
+
    // Zero area means it's likely a complex polygon or something with all points
    // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
    // It's not great, but maybe good enough
-   if(abs(sArea) < 1)  // This is about zero for a floating point number
+   if(abs(sArea) < 1e-6)  // This is about zero for a floating point number
       return mean2d(polyPoints);
-
-   x += (p1.x + p2.x) * area;
-   y += (p1.y + p2.y) * area;
 
    // Finish up
    sArea *= 3.0;  // 0.5 * 6  (from area6)
