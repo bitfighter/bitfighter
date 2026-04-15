@@ -1483,6 +1483,20 @@ TEST(GeomUtilsTest, isConvexLessThanThreePoints)
    EXPECT_TRUE(isConvex(&empty));
 }
 
+TEST(GeomUtilsTest, isConvexConcaveWithCollinear)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0, 1));
+   poly.push_back(Point(1, 1));
+   poly.push_back(Point(0.5, 0.5)); // Concave point
+   poly.push_back(Point(1, 0));
+   poly.push_back(Point(0, -1)); // (0,-1), (0,0), (0,1) are collinear
+
+   // This failed before the fix
+   EXPECT_FALSE(isConvex(&poly));
+}
+
 
 // ============================================================
 // segsOverlap (public wrapper)
