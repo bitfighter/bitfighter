@@ -799,7 +799,7 @@ string makeFilenameFromString(const char *levelname, bool allowLastDot)
    static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
 
    U32 i = 0;
-   U32 lastDotIndex = 0;
+   U32 lastDotIndex = U32_MAX;   // U32_MAX means "no dot found yet"
 
    while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
    {
@@ -818,7 +818,7 @@ string makeFilenameFromString(const char *levelname, bool allowLastDot)
 
    filename[i] = 0;    // Null terminate
 
-   if(allowLastDot && lastDotIndex != 0) // Allow last dot extensions?
+   if(allowLastDot && lastDotIndex != U32_MAX)  // Allow last dot extensions?
       filename[lastDotIndex] = '.';
 
    return filename;

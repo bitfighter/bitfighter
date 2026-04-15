@@ -555,6 +555,35 @@ TEST(StringUtilsTest, makeFilenameFromString)
    EXPECT_EQ("My_Level", makeFilenameFromString("My Level"));
    EXPECT_EQ("My_Level", makeFilenameFromString("My.Level"));
    EXPECT_EQ("My.Level", makeFilenameFromString("My.Level", true));
+
+   // Spaces and other special characters are replaced with underscores
+   EXPECT_EQ("Hello_World_", makeFilenameFromString("Hello World!"));
+   EXPECT_EQ("a_b_c", makeFilenameFromString("a b c"));
+
+   // No dot in name — allowLastDot has no effect
+   EXPECT_EQ("MyLevel", makeFilenameFromString("MyLevel", true));
+   EXPECT_EQ("MyLevel", makeFilenameFromString("MyLevel", false));
+
+   // Multiple dots — only the last dot is preserved with allowLastDot
+   EXPECT_EQ("my_cool_level", makeFilenameFromString("my.cool.level", false));
+   EXPECT_EQ("my_cool.level", makeFilenameFromString("my.cool.level", true));
+
+   // Bug fix: dot at position 0 — sentinel was 0, conflicting with valid first index
+   // Without the fix, ".level" with allowLastDot=true incorrectly returned "_level"
+   EXPECT_EQ("_level", makeFilenameFromString(".level", false));
+   EXPECT_EQ(".level", makeFilenameFromString(".level", true));
+
+   // Leading dot followed by another dot — only the *last* dot is preserved
+   EXPECT_EQ("_my_level", makeFilenameFromString(".my.level", false));
+   EXPECT_EQ("_my.level", makeFilenameFromString(".my.level", true));
+
+   // Dot-only string
+   EXPECT_EQ("_", makeFilenameFromString(".", false));
+   EXPECT_EQ(".", makeFilenameFromString(".", true));
+
+   // Empty string
+   EXPECT_EQ("", makeFilenameFromString(""));
+   EXPECT_EQ("", makeFilenameFromString("", true));
 }
 
 
