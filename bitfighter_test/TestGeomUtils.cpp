@@ -1483,6 +1483,169 @@ TEST(GeomUtilsTest, isConvexLessThanThreePoints)
    EXPECT_TRUE(isConvex(&empty));
 }
 
+TEST(GeomUtilsTest, isConvexConcaveWithCollinear)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0, 1));
+   poly.push_back(Point(1, 1));
+   poly.push_back(Point(0.5, 0.5)); // Concave point
+   poly.push_back(Point(1, 0));
+   poly.push_back(Point(0, -1)); // (0,-1), (0,0), (0,1) are collinear
+
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexClockwiseWinding)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(10, 0));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexWithRedundantPoints)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(5, 0));  // Redundant (collinear)
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 5)); // Redundant
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(0, 0));  // Duplicate point
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexConcaveAtEnd)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+   poly.push_back(Point(2, 2));   // Concave point near the end of the list
+
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexCCW)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexRegularHexagon)
+{
+   Vector<Point> poly = createPolygon(Point(0, 0), 10.0f, 6, 0);
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexConcaveSpike)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(5, 1));  // Spike in
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexDiamond)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(5, 0));
+   poly.push_back(Point(10, 5));
+   poly.push_back(Point(5, 10));
+   poly.push_back(Point(0, 5));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexSelfIntersecting)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(0, 10));
+
+   // Self-intersecting polygons are concave by definition (they have alternating turn directions)
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexDegenerateLine)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(5, 0));
+   poly.push_back(Point(10, 0));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexDegenerateTriangle)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(5, 0));  // Backwards on same line
+
+   // This is effectively a line that goes 0->10 then back to 5.
+   // Turns are 180 degrees, so cross product is 0.
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexCollinearStartCCW)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(5, 0));  // Collinear start
+   poly.push_back(Point(10, 0));
+   poly.push_back(Point(10, 10));
+   poly.push_back(Point(0, 10));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexLargeConvex)
+{
+   Vector<Point> poly = createPolygon(Point(100, 100), 50.0f, 100, 0);
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexLargeConcave)
+{
+   Vector<Point> poly = createPolygon(Point(100, 100), 50.0f, 100, 0);
+   poly[50] = Point(100, 100); // Pull one vertex to center
+   EXPECT_FALSE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexTiny)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(1, 1));
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexPoint)
+{
+   Vector<Point> poly;
+   poly.push_back(Point(0, 0));
+   EXPECT_TRUE(isConvex(&poly));
+}
+
 
 // ============================================================
 // segsOverlap (public wrapper)
