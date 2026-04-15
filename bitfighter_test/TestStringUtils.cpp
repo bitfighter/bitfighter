@@ -169,6 +169,11 @@ TEST(StringUtilsTest, stripExtension)
    EXPECT_EQ("path.to/file", stripExtension("path.to/file"));
    EXPECT_EQ("file", stripExtension("file"));
    EXPECT_EQ("/path.with.dots/file", stripExtension("/path.with.dots/file"));
+
+   // Bug fixes: filenames starting with a dot or where the only dot is immediately after a slash
+   EXPECT_EQ(".hidden", stripExtension(".hidden"));
+   EXPECT_EQ("path/.hidden", stripExtension("path/.hidden"));
+   EXPECT_EQ("path\\.hidden", stripExtension("path\\.hidden"));
 }
 
 

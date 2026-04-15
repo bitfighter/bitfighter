@@ -182,11 +182,15 @@ string replaceString(const string &strString, const string &from, const string &
 string stripExtension(string filename)
 {
    string::size_type dotPos = filename.find_last_of('.');
-   if (dotPos == string::npos)
+   if (dotPos == string::npos || dotPos == 0)      // If no dot, or it's the first char, there is no extension
       return filename;
 
    string::size_type slashPos = filename.find_last_of("\\/");
    if (slashPos != string::npos && dotPos < slashPos)
+      return filename;
+
+   // Edge case: if the only dot is the one immediately following a slash, it's not an extension
+   if (slashPos != string::npos && dotPos == slashPos + 1)
       return filename;
 
    return filename.substr(0, dotPos);

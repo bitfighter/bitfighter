@@ -1012,6 +1012,22 @@ TEST(GeomUtilsTest, findCentroidSquare)
    EXPECT_NEAR(5.0f, c.y, 0.01f);
 }
 
+TEST(GeomUtilsTest, findCentroidSmallPolygon)
+{
+   Vector<Point> poly;
+   // Square (0,0) to (0.1, 0.1) with an extra vertex on one side
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0.1, 0));
+   poly.push_back(Point(0.1, 0.05)); // Extra vertex
+   poly.push_back(Point(0.1, 0.1));
+   poly.push_back(Point(0, 0.1));
+
+   Point c = findCentroid(poly);
+   // Should be (0.05, 0.05). If it falls back to mean2d, it will be (0.06, 0.05).
+   EXPECT_NEAR(0.05f, c.x, 0.001f);
+   EXPECT_NEAR(0.05f, c.y, 0.001f);
+}
+
 TEST(GeomUtilsTest, findCentroidEmptyReturnOrigin)
 {
    Vector<Point> empty;
