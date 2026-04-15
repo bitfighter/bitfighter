@@ -455,6 +455,39 @@ TEST(GeomUtilsTest, polygonContainsPoint)
    EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(10.1f, 10.1f)));
 }
 
+TEST(GeomUtilsTest, polygonContainsPointPrecisionBug)
+{
+   // Square polygon
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   // Point slightly outside on the left
+   // isLeft should be -0.01, but truncated to 0, causing polygonContainsPoint to return true incorrectly
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(-0.001f, 5.0f)));
+
+   // Point slightly inside on the left
+   // isLeft should be 0.01, but truncated to 0, causing polygonContainsPoint to return false incorrectly
+   // Actually, for (0.001, 5), edge (0,10)->(0,0) is a downward crossing.
+   // isLeft is (0-0)*(5-10) - (0.001-0)*(0-10) = 0.01
+   // Counter starts at 1 from edge (10,0)->(10,10)
+   // Downward crossing edge (0,10)->(0,0) should NOT decrement counter if point is left of it (inside)
+   // 0.01 > 0, so it's not < 0. Counter remains 1. Correct.
+   EXPECT_TRUE(polygonContainsPoint(square.address(), square.size(), Point(0.001f, 5.0f)));
+
+   // Point slightly outside on the right
+   // Edge (10,0) -> (10,10) is upward crossing.
+   // isLeft((10,0), (10,10), (10.001, 5)) = (10-10)*(5-0) - (10.001-10)*(10-0) = -0.01
+   // Truncated to 0. 0 > 0 is false. Counter remains 0. Correct (outside).
+
+   // Point slightly inside on the right
+   // isLeft((10,0), (10,10), (9.999, 5)) = (10-10)*(5-0) - (9.999-10)*(10-0) = 0.01
+   // Truncated to 0. 0 > 0 is false. Counter remains 0. WRONG (inside).
+   EXPECT_TRUE(polygonContainsPoint(square.address(), square.size(), Point(9.999f, 5.0f)));
+}
+
 TEST(GeomUtilsTest, polygonContainsPointTriangle)
 {
    Vector<Point> tri;

@@ -320,6 +320,42 @@ string sanitizeForSql(const string &value)
 }
 
 
+string formatMessage(const char *format, const Vector<StringTableEntry> &e, const Vector<StringPtr> &s, const Vector<S32> &i)
+{
+   string result;
+   if(!format)
+      return result;
+
+   const char *src = format;
+   while(*src)
+   {
+      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+      {
+         S32 index = src[2] - '0';
+         switch(src[1])
+         {
+            case 'e':
+               if(index < e.size())
+                  result += e[index].getString();
+               break;
+            case 's':
+               if(index < s.size())
+                  result += s[index].getString();
+               break;
+            case 'i':
+               if(index < i.size())
+                  result += itos(i[index]);
+               break;
+         }
+         src += 3;
+      }
+      else
+         result += *src++;
+   }
+   return result;
+}
+
+
 bool isControlCharacter(char ch)
 {
    return ch > 0 && ch <= 0x1F;

@@ -259,6 +259,16 @@ TEST(StringUtilsTest, toString)
 
 TEST(StringUtilsTest, parseString)
 {
+   Vector<string> words;
+
+   // NULL input - currently would crash
+   parseString((const char*)NULL, words, ',');
+   EXPECT_TRUE(words.empty());
+
+   // Empty string input
+   parseString("", words, ',');
+   EXPECT_TRUE(words.empty());
+
    Vector<string> result = parseString("one two \"three four\" five");
    ASSERT_EQ(4, result.size());
    EXPECT_EQ("one", result[0]);
@@ -625,6 +635,50 @@ TEST(StringUtilsTest, sortingNumericPrefixAlphaSuffix)
    EXPECT_TRUE(alphaNumberSort("2AAA", "9BBB"));   // 2 < 9
    EXPECT_TRUE(alphaNumberSort("9BBB", "12AAA"));  // 9 < 12
    EXPECT_FALSE(alphaNumberSort("2AAA", "1BBB"));  // 2 > 1
+}
+
+
+TEST(StringUtilsTest, formatMessage)
+{
+   Vector<StringTableEntry> e;
+   e.push_back("entry0");
+   e.push_back("entry1");
+
+   Vector<StringPtr> s;
+   s.push_back("ptr0");
+
+   Vector<S32> i;
+   i.push_back(42);
+
+   EXPECT_EQ("entry0 and entry1", formatMessage("%e0 and %e1", e, s, i));
+   EXPECT_EQ("ptr0 is 42", formatMessage("%s0 is %i0", e, s, i));
+   EXPECT_EQ("plain text", formatMessage("plain text", e, s, i));
+   EXPECT_EQ("invalid %x9 tokens", formatMessage("invalid %x9 tokens", e, s, i));
+   EXPECT_EQ("out of range ", formatMessage("out of range %e9", e, s, i));
+
+   // Long string test to ensure no overflow
+   std::string longStr(500, 'a');
+   e.push_back(longStr.c_str());
+   EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+
+   // Multiple placeholders and mixed types
+   EXPECT_EQ("entry0 entry1 ptr0 42 entry0", formatMessage("%e0 %e1 %s0 %i0 %e0", e, s, i));
+
+   // Boundary cases
+   EXPECT_EQ("%e", formatMessage("%e", e, s, i));
+   EXPECT_EQ("%eX", formatMessage("%eX", e, s, i));
+   EXPECT_EQ("hello %", formatMessage("hello %", e, s, i));
+   EXPECT_EQ("hello %e", formatMessage("hello %e", e, s, i));
+
+   // Empty vectors
+   EXPECT_EQ("test ", formatMessage("test %e0", Vector<StringTableEntry>(), s, i));
+
+   // Large number of placeholders
+   std::string manyPlaceholders;
+   for(int j = 0; j < 100; ++j) manyPlaceholders += "%e0 ";
+   std::string expectedMany;
+   for(int j = 0; j < 100; ++j) expectedMany += "entry0 ";
+   EXPECT_EQ(trim(expectedMany), trim(formatMessage(manyPlaceholders.c_str(), e, s, i)));
 }
 
 

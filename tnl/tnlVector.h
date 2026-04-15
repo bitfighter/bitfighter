@@ -92,10 +92,6 @@ public:
 
    void push_front(const T&);
    void push_back(const T&);
-
-   // These methods previously returned T&, which caused a Use-After-Free bug.
-   // They now return void to prevent this, and to avoid unnecessary copies
-   // since the return values were never used in the codebase.
    void pop_front();
    void pop_back();
 
