@@ -80,7 +80,7 @@ string extractExtension(const string &path )
 {
    string filename = extractFilename(path);
    string::size_type dotPos = filename.find_last_of('.');
-   if (dotPos == string::npos)
+   if (dotPos == string::npos || dotPos == 0)      // If no dot, or it's the first char, there is no extension
       return "";
 
    return filename.substr(dotPos + 1);

@@ -154,7 +154,7 @@ static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 {
    // Check for duplicate points
-   for(S32 i = 1; i < points.size(); i++)
+   for(S32 i = 1; i < (S32)points.size(); i++)
       if(points[i-1] == points[i])
       {
          points.erase(i);
