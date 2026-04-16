@@ -1123,8 +1123,18 @@ TEST(GeomUtilsTest, removeCollinearPointsDuplicates)
    pts.push_back(Point(5, 0));
    pts.push_back(Point(10, 0));
    removeCollinearPoints(pts, false);
-   // The duplicate should be removed; then collinear check on remaining
-   EXPECT_LT(pts.size(), 4);
+   // The duplicate should be removed; then collinear check on remaining (5,0 is removed as well)
+   EXPECT_EQ(2, pts.size());
+}
+
+TEST(GeomUtilsTest, removeCollinearPointsTrailingDuplicate)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(5, 5));
+   pts.push_back(Point(5, 5));  // trailing duplicate
+   removeCollinearPoints(pts, false);
+   EXPECT_EQ(2, pts.size());
 }
 
 

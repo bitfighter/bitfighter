@@ -145,6 +145,11 @@ TEST(StringUtilsTest, extractExtension)
    EXPECT_EQ("", extractExtension("file_with_no_extension"));
    EXPECT_EQ("", extractExtension("path.to/file"));
    EXPECT_EQ("", extractExtension("file"));
+
+   // Hidden files or dots immediately following a slash should not be considered as extensions
+   EXPECT_EQ("", extractExtension(".hidden"));
+   EXPECT_EQ("", extractExtension("path/.hidden"));
+   EXPECT_EQ("", extractExtension("path\\.hidden"));
 }
 
 

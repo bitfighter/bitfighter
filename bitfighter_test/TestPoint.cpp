@@ -213,7 +213,18 @@ TEST(PointTest, DotAndDeterminant)
    Point p1(1.0f, 2.0f);
    Point p2(3.0f, 4.0f);
    EXPECT_FLOAT_EQ(11.0f, p1.dot(p2));
-   EXPECT_FLOAT_EQ(-2.0f, p1.determinant(p2)); // 1*4 - 2*3 = 4 - 6 = -2
+   EXPECT_DOUBLE_EQ(-2.0, p1.determinant(p2)); // 1*4 - 2*3 = 4 - 6 = -2
+}
+
+TEST(PointTest, DeterminantPrecision)
+{
+   // Use large values to test for precision issues
+   // (1e7 * 1e7) - ( (1e7+1) * (1e7-1) ) = 1e14 - (1e14 - 1) = 1
+   Point p1(10000000.0f, 10000001.0f);
+   Point p2(9999999.0f,  10000000.0f);
+
+   // F32 precision would likely result in 0 or large error
+   EXPECT_DOUBLE_EQ(1.0, (F64)p1.determinant(p2));
 }
 
 TEST(PointTest, StringConversion)

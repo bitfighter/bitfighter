@@ -60,7 +60,7 @@ public:
    void setAngle(const F32 ang);
    void setPolar(const F32 l, const F32 ang);
 
-   F32 determinant(const Point &p);
+   F64 determinant(const Point &p) const;
 
    void scaleFloorDiv(float scaleFactor, float divFactor);
 
