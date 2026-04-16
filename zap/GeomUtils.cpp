@@ -154,29 +154,33 @@ static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 {
    // Check for duplicate points
-   for(S32 i = 1; i < points.size() - 1; i++)
+   for(S32 i = 1; i < points.size(); i++)
       if(points[i-1] == points[i])
       {
          points.erase(i);
          i--;
       }
 
+   if(points.size() < 3)
+      return;
 
    for(S32 i = 1; i < points.size() - 1; i++)
    {
-      S32 j = i;
-      while(i < points.size() - 1 && (points[j] - points[j-1]).ATAN2() == (points[i+1] - points[i]).ATAN2())
+      if((points[i] - points[i-1]).ATAN2() == (points[i+1] - points[i]).ATAN2())
+      {
          points.erase(i);
+         i--;
+      }
    }
 
-   if(isPolygon)
+   if(isPolygon && points.size() >= 3)
    {
       // Handle wrap-around, where second-to-last, last, and first are collinear
-      while((points[points.size() - 2] - points[points.size() - 1]).ATAN2() == (points[points.size() - 1] - points[0]).ATAN2())
+      while(points.size() >= 3 && (points[points.size() - 2] - points[points.size() - 1]).ATAN2() == (points[points.size() - 1] - points[0]).ATAN2())
          points.erase(points.size() - 1);
 
       // Handle wrap-around, where last, first, and second are collinear
-      while((points[points.size() - 1] - points[0]).ATAN2() == (points[0] - points[1]).ATAN2())
+      while(points.size() >= 3 && (points[points.size() - 1] - points[0]).ATAN2() == (points[0] - points[1]).ATAN2())
          points.erase(0);
    }
 }
@@ -1501,13 +1505,13 @@ Vector<Point> floatsToPoints(const Vector<F32> floats)
 // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
 bool isWoundClockwise(const Vector<Point>& inputPoly)
 {
-   F32 finalSum = 0;
+   F64 finalSum = 0;
    S32 i_prev = inputPoly.size() - 1;
 
    for(S32 i = 0; i < inputPoly.size(); i++)
    {
       // (x2-x1)(y2+y1)
-      finalSum += (inputPoly[i].x - inputPoly[i_prev].x) * (inputPoly[i].y + inputPoly[i_prev].y);
+      finalSum += (F64(inputPoly[i].x) - inputPoly[i_prev].x) * (F64(inputPoly[i].y) + inputPoly[i_prev].y);
       i_prev = i;
    }
 
