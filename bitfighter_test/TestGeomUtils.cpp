@@ -1127,6 +1127,34 @@ TEST(GeomUtilsTest, removeCollinearPointsDuplicates)
    EXPECT_LT(pts.size(), 4);
 }
 
+TEST(GeomUtilsTest, removeCollinearPointsDuplicatesAtEnd)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(1, 1));
+   pts.push_back(Point(1, 1));
+
+   removeCollinearPoints(pts, false);
+
+   ASSERT_EQ(2, pts.size());
+   EXPECT_EQ(Point(0, 0), pts[0]);
+   EXPECT_EQ(Point(1, 1), pts[1]);
+}
+
+TEST(GeomUtilsTest, removeCollinearPointsDegenerate)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   removeCollinearPoints(pts, true);
+   ASSERT_EQ(1, pts.size());
+
+   pts.clear();
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(0, 0));
+   removeCollinearPoints(pts, true);
+   ASSERT_EQ(1, pts.size());
+}
+
 
 // ============================================================
 // createPolygon / calcPolygonVerts
@@ -1189,6 +1217,22 @@ TEST(GeomUtilsTest, isWoundClockwiseCCW)
    ccw.push_back(Point(10, 10));
    ccw.push_back(Point(0, 10));
    EXPECT_FALSE(isWoundClockwise(ccw));
+}
+
+TEST(GeomUtilsTest, isWoundClockwiseLargeCoordinates)
+{
+   F32 offset = 1e7;
+   Vector<Point> ccw;
+   ccw.push_back(Point(offset, offset));
+   ccw.push_back(Point(offset + 10, offset));
+   ccw.push_back(Point(offset, offset + 10));
+   EXPECT_FALSE(isWoundClockwise(ccw));
+
+   Vector<Point> cw;
+   cw.push_back(Point(offset, offset));
+   cw.push_back(Point(offset, offset + 10));
+   cw.push_back(Point(offset + 10, offset));
+   EXPECT_TRUE(isWoundClockwise(cw));
 }
 
 TEST(GeomUtilsTest, isWoundClockwiseTriangleCW)

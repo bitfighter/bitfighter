@@ -136,9 +136,9 @@ void Point::setPolar(const F32 l, const F32 ang)
    y = sin(ang) * l;
 }
 
-F32 Point::determinant(const Point &p)
+F64 Point::determinant(const Point &p) const
 {
-   return (x * p.y - y * p.x);
+   return (F64(x) * p.y - F64(y) * p.x);
 }
 
 void Point::scaleFloorDiv(float scaleFactor, float divFactor)
