@@ -302,7 +302,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name);
 
       // Render help string, if one is available
-      if(strcmp(items[i].help, "") != 0)
+      if(items[i].help != nullptr && strcmp(items[i].help, "") != 0)
       {
          renderer.setColor(*items[i].helpColor);
          xPos += textWidth + ButtonLabelGap;
