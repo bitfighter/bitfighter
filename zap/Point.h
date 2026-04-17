@@ -180,6 +180,16 @@ public:
    }
 }; // class
 
+struct PointCompare
+{
+   bool operator()( const Point& lhs, const Point& rhs ) const
+   {
+      if(lhs.x != rhs.x)
+         return lhs.x < rhs.x;
+      return lhs.y < rhs.y;
+   }
+};
+
 
 };	// namespace
 
