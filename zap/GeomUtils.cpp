@@ -1743,8 +1743,8 @@ Point findCentroid(const Vector<Point> &polyPoints)
       area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
       sArea += area;
 
-      x += F64(p1.x + p2.x) * area;
-      y += F64(p1.y + p2.y) * area;
+      x += (F64(p1.x) + p2.x) * area;
+      y += (F64(p1.y) + p2.y) * area;
    }
 
    // Do last segment
@@ -1754,8 +1754,8 @@ Point findCentroid(const Vector<Point> &polyPoints)
    area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
    sArea += area;
 
-   x += F64(p1.x + p2.x) * area;
-   y += F64(p1.y + p2.y) * area;
+   x += (F64(p1.x) + p2.x) * area;
+   y += (F64(p1.y) + p2.y) * area;
 
    // Zero area means it's likely a complex polygon or something with all points
    // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
