@@ -12,8 +12,9 @@
 #include <stdarg.h>        // For va_args
 #include <streambuf>
 #include <string>          // For... everything.  This is stringUtils, after all!
-#include <sstream>         // For parseString
+#include <sstream>
 #include <sys/stat.h>      // For testing existence of folders
+#include <cctype>          // For isspace
 
 #ifdef TNL_OS_WIN32
 #  include "../other/dirent.h"        // Need local copy for Windows builds
@@ -63,6 +64,9 @@ string extractDirectory(const string &path )
   string::size_type pos = path.find_last_of("\\/");
   if (pos == string::npos)
      return "";
+
+  if (pos == 0)
+     return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
 }
@@ -336,35 +340,66 @@ bool containsControlCharacter(const char* str)
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
 //
-// FIXME: This is using string streams which are an order of magnitude (or 2) too slow
-// rewrite without using streams if possible
+// Parses a string on whitespace, except when inside "s.
+// Supports escaped quotes using "".
 Vector<string> parseString(const string &line)
 {
    Vector<string> result;
+   string current;
+   bool inQuotes = false;
+   bool hasToken = false;
 
-   string          item;
-   stringstream    ss(line);
-
-   while(ss >> item)
+   for(size_t i = 0; i < line.length(); ++i)
    {
-      if(item[0] == '"')
-      {
-         S32 lastItemPosition = (S32)item.length() - 1;
-         if(item[lastItemPosition] != '"') 
-         {
-            // read the rest of the double-quoted item
-            string restOfItem;
-            getline(ss, restOfItem, '"');
-            item += restOfItem;
-         }
-         // otherwise, we had a single word that was quoted. In any case, we now
-         // have the item in quotes; remove them
-         item = trim(item, "\"");
-      }
+      char c = line[i];
 
-      // item is "fully cooked" now
-      result.push_back(item);
+      if(inQuotes)
+      {
+         hasToken = true;
+         if(c == '"')
+         {
+            // Check for escaped quote ""
+            if(i + 1 < line.length() && line[i + 1] == '"')
+            {
+               current += '"';
+               i++;
+            }
+            else
+            {
+               inQuotes = false;
+            }
+         }
+         else
+         {
+            current += c;
+         }
+      }
+      else
+      {
+         if(isspace((unsigned char)c))
+         {
+            if(hasToken)
+            {
+               result.push_back(current);
+               current.clear();
+               hasToken = false;
+            }
+         }
+         else if(c == '"')
+         {
+            inQuotes = true;
+            hasToken = true;
+         }
+         else
+         {
+            current += c;
+            hasToken = true;
+         }
+      }
    }
+
+   if(hasToken)
+      result.push_back(current);
 
    return result;
 }
@@ -974,6 +1009,9 @@ bool isAlNum(char c)
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
+   if(str.empty())
+      return false;
+
    for(string::size_type i = 0; i < str.length(); i++)
       if(!isHex(str[i]))
          return false;

@@ -60,6 +60,7 @@ TEST(StringUtilsTest, isHex)
    EXPECT_FALSE(isHex("12:345"));   // ':' comes just after '9'
    EXPECT_FALSE(isHex("@bcdef"));   // '@' comes just before 'A'
    EXPECT_FALSE(isHex("c01`"));     // '`' comes just before 'a'
+   EXPECT_FALSE(isHex(""));
 }
 
 
@@ -120,6 +121,9 @@ TEST(StringUtilsTest, extractDirectory)
    EXPECT_EQ("", extractDirectory("file.txt"));
    EXPECT_EQ("path/to", extractDirectory("path/to/"));
    EXPECT_EQ("path/to", extractDirectory("path/to/this"));
+#if !defined(TNL_OS_WIN32)
+   EXPECT_EQ("/", extractDirectory("/file.txt"));
+#endif
 }
 
 
@@ -261,6 +265,35 @@ TEST(StringUtilsTest, parseString)
    EXPECT_EQ("two", result[1]);
    EXPECT_EQ("three four", result[2]);
    EXPECT_EQ("five", result[3]);
+
+   // New tests for spaces within quotes
+   result = parseString("\" space at start\"");
+   ASSERT_EQ(1, result.size());
+   EXPECT_EQ(" space at start", result[0]);
+
+   result = parseString("\"space at end \"");
+   ASSERT_EQ(1, result.size());
+   EXPECT_EQ("space at end ", result[0]);
+
+   result = parseString("\" \"");
+   ASSERT_EQ(1, result.size());
+   EXPECT_EQ(" ", result[0]);
+
+   result = parseString("\"\"");
+   ASSERT_EQ(1, result.size());
+   EXPECT_EQ("", result[0]);
+
+   // Test escaped quotes
+   result = parseString("\"a \"\"quoted\"\" word\"");
+   ASSERT_EQ(1, result.size());
+   EXPECT_EQ("a \"quoted\" word", result[0]);
+
+   result = parseString("mixed \"quoted space\" and \"\"\"escaped quote\"\"\"");
+   ASSERT_EQ(4, result.size());
+   EXPECT_EQ("mixed", result[0]);
+   EXPECT_EQ("quoted space", result[1]);
+   EXPECT_EQ("and", result[2]);
+   EXPECT_EQ("\"escaped quote\"", result[3]);
 
    Vector<string> result2;
    parseString("one;two;three", result2, ';');
