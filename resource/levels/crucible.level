@@ -2,7 +2,7 @@ LevelFormat 2
 GameType 10 20
 LevelName "The Crucible"
 LevelDescription "Speed lanes, teleporters, and tight corners — fight to survive!"
-LevelCredits ""
+LevelCredits "Claude Sonnet 4.5 (AI)"
 Team Blue 0 0 1
 Specials
 MinPlayers 4
