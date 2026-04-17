@@ -958,6 +958,18 @@ TEST(GeomUtilsTest, areaSignDependsOnWinding)
    EXPECT_TRUE(area(cw) * area(ccw) < 0.0f);
 }
 
+TEST(GeomUtilsTest, areaLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> square;
+   square.push_back(Point(offset, offset));
+   square.push_back(Point(offset + 10, offset));
+   square.push_back(Point(offset + 10, offset + 10));
+   square.push_back(Point(offset, offset + 10));
+
+   EXPECT_NEAR(100.0f, fabs(area(square)), 0.001f);
+}
+
 
 // ============================================================
 // mean2d
@@ -1010,6 +1022,20 @@ TEST(GeomUtilsTest, findCentroidSquare)
    Point c = findCentroid(square);
    EXPECT_NEAR(5.0f, c.x, 0.01f);
    EXPECT_NEAR(5.0f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, findCentroidLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> square;
+   square.push_back(Point(offset, offset));
+   square.push_back(Point(offset + 10, offset));
+   square.push_back(Point(offset + 10, offset + 10));
+   square.push_back(Point(offset, offset + 10));
+
+   Point c = findCentroid(square);
+   EXPECT_NEAR(offset + 5.0f, c.x, 0.01f);
+   EXPECT_NEAR(offset + 5.0f, c.y, 0.01f);
 }
 
 TEST(GeomUtilsTest, findCentroidSmallPolygon)
@@ -1716,6 +1742,18 @@ TEST(GeomUtilsTest, isConvexPoint)
    EXPECT_TRUE(isConvex(&poly));
 }
 
+TEST(GeomUtilsTest, isConvexLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> poly;
+   poly.push_back(Point(offset, offset));
+   poly.push_back(Point(offset + 10, offset));
+   poly.push_back(Point(offset + 10, offset + 10));
+   poly.push_back(Point(offset, offset + 10));
+
+   EXPECT_TRUE(isConvex(&poly));
+}
+
 
 // ============================================================
 // segsOverlap (public wrapper)
@@ -1777,4 +1815,87 @@ TEST(GeomUtilsTest, segmentsColinearPerpendicular)
                                   Point(5, 5), Point(5, -5), 1.0f));
 }
 
+TEST(GeomUtilsTest, areaRightTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(10, 0));
+   tri.push_back(Point(0, 10));
+   // Area = 0.5 * 10 * 10 = 50
+   EXPECT_NEAR(50.0f, fabs(area(tri)), 0.001f);
+}
+
+TEST(GeomUtilsTest, areaTinyPolygonLargeCoords)
+{
+   F32 offset = 1e7f;
+   Vector<Point> square;
+   square.push_back(Point(offset, offset));
+   square.push_back(Point(offset + 1, offset));
+   square.push_back(Point(offset + 1, offset + 1));
+   square.push_back(Point(offset, offset + 1));
+
+   // Area = 1 * 1 = 1
+   // With float, 1e7 * 1e7 = 1e14, float has ~7 digits, 1e14 + 1 is lost.
+   EXPECT_NEAR(1.0f, fabs(area(square)), 0.001f);
+}
+
+TEST(GeomUtilsTest, findCentroidLShape)
+{
+   // L-shape from (0,0) to (10,10) with width 5
+   Vector<Point> lshape;
+   lshape.push_back(Point(0, 0));
+   lshape.push_back(Point(10, 0));
+   lshape.push_back(Point(10, 5));
+   lshape.push_back(Point(5, 5));
+   lshape.push_back(Point(5, 10));
+   lshape.push_back(Point(0, 10));
+
+   // Area = (10*5) + (5*5) = 75
+   // Centroid of (10x5) rect at (5, 2.5), weighted by area 50
+   // Centroid of (5x5) rect at (2.5, 7.5), weighted by area 25
+   // x = (50*5 + 25*2.5) / 75 = (250 + 62.5) / 75 = 312.5 / 75 = 4.1666
+   // y = (50*2.5 + 25*7.5) / 75 = (125 + 187.5) / 75 = 312.5 / 75 = 4.1666
+   Point c = findCentroid(lshape);
+   EXPECT_NEAR(4.1666f, c.x, 0.01f);
+   EXPECT_NEAR(4.1666f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, findCentroidDegenerateLine)
+{
+   Vector<Point> line;
+   line.push_back(Point(0, 0));
+   line.push_back(Point(10, 0));
+   line.push_back(Point(20, 0));
+
+   // Area is 0, should fall back to mean2d
+   Point c = findCentroid(line);
+   EXPECT_NEAR(10.0f, c.x, 0.01f);
+   EXPECT_NEAR(0.0f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, isConvexVeryThinTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(1000, 0));
+   tri.push_back(Point(500, 0.01)); // Very thin
+
+   EXPECT_TRUE(isConvex(&tri));
+}
+
+TEST(GeomUtilsTest, isConvexConcaveC)
+{
+   // C-shape
+   Vector<Point> cshape;
+   cshape.push_back(Point(0, 0));
+   cshape.push_back(Point(10, 0));
+   cshape.push_back(Point(10, 10));
+   cshape.push_back(Point(0, 10));
+   cshape.push_back(Point(0, 8));
+   cshape.push_back(Point(8, 8));
+   cshape.push_back(Point(8, 2));
+   cshape.push_back(Point(0, 2));
+
+   EXPECT_FALSE(isConvex(&cshape));
+}
 }; // namespace Zap
