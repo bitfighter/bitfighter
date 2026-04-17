@@ -958,6 +958,18 @@ TEST(GeomUtilsTest, areaSignDependsOnWinding)
    EXPECT_TRUE(area(cw) * area(ccw) < 0.0f);
 }
 
+TEST(GeomUtilsTest, areaLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> square;
+   square.push_back(Point(offset, offset));
+   square.push_back(Point(offset + 10, offset));
+   square.push_back(Point(offset + 10, offset + 10));
+   square.push_back(Point(offset, offset + 10));
+
+   EXPECT_NEAR(100.0f, fabs(area(square)), 0.001f);
+}
+
 
 // ============================================================
 // mean2d
@@ -1010,6 +1022,20 @@ TEST(GeomUtilsTest, findCentroidSquare)
    Point c = findCentroid(square);
    EXPECT_NEAR(5.0f, c.x, 0.01f);
    EXPECT_NEAR(5.0f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, findCentroidLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> square;
+   square.push_back(Point(offset, offset));
+   square.push_back(Point(offset + 10, offset));
+   square.push_back(Point(offset + 10, offset + 10));
+   square.push_back(Point(offset, offset + 10));
+
+   Point c = findCentroid(square);
+   EXPECT_NEAR(offset + 5.0f, c.x, 0.01f);
+   EXPECT_NEAR(offset + 5.0f, c.y, 0.01f);
 }
 
 TEST(GeomUtilsTest, findCentroidSmallPolygon)
@@ -1713,6 +1739,18 @@ TEST(GeomUtilsTest, isConvexPoint)
 {
    Vector<Point> poly;
    poly.push_back(Point(0, 0));
+   EXPECT_TRUE(isConvex(&poly));
+}
+
+TEST(GeomUtilsTest, isConvexLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> poly;
+   poly.push_back(Point(offset, offset));
+   poly.push_back(Point(offset + 10, offset));
+   poly.push_back(Point(offset + 10, offset + 10));
+   poly.push_back(Point(offset, offset + 10));
+
    EXPECT_TRUE(isConvex(&poly));
 }
 

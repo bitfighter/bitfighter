@@ -252,9 +252,17 @@ bool isConvex(const Vector<Point> *verts)
    double sign = 0;
    for(int i = 0; i < n; i++)
    {
-      Point v1 = verts->get((i + 1) % n) - verts->get(i);
-      Point v2 = verts->get((i + 2) % n) - verts->get((i + 1) % n);
-      double det = v1.determinant(v2);
+      const Point &p1 = verts->get(i);
+      const Point &p2 = verts->get((i + 1) % n);
+      const Point &p3 = verts->get((i + 2) % n);
+
+      // Perform subtraction in F64 to maintain precision
+      F64 v1x = F64(p2.x) - p1.x;
+      F64 v1y = F64(p2.y) - p1.y;
+      F64 v2x = F64(p3.x) - p2.x;
+      F64 v2y = F64(p3.y) - p2.y;
+
+      double det = v1x * v2y - v1y * v2x;
       if(det != 0)
       {
          if(sign == 0)
@@ -771,12 +779,12 @@ F32 area(const Vector<Point> &contour)
 {
   int n = contour.size();
 
-  float A = 0.0f;
+  F64 A = 0.0;
 
   for(int p = n-1, q = 0; q < n; p = q++)
-    A += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
+    A += F64(contour[p].x) * contour[q].y - F64(contour[q].x) * contour[p].y;
 
-  return A * 0.5f;
+  return (F32)(A * 0.5);
 }
 
    /*
@@ -1718,10 +1726,10 @@ Point findCentroid(const Vector<Point> &polyPoints)
    if(size == 0)
       return Point(0,0);
 
-   F32 x = 0;
-   F32 y = 0;
-   F32 sArea = 0;  // Signed area
-   F32 area = 0;   // Partial signed area
+   F64 x = 0;
+   F64 y = 0;
+   F64 sArea = 0;  // Signed area
+   F64 area = 0;   // Partial signed area
 
    Point p1;
    Point p2;
@@ -1732,27 +1740,27 @@ Point findCentroid(const Vector<Point> &polyPoints)
       p1 = polyPoints[i];
       p2 = polyPoints[i+1];
 
-      area = (p1.x * p2.y - p2.x * p1.y);
+      area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
       sArea += area;
 
-      x += (p1.x + p2.x) * area;
-      y += (p1.y + p2.y) * area;
+      x += F64(p1.x + p2.x) * area;
+      y += F64(p1.y + p2.y) * area;
    }
 
    // Do last segment
    p1 = polyPoints[size - 1];
    p2 = polyPoints[0];
 
-   area = (p1.x * p2.y - p2.x * p1.y);
+   area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
    sArea += area;
 
-   x += (p1.x + p2.x) * area;
-   y += (p1.y + p2.y) * area;
+   x += F64(p1.x + p2.x) * area;
+   y += F64(p1.y + p2.y) * area;
 
    // Zero area means it's likely a complex polygon or something with all points
    // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
    // It's not great, but maybe good enough
-   if(abs(sArea) < 1e-6)  // This is about zero for a floating point number
+   if(fabs(sArea) < 1e-6)  // This is about zero for a floating point number
       return mean2d(polyPoints);
 
    // Finish up
@@ -2532,8 +2540,8 @@ bool pointInHexagon(const Point &pos, const Point &center, F32 radius)
 {
    const F32 d = 2 * radius;
 
-   const F32 dx = abs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
-   const F32 dy = abs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
+   const F32 dx = fabs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
+   const F32 dy = fabs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
 
    //if(dx / 2 > radius || dy / 2 > radius * FloatSqrt3Half)     // Bounding test (since q2 is in quadrant 2 only 2 tests are needed)
    //   return false;
