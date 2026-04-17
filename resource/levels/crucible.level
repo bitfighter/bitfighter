@@ -1,0 +1,114 @@
+LevelFormat 2
+GameType 10 20
+LevelName "The Crucible"
+LevelDescription "Speed lanes, teleporters, and tight corners — fight to survive!"
+LevelCredits "Claude Sonnet 4.5 (AI)"
+Team Blue 0 0 1
+Specials
+MinPlayers 4
+MaxPlayers 10
+
+# -----------------------------------------------------------------------
+# Outer octagonal boundary wall (closed)
+# Coordinates derived from the classic bm.level grid layout, scaled to
+# real world units (grid unit * 255).
+# -----------------------------------------------------------------------
+BarrierMaker 50 -1147.5 0 -1147.5 -127.5 -892.5 -382.5 -765 -382.5 -382.5 -765 -382.5 -892.5 -127.5 -1147.5 127.5 -1147.5 382.5 -892.5 382.5 -765 765 -382.5 892.5 -382.5 1147.5 -127.5 1147.5 127.5 892.5 382.5 765 382.5 382.5 765 382.5 892.5 127.5 1147.5 -127.5 1147.5 -382.5 892.5 -382.5 765 -765 382.5 -892.5 382.5 -1147.5 127.5 -1147.5 0
+
+# -----------------------------------------------------------------------
+# Cardinal corridor narrowers — create tight choke-point passages
+# at the N/S/E/W openings, rewarding players who know the layout.
+# -----------------------------------------------------------------------
+BarrierMaker 50 -892.5 0 -765 0
+BarrierMaker 50  892.5 0  765 0
+BarrierMaker 50 0 -892.5 0 -765
+BarrierMaker 50 0  892.5 0  765
+BarrierMaker 50 -765 -127.5 -765 127.5
+BarrierMaker 50  765 -127.5  765 127.5
+BarrierMaker 50 -127.5 -765 127.5 -765
+BarrierMaker 50 -127.5  765 127.5  765
+
+# -----------------------------------------------------------------------
+# L-shaped cover walls in each diagonal quadrant
+# Each "L" gives players a two-sided corner to duck behind.
+# -----------------------------------------------------------------------
+BarrierMaker 50  382.5 -255  510 -255  510 -510
+BarrierMaker 50 -382.5 -255 -510 -255 -510 -510
+BarrierMaker 50  382.5  255  510  255  510  510
+BarrierMaker 50 -382.5  255 -510  255 -510  510
+
+# -----------------------------------------------------------------------
+# Central cluster of four PolyWall pillboxes
+# These sit in the four near-centre quadrants and break up the open
+# middle, forcing fights around corners rather than across an empty room.
+# -----------------------------------------------------------------------
+PolyWall  127.5 -127.5  255 -127.5  255 -255  127.5 -255
+PolyWall -255  -127.5 -127.5 -127.5 -127.5 -255 -255 -255
+PolyWall  127.5  127.5  255  127.5  255  255  127.5  255
+PolyWall -255   127.5 -127.5  127.5 -127.5  255 -255  255
+
+# -----------------------------------------------------------------------
+# SpeedZones — boost pads in each corridor pointing toward the centre.
+# Lets aggressive players rocket into the fray; retreating players can
+# use them as a quick escape back into the open.
+# -----------------------------------------------------------------------
+SpeedZone 0 -892.5  0 -382.5 2000 SnapEnabled
+SpeedZone 0  892.5  0  382.5 2000 SnapEnabled
+SpeedZone  892.5 0  382.5 0 2000 SnapEnabled
+SpeedZone -892.5 0 -382.5 0 2000 SnapEnabled
+
+# -----------------------------------------------------------------------
+# Teleporters — two bidirectional diagonal pairs.
+# NE <-> SW  and  NW <-> SE.  Mastering the teleporters gives a big
+# positional advantage in a free-for-all.
+# -----------------------------------------------------------------------
+Teleporter  586.5 -586.5 -586.5  586.5
+Teleporter -586.5  586.5  586.5 -586.5
+Teleporter -586.5 -586.5  586.5  586.5
+Teleporter  586.5  586.5 -586.5 -586.5
+
+# -----------------------------------------------------------------------
+# Neutral LoadoutZones — one tucked into each diagonal quadrant wing.
+# Because they are team-neutral (-1) anyone can use them, but reaching
+# one means running a gauntlet through a contested quadrant.
+# -----------------------------------------------------------------------
+LoadoutZone -1  637.5 -357  816 -357  816 -255  637.5 -255
+LoadoutZone -1 -816  -357 -637.5 -357 -637.5 -255 -816  -255
+LoadoutZone -1  637.5  255  816  255  816  357  637.5  357
+LoadoutZone -1 -816   255 -637.5  255 -637.5  357 -816   357
+
+# -----------------------------------------------------------------------
+# RepairItems — one at each cardinal mid-corridor.
+# Sitting right next to the SpeedZone, so picking one up is risky.
+# 45-second respawn.
+# -----------------------------------------------------------------------
+RepairItem 0 -1020 45
+RepairItem 0  1020 45
+RepairItem  1020 0 45
+RepairItem -1020 0 45
+
+# -----------------------------------------------------------------------
+# EnergyItems — one in each diagonal quadrant, a short run from the
+# teleporter and L-wall.
+# -----------------------------------------------------------------------
+EnergyItem  510 -637.5
+EnergyItem -510 -637.5
+EnergyItem  510  637.5
+EnergyItem -510  637.5
+
+# -----------------------------------------------------------------------
+# Spawn points — three per diagonal quadrant (12 total).
+# Each cluster is spread so players don't land on top of one another.
+# -----------------------------------------------------------------------
+Spawn 0  382.5 -816
+Spawn 0  637.5 -510
+Spawn 0  892.5 -255
+Spawn 0 -382.5 -816
+Spawn 0 -637.5 -510
+Spawn 0 -892.5 -255
+Spawn 0  382.5  816
+Spawn 0  637.5  510
+Spawn 0  892.5  255
+Spawn 0 -382.5  816
+Spawn 0 -637.5  510
+Spawn 0 -892.5  255
