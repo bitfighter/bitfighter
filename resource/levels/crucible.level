@@ -91,10 +91,10 @@ RepairItem -1020 0 45
 # EnergyItems — one in each diagonal quadrant, a short run from the
 # teleporter and L-wall.
 # -----------------------------------------------------------------------
-EnergyItem  637.5 -510
-EnergyItem -637.5 -510
-EnergyItem  637.5  510
-EnergyItem -637.5  510
+EnergyItem  510 -637.5
+EnergyItem -510 -637.5
+EnergyItem  510  637.5
+EnergyItem -510  637.5
 
 # -----------------------------------------------------------------------
 # Spawn points — three per diagonal quadrant (12 total).
