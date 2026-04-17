@@ -116,7 +116,7 @@ namespace Zap
    {
       mObjectTypeNumber = BarrierTypeNumber;
       mPoints = points;
-      mWidth = abs(width);     // Must be positive to avoid problem with botzone buffers
+      mWidth = fabs(width);     // Must be positive to avoid problem with botzone buffers
       mSolid = solid;
 
       if(mSolid)  // Polywall

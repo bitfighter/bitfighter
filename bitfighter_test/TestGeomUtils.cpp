@@ -1028,6 +1028,57 @@ TEST(GeomUtilsTest, findCentroidSmallPolygon)
    EXPECT_NEAR(0.05f, c.y, 0.001f);
 }
 
+TEST(GeomUtilsTest, findCentroidFloatingPointPrecision)
+{
+   Vector<Point> poly;
+   // A polygon with area between 0 and 1, specifically less than 0.5
+   // Area = 0.5 * 0.4 * 0.4 = 0.08
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0.4, 0));
+   poly.push_back(Point(0, 0.4));
+
+   Point c = findCentroid(poly);
+   // Centroid of triangle is (x1+x2+x3)/3, (y1+y2+y3)/3
+   // (0+0.4+0)/3 = 0.1333..., (0+0+0.4)/3 = 0.1333...
+   // If area (0.08) was truncated to 0, it would fallback to mean2d:
+   // (0+0.4+0)/3 = 0.1333... which happens to be the same for a triangle!
+   // Let's use a square to distinguish.
+
+   poly.clear();
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0.4, 0));
+   poly.push_back(Point(0.4, 0.4));
+   poly.push_back(Point(0, 0.4));
+   // Area = 0.16. sArea = 0.32.
+   // Correct Centroid: (0.2, 0.2)
+   // mean2d: (0+0.4+0.4+0)/4 = 0.2. Still the same.
+
+   // Let's use an asymmetric one.
+   poly.clear();
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0.6, 0));
+   poly.push_back(Point(0.6, 0.2));
+   poly.push_back(Point(0, 0.2));
+   // Area = 0.12. sArea = 0.24.
+   // Correct Centroid: (0.3, 0.1)
+   // mean2d: (0+0.6+0.6+0)/4 = 0.3, (0+0+0.2+0.2)/4 = 0.1. Argh.
+
+   // Triangle again, but with extra points on one side.
+   poly.clear();
+   poly.push_back(Point(0, 0));
+   poly.push_back(Point(0.6, 0));
+   poly.push_back(Point(0.3, 0.6));
+   poly.push_back(Point(0.15, 0.3)); // On edge (0,0)-(0.3,0.6)
+
+   // This triangle has area 0.5 * 0.6 * 0.6 = 0.18. sArea = 0.36.
+   // Centroid: (0+0.6+0.3)/3 = 0.3, (0+0+0.6)/3 = 0.2.
+   // mean2d: (0+0.6+0.3+0.15)/4 = 0.2625, (0+0+0.6+0.3)/4 = 0.225.
+
+   c = findCentroid(poly);
+   EXPECT_NEAR(0.3f, c.x, 0.001f);
+   EXPECT_NEAR(0.2f, c.y, 0.001f);
+}
+
 TEST(GeomUtilsTest, findCentroidEmptyReturnOrigin)
 {
    Vector<Point> empty;

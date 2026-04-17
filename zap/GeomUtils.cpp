@@ -1752,7 +1752,7 @@ Point findCentroid(const Vector<Point> &polyPoints)
    // Zero area means it's likely a complex polygon or something with all points
    // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
    // It's not great, but maybe good enough
-   if(abs(sArea) < 1e-6)  // This is about zero for a floating point number
+   if(fabs(sArea) < 1e-6)  // This is about zero for a floating point number
       return mean2d(polyPoints);
 
    // Finish up
@@ -2532,8 +2532,8 @@ bool pointInHexagon(const Point &pos, const Point &center, F32 radius)
 {
    const F32 d = 2 * radius;
 
-   const F32 dx = abs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
-   const F32 dy = abs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
+   const F32 dx = fabs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
+   const F32 dy = fabs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
 
    //if(dx / 2 > radius || dy / 2 > radius * FloatSqrt3Half)     // Bounding test (since q2 is in quadrant 2 only 2 tests are needed)
    //   return false;
