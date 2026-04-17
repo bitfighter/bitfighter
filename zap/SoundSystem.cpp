@@ -34,8 +34,8 @@ namespace Zap {
 // This function makes sure a point never return too big or invalid numbers which can freeze openAL
 static Point safePoint(Zap::Point pos)
 {
-   if(! (abs(pos.x) < 1e20f)) pos.x = 0;
-   if(! (abs(pos.y) < 1e20f)) pos.y = 0;
+   if(! (fabs(pos.x) < 1e20f)) pos.x = 0;
+   if(! (fabs(pos.y) < 1e20f)) pos.y = 0;
    return pos;
 }
 
