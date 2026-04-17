@@ -75,6 +75,7 @@ private:
    void buildTreadItems();
    void buildHeatSinkItems();
    void buildWeaponItems();
+   void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
    void applyDesign();                 // Finalise and propagate the chosen design
 

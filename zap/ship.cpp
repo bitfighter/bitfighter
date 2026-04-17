@@ -11,7 +11,7 @@
 #include "Colors.h"
 #include "Teleporter.h"
 #include "speedZone.h"
-#include "XtankShape.h"    // For xtankPhysicsInfos, XtankBody enum (used by both client and server)
+#include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -134,6 +134,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mXtankBodyIndex  = XtankBodyNone;
    mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
    mTankSpeed        = 0;
+   mXtankDesign      = XtankDesign();
 
    mLoadout.setLoadout(DefaultLoadout);
 
@@ -322,6 +323,7 @@ F32 Ship::processMove(U32 stateIndex)
          // Just switched into tank mode: set heading from current aim angle, start from rest
          mTankHeadingAngle = getAngle(stateIndex);
          mTankSpeed        = 0;
+         setVel(stateIndex, Point(0, 0));             // Zero velocity so xtank physics starts clean
          mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons for this body
       }
       else if(mXtankBodyIndex < 0)
@@ -348,7 +350,7 @@ F32 Ship::processMove(U32 stateIndex)
 
       // Sync engine, tread and heat sink settings from the move.
       XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
-      XtankTread  newTread  = (XtankTread)(S32)mCurrentMove.treadType;
+      XtankTread newTread  = (XtankTread)(S32)mCurrentMove.treadType;
 
       S8 newHS = mCurrentMove.heatSinkCount;
 
@@ -425,7 +427,21 @@ F32 Ship::processMove(U32 stateIndex)
 }
 
 
+
 // Tank driving physics for xtank vehicle bodies.
+//
+// Implements the update_vector() algorithm from the original xtank game
+// (xtank-master/Src/update.c), adapted for Bitfighter's continuous-time
+// simulation.  Derived stats (max_speed, engine_acc, tread_acc, handling)
+// are computed from the original xtank component tables using the formulas
+// from xtank-master/Src/vdesign.c (compute_vdesc).
+//
+// Key behaviors:
+//   - Weight-dependent acceleration (engine power vs. total vehicle mass)
+//   - Traction-limited turning and acceleration (skidding on grip loss)
+//   - Roll/slide velocity decomposition (lateral drift when turning at speed)
+//   - Dynamic friction < static friction (0.7x when already sliding)
+//   - Engine-assisted braking
 //
 // Input mapping (same Move fields, new meaning):
 //   move.y: (BINDING_DOWN - BINDING_UP); W gives -1, S gives +1
@@ -437,63 +453,213 @@ F32 Ship::processMove(U32 stateIndex)
 // The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
 F32 Ship::processTankMove(U32 stateIndex)
 {
-   const TankPhysicsInfo &info   = xtankPhysicsInfos[mXtankBodyIndex];
+   const XtankBodyInfo   &body   = body_stat[mXtankBodyIndex];
    const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
    const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
+   const XtankArmorInfo  &armor  = xtankArmorInfos[(S32)mXtankDesign.armorType];
 
    F32 dt = mCurrentMove.time * 0.001f;
+   if(dt <= 0)
+      return 0;
 
-   // Effective physics parameters after applying engine and tread multipliers.
-   F32 effectiveMaxSpeed    = info.maxSpeed        * engine.speedMult;
-   F32 effectiveMaxRevSpeed = info.maxReverseSpeed * engine.speedMult;
-   F32 effectiveAccel       = info.acceleration    * engine.accelMult;
-   F32 effectiveFriction    = info.friction        * tread.frictionMult;
-   F32 effectiveTurnRate    = info.turnRate        * tread.turnMult;
-
-   // W (BINDING_UP) gives move.y = -1; negate so forward throttle is positive
-   F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
-   F32 steer    =  mCurrentMove.x;   // +1 = turn right (clockwise), -1 = turn left
-
-   // Early exit when completely idle (also check for SpeedZones like BF mode does)
-   if(throttle == 0 && steer == 0 && mTankSpeed == 0.0f)
+   // --- Compute total vehicle weight (xtank units) ---
+   S32 weaponWeight = 0;
+   S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
+   for(S32 i = 0; i < slotCount; i++)
    {
+      XtankWeapon w = mXtankDesign.weapons[i];
+      if(w != XtankWeaponNone)
+         weaponWeight += xtankWeaponInfos[(S32)w].weight;
+   }
+   // Approximate armor weight: body.size * 30 armor points at selected type weight-per-point.
+   // (Full xtank has per-side armor amounts; this is a reasonable default.)
+   S32 armorWeight = body.size * 30 * armor.weight;
+
+   S32 totalWeight = body.weight + engine.weight + weaponWeight
+                   + armorWeight + heatSinkStat.weight * mXtankDesign.heatSinkCount;
+   if(totalWeight < 1) totalWeight = 1;
+
+   // --- Xtank derived physics (per-frame units, from vdesign.c compute_vdesc) ---
+   F32 power     = (F32)engine.power;
+   F32 drag      = body.drag;
+   F32 treadFric = tread.friction;
+   bool isHover  = (mXtankDesign.treadType == TREAD_HOVER);
+
+   // max_speed = cbrt(power / drag) / friction   [xtank units/frame]
+   F32 xt_max_speed = powf(power / drag, 1.0f / 3.0f) / treadFric;
+   if(isHover)
+      xt_max_speed *= 0.5f;
+
+   // engine_acc = 16 * power / weight   [xtank dv/frame from engine]
+   F32 xt_engine_acc = 16.0f * power / (F32)totalWeight;
+
+   // tread_acc = friction * MAX_ACCEL   [xtank dv/frame from traction]
+   // Weight drops out because traction is proportional to weight.
+   F32 xt_tread_acc = treadFric * (F32)MAX_ACCEL;
+
+   // max_turn_rate = handling / 8.0     [radians/frame, for snap-to-heading]
+   // In xtank, vehicles rotate toward a mouse-set desired_heading and stop.
+   // With BF's continuous WASD rotation we need a much lower rate.  We keep
+   // the xtank handling ratio (light=fast, heavy=slow) but scale to a range
+   // that feels right for hold-to-spin: ~3.5 rad/s for handling=8 (Lightcycle)
+   // down to ~1.3 rad/s for handling=3 (Rhino/Panzy).
+   static const F32 TURN_SCALE = 3.5f;  // target rad/s for handling/8 = 1.0
+   F32 xt_max_turn = (F32)body.handling / 8.0f;
+
+   // --- Convert xtank per-frame units to BF per-second units ---
+   // Xtank runs at ~20 fps.  BF_SCALE maps xtank distance to BF distance.
+   static const F32 XTANK_FPS = 20.0f;
+   static const F32 BF_SCALE  = 1.5f;
+
+   F32 maxSpeed    = xt_max_speed   * XTANK_FPS * BF_SCALE;                     // BF units/sec
+   F32 engineAcc   = xt_engine_acc  * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
+   F32 treadAcc    = xt_tread_acc   * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
+   F32 maxTurnRate = xt_max_turn    * TURN_SCALE;                                // radians/sec
+
+   // --- Input mapping ---
+   F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
+   F32 steer    =  mCurrentMove.x;   // +1 = clockwise, -1 = counter-clockwise
+
+   // --- Get current velocity ---
+   Point vel = getVel(stateIndex);
+   F32 speed = vel.len();
+   F32 moveAngle = (speed > 0.1f) ? atan2f(vel.y, vel.x) : mTankHeadingAngle;
+
+   // --- Early exit when completely idle ---
+   if(throttle == 0 && steer == 0 && speed < 0.1f)
+   {
+      setVel(stateIndex, Point(0, 0));
+      mTankSpeed = 0;
       if(!checkForSpeedzones(stateIndex))
          return 0;
    }
 
    // --- Steering: rotate the hull ---
-   mTankHeadingAngle += steer * effectiveTurnRate * dt;
+   // In xtank (safety=FALSE, the default), vehicles always turn at max rate.
+   // The consequence of turning fast at speed is lateral skid, handled by the
+   // traction model below.
+   mTankHeadingAngle += steer * maxTurnRate * dt;
 
-   // Keep heading in [-pi, pi] to avoid unbounded drift
+   // Keep heading in [-pi, pi]
    while(mTankHeadingAngle >  FloatPi)  mTankHeadingAngle -= Float2Pi;
    while(mTankHeadingAngle < -FloatPi)  mTankHeadingAngle += Float2Pi;
 
-   // --- Throttle: accelerate / decelerate ---
-   mTankSpeed += throttle * effectiveAccel * dt;
+   F32 heading = mTankHeadingAngle;
 
-   // --- Passive friction (deceleration toward zero when not throttling) ---
-   F32 frictionDelta = effectiveFriction * dt;
-   if(mTankSpeed > frictionDelta)
-      mTankSpeed -= frictionDelta;
-   else if(mTankSpeed < -frictionDelta)
-      mTankSpeed += frictionDelta;
+   // --- Ground friction ---
+   // 1.0 on normal ground, reduced in BF SlipZones (mirrors xtank slip squares).
+   F32 groundFriction = getGame()->getShipAccelModificationFactor(this);
+
+   // --- Traction: maximum acceleration the treads can deliver ---
+   F32 traction = groundFriction * treadAcc;   // BF units/sec^2
+   if(isHover)
+   {
+      // In xtank, hover treads get a fixed low traction of 1.0 per-frame,
+      // independent of ground friction.  This makes hovers slide much more.
+      traction = 1.0f * XTANK_FPS * XTANK_FPS * BF_SCALE;
+   }
+
+   // --- Decompose velocity into roll (along heading) and slide (perpendicular) ---
+   F32 headingDiff = moveAngle - heading;
+   F32 rollSpeed   = cosf(headingDiff) * speed;   // forward component (BF units/sec)
+   F32 slideSpeed  = sinf(headingDiff) * speed;   // sideways component (BF units/sec)
+
+   // --- Dynamic friction reduction when already sliding ---
+   // In xtank (safety=FALSE), when the vehicle is sliding sideways, dynamic
+   // friction is 70% of static friction.  This is what causes the characteristic
+   // xtank skid: once you start sliding, it's harder to regain grip.
+   if(fabsf(slideSpeed) > 0.1f && !isHover)
+      traction *= 0.7f;
+
+   // --- Velocity-change limits for this timestep ---
+   F32 tractionDV = traction * dt;   // max dv from traction this step
+   F32 engineDV   = engineAcc * dt;  // max dv from engine this step
+
+   // --- Desired forward speed ---
+   // Reverse is capped at 40% of forward max (xtank has no reverse; this gives
+   // BF's WASD controls a natural feel while keeping reverse slower).
+   F32 maxForward = maxSpeed;
+   F32 maxReverse = maxSpeed * 0.4f;
+   F32 desiredSpeed = (throttle >= 0) ? throttle * maxForward
+                                      : throttle * maxReverse;
+
+   // How much the driver wants to change forward speed
+   F32 desiredDV = desiredSpeed - rollSpeed;
+
+   // Limit by engine power
+   F32 driveDV;
+   if(fabsf(desiredDV) > engineDV)
+      driveDV = engineDV * (desiredDV > 0 ? 1.0f : -1.0f);
    else
-      mTankSpeed = 0;
+      driveDV = desiredDV;
 
-   // --- Clamp to body speed limits (scaled by engine) ---
-   mTankSpeed = CLAMP(mTankSpeed, -effectiveMaxRevSpeed, effectiveMaxSpeed);
+   // --- Xtank acceleration model (from update_vector in update.c) ---
+   F32 rollDV, slideDV;
 
-   // --- Compute world-space velocity from heading + speed ---
-   setVel(stateIndex, Point(cos(mTankHeadingAngle) * mTankSpeed,
-                            sin(mTankHeadingAngle) * mTankSpeed));
+   if(driveDV * rollSpeed >= 0)
+   {
+      // Speeding up (or from rest):
+      // Correct lateral slide toward zero, limited by traction.
+      if(fabsf(slideSpeed) <= tractionDV)
+         slideDV = -slideSpeed;                                       // Cancel slide completely
+      else
+         slideDV = tractionDV * (slideSpeed > 0 ? -1.0f : 1.0f);    // Limit correction to grip
 
-   // --- Run collision/movement simulation ---
+      rollDV = driveDV;
+   }
+   else
+   {
+      // Braking: decelerate along both roll and slide, proportional to speed.
+      F32 scale = speed / tractionDV;
+      if(scale < 1.0f)
+      {
+         // Traction sufficient to stop completely this step
+         rollDV  = -rollSpeed;
+         slideDV = -slideSpeed;
+      }
+      else
+      {
+         // Decelerate proportionally (preserving drift direction)
+         rollDV  = -rollSpeed  / scale;
+         slideDV = -slideSpeed / scale;
+      }
+
+      // Engine contributes to braking effort (fun, not realistic -- per xtank)
+      rollDV += driveDV;
+
+      // Don't over-compensate past the desired speed
+      if(fabsf(desiredDV) < fabsf(rollDV))
+         rollDV = desiredDV;
+   }
+
+   // --- Clamp total acceleration to traction limit ---
+   F32 totalDV = sqrtf(rollDV * rollDV + slideDV * slideDV);
+   if(totalDV > tractionDV)
+   {
+      F32 scale = tractionDV / totalDV;
+      rollDV  *= scale;
+      slideDV *= scale;
+   }
+
+   // --- Apply acceleration in world space ---
+   // roll direction = heading;  slide direction = heading + pi/2
+   F32 ch = cosf(heading);
+   F32 sh = sinf(heading);
+   F32 cp = -sh;   // cos(heading + pi/2)
+   F32 sp =  ch;   // sin(heading + pi/2)
+
+   vel.x += ch * rollDV + cp * slideDV;
+   vel.y += sh * rollDV + sp * slideDV;
+
+   setVel(stateIndex, vel);
+
+   // --- Run collision / movement simulation ---
    F32 result = move(dt, stateIndex, false);
 
-   // --- After collision response, project resulting velocity back onto the
-   //     heading direction.  This discards lateral velocity (tank traction)
-   //     and updates mTankSpeed to reflect wall/collision impacts. ---
-   Point headingVec(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
+   // --- Update mTankSpeed for HUD display ---
+   // Project post-collision velocity onto heading to get forward speed.
+   // (Lateral velocity is preserved -- the vehicle can drift/skid.)
+   Point headingVec(ch, sh);
    mTankSpeed = getVel(stateIndex).dot(headingVec);
 
    return result;
@@ -646,8 +812,9 @@ void Ship::processWeaponFire()
                continue;
             hasAnyWeapon = true;
             const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
-            if(wi.fireDelay < minFireDelay) minFireDelay = wi.fireDelay;
-            totalDrain += wi.energyDrain;
+            U32 weaponFireDelay = (U32)(wi.reload_time * 50);  // xtank frames → ms (20fps)
+            if(weaponFireDelay < minFireDelay) minFireDelay = weaponFireDelay;
+            totalDrain += (U32)wi.heat;  // Use heat as energy cost
          }
 
          // Apply heat sink multiplier: more heat sinks → shorter fire delay.
@@ -2538,8 +2705,8 @@ void Ship::emitMovementSparks()
       switch(mXtankDesign.engineType)
       {
          case XtankEngine::Small_Electric:
-      case XtankEngine::Small_Combustion:
-      case XtankEngine::Small_Turbine:
+         case XtankEngine::Small_Combustion:
+         case XtankEngine::Small_Turbine:
             sparkCount = 1;
             colorDim    = Color(0.50f, 0.10f, 0.00f);  // dark red-brown
             colorBright = Color(0.80f, 0.30f, 0.05f);  // dim orange-red

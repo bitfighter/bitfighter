@@ -123,7 +123,7 @@ void GameWeapon::createXtankProjectile(XtankWeapon weapon, const Point &dir,
    // Compute projectile velocity using the xtank-derived speed, not the BF
    // weapon default speed.  We still add the shooter's velocity component
    // along the fire direction (relative shooting).
-   Point projVel = dir * F32(wi.projVelocity) + dir * shooterVel.dot(dir);
+   Point projVel = dir * F32(xtankProjVelocity(wi)) + dir * shooterVel.dot(dir);
 
    // Advance the spawn position for any latency the caller passes in.
    Point firePos = barrelTip + projVel * F32(time) / 1000.0f;
@@ -138,7 +138,7 @@ void GameWeapon::createXtankProjectile(XtankWeapon weapon, const Point &dir,
             for(S32 k = -1; k <= 1; k++)
             {
                Projectile *p = new Projectile(bfWeapon, firePos, projVel + velPerp * F32(k), shooter);
-               p->mTimeRemaining = wi.projLiveTime;
+               p->mTimeRemaining = xtankProjLiveTime(wi);
                p->mStyle         = wi.style;
                p->addToGame(game, game->getGameObjDatabase());
             }
@@ -151,7 +151,7 @@ void GameWeapon::createXtankProjectile(XtankWeapon weapon, const Point &dir,
       case WeaponRailgun:
          {
             Projectile *p = new Projectile(bfWeapon, firePos, projVel, shooter);
-            p->mTimeRemaining = wi.projLiveTime;
+            p->mTimeRemaining = xtankProjLiveTime(wi);
             p->mStyle         = wi.style;
             p->addToGame(game, game->getGameObjDatabase());
          }

@@ -22,7 +22,7 @@ using namespace TNL;
 #endif
 
 #define SIGN(x)	((x) < 0 ? -1 : (x) == 0 ? 0 : 1)
-
+#define ABS(x) (((x) > 0) ? (x) : -(x))
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #define sq(a) ((a) * (a))

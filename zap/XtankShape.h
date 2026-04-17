@@ -34,373 +34,386 @@
 namespace Zap
 {
 
-// Names of each xtank body, kept in the same order as the enum below.
-// Used for on-screen display when the player cycles bodies.
-extern const char *xtankBodyNames[];
+#define MAX_ACCEL 2.5   // The amount a vehicle can accelerate under perfect conditions
+#define MAX_WEAPONS 6   // Number of weapons allowed on any one tank
 
-// Enum of all 14 xtank vehicle bodies (in the order they appear in xtank's
-// objects.c).  XtankBodyNone represents "show the normal BF ship".
-enum XtankBody
-{
-   Lightcycle = 0,
-   Trike,
-   Hexo,
-   Spider,
-   Psycho,
-   Tornado,
-   Marauder,
-   Tiger,
-   Rhino,
-   Medusa,
-   Delta,
-   Disk,
-   Malice,
-   Panzy,
-   XtankBodyCount,    // total number of xtank bodies
-   XtankBodyNone = -1 // sentinel: use the regular BF ship shape
-};
+   // Names of each xtank body, kept in the same order as the enum below.
+   // Used for on-screen display when the player cycles bodies.
+   extern const char *xtankBodyNames[];
 
+   // Enum of all 14 xtank vehicle bodies (in the order they appear in xtank's
+   // objects.c).  XtankBodyNone represents "show the normal BF ship".
+   enum XtankBody
+   {
+      Lightcycle = 0,
+      Trike,
+      Hexo,
+      Spider,
+      Psycho,
+      Tornado,
+      Marauder,
+      Tiger,
+      Rhino,
+      Medusa,
+      Delta,
+      Disk,
+      Malice,
+      Panzy,
+      XtankBodyCount,    // total number of xtank bodies
+      XtankBodyNone = -1 // sentinel: use the regular BF ship shape
+   };
 
-struct XtankBodyInfo
-{
-   const char *name;      // Display name
-   S32 size;
-   S32 weight;
-   S32 weightLimit;
-   S32 space;
-   F32 drag;
-   S32 handling;
-   S32 turrets;
-   S32 cost;
-};
+   struct XtankBodyInfo
+   {
+      const char *name; // Display name
+      S32 size;
+      S32 weight;
+      S32 weightLimit;
+      S32 space;
+      F32 drag;
+      S32 handling;
+      S32 turrets;
+      S32 cost;
+   };
 
+   // Array of ShipShapeInfo descriptors for every xtank body.  Each entry is
+   // compatible with the existing renderShip() rendering path.
+   extern ShipShapeInfo xtankBodyInfos[XtankBodyCount];
 
+   // Pre-computed bounding-circle radius for each xtank body (maximum distance
+   // from origin to any hull vertex).  Used for collision detection so the
+   // hitbox reflects the actual hull size rather than the BF default.
+   extern F32 xtankBodyCollisionRadius[XtankBodyCount];
 
-// Array of ShipShapeInfo descriptors for every xtank body.  Each entry is
-// compatible with the existing renderShip() rendering path.
-extern ShipShapeInfo xtankBodyInfos[XtankBodyCount];
+   // Y coordinate (in body space, +Y = forward/nose) of the foremost hull vertex.
+   // Used by the vehicle overlay renderer to position the nose chevron and to
+   // distribute heat-sink / engine indicators along the hull.
+   extern F32 xtankBodyNoseY[XtankBodyCount];
 
-// Pre-computed bounding-circle radius for each xtank body (maximum distance
-// from origin to any hull vertex).  Used for collision detection so the
-// hitbox reflects the actual hull size rather than the BF default.
-extern F32 xtankBodyCollisionRadius[XtankBodyCount];
+   // Y coordinate of the rearmost hull vertex (always negative or small positive).
+   extern F32 xtankBodyRearY[XtankBodyCount];
 
-// Y coordinate (in body space, +Y = forward/nose) of the foremost hull vertex.
-// Used by the vehicle overlay renderer to position the nose chevron and to
-// distribute heat-sink / engine indicators along the hull.
-extern F32 xtankBodyNoseY[XtankBodyCount];
+   // ---------------------------------------------------------------------------
+   // Turret data for xtank vehicles.
+   //
+   // Each vehicle carries one or more turrets that are rendered separately from
+   // the hull.  Mount positions are in body space: +Y points toward the nose,
+   // using the same coordinate scale as the hull vertex data above.
+   // ---------------------------------------------------------------------------
 
-// Y coordinate of the rearmost hull vertex (always negative or small positive).
-extern F32 xtankBodyRearY[XtankBodyCount];
+   // A single turret mount point in body space.
+   struct XtankTurret
+   {
+      F32 x, y;
+   };
 
+   // All turret mount points for one vehicle body (up to 4).
+   struct XtankBodyTurrets
+   {
+      S32 count;
+      XtankTurret turrets[4];
+   };
 
-// ---------------------------------------------------------------------------
-// Turret data for xtank vehicles.
-//
-// Each vehicle carries one or more turrets that are rendered separately from
-// the hull.  Mount positions are in body space: +Y points toward the nose,
-// using the same coordinate scale as the hull vertex data above.
-// ---------------------------------------------------------------------------
+   // One entry per XtankBody value.
+   extern XtankBodyTurrets xtankTurretInfos[XtankBodyCount];
 
-// A single turret mount point in body space.
-struct XtankTurret
-{
-   F32 x, y;
-};
+   // ---------------------------------------------------------------------------
+   // Tank driving physics parameters for xtank vehicle bodies.
+   //
+   // All speed/acceleration values are in game-units per second (or per second²).
+   // turnRate is in radians per second.
+   //
+   // These represent a "middle-of-the-road" tuning for each body so they handle
+   // distinctly (heavy Rhino vs. nimble Lightcycle) while remaining playable.
+   // ---------------------------------------------------------------------------
 
-// All turret mount points for one vehicle body (up to 4).
-struct XtankBodyTurrets
-{
-   S32 count;
-   XtankTurret turrets[4];
-};
+   struct TankPhysicsInfo
+   {
+      F32 maxSpeed;        // Maximum forward speed (units/sec)
+      F32 maxReverseSpeed; // Maximum reverse speed (units/sec)
+      F32 acceleration;    // Throttle acceleration (units/sec²)
+      F32 friction;        // Passive deceleration when no throttle (units/sec²)
+      F32 turnRate;        // Rotation rate of the hull (radians/sec)
+      F32 armor;           // Incoming-damage multiplier (0 = immune, 1 = normal)
+   };
 
-// One entry per XtankBody value.
-extern XtankBodyTurrets xtankTurretInfos[XtankBodyCount];
+   // One entry per XtankBody value.
+   extern TankPhysicsInfo xtankPhysicsInfos[XtankBodyCount]; // AI data
+   extern XtankBodyInfo body_stat[];                         // Original data
 
+   // ---------------------------------------------------------------------------
+   // Xtank weapon catalogue.
+   //
+   // Each xtank weapon maps to an existing Bitfighter WeaponType for projectile
+   // behavior and damage (so we reuse the well-tuned BF projectile system).
+   // Fire delay and energy cost are xtank-specific and storedype here.
+   // ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// Tank driving physics parameters for xtank vehicle bodies.
-//
-// All speed/acceleration values are in game-units per second (or per second²).
-// turnRate is in radians per second.
-//
-// These represent a "middle-of-the-road" tuning for each body so they handle
-// distinctly (heavy Rhino vs. nimble Lightcycle) while remaining playable.
-// ---------------------------------------------------------------------------
+   // Enum of all xtank weapons (native from xtank game).
+   // XtankWeaponNone represents "this turret slot carries no weapon".
+   enum XtankWeapon
+   {
+      LIGHT_MACHINE_GUN,
+      MACHINE_GUN,
+      HEAVY_MACHINE_GUN,
+      LIGHT_AUTOCANNON,
+      AUTOCANNON,
+      HEAVY_AUTOCANNON,
+      LIGHT_RKT_LAUNCHER,
+      RKT_LAUNCHER,
+      HEAVY_RKT_LAUNCHER,
+      ACID_SPRAYER,
+      FLAME_THROWER,
+      HEAT_SEEKER,
+      POCKET_ROCKET,
+      UNGUIDED_MISSLE,
+      TELEGUIDED,
+      TOW_MISSILE,
+      LAND_TORPEDO,
+      BLAST_CANNON,
+      PULSE_LASER,
+      MINE_LAYER,
+      OIL_SLICK,
+      HEAVY_MORTAR,
+      TACTICAL_NUKE,
+      ANTI_RADIATION,
+      DISC_SHOOTER,
+      XtankWeaponCount,    // total number of xtank weapons
+      XtankWeaponNone = -1 // sentinel: slot carries no weapon
+   };
 
-struct TankPhysicsInfo
-{
-   F32 maxSpeed;          // Maximum forward speed (units/sec)
-   F32 maxReverseSpeed;   // Maximum reverse speed (units/sec)
-   F32 acceleration;      // Throttle acceleration (units/sec²)
-   F32 friction;          // Passive deceleration when no throttle (units/sec²)
-   F32 turnRate;          // Rotation rate of the hull (radians/sec)
-   F32 armor;             // Incoming-damage multiplier (0 = immune, 1 = normal)
-};
+   struct HeatSinkStat
+   {
+      S32 weight;
+      S32 space;
+      S32 cost;
+   };
 
-// One entry per XtankBody value.
-extern TankPhysicsInfo xtankPhysicsInfos[XtankBodyCount];
+   struct SuspensionStat
+   {
+      const char *name;
+      F32 friction;
+      S32 cost;
+   };
 
+   struct BumperStat
+   {
+      const char *name;
+      F32 elasticity; // (0 = no bounce, 1 = perfect bounce)
+      S32 cost;
+   };
 
-// ---------------------------------------------------------------------------
-// Xtank weapon catalogue.
-//
-// Each xtank weapon maps to an existing Bitfighter WeaponType for projectile
-// behavior and damage (so we reuse the well-tuned BF projectile system).
-// Fire delay and energy cost are xtank-specific and storedype here.
-// ---------------------------------------------------------------------------
+   // Names for on-screen display, one per XtankWeapon.
+   extern const char *xtankWeaponNames[];
 
-// Enum of all xtank weapons, in the order they appear in the original xtank
-// game.  XtankWeaponNone represents "this turret slot carries no weapon".
-// These are AI inventions
-enum XtankWeapon
-{
-   MachineGun = 0,
-   Laser,
-   Missile,
-   Grenade,
-   Rocket,
-   Acid,
-   Tracer,
-   Bomb,
-   Fire,
-   XtankWeaponCount,    // total number of xtank weapons
-   XtankWeaponNone = -1 // sentinel: slot carries no weapon
-};
+   // Per-weapon parameters: native xtank stats + BF integration fields.
+   struct XtankWeaponInfo
+   {
+      const char *name;      // Display name
+      S32 damage;            // Damage per hit (xtank native)
+      S32 max_ammo;          // Maximum ammo capacity
+      S32 reload_time;       // Reload time between shots (xtank frames)
+      S32 ammo_speed;        // Projectile speed (xtank units/frame)
+      S32 weight;            // Weight of the weapon
+      S32 space;             // Space required to mount
+      S32 mount_space;       // Mounting space needed
+      S32 frames;            // Projectile lifetime (xtank frames)
+      S32 heat;              // Heat generated per shot
+      S32 ammo_cost;         // Cost per shot
+      S32 cost;              // Purchase cost
+      S32 refill_time;       // Ammo refill time
+      S32 safety;            // Safety distance
+      S32 height;            // Projectile height
+      S32 mount;             // Where weapon can be mounted (bitflags)
+      U64 other_flgs;        // Misc. flags
+      U64 creat_flgs;        // Bullet creation flags
+      U64 disp_flgs;         // Display flags
+      U64 move_flgs;         // Movement flags
+      U64 hit_flgs;          // Hit/damage flags
+      // Bitfighter integration fields:
+      WeaponType bfWeapon;   // Mapped BF weapon for projectile behavior
+      ProjectileStyle style; // Rendering style
+   };
 
+   // One entry per XtankWeapon value.
+   extern XtankWeaponInfo xtankWeaponInfos[XtankWeaponCount];
 
-// These are the actual xtank weapons
-enum XtankWeapon2
-{
-   LIGHT_MACHINE_GUN,
-   MACHINE_GUN,
-   HEAVY_MACHINE_GUN,
-   LIGHT_AUTOCANNON,
-   AUTOCANNON,
-   HEAVY_AUTOCANNON,
-   LIGHT_RKT_LAUNCHER,
-   RKT_LAUNCHER,
-   HEAVY_RKT_LAUNCHER,
-   ACID_SPRAYER,
-   FLAME_THROWER,
-   HEAT_SEEKER,
-   POCKET_ROCKET,
-   UNGUIDED_MISSLE,
-   TELEGUIDED,
-   TOW_MISSILE,
-   LAND_TORPEDO,
-   BLAST_CANNON,
-   PULSE_LASER,
-   MINE_LAYER,
-   OIL_SLICK,
-   HEAVY_MORTAR,
-   TACTICAL_NUKE,
-   ANTI_RADIATION,
-   DISC_SHOOTER,
-   XtankWeaponCount2,    // total number of xtank weapons
-   XtankWeaponNone2 = -1 // sentinel: slot carries no weapon
-};
+   // Helper functions to compute BF-compatible values from native xtank fields.
+   // Xtank runs at 20fps, so 1 frame = 50ms.
+   inline U32 xtankFireDelayMs(const XtankWeaponInfo &wi)
+   {
+      return (U32)(wi.reload_time * 50);  // frames → milliseconds
+   }
 
-struct HeatSinkStat
-{
-   S32 weight;
-   S32 space;
-   S32 cost;
-};
+   inline U32 xtankProjVelocity(const XtankWeaponInfo &wi)
+   {
+      return (U32)(wi.ammo_speed * 20);  // xtank units/frame → BF units/sec
+   }
 
-struct SuspensionStat
-{
-   const char *name;
-   F32 friction;
-   S32 cost;
-};
+   inline S32 xtankProjLiveTime(const XtankWeaponInfo &wi)
+   {
+      return (S32)(wi.frames * 50);  // frames → milliseconds
+   }
 
-struct BumperStat
-{
-   const char *name;
-   F32 elasticity;   // (0 = no bounce, 1 = perfect bounce)
-   S32 cost;
-};
+   // ---------------------------------------------------------------------------
+   // Engine types: player-selectable power plant affecting top speed and
+   // acceleration.  A heavier engine gives more power but adds bulk.
+   // ---------------------------------------------------------------------------
 
+   enum XtankEngine
+   {
+      Small_Electric,
+      Medium_Electric,
+      Large_Electric,
+      Super_Electric,
+      Small_Combustion,
+      Medium_Combustion,
+      Large_Combustion,
+      Super_Combustion,
+      Small_Turbine,
+      Medium_Turbine,
+      Large_Turbine,
+      Turbojet_Turbine,
+      Fuel_Cell,
+      Fission,
+      Breeder_Fission,
+      Fusion,
+      XtankEngineCount,
+      XtankEngineDefault = Super_Combustion
+   };
 
-// Names for on-screen display, one per XtankWeapon.
-extern const char *xtankWeaponNames[];
+   enum XtankArmor
+   {
+      Steel,
+      Kevlar,
+      Hardened_Steel,
+      Composite,
+      Carapice,
+      Porcelain,
+      Compound_Steel,
+      Titanium,
+      Tungsten,
+      XtankArmorCount,
+      XtankArmorDefault = Steel
+   };
 
-// Per-weapon parameters.
-struct XtankWeaponInfo
-{
-   const char     *name;         // Display name
-   U32            fireDelay;     // Milliseconds between shots per turret
-   U32            energyDrain;   // Energy units consumed per shot
-   WeaponType     bfWeapon;      // Mapped BF weapon used to create the projectile
-   U32            projVelocity;  // Projectile speed in BF units/sec (from xtank: spd*20)
-   S32            projLiveTime;  // Projectile lifetime in ms  (from xtank: fr*50)
-   ProjectileStyle style;        // Rendering style (xtank-specific look)
-};
+   // Per-engine gameplay multipliers applied on top of the body's base physics.
+   struct XtankEngineInfo
+   {
+      const char *name;
+      F32 speedMult; // Multiplier on maxSpeed and maxReverseSpeed
+      F32 accelMult; // Multiplier on acceleration
 
-// One entry per XtankWeapon value.
-extern XtankWeaponInfo xtankWeaponInfos[XtankWeaponCount];
+      S32 power;
+      S32 weight;
+      S32 space;
+      S32 fuel;
+      S32 fcap;
+      S32 cost;
+   };
 
+   struct XtankArmorInfo
+   {
+      const char *name;
+      S32 defense;
+      S32 weight;
+      S32 space;
+      S32 cost;
+   };
 
-// ---------------------------------------------------------------------------
-// Engine types: player-selectable power plant affecting top speed and
-// acceleration.  A heavier engine gives more power but adds bulk.
-// ---------------------------------------------------------------------------
+   // One entry per XtankEngine value.
+   extern XtankEngineInfo xtankEngineInfos[XtankEngineCount];
 
-enum XtankEngine
-{
-   Small_Electric,
-   Medium_Electric,
-   Large_Electric,
-   Super_Electric,
-   Small_Combustion,
-   Medium_Combustion,
-   Large_Combustion,
-   Super_Combustion,
-   Small_Turbine,
-   Medium_Turbine,
-   Large_Turbine,
-   Turbojet_Turbine,
-   Fuel_Cell,
-   Fission,
-   Breeder_Fission,
-   Fusion,
-   XtankEngineCount,
-   XtankEngineDefault = Super_Combustion
-};
+   // ---------------------------------------------------------------------------
+   // Tread types: player-selectable track system affecting maneuverability.
+   // Rubber treads give nimble steering; heavy treads grip harder but turn slower.
+   // ---------------------------------------------------------------------------
 
+   enum XtankTread      // united
+   {
+      TREAD_SMOOTH = 0,
+      TREAD_NORMAL,
+      TREAD_CHAINED,
+      TREAD_SPIKED,
+      TREAD_HOVER,
+      XtankTreadCount,
+      XtankTreadDefault = TREAD_NORMAL
+   };
 
-enum XtankArmor
-{
-   Steel,
-   Kevlar,
-   Hardened_Steel,
-   Composite,
-   Carapice,
-   Porcelain,
-   Compound_Steel,
-   Titanium,
-   Tungsten,
-   XtankArmorCount,
-   XtankArmorDefault = Steel
-};
+   //enum XtankTread
+   //{
+   //   // AI values
+   //   Rubber = 0, // Light, nimble; faster turning, slightly less grip
+   //   Metal = 1,  // Balanced standard
+   //   Heavy = 2,  // Slow to turn, but high grip / rapid deceleration
 
+   //   XtankTreadCount,
+   //   XtankTreadDefault = Metal
+   //};
 
-// Per-engine gameplay multipliers applied on top of the body's base physics.
-struct XtankEngineInfo
-{
-   const char *name;
-   F32 speedMult;   // Multiplier on maxSpeed and maxReverseSpeed
-   F32 accelMult;   // Multiplier on acceleration
+   // Names for on-screen display, one per XtankTread.
+   extern const char *xtankTreadNames[];
 
-   S32 power;
-   S32 weight;
-   S32 space;
-   S32 fuel;
-   S32 fcap;
-   S32 cost;
+   // Per-tread gameplay multipliers applied on top of the body's base physics.
+   struct XtankTreadInfo
+   {
+      const char *name;
+      F32 friction; // Multiplier on turnRate
+      S32 cost;
+   };
 
-};
-
-
-struct XtankArmorInfo
-{
-   const char *name;
-   S32 defense;
-   S32 weight;
-   S32 space;
-   S32 cost;
-};
-
-    // One entry per XtankEngine value.
-    extern XtankEngineInfo xtankEngineInfos[XtankEngineCount];
-
-// ---------------------------------------------------------------------------
-// Tread types: player-selectable track system affecting maneuverability.
-// Rubber treads give nimble steering; heavy treads grip harder but turn slower.
-// ---------------------------------------------------------------------------
-
-enum XtankTread
-{
-   // AI values
-   Rubber = 0,  // Light, nimble; faster turning, slightly less grip
-   Metal  = 1,  // Balanced standard
-   Heavy  = 2,  // Slow to turn, but high grip / rapid deceleration
-
-   // Original values
-   Smooth,
-   Normal,
-   Chained,
-   Spiked,
-   Hover,
-
-   XtankTreadCount,
-   XtankTreadDefault = Metal
-};
-
-// Names for on-screen display, one per XtankTread.
-extern const char *xtankTreadNames[];
-
-// Per-tread gameplay multipliers applied on top of the body's base physics.
-struct XtankTreadInfo
-{
-   const char *name;
-   F32 turnMult;     // Multiplier on turnRate
-   F32 frictionMult; // Multiplier on friction (passive deceleration)
-   S32 cost;
-};
-
-// One entry per XtankTread value.
-extern XtankTreadInfo xtankTreadInfos[];
-
-
-// ---------------------------------------------------------------------------
-// Heat sinks: player-selectable count (1-6) that reduces weapon fire delay.
-// More heat sinks allow the weapons to cycle faster.
-// ---------------------------------------------------------------------------
-
-static const S32 XtankHeatSinkMin = 1;
-static const S32 XtankHeatSinkMax = 6;
-static const S32 XtankHeatSinkDefault = 1;
-
-// Returns the fire-delay multiplier for a given heat-sink count.
-// 1 sink → 1.00x, each additional sink reduces delay by 8%.
-// 6 sinks → 0.60x (40% faster cycling).
-inline F32 xtankHeatSinkFireDelayMult(S32 count)
-{
-   return 1.0f - (count - 1) * 0.08f;
-}
+   extern XtankTreadInfo xtankTreadInfos[];                 // Tread data, original
 
 
-// ---------------------------------------------------------------------------
-// Vehicle design: per-player xtank configuration (body + weapon loadout).
-// ---------------------------------------------------------------------------
+   // One entry per XtankTread value.
+   extern XtankArmorInfo xtankArmorInfos[];
+   extern HeatSinkStat heatSinkStat;
 
-// Default weapons for each body (first slotCount entries are valid;
-// slotCount comes from xtankTurretInfos[bodyIdx].count).
-struct XtankBodyDefaultWeapons
-{
-   XtankWeapon weapons[4];
-};
+   // ---------------------------------------------------------------------------
+   // Heat sinks: player-selectable count (1-6) that reduces weapon fire delay.
+   // More heat sinks allow the weapons to cycle faster.
+   // ---------------------------------------------------------------------------
 
-// One entry per XtankBody value.
-extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBodyCount];
+   static const S32 XtankHeatSinkMin = 1;
+   static const S32 XtankHeatSinkMax = 6;
+   static const S32 XtankHeatSinkDefault = 1;
 
+   // Returns the fire-delay multiplier for a given heat-sink count.
+   // 1 sink → 1.00x, each additional sink reduces delay by 8%.
+   // 6 sinks → 0.60x (40% faster cycling).
+   inline F32 xtankHeatSinkFireDelayMult(S32 count)
+   {
+      return 1.0f - (count - 1) * 0.08f;
+   }
 
-// The player's active vehicle configuration.  Stored in Ship and communicated
-// via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount).
-struct XtankDesign
-{
-   S8                bodyIndex;    // XtankBody, -1 = normal BF ship
-   XtankWeapon weapons[4];  // active weapon per turret slot (extras = None)
-   XtankEngine engineType;  // selected engine
-   XtankTread  treadType;   // selected tread type
-   S8          heatSinkCount; // number of heat sinks (1-6)
+   // ---------------------------------------------------------------------------
+   // Vehicle design: per-player xtank configuration (body + weapon loadout).
+   // ---------------------------------------------------------------------------
 
-   XtankDesign();                        // Default constructor (bodyIndex = None)
-   void initForBody(S32 bodyIdx);        // Set body + reset all components to defaults
-};
+   // Default weapons for each body (first slotCount entries are valid;
+   // slotCount comes from xtankTurretInfos[bodyIdx].count).
+   struct XtankBodyDefaultWeapons
+   {
+      XtankWeapon weapons[4];
+   };
+
+   // One entry per XtankBody value.
+   extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBodyCount];
+
+   // The player's active vehicle configuration.  Stored in Ship and communicated
+   // via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount).
+   struct XtankDesign
+   {
+      S8 bodyIndex;           // XtankBody, -1 = normal BF ship
+      XtankWeapon weapons[4]; // active weapon per turret slot (extras = None)
+      XtankEngine engineType; // selected engine
+      XtankTread treadType;   // selected tread type
+      S8 heatSinkCount;       // number of heat sinks (1-6)
+      XtankArmor armorType;
+
+      XtankDesign();                 // Default constructor (bodyIndex = None)
+      void initForBody(S32 bodyIdx); // Set body + reset all components to defaults
+   };
 
 /* Other options */
 #define F_OUTP 0x0F /* mask.  lower 4 bits specify which levels of */
@@ -471,32 +484,7 @@ struct XtankDesign
 #define BIG ((int) ((unsigned)(~0) >> 1))
 
 
-struct XtankWeaponInfo2
-{
-   const char *name; // Display name
-   S32 damage;
-   S32 range;
-   S32 max_ammo;
-   S32 reload_time;
-   S32 ammo_speed;
-   S32 weight;
-   S32 space;
-   S32 mount_space;
-   S32 frames;
-   S32 heat;
-   S32 ammo_cost;
-   S32 cost;
-   S32 refill_time;
-   S32 safety;
-   S32 height;
 
-   S32 mount;      // Where the weapon can be mounted
-   U64 other_flgs; // Misc. flags
-   U64 creat_flgs; // bullet creation
-   U64 disp_flgs;  // how the bullet is displayed
-   U64 move_flgs;  // how the bullet moves
-   U64 hit_flgs;   // damage type and side
-};
 
 
 

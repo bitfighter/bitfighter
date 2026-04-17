@@ -37,32 +37,22 @@ static const InputCode sBodyKeys[XtankBodyCount] =
    KEY_8, KEY_9, KEY_0, KEY_A, KEY_B, KEY_C, KEY_D,
 };
 
-// Keys used for engine/tread selections (3 options each, keys 1-3).
-static const InputCode s3Keys[3] =
+// Dynamic key assignment: returns the InputCode for index i (0-based).
+// Uses 1-9 for indices 0-8, then A-Z for indices 9-34.
+// Covers up to 35 items total (9 numbers + 26 letters).
+static InputCode getKeyForIndex(S32 index)
 {
-   KEY_1, KEY_2, KEY_3,
-};
+   if(index >= 0 && index <= 8)
+      return (InputCode)(KEY_1 + index);  // 1-9
+   else if(index >= 9 && index <= 34)
+      return (InputCode)(KEY_A + (index - 9));  // A-Z
+   return KEY_UNKNOWN;
+}
 
 // Keys used for heat-sink count (6 options, keys 1-6).
 static const InputCode sHeatSinkKeys[XtankHeatSinkMax] =
 {
    KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6,
-};
-
-// Keys used for the 10 weapon options (None = 0, weapons 1-9).
-// None is placed at KEY_0 so number keys 1-9 map directly to weapon indices.
-static const InputCode sWeaponKeys[XtankWeaponCount + 1] =
-{
-   KEY_0,     // None
-   KEY_1,     // MachineGun
-   KEY_2,     // Laser
-   KEY_3,     // Missile
-   KEY_4,     // Grenade
-   KEY_5,     // Rocket
-   KEY_6,     // Acid
-   KEY_7,     // Tracer
-   KEY_8,     // Bomb
-   KEY_9,     // Fire
 };
 
 
@@ -142,23 +132,27 @@ void UIXtankHelper::buildBodyItems()
 void UIXtankHelper::buildEngineItems()
 {
    mEngineItems.clear();
-   static const char *engineHelp[XtankEngineCount] =
-   {
-      "Slower top speed and acceleration",
-      "Balanced performance",
-      "Higher top speed and acceleration",
-   };
 
    for(S32 e = 0; e < XtankEngineCount; e++)
    {
+      const XtankEngineInfo &info = xtankEngineInfos[e];
+
+      // Generate help text from engine stats
+      static string engineHelpTexts[XtankEngineCount];
+      char buf[128];
+      dSprintf(buf, sizeof(buf), "Spd:%.0f%% Acc:%.0f%% Pwr:%d Wt:%d",
+               info.speedMult * 100.0f, info.accelMult * 100.0f,
+               info.power, info.weight);
+      engineHelpTexts[e] = buf;
+
       OverlayMenuItem item;
-      item.key                 = s3Keys[e];
+      item.key                 = getKeyForIndex(e);
       item.button              = KEY_NONE;
       item.showOnMenu          = true;
       item.itemIndex           = (U32)e;
-      item.name                = xtankEngineInfos[e].name;
+      item.name                = info.name;
       item.itemColor           = UNSEL_COLOR;
-      item.help                = engineHelp[e];
+      item.help                = engineHelpTexts[e].c_str();
       item.helpColor           = UNSEL_COLOR;
       item.buttonOverrideColor = NULL;
       mEngineItems.push_back(item);
@@ -170,23 +164,25 @@ void UIXtankHelper::buildEngineItems()
 void UIXtankHelper::buildTreadItems()
 {
    mTreadItems.clear();
-   static const char *treadHelp[XtankTreadCount] =
-   {
-      "Nimble steering, slightly less traction",
-      "Balanced handling",
-      "Slower turning, higher grip and braking",
-   };
 
    for(S32 t = 0; t < XtankTreadCount; t++)
    {
+      const XtankTreadInfo &info = xtankTreadInfos[t];
+
+      // Generate help text from tread stats
+      static string treadHelpTexts[XtankTreadCount];
+      char buf[128];
+      dSprintf(buf, sizeof(buf), "Friction:%.2f", info.friction);
+      treadHelpTexts[t] = buf;
+
       OverlayMenuItem item;
-      item.key                 = s3Keys[t];
+      item.key                 = getKeyForIndex(t);
       item.button              = KEY_NONE;
       item.showOnMenu          = true;
       item.itemIndex           = (U32)t;
-      item.name                = xtankTreadInfos[t].name;
+      item.name                = info.name;
       item.itemColor           = UNSEL_COLOR;
-      item.help                = treadHelp[t];
+      item.help                = treadHelpTexts[t].c_str();
       item.helpColor           = UNSEL_COLOR;
       item.buttonOverrideColor = NULL;
       mTreadItems.push_back(item);
@@ -239,7 +235,7 @@ void UIXtankHelper::buildWeaponItems()
    // First option is always "None" (key 0).
    {
       OverlayMenuItem item;
-      item.key                 = sWeaponKeys[0];
+      item.key                 = KEY_0;
       item.button              = KEY_NONE;
       item.showOnMenu          = true;
       item.itemIndex           = (U32)XtankWeaponNone + 1;  // offset so 0 = None stored safely
@@ -251,11 +247,11 @@ void UIXtankHelper::buildWeaponItems()
       mWeaponItems.push_back(item);
    }
 
-   // One entry per weapon.
+   // One entry per weapon (dynamically assigned keys 1-9, A-P).
    for(S32 w = 0; w < XtankWeaponCount; w++)
    {
       OverlayMenuItem item;
-      item.key                 = sWeaponKeys[w + 1];
+      item.key                 = getKeyForIndex(w);  // Use dynamic key assignment
       item.button              = KEY_NONE;
       item.showOnMenu          = true;
       item.itemIndex           = (U32)w;
@@ -265,6 +261,27 @@ void UIXtankHelper::buildWeaponItems()
       item.helpColor           = UNSEL_COLOR;
       item.buttonOverrideColor = NULL;
       mWeaponItems.push_back(item);
+   }
+}
+
+
+// Update the colors of items in a menu to highlight the selected one.
+// The highlighted item (at mHighlightedIndex) gets the selected color,
+// all others get the unselected color.
+void UIXtankHelper::updateItemColors(Vector<OverlayMenuItem> &items)
+{
+   for(S32 i = 0; i < items.size(); i++)
+   {
+      if(i == mHighlightedIndex)
+      {
+         items[i].itemColor = &Colors::overlayMenuSelectedItemColor;
+         items[i].helpColor = &Colors::overlayMenuSelectedItemColor;
+      }
+      else
+      {
+         items[i].itemColor = UNSEL_COLOR;
+         items[i].helpColor = UNSEL_COLOR;
+      }
    }
 }
 
@@ -317,6 +334,7 @@ void UIXtankHelper::render()
 {
    if(mPhase == PHASE_BODY)
    {
+      updateItemColors(mBodyItems);
       drawItemMenu("Choose vehicle body:",
                    mBodyItems.address(), mBodyItems.size(),
                    NULL, 0,
@@ -324,6 +342,7 @@ void UIXtankHelper::render()
    }
    else if(mPhase == PHASE_ENGINE)
    {
+      updateItemColors(mEngineItems);
       drawItemMenu("Choose engine:",
                    mEngineItems.address(), mEngineItems.size(),
                    mBodyItems.address(),   mBodyItems.size(),
@@ -331,6 +350,7 @@ void UIXtankHelper::render()
    }
    else if(mPhase == PHASE_TREADS)
    {
+      updateItemColors(mTreadItems);
       drawItemMenu("Choose treads:",
                    mTreadItems.address(), mTreadItems.size(),
                    mBodyItems.address(),  mBodyItems.size(),
@@ -338,6 +358,7 @@ void UIXtankHelper::render()
    }
    else if(mPhase == PHASE_HEATSINK)
    {
+      updateItemColors(mHeatSinkItems);
       drawItemMenu("Choose heat sinks:",
                    mHeatSinkItems.address(), mHeatSinkItems.size(),
                    mBodyItems.address(),     mBodyItems.size(),
@@ -350,6 +371,7 @@ void UIXtankHelper::render()
       char title[80];
       dSprintf(title, sizeof(title), "Slot %d of %d — pick weapon:", slot + 1, mSlotCount);
 
+      updateItemColors(mWeaponItems);
       drawItemMenu(title,
                    mWeaponItems.address(), mWeaponItems.size(),
                    mBodyItems.address(),   mBodyItems.size(),
@@ -380,6 +402,21 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
          mHighlightedIndex = (mHighlightedIndex + 1) % itemCount;
          return true;
       }
+      // ENTER key selects the currently highlighted item
+      if(inputCode == KEY_ENTER)
+      {
+         // Simulate pressing the key for the highlighted item
+         if(mPhase == PHASE_BODY && mHighlightedIndex < mBodyItems.size())
+            return processInputCode(mBodyItems[mHighlightedIndex].key);
+         else if(mPhase == PHASE_ENGINE && mHighlightedIndex < mEngineItems.size())
+            return processInputCode(mEngineItems[mHighlightedIndex].key);
+         else if(mPhase == PHASE_TREADS && mHighlightedIndex < mTreadItems.size())
+            return processInputCode(mTreadItems[mHighlightedIndex].key);
+         else if(mPhase == PHASE_HEATSINK && mHighlightedIndex < mHeatSinkItems.size())
+            return processInputCode(mHeatSinkItems[mHighlightedIndex].key);
+         else if(mPhase >= PHASE_WEAPONS && mHighlightedIndex < mWeaponItems.size())
+            return processInputCode(mWeaponItems[mHighlightedIndex].key);
+      }
    }
 
    if(mPhase == PHASE_BODY)
@@ -406,11 +443,11 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    else if(mPhase == PHASE_ENGINE)
    {
       // --- Engine selection ---
-      for(S32 e = 0; e < XtankEngineCount; e++)
+      for(S32 e = 0; e < mEngineItems.size(); e++)
       {
-         if(inputCode == s3Keys[e])
+         if(inputCode == mEngineItems[e].key)
          {
-            mDesignInProgress.engineType = (XtankEngine)e;
+            mDesignInProgress.engineType = (XtankEngine)mEngineItems[e].itemIndex;
             mPhase = PHASE_TREADS;
             mHighlightedIndex = 0;
 
@@ -424,11 +461,11 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    else if(mPhase == PHASE_TREADS)
    {
       // --- Tread selection ---
-      for(S32 t = 0; t < XtankTreadCount; t++)
+      for(S32 t = 0; t < mTreadItems.size(); t++)
       {
-         if(inputCode == s3Keys[t])
+         if(inputCode == mTreadItems[t].key)
          {
-            mDesignInProgress.treadType = (XtankTreadType)t;
+            mDesignInProgress.treadType = (XtankTread)mTreadItems[t].itemIndex;
             mPhase = PHASE_HEATSINK;
             mHighlightedIndex = 0;
 
@@ -458,20 +495,17 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       // --- Weapon slot selection ---
       S32 slot = mPhase - PHASE_WEAPONS;
 
-      // None (key 0)
-      if(inputCode == sWeaponKeys[0])
+      // Check all weapon items (including None at index 0)
+      for(S32 i = 0; i < mWeaponItems.size(); i++)
       {
-         mDesignInProgress.weapons[slot] = XtankWeaponNone;
-         mHighlightedIndex = 0;
-         advanceToNextPhaseOrFinish();
-         return true;
-      }
-
-      for(S32 w = 0; w < XtankWeaponCount; w++)
-      {
-         if(inputCode == sWeaponKeys[w + 1])
+         if(inputCode == mWeaponItems[i].key)
          {
-            mDesignInProgress.weapons[slot] = (XtankWeapon)w;
+            // First item is "None", remaining items are weapons
+            if(i == 0)
+               mDesignInProgress.weapons[slot] = XtankWeaponNone;
+            else
+               mDesignInProgress.weapons[slot] = (XtankWeapon)mWeaponItems[i].itemIndex;
+
             mHighlightedIndex = 0;
             advanceToNextPhaseOrFinish();
             return true;
@@ -722,8 +756,11 @@ void UIXtankHelper::renderPreviewPanel() const
          "Heavy plant, maximum power",
       };
       ty += LINE_GAP * 2;
-      r.setColor(Colors::gray70);
-      drawCenteredString(PNL_CX, ty, STAT_SZ, engDesc[idx]);
+      if(engDesc[idx] != nullptr)
+      {
+         r.setColor(Colors::gray70);
+         drawCenteredString(PNL_CX, ty, STAT_SZ, engDesc[idx]);
+      }
    }
 
    // -------------------------------------------------------------------------
@@ -749,8 +786,7 @@ void UIXtankHelper::renderPreviewPanel() const
       static const F32 TR_SEP = 28.0f;  // distance from centre to each track
 
       F32 trCy = F32(GRAPHIC_Y);
-      Color trColor = (idx == (S32)XtankTread::Rubber) ? Colors::green65 :
-                      (idx == (S32)XtankTread::Metal)  ? Colors::gray67  : Colors::orange67;
+      Color trColor = Colors::green65;
       r.setColor(trColor);
       // Left track
       drawHollowRect(PNL_CX - TR_SEP - TR_W, trCy - TR_H * 0.5f,
@@ -761,8 +797,8 @@ void UIXtankHelper::renderPreviewPanel() const
 
       S32 ty = TRD_TEXT_Y;
       r.setColor(Colors::cyan);
-      S32 turnPct = S32((ti.turnMult - 1.0f) * 100.0f + 0.5f);
-      S32 fricPct = S32((ti.frictionMult - 1.0f) * 100.0f + 0.5f);
+      S32 turnPct = S32((ti.friction - 1.0f) * 100.0f + 0.5f);
+      S32 fricPct = S32((ti.friction - 1.0f) * 100.0f + 0.5f);
       drawCenteredStringf(PNL_CX, ty, STAT_SZ,
                           "Turn rate:   %+d%%", turnPct);
       ty += LINE_GAP;
@@ -775,8 +811,11 @@ void UIXtankHelper::renderPreviewPanel() const
          "Slower turns, heavy braking",
       };
       ty += LINE_GAP * 2;
-      r.setColor(Colors::gray70);
-      drawCenteredString(PNL_CX, ty, STAT_SZ, trdDesc[idx]);
+      if(trdDesc[idx] != nullptr)
+      { 
+         r.setColor(Colors::gray70);
+         drawCenteredString(PNL_CX, ty, STAT_SZ, trdDesc[idx]);
+      }
    }
 
    // -------------------------------------------------------------------------
@@ -861,16 +900,16 @@ void UIXtankHelper::renderPreviewPanel() const
          S32 ty = TITLE_Y + TITLE_SZ + 4 + 20;
          r.setColor(Colors::cyan);
          drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Fire delay:  %d ms", (S32)wi.fireDelay);
+                             "Fire delay:  %d ms", (S32)xtankFireDelayMs(wi));
          ty += LINE_GAP;
          drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Energy:      %d/shot", (S32)wi.energyDrain);
+                             "Energy:      %d/shot", (S32)wi.heat);
          ty += LINE_GAP;
          drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Speed:       %d u/s", (S32)wi.projVelocity);
+                             "Speed:       %d u/s", (S32)xtankProjVelocity(wi));
          ty += LINE_GAP;
          drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Lifetime:    %d ms", (S32)wi.projLiveTime);
+                             "Lifetime:    %d ms", (S32)xtankProjLiveTime(wi));
       }
    }
 
