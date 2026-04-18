@@ -575,3 +575,7 @@ Spawn 1  7  2
 - **Theme** -- Most levels don't have any inherent theme, but occasionally a designer will find a way to create one, through level naming, level shape, text, team names and colors, and other elements.
 - **Team count** -- Levels with more teams require more players (or bots), and player count can sometimes be a challenge.
 
+## Some additional tips based on AI level generation failures
+- Make sure places you want ships to pass are large enough for them
+- If you place objects such as health units, gofasts, or teleporters inside walls, ships can't access them.
+- Levels should try to _say_ something, not just be another random collection of walls and objects.  I realize that's a bit abstract, but find something to make the level interesting.
