@@ -1065,15 +1065,37 @@ bool alphaNumberSort(const string &a, const string &b)
    bool aIsNum = isPositiveInteger(a.c_str());
    bool bIsNum = isPositiveInteger(b.c_str());
 
+   // Helper to find the numeric part of a string, skipping leading zeros
+   auto getNumericPart = [](const string &s, size_t &start, size_t &len) {
+      start = 0;
+      while(start < s.length() && s[start] == '0')
+         start++;
+      len = 0;
+      while(start + len < s.length() && isDigit(s[start + len]))
+         len++;
+      if (len == 0 && start > 0 && (start == s.length() || !isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
+      {
+          start--; // Keep one zero
+          len = 1;
+      }
+   };
+
    if(aIsNum && bIsNum)
    {
-      int aNum = atoi(a.c_str());
-      int bNum = atoi(b.c_str());
+      size_t aStart, aLen, bStart, bLen;
+      getNumericPart(a, aStart, aLen);
+      getNumericPart(b, bStart, bLen);
 
-      if(aNum == bNum)
-         return alphaSort(a, b);
+      if(aLen != bLen)
+         return aLen < bLen;
 
-      return aNum < bNum;
+      for(size_t i = 0; i < aLen; i++)
+      {
+         if(a[aStart + i] != b[bStart + i])
+            return a[aStart + i] < b[bStart + i];
+      }
+
+      return alphaSort(a, b);
    }
 
    if(aIsNum)
@@ -1083,18 +1105,24 @@ bool alphaNumberSort(const string &a, const string &b)
       return false;
 
    // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
-   // Compare the leading numeric portions numerically; atoi stops at the first non-digit,
-   // which is exactly the behavior we want here. Fall back to alphabetical on a tie.
+   // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
    bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
    bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
 
    if(aStartsWithDigit && bStartsWithDigit)
    {
-      int aNum = atoi(a.c_str());
-      int bNum = atoi(b.c_str());
+      size_t aStart, aLen, bStart, bLen;
+      getNumericPart(a, aStart, aLen);
+      getNumericPart(b, bStart, bLen);
 
-      if(aNum != bNum)
-         return aNum < bNum;
+      if(aLen != bLen)
+         return aLen < bLen;
+
+      for(size_t i = 0; i < aLen; i++)
+      {
+         if(a[aStart + i] != b[bStart + i])
+            return a[aStart + i] < b[bStart + i];
+      }
    }
 
    return alphaSort(a, b);
