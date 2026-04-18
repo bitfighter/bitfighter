@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -346,22 +344,8 @@ int kseed_test(void)
        kseed_setup(tests[x].key, 16, 0, &skey);
        kseed_ecb_encrypt(tests[x].pt, buf[0], &skey);
        kseed_ecb_decrypt(buf[0], buf[1], &skey);
-       if (XMEMCMP(buf[0], tests[x].ct, 16) || XMEMCMP(buf[1], tests[x].pt, 16)) {
-#if 0
-          int i, j;
-          printf ("\n\nLTC_KSEED failed for x=%d, I got:\n", x);
-          for (i = 0; i < 2; i++) {
-             const unsigned char *expected, *actual;
-             expected = (i ? tests[x].pt : tests[x].ct);
-             actual = buf[i];
-             printf ("expected    actual   (%s)\n", (i ? "plaintext" : "ciphertext"));
-             for (j = 0; j < 16; j++) {
-                const char *eq = (expected[j] == actual[j] ? "==" : "!=");
-                printf ("     %02x  %s  %02x\n", expected[j], eq, actual[j]);
-             }
-             printf ("\n");
-          }
-#endif
+       if (compare_testvector(buf[0], 16, tests[x].ct, 16, "KSEED Encrypt", x) ||
+             compare_testvector(buf[1], 16, tests[x].pt, 16, "KSEED Decrypt", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
    }
@@ -387,6 +371,6 @@ int kseed_keysize(int *keysize)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

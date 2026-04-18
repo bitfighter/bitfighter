@@ -1,3 +1,12 @@
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
+ *
+ * LibTomCrypt is a library that provides various cryptographic
+ * algorithms in a highly modular and flexible manner.
+ *
+ * The library is free for all purposes without any express
+ * guarantee it works.
+ */
+
 /* PKCS Header Info */
 
 /* ===> PKCS #1 -- RSA Cryptography <=== */
@@ -13,7 +22,8 @@ enum ltc_pkcs_1_paddings
 {
   LTC_PKCS_1_V1_5     = 1,        /* PKCS #1 v1.5 padding (\sa ltc_pkcs_1_v1_5_blocks) */
   LTC_PKCS_1_OAEP     = 2,        /* PKCS #1 v2.0 encryption padding */
-  LTC_PKCS_1_PSS      = 3         /* PKCS #1 v2.1 signature padding */
+  LTC_PKCS_1_PSS      = 3,        /* PKCS #1 v2.1 signature padding */
+  LTC_PKCS_1_V1_5_NA1 = 4         /* PKCS #1 v1.5 padding - No ASN.1 (\sa ltc_pkcs_1_v1_5_blocks) */
 };
 
 int pkcs_1_mgf1(      int            hash_idx,
@@ -70,13 +80,13 @@ int pkcs_1_pss_decode(const unsigned char *msghash, unsigned long msghashlen,
 /* ===> PKCS #5 -- Password Based Cryptography <=== */
 #ifdef LTC_PKCS_5
 
-/* Algorithm #1 (old) */
+/* Algorithm #1 (PBKDF1) */
 int pkcs_5_alg1(const unsigned char *password, unsigned long password_len,
                 const unsigned char *salt,
                 int iteration_count,  int hash_idx,
                 unsigned char *out,   unsigned long *outlen);
 
-/* Algorithm #1 - OpenSSL-compatible variant for arbitrarily-long keys.
+/* Algorithm #1 (PBKDF1) - OpenSSL-compatible variant for arbitrarily-long keys.
    Compatible with EVP_BytesToKey() */
 int pkcs_5_alg1_openssl(const unsigned char *password,
                         unsigned long password_len,
@@ -84,7 +94,7 @@ int pkcs_5_alg1_openssl(const unsigned char *password,
                         int iteration_count,  int hash_idx,
                         unsigned char *out,   unsigned long *outlen);
 
-/* Algorithm #2 (new) */
+/* Algorithm #2 (PBKDF2) */
 int pkcs_5_alg2(const unsigned char *password, unsigned long password_len,
                 const unsigned char *salt,     unsigned long salt_len,
                 int iteration_count,           int hash_idx,
@@ -93,6 +103,6 @@ int pkcs_5_alg2(const unsigned char *password, unsigned long password_len,
 int pkcs_5_test (void);
 #endif  /* LTC_PKCS_5 */
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

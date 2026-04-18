@@ -1,3 +1,12 @@
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
+ *
+ * LibTomCrypt is a library that provides various cryptographic
+ * algorithms in a highly modular and flexible manner.
+ *
+ * The library is free for all purposes without any express
+ * guarantee it works.
+ */
+
 #ifndef TOMCRYPT_CUSTOM_H_
 #define TOMCRYPT_CUSTOM_H_
 
@@ -21,9 +30,15 @@
 #ifndef XMEMCPY
 #define XMEMCPY  memcpy
 #endif
+#ifndef XMEMMOVE
+#define XMEMMOVE memmove
+#endif
 #ifndef XMEMCMP
 #define XMEMCMP  memcmp
 #endif
+/* A memory compare function that has to run in constant time,
+ * c.f. mem_neq() API summary.
+ */
 #ifndef XMEM_NEQ
 #define XMEM_NEQ  mem_neq
 #endif
@@ -47,7 +62,6 @@
 
 /* shortcut to disable automatic inclusion */
 #if defined LTC_NOTHING && !defined LTC_EASY
-  #define LTC_NO_MATH
   #define LTC_NO_CIPHERS
   #define LTC_NO_MODES
   #define LTC_NO_HASHES
@@ -56,7 +70,6 @@
   #define LTC_NO_PK
   #define LTC_NO_PKCS
   #define LTC_NO_MISC
-  #define LTC_NO_FILE
 #endif /* LTC_NOTHING */
 
 /* Easy button? */
@@ -189,8 +202,11 @@
 #define LTC_KASUMI
 #define LTC_MULTI2
 #define LTC_CAMELLIA
-/* ChaCha is special (a stream cipher) */
+
+/* stream ciphers */
 #define LTC_CHACHA
+#define LTC_RC4_STREAM
+#define LTC_SOBER128_STREAM
 
 #endif /* LTC_NO_CIPHERS */
 
@@ -260,6 +276,8 @@
 #define LTC_F9_MODE
 #define LTC_PELICAN
 #define LTC_POLY1305
+#define LTC_BLAKE2SMAC
+#define LTC_BLAKE2BMAC
 
 /* ---> Encrypt + Authenticate Modes <--- */
 
@@ -293,7 +311,7 @@
 /* a PRNG that simply reads from an available system source */
 #define LTC_SPRNG
 
-/* The LTC_RC4 stream cipher */
+/* The RC4 stream cipher based PRNG */
 #define LTC_RC4
 
 /* The ChaCha20 stream cipher based PRNG */
@@ -302,7 +320,7 @@
 /* Fortuna PRNG */
 #define LTC_FORTUNA
 
-/* Greg's LTC_SOBER128 PRNG ;-0 */
+/* Greg's SOBER128 stream cipher based PRNG */
 #define LTC_SOBER128
 
 /* the *nix style /dev/random device */
@@ -359,16 +377,15 @@
 /* Supported Key Sizes */
 #define LTC_DH768
 #define LTC_DH1024
-#define LTC_DH1280
 #define LTC_DH1536
-#define LTC_DH1792
 #define LTC_DH2048
 
 #ifndef TFM_DESC
 /* tfm has a problem in fp_isprime for larger key sizes */
-#define LTC_DH2560
 #define LTC_DH3072
 #define LTC_DH4096
+#define LTC_DH6144
+#define LTC_DH8192
 #endif
 
 /* Include Katja (a Rabin variant like RSA) */
@@ -406,30 +423,6 @@
 /* Enable ECC timing resistant version by default */
 #define LTC_ECC_TIMING_RESISTANT
 #endif
-
-/* define these PK sizes out of LTC_NO_PK
- * to have them always defined
- */
-#if defined(LTC_MRSA)
-/* Min and Max RSA key sizes (in bits) */
-#ifndef MIN_RSA_SIZE
-#define MIN_RSA_SIZE 1024
-#endif
-#ifndef MAX_RSA_SIZE
-#define MAX_RSA_SIZE 4096
-#endif
-#endif
-
-/* in cases where you want ASN.1/DER functionality, but no
- * RSA, you can define this externally if 1024 is not enough
- */
-#if defined(LTC_MRSA)
-#define LTC_DER_MAX_PUBKEY_SIZE MAX_RSA_SIZE
-#elif !defined(LTC_DER_MAX_PUBKEY_SIZE)
-/* this includes DSA */
-#define LTC_DER_MAX_PUBKEY_SIZE 1024
-#endif
-
 
 /* PKCS #1 (RSA) and #5 (Password Handling) stuff */
 #ifndef LTC_NO_PKCS
@@ -479,18 +472,25 @@
 #endif
 #endif
 
+#if defined(LTC_DER)
+   #ifndef LTC_DER_MAX_RECURSION
+      /* Maximum recursion limit when processing nested ASN.1 types. */
+      #define LTC_DER_MAX_RECURSION 30
+   #endif
+#endif
+
 #if defined(LTC_MECC) || defined(LTC_MRSA) || defined(LTC_MDSA) || defined(LTC_MKAT)
    /* Include the MPI functionality?  (required by the PK algorithms) */
    #define LTC_MPI
+
+   #ifndef LTC_PK_MAX_RETRIES
+      /* iterations limit for retry-loops */
+      #define LTC_PK_MAX_RETRIES  20
+   #endif
 #endif
 
 #ifdef LTC_MRSA
    #define LTC_PKCS_1
-#endif
-
-#if defined(TFM_DESC) && defined(LTC_RSA_BLINDING)
-    #warning RSA blinding currently not supported in combination with TFM
-    #undef LTC_RSA_BLINDING
 #endif
 
 #if defined(LTC_PELICAN) && !defined(LTC_RIJNDAEL)
@@ -521,6 +521,30 @@
    #error LTC_CHACHA20_PRNG requires LTC_CHACHA
 #endif
 
+#if defined(LTC_RC4) && !defined(LTC_RC4_STREAM)
+   #error LTC_RC4 requires LTC_RC4_STREAM
+#endif
+
+#if defined(LTC_SOBER128) && !defined(LTC_SOBER128_STREAM)
+   #error LTC_SOBER128 requires LTC_SOBER128_STREAM
+#endif
+
+#if defined(LTC_BLAKE2SMAC) && !defined(LTC_BLAKE2S)
+   #error LTC_BLAKE2SMAC requires LTC_BLAKE2S
+#endif
+
+#if defined(LTC_BLAKE2BMAC) && !defined(LTC_BLAKE2B)
+   #error LTC_BLAKE2BMAC requires LTC_BLAKE2B
+#endif
+
+#if defined(LTC_SPRNG) && !defined(LTC_RNG_GET_BYTES)
+   #error LTC_SPRNG requires LTC_RNG_GET_BYTES
+#endif
+
+#if defined(LTC_NO_MATH) && (defined(LTM_DESC) || defined(TFM_DESC) || defined(GMP_DESC))
+   #error LTC_NO_MATH defined, but also a math descriptor
+#endif
+
 /* THREAD management */
 #ifdef LTC_PTHREAD
 
@@ -529,9 +553,10 @@
 #define LTC_MUTEX_GLOBAL(x)   pthread_mutex_t x = PTHREAD_MUTEX_INITIALIZER;
 #define LTC_MUTEX_PROTO(x)    extern pthread_mutex_t x;
 #define LTC_MUTEX_TYPE(x)     pthread_mutex_t x;
-#define LTC_MUTEX_INIT(x)     pthread_mutex_init(x, NULL);
-#define LTC_MUTEX_LOCK(x)     pthread_mutex_lock(x);
-#define LTC_MUTEX_UNLOCK(x)   pthread_mutex_unlock(x);
+#define LTC_MUTEX_INIT(x)     LTC_ARGCHK(pthread_mutex_init(x, NULL) == 0);
+#define LTC_MUTEX_LOCK(x)     LTC_ARGCHK(pthread_mutex_lock(x) == 0);
+#define LTC_MUTEX_UNLOCK(x)   LTC_ARGCHK(pthread_mutex_unlock(x) == 0);
+#define LTC_MUTEX_DESTROY(x)  LTC_ARGCHK(pthread_mutex_destroy(x) == 0);
 
 #else
 
@@ -542,12 +567,13 @@
 #define LTC_MUTEX_INIT(x)
 #define LTC_MUTEX_LOCK(x)
 #define LTC_MUTEX_UNLOCK(x)
+#define LTC_MUTEX_DESTROY(x)
 
 #endif
 
 /* Debuggers */
 
-/* define this if you use Valgrind, note: it CHANGES the way SOBER-128 and LTC_RC4 work (see the code) */
+/* define this if you use Valgrind, note: it CHANGES the way SOBER-128 and RC4 work (see the code) */
 /* #define LTC_VALGRIND */
 
 #endif
@@ -559,6 +585,6 @@
    #endif
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

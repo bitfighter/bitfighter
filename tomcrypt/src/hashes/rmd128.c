@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -355,8 +353,8 @@ int rmd128_test(void)
    return CRYPT_NOP;
 #else
    static const struct {
-        char *msg;
-        unsigned char md[16];
+        const char *msg;
+        unsigned char hash[16];
    } tests[] = {
    { "",
      { 0xcd, 0xf2, 0x62, 0x13, 0xa1, 0x50, 0xdc, 0x3e,
@@ -383,18 +381,16 @@ int rmd128_test(void)
        0xae, 0xa4, 0x62, 0x4c, 0x60, 0xc5, 0xc7, 0x02 }
    }
    };
-   int x;
-   unsigned char buf[16];
+
+   int i;
+   unsigned char tmp[16];
    hash_state md;
 
-   for (x = 0; x < (int)(sizeof(tests)/sizeof(tests[0])); x++) {
+   for (i = 0; i < (int)(sizeof(tests)/sizeof(tests[0])); i++) {
        rmd128_init(&md);
-       rmd128_process(&md, (unsigned char *)tests[x].msg, strlen(tests[x].msg));
-       rmd128_done(&md, buf);
-       if (XMEMCMP(buf, tests[x].md, 16) != 0) {
-       #if 0
-          printf("Failed test %d\n", x);
-       #endif
+       rmd128_process(&md, (unsigned char *)tests[i].msg, strlen(tests[i].msg));
+       rmd128_done(&md, tmp);
+       if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "RIPEMD128", i)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
    }
@@ -405,6 +401,6 @@ int rmd128_test(void)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

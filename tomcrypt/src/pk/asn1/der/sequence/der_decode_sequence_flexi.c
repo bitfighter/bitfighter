@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -17,7 +15,7 @@
 
 #ifdef LTC_DER
 
-static unsigned long fetch_length(const unsigned char *in, unsigned long inlen, unsigned long *data_offset)
+static unsigned long _fetch_length(const unsigned char *in, unsigned long inlen, unsigned long *data_offset)
 {
    unsigned long x, z;
 
@@ -53,7 +51,7 @@ static unsigned long fetch_length(const unsigned char *in, unsigned long inlen, 
    return z+*data_offset;
 }
 
-static int new_element(ltc_asn1_list **l)
+static int _new_element(ltc_asn1_list **l)
 {
    /* alloc new link */
    if (*l == NULL) {
@@ -81,8 +79,8 @@ static int new_element(ltc_asn1_list **l)
 */
 int der_decode_sequence_flexi(const unsigned char *in, unsigned long *inlen, ltc_asn1_list **out)
 {
-   ltc_asn1_list *l;
-   unsigned long err, type, len, totlen, data_offset;
+   ltc_asn1_list *l, *t;
+   unsigned long err, type, len, totlen, data_offset, len_len;
    void          *realloc_tmp;
 
    LTC_ARGCHK(in    != NULL);
@@ -94,7 +92,7 @@ int der_decode_sequence_flexi(const unsigned char *in, unsigned long *inlen, ltc
 
    if (*inlen == 0) {
       /* alloc new link */
-      if ((err = new_element(&l)) != CRYPT_OK) {
+      if ((err = _new_element(&l)) != CRYPT_OK) {
          goto error;
       }
    }
@@ -105,14 +103,14 @@ int der_decode_sequence_flexi(const unsigned char *in, unsigned long *inlen, ltc
       type = *in;
 
       /* fetch length */
-      len = fetch_length(in, *inlen, &data_offset);
+      len = _fetch_length(in, *inlen, &data_offset);
       if (len > *inlen) {
          err = CRYPT_INVALID_PACKET;
          goto error;
       }
 
       /* alloc new link */
-      if ((err = new_element(&l)) != CRYPT_OK) {
+      if ((err = _new_element(&l)) != CRYPT_OK) {
          goto error;
       }
 
@@ -409,6 +407,17 @@ int der_decode_sequence_flexi(const unsigned char *in, unsigned long *inlen, ltc
                 l->child->parent = l;
              }
 
+             t = l;
+             len_len = 0;
+             while((t != NULL) && (t->child != NULL)) {
+                len_len++;
+                t = t->child;
+             }
+             if (len_len > LTC_DER_MAX_RECURSION) {
+                err = CRYPT_ERROR;
+                goto error;
+             }
+
              break;
 
          case 0x80: /* Context-specific */
@@ -470,6 +479,6 @@ error:
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

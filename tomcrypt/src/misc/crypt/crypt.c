@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -18,7 +16,7 @@
 #define NAME(s) #s
 
 const char *crypt_build_settings =
-   "LibTomCrypt " SCRYPT " (Tom St Denis, tomstdenis@gmail.com)\n"
+   "LibTomCrypt " SCRYPT " (www.libtom.net)\n"
    "LibTomCrypt is public domain software.\n"
 #if defined(INCLUDE_BUILD_DATE)
    "Built on " __DATE__ " at " __TIME__ "\n"
@@ -45,7 +43,7 @@ const char *crypt_build_settings =
 #else
    "disabled\n"
 #endif
-   "Ciphers built-in:\n"
+   "\nCiphers built-in:\n"
 #if defined(LTC_BLOWFISH)
    "   Blowfish\n"
 #endif
@@ -124,8 +122,15 @@ const char *crypt_build_settings =
 #if defined(LTC_CAMELLIA)
    "   Camellia\n"
 #endif
+   "Stream ciphers built-in:\n"
 #if defined(LTC_CHACHA)
    "   ChaCha\n"
+#endif
+#if defined(LTC_RC4_STREAM)
+   "   RC4\n"
+#endif
+#if defined(LTC_SOBER128_STREAM)
+   "   SOBER128\n"
 #endif
 
     "\nHashes built-in:\n"
@@ -242,6 +247,12 @@ const char *crypt_build_settings =
 #if defined(LTC_POLY1305)
     "   POLY1305\n"
 #endif
+#if defined(LTC_BLAKE2SMAC)
+    "   BLAKE2S MAC\n"
+#endif
+#if defined(LTC_BLAKE2BMAC)
+    "   BLAKE2B MAC\n"
+#endif
 
     "\nENC + AUTH modes:\n"
 #if defined(LTC_EAX_MODE)
@@ -290,7 +301,7 @@ const char *crypt_build_settings =
     "   SOBER128\n"
 #endif
 
-    "\nPK Algs:\n"
+    "\nPK Crypto:\n"
 #if defined(LTC_MRSA)
     "   RSA"
 #if defined(LTC_RSA_BLINDING) && defined(LTC_RSA_CRT_HARDENING)
@@ -317,6 +328,26 @@ const char *crypt_build_settings =
 #endif
 #if defined(LTC_MKAT)
     "   Katja\n"
+#endif
+#if defined(LTC_PK_MAX_RETRIES)
+    "   "NAME_VALUE(LTC_PK_MAX_RETRIES)"\n"
+#endif
+
+    "\nMPI (Math):\n"
+#if defined(LTC_MPI)
+    "   LTC_MPI\n"
+#endif
+#if defined(LTM_DESC)
+    "   LTM_DESC\n"
+#endif
+#if defined(TFM_DESC)
+    "   TFM_DESC\n"
+#endif
+#if defined(GMP_DESC)
+    "   GMP_DESC\n"
+#endif
+#if defined(LTC_MILLER_RABIN_REPS)
+    "   "NAME_VALUE(LTC_MILLER_RABIN_REPS)"\n"
 #endif
 
     "\nCompiler:\n"
@@ -350,6 +381,9 @@ const char *crypt_build_settings =
 #endif
 
     "\nVarious others: "
+#if defined(ARGTYPE)
+    " " NAME_VALUE(ARGTYPE) " "
+#endif
 #if defined(LTC_ADLER32)
     " ADLER32 "
 #endif
@@ -364,9 +398,7 @@ const char *crypt_build_settings =
 #endif
 #if defined(LTC_DER)
     " DER "
-#endif
-#if defined(LTC_DER_MAX_PUBKEY_SIZE)
-    " " NAME_VALUE(LTC_DER_MAX_PUBKEY_SIZE) " "
+    " " NAME_VALUE(LTC_DER_MAX_RECURSION) " "
 #endif
 #if defined(LTC_PKCS_1)
     " PKCS#1 "
@@ -376,9 +408,6 @@ const char *crypt_build_settings =
 #endif
 #if defined(LTC_HKDF)
     " HKDF "
-#endif
-#if defined(MPI)
-    " MPI "
 #endif
 #if defined(LTC_DEVRANDOM)
     " LTC_DEVRANDOM "
@@ -403,6 +432,9 @@ const char *crypt_build_settings =
 #endif
 #if defined(LTC_TEST)
     " LTC_TEST "
+#endif
+#if defined(LTC_TEST_DBG)
+    " " NAME_VALUE(LTC_TEST_DBG) " "
 #endif
 #if defined(LTC_TEST_EXT)
     " LTC_TEST_EXT "
@@ -443,15 +475,6 @@ const char *crypt_build_settings =
 #if defined(LTC_PTHREAD)
     " LTC_PTHREAD "
 #endif
-#if defined(LTM_DESC)
-    " LTM_DESC "
-#endif
-#if defined(TFM_DESC)
-    " TFM_DESC "
-#endif
-#if defined(GMP_DESC)
-    " GMP_DESC "
-#endif
 #if defined(LTC_EASY)
     " LTC_EASY "
 #endif
@@ -468,6 +491,6 @@ const char *crypt_build_settings =
     ;
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

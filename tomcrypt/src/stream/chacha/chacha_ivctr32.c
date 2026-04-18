@@ -20,7 +20,7 @@
   Set IV + counter data to the ChaCha state
   @param st      The ChaCha20 state
   @param iv      The IV data to add
-  @param inlen   The length of the IV (must be 12)
+  @param ivlen   The length of the IV (must be 12)
   @param counter 32bit (unsigned) initial counter value
   @return CRYPT_OK on success
  */
@@ -36,7 +36,12 @@ int chacha_ivctr32(chacha_state *st, const unsigned char *iv, unsigned long ivle
    LOAD32L(st->input[14], iv + 4);
    LOAD32L(st->input[15], iv + 8);
    st->ksleft = 0;
+   st->ivlen = ivlen;
    return CRYPT_OK;
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

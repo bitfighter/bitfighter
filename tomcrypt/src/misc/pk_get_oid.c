@@ -1,11 +1,10 @@
-/* LibTomCrypt, modular cryptographic library
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
  *
  * LibTomCrypt is a library that provides various cryptographic
  * algorithms in a highly modular and flexible manner.
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
  */
 #include "tomcrypt.h"
 
@@ -39,3 +38,7 @@ int pk_get_oid(int pk, oid_st *st)
    return CRYPT_OK;
 }
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

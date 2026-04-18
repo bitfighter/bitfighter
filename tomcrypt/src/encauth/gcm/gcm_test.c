@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -327,6 +325,7 @@ int gcm_test(void)
    int           idx, err;
    unsigned long x, y;
    unsigned char out[2][128], T[2][16];
+   gcm_state gcm;
 
    /* find aes */
    idx = find_cipher("aes");
@@ -336,6 +335,14 @@ int gcm_test(void)
          return CRYPT_NOP;
       }
    }
+
+   /* Special test case for empty AAD + empty PT */
+   y = sizeof(T[0]);
+   if ((err = gcm_init(&gcm, idx, tests[0].K, tests[0].keylen)) != CRYPT_OK) return err;
+   if ((err = gcm_add_iv(&gcm, tests[0].IV, tests[0].IVlen)) != CRYPT_OK)    return err;
+   /* intentionally skip gcm_add_aad + gcm_process */
+   if ((err = gcm_done(&gcm, T[0], &y)) != CRYPT_OK)                         return err;
+   if (compare_testvector(T[0], y, tests[0].T, 16, "GCM Encrypt Tag-special", 0))      return CRYPT_FAIL_TESTVECTOR;
 
    for (x = 0; x < (int)(sizeof(tests)/sizeof(tests[0])); x++) {
        y = sizeof(T[0]);
@@ -347,25 +354,11 @@ int gcm_test(void)
           return err;
        }
 
-       if (XMEMCMP(out[0], tests[x].C, tests[x].ptlen)) {
-#if 0
-          printf("\nCiphertext wrong %lu\n", x);
-          for (y = 0; y < tests[x].ptlen; y++) {
-              printf("%02x", out[0][y] & 255);
-          }
-          printf("\n");
-#endif
+       if (compare_testvector(out[0], tests[x].ptlen, tests[x].C, tests[x].ptlen, "GCM CT", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
-       if (XMEMCMP(T[0], tests[x].T, 16)) {
-#if 0
-          printf("\nTag on plaintext wrong %lu\n", x);
-          for (y = 0; y < 16; y++) {
-              printf("%02x", T[0][y] & 255);
-          }
-          printf("\n");
-#endif
+       if (compare_testvector(T[0], y, tests[x].T, 16, "GCM Encrypt Tag", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
@@ -378,25 +371,11 @@ int gcm_test(void)
           return err;
        }
 
-       if (XMEMCMP(out[1], tests[x].P, tests[x].ptlen)) {
-#if 0
-          printf("\nplaintext wrong %lu\n", x);
-          for (y = 0; y < tests[x].ptlen; y++) {
-              printf("%02x", out[0][y] & 255);
-          }
-          printf("\n");
-#endif
+       if (compare_testvector(out[1], tests[x].ptlen, tests[x].P, tests[x].ptlen, "GCM PT", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
-       if (XMEMCMP(T[1], tests[x].T, 16)) {
-#if 0
-          printf("\nTag on ciphertext wrong %lu\n", x);
-          for (y = 0; y < 16; y++) {
-              printf("%02x", T[1][y] & 255);
-          }
-          printf("\n");
-#endif
+       if (compare_testvector(T[1], y, tests[x].T, 16, "GCM Decrypt Tag", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
@@ -408,6 +387,6 @@ int gcm_test(void)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

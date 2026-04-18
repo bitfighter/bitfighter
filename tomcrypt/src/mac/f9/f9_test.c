@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -61,7 +59,7 @@ int f9_test(void)
      if ((err = f9_memory(idx, tests[x].K, 16, tests[x].M, tests[x].msglen, T, &taglen)) != CRYPT_OK) {
         return err;
      }
-     if (taglen != 4 || XMEMCMP(T, tests[x].T, 4)) {
+     if (compare_testvector(T, taglen, tests[x].T, 4, "F9", x)) {
         return CRYPT_FAIL_TESTVECTOR;
      }
   }
@@ -72,7 +70,7 @@ int f9_test(void)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */
 

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -88,7 +86,7 @@ int lrw_test(void)
      }
 
      /* check pad against expected tweak */
-     if (XMEMCMP(tests[x].expected_tweak, lrw.pad, 16)) {
+     if (compare_testvector(tests[x].expected_tweak, 16, lrw.pad, 16, "LRW Tweak", x)) {
         lrw_done(&lrw);
         return CRYPT_FAIL_TESTVECTOR;
      }
@@ -99,7 +97,7 @@ int lrw_test(void)
         return err;
      }
 
-     if (XMEMCMP(buf[0], tests[x].C, 16)) {
+     if (compare_testvector(buf[0], 16, tests[x].C, 16, "LRW Encrypt", x)) {
         lrw_done(&lrw);
         return CRYPT_FAIL_TESTVECTOR;
      }
@@ -115,7 +113,7 @@ int lrw_test(void)
         return err;
      }
 
-     if (XMEMCMP(buf[1], tests[x].P, 16)) {
+     if (compare_testvector(buf[1], 16, tests[x].P, 16, "LRW Decrypt", x)) {
         lrw_done(&lrw);
         return CRYPT_FAIL_TESTVECTOR;
      }
@@ -131,6 +129,6 @@ int lrw_test(void)
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

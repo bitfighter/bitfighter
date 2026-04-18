@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 #include "tomcrypt.h"
@@ -22,7 +20,7 @@ static const char * const err_2_str[] =
    "CRYPT_ERROR",
    "Non-fatal 'no-operation' requested.",
 
-   "Invalid keysize for block cipher.",
+   "Invalid key size.",
    "Invalid number of rounds for block cipher.",
    "Algorithm failed test vectors.",
 
@@ -49,7 +47,8 @@ static const char * const err_2_str[] =
    "An overflow of a value was detected/prevented.",
 
    "UNUSED1.",
-   "UNUSED2.",
+
+   "The input was longer than expected.",
 
    "Invalid sized parameter.",
 
@@ -75,6 +74,6 @@ const char *error_to_string(int err)
 }
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

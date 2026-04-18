@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -144,8 +142,8 @@ int hmac_test(void)
     };
 
     static const struct hmac_test_case {
-        char *num;
-        char *algo;
+        const char *num;
+        const char *algo;
         const unsigned char *key;
         unsigned long keylen;
         const unsigned char *data;
@@ -609,20 +607,8 @@ int hmac_test(void)
             return err;
         }
 
-        if(XMEMCMP(digest, cases[i].digest, (size_t)hash_descriptor[hash].hashsize) != 0)  {
+        if(compare_testvector(digest, outlen, cases[i].digest, (size_t)hash_descriptor[hash].hashsize, cases[i].num, i)) {
             failed++;
-#ifdef LTC_TEST_DBG
-          {
-            printf("\nHMAC-%s test %s: Failed\n", cases[i].algo, cases[i].num);
-            print_hex("is", digest, hash_descriptor[hash].hashsize);
-            print_hex("should", cases[i].digest, hash_descriptor[hash].hashsize);
-            return CRYPT_FAIL_TESTVECTOR;
-          }
-#if LTC_TEST_DBG > 1
-        } else {
-            printf("HMAC-%s test %s: Passed\n", cases[i].algo, cases[i].num);
-#endif
-#endif
         }
     }
 
@@ -639,6 +625,6 @@ int hmac_test(void)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 /**********************************************************************\
 * To commemorate the 1996 RSA Data Security Conference, the following  *
@@ -18,7 +16,7 @@
 * Thanks to CodeView, SoftIce, and D86 for helping bring this code to  *
 * the public.                                                          *
 \**********************************************************************/
-#include <tomcrypt.h>
+#include "tomcrypt.h"
 
 /**
   @file rc2.c
@@ -414,6 +412,6 @@ int rc2_keysize(int *keysize)
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

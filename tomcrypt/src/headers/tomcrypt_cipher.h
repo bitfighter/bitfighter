@@ -1,3 +1,12 @@
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
+ *
+ * LibTomCrypt is a library that provides various cryptographic
+ * algorithms in a highly modular and flexible manner.
+ *
+ * The library is free for all purposes without any express
+ * guarantee it works.
+ */
+
 /* ---- SYMMETRIC KEY STUFF -----
  *
  * We put each of the ciphers scheduled keys in their own structs then we put all of
@@ -340,7 +349,7 @@ typedef struct {
 /** cipher descriptor table, last entry has "name == NULL" to mark the end of table */
 extern struct ltc_cipher_descriptor {
    /** name of cipher */
-   char *name;
+   const char *name;
    /** internal ID */
    unsigned char ID;
    /** min keysize (octets) */
@@ -490,8 +499,8 @@ extern struct ltc_cipher_descriptor {
    /** Accelerated GCM packet (one shot)
        @param key        The secret key
        @param keylen     The length of the secret key
-       @param IV         The initial vector
-       @param IVlen      The length of the initial vector
+       @param IV         The initialization vector
+       @param IVlen      The length of the initialization vector
        @param adata      The additional authentication data (header)
        @param adatalen   The length of the adata
        @param pt         The plaintext
@@ -866,8 +875,8 @@ int ctr_test(void);
 
 #ifdef LTC_LRW_MODE
 
-#define LRW_ENCRYPT 0
-#define LRW_DECRYPT 1
+#define LRW_ENCRYPT LTC_ENCRYPT
+#define LRW_DECRYPT LTC_DECRYPT
 
 int lrw_start(               int   cipher,
               const unsigned char *IV,
@@ -933,6 +942,7 @@ int find_cipher_any(const char *name, int blocklen, int keylen);
 int find_cipher_id(unsigned char ID);
 int register_cipher(const struct ltc_cipher_descriptor *cipher);
 int unregister_cipher(const struct ltc_cipher_descriptor *cipher);
+int register_all_ciphers(void);
 int cipher_is_valid(int idx);
 
 LTC_MUTEX_PROTO(ltc_cipher_mutex)
@@ -959,6 +969,40 @@ int chacha_test(void);
 
 #endif /* LTC_CHACHA */
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+#ifdef LTC_RC4_STREAM
+
+typedef struct {
+   unsigned int x, y;
+   unsigned char buf[256];
+} rc4_state;
+
+int rc4_stream_setup(rc4_state *st, const unsigned char *key, unsigned long keylen);
+int rc4_stream_crypt(rc4_state *st, const unsigned char *in, unsigned long inlen, unsigned char *out);
+int rc4_stream_keystream(rc4_state *st, unsigned char *out, unsigned long outlen);
+int rc4_stream_done(rc4_state *st);
+int rc4_stream_test(void);
+
+#endif /* LTC_RC4_STREAM */
+
+#ifdef LTC_SOBER128_STREAM
+
+typedef struct {
+   ulong32 R[17],       /* Working storage for the shift register */
+           initR[17],   /* saved register contents */
+           konst,       /* key dependent constant */
+           sbuf;        /* partial word encryption buffer */
+   int     nbuf;        /* number of part-word stream bits buffered */
+} sober128_state;
+
+int sober128_stream_setup(sober128_state *st, const unsigned char *key, unsigned long keylen);
+int sober128_stream_setiv(sober128_state *st, const unsigned char *iv, unsigned long ivlen);
+int sober128_stream_crypt(sober128_state *st, const unsigned char *in, unsigned long inlen, unsigned char *out);
+int sober128_stream_keystream(sober128_state *st, unsigned char *out, unsigned long outlen);
+int sober128_stream_done(sober128_state *st);
+int sober128_stream_test(void);
+
+#endif /* LTC_SOBER128_STREAM */
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

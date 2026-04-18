@@ -169,7 +169,7 @@ static void blake2b_set_lastblock(hash_state *md)
 static void blake2b_increment_counter(hash_state *md, ulong64 inc)
 {
    md->blake2b.t[0] += inc;
-   md->blake2b.t[1] += (md->blake2b.t[0] < inc);
+   if (md->blake2b.t[0] < inc) md->blake2b.t[1]++;
 }
 
 static void blake2b_init0(hash_state *md)
@@ -342,7 +342,7 @@ int blake2b_process(hash_state *md, const unsigned char *in, unsigned long inlen
       unsigned long fill = BLAKE2B_BLOCKBYTES - left;
       if (inlen > fill) {
          md->blake2b.curlen = 0;
-         XMEMCPY(md->blake2b.buf + left, in, fill); /* Fill buffer */
+         XMEMCPY(md->blake2b.buf + (left % sizeof(md->blake2b.buf)), in, fill); /* Fill buffer */
          blake2b_increment_counter(md, BLAKE2B_BLOCKBYTES);
          blake2b_compress(md, md->blake2b.buf); /* Compress */
          in += fill;
@@ -399,7 +399,7 @@ int blake2b_512_test(void)
    return CRYPT_NOP;
 #else
    static const struct {
-      char *msg;
+      const char *msg;
       unsigned char hash[64];
   } tests[] = {
     { "",
@@ -432,8 +432,9 @@ int blake2b_512_test(void)
       blake2b_512_init(&md);
       blake2b_process(&md, (unsigned char *)tests[i].msg, (unsigned long)strlen(tests[i].msg));
       blake2b_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_512", i))
+      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_512", i)) {
          return CRYPT_FAIL_TESTVECTOR;
+      }
    }
    return CRYPT_OK;
 #endif
@@ -449,7 +450,7 @@ int blake2b_384_test(void)
    return CRYPT_NOP;
 #else
    static const struct {
-      char *msg;
+      const char *msg;
       unsigned char hash[48];
   } tests[] = {
     { "",
@@ -478,8 +479,9 @@ int blake2b_384_test(void)
       blake2b_384_init(&md);
       blake2b_process(&md, (unsigned char *)tests[i].msg, (unsigned long)strlen(tests[i].msg));
       blake2b_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_384", i))
+      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_384", i)) {
          return CRYPT_FAIL_TESTVECTOR;
+      }
    }
    return CRYPT_OK;
 #endif
@@ -495,7 +497,7 @@ int blake2b_256_test(void)
    return CRYPT_NOP;
 #else
    static const struct {
-      char *msg;
+      const char *msg;
       unsigned char hash[32];
   } tests[] = {
     { "",
@@ -530,8 +532,9 @@ int blake2b_256_test(void)
       blake2b_256_init(&md);
       blake2b_process(&md, (unsigned char *)tests[i].msg, (unsigned long)strlen(tests[i].msg));
       blake2b_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_256", i))
+      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_256", i)) {
          return CRYPT_FAIL_TESTVECTOR;
+      }
    }
    return CRYPT_OK;
 #endif
@@ -547,7 +550,7 @@ int blake2b_160_test(void)
    return CRYPT_NOP;
 #else
    static const struct {
-      char *msg;
+      const char *msg;
       unsigned char hash[20];
   } tests[] = {
     { "",
@@ -570,11 +573,16 @@ int blake2b_160_test(void)
       blake2b_160_init(&md);
       blake2b_process(&md, (unsigned char *)tests[i].msg, (unsigned long)strlen(tests[i].msg));
       blake2b_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_160", i))
+      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "BLAKE2B_160", i)) {
          return CRYPT_FAIL_TESTVECTOR;
+      }
    }
    return CRYPT_OK;
 #endif
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -30,7 +30,12 @@ int ocb3_encrypt_last(ocb3_state *ocb, const unsigned char *pt, unsigned long pt
    int err, x, full_blocks, full_blocks_len, last_block_len;
 
    LTC_ARGCHK(ocb != NULL);
-   LTC_ARGCHK(pt  != NULL);
+   if (pt == NULL) LTC_ARGCHK(ptlen == 0);
+   if (ptlen != 0) {
+      LTC_ARGCHK(pt    != NULL);
+      LTC_ARGCHK(ct    != NULL);
+   }
+
    if ((err = cipher_is_valid(ocb->cipher)) != CRYPT_OK) {
       goto LBL_ERR;
    }
@@ -102,6 +107,6 @@ LBL_ERR:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

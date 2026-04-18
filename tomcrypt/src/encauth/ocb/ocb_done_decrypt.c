@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -57,7 +55,7 @@ int ocb_done_decrypt(ocb_state *ocb,
       goto LBL_ERR;
    }
 
-   if (taglen <= tagbuflen && XMEMCMP(tagbuf, tag, taglen) == 0) {
+   if (taglen <= tagbuflen && XMEM_NEQ(tagbuf, tag, taglen) == 0) {
       *stat = 1;
    }
 
@@ -75,6 +73,6 @@ LBL_ERR:
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

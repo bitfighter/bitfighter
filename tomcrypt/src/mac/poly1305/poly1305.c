@@ -164,8 +164,8 @@ int poly1305_process(poly1305_state *st, const unsigned char *in, unsigned long 
 /**
    Terminate a POLY1305 session
    @param st      The POLY1305 state
-   @param out     [out] The destination of the POLY1305 authentication tag
-   @param outlen  [in/out]  The max size and resulting size of the POLY1305 authentication tag
+   @param mac     [out] The destination of the POLY1305 authentication tag
+   @param maclen  [in/out]  The max size and resulting size of the POLY1305 authentication tag
    @return CRYPT_OK if successful
 */
 int poly1305_done(poly1305_state *st, unsigned char *mac, unsigned long *maclen)
@@ -262,3 +262,7 @@ int poly1305_done(poly1305_state *st, unsigned char *mac, unsigned long *maclen)
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

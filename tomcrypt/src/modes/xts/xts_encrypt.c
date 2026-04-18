@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -16,7 +14,7 @@
 
 #ifdef LTC_XTS_MODE
 
-static int tweak_crypt(const unsigned char *P, unsigned char *C, unsigned char *T, symmetric_xts *xts)
+static int _tweak_crypt(const unsigned char *P, unsigned char *C, unsigned char *T, symmetric_xts *xts)
 {
    unsigned long x;
    int err;
@@ -113,7 +111,7 @@ int xts_encrypt(const unsigned char *pt, unsigned long ptlen, unsigned char *ct,
       }
 
       for (i = 0; i < lim; i++) {
-         if ((err = tweak_crypt(pt, ct, T, xts)) != CRYPT_OK) {
+         if ((err = _tweak_crypt(pt, ct, T, xts)) != CRYPT_OK) {
             return err;
          }
          ct += 16;
@@ -124,7 +122,7 @@ int xts_encrypt(const unsigned char *pt, unsigned long ptlen, unsigned char *ct,
    /* if ptlen not divide 16 then */
    if (mo > 0) {
       /* CC = tweak encrypt block m-1 */
-      if ((err = tweak_crypt(pt, CC, T, xts)) != CRYPT_OK) {
+      if ((err = _tweak_crypt(pt, CC, T, xts)) != CRYPT_OK) {
          return err;
       }
 
@@ -139,7 +137,7 @@ int xts_encrypt(const unsigned char *pt, unsigned long ptlen, unsigned char *ct,
       }
 
       /* Cm-1 = Tweak encrypt PP */
-      if ((err = tweak_crypt(PP, ct, T, xts)) != CRYPT_OK) {
+      if ((err = _tweak_crypt(PP, ct, T, xts)) != CRYPT_OK) {
          return err;
       }
    }
@@ -154,6 +152,6 @@ int xts_encrypt(const unsigned char *pt, unsigned long ptlen, unsigned char *ct,
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -22,8 +20,8 @@
   @param cipher            Index of cipher to use
   @param key               The secret key
   @param keylen            The length of the secret key
-  @param IV                The initial vector
-  @param IVlen             The length of the initial vector
+  @param IV                The initialization vector
+  @param IVlen             The length of the initialization vector
   @param adata             The additional authentication data (header)
   @param adatalen          The length of the adata
   @param pt                The plaintext
@@ -52,8 +50,7 @@ int gcm_memory(      int           cipher,
     }
 
     if (cipher_descriptor[cipher].accel_gcm_memory != NULL) {
-       return
-         cipher_descriptor[cipher].accel_gcm_memory
+       return cipher_descriptor[cipher].accel_gcm_memory
                                           (key,   keylen,
                                            IV,    IVlen,
                                            adata, adatalen,
@@ -104,6 +101,6 @@ LTC_ERR:
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -48,6 +46,8 @@ int gcm_add_aad(gcm_state *gcm,
 
    /* in IV mode? */
    if (gcm->mode == LTC_GCM_MODE_IV) {
+      /* IV length must be > 0 */
+      if (gcm->buflen == 0 && gcm->totlen == 0) return CRYPT_ERROR;
       /* let's process the IV */
       if (gcm->ivmode || gcm->buflen != 12) {
          for (x = 0; x < (unsigned long)gcm->buflen; x++) {
@@ -119,6 +119,6 @@ int gcm_add_aad(gcm_state *gcm,
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

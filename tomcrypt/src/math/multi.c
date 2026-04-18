@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -55,8 +53,24 @@ void ltc_deinit_multi(void *a, ...)
    va_end(args);
 }
 
+void ltc_cleanup_multi(void **a, ...)
+{
+   void **cur = a;
+   va_list args;
+
+   va_start(args, a);
+   while (cur != NULL) {
+      if (*cur != NULL) {
+         mp_clear(*cur);
+         *cur = NULL;
+      }
+      cur = va_arg(args, void**);
+   }
+   va_end(args);
+}
+
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

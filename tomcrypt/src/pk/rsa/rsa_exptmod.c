@@ -5,16 +5,13 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
- *
- * Added RSA blinding --nmav
  */
 #include "tomcrypt.h"
 
 /**
   @file rsa_exptmod.c
   RSA PKCS exptmod, Tom St Denis
+  Added RSA blinding --nmav
 */
 
 #ifdef LTC_MRSA
@@ -100,9 +97,11 @@ int rsa_exptmod(const unsigned char *in,   unsigned long inlen,
       }
       #endif /* LTC_RSA_BLINDING */
 
-      has_crt_parameters = (key->dP != NULL) && (mp_get_digit_count(key->dP) != 0) &&
-                              (key->dQ != NULL) && (mp_get_digit_count(key->dQ) != 0) &&
-                                 (key->qP != NULL) && (mp_get_digit_count(key->qP) != 0);
+      has_crt_parameters = (key->p != NULL) && (mp_get_digit_count(key->p) != 0) &&
+                              (key->q != NULL) && (mp_get_digit_count(key->q) != 0) &&
+                                 (key->dP != NULL) && (mp_get_digit_count(key->dP) != 0) &&
+                                    (key->dQ != NULL) && (mp_get_digit_count(key->dQ) != 0) &&
+                                       (key->qP != NULL) && (mp_get_digit_count(key->qP) != 0);
 
       if (!has_crt_parameters) {
          /*
@@ -178,6 +177,6 @@ error:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

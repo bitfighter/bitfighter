@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -57,6 +55,9 @@ int eax_decrypt_verify_memory(int cipher,
    /* default to zero */
    *stat = 0;
 
+   /* limit taglen */
+   taglen = MIN(taglen, MAXBLOCKSIZE);
+
    /* allocate ram */
    buf = XMALLOC(taglen);
    eax = XMALLOC(sizeof(*eax));
@@ -84,7 +85,7 @@ int eax_decrypt_verify_memory(int cipher,
    }
 
    /* compare tags */
-   if (buflen >= taglen && XMEMCMP(buf, tag, taglen) == 0) {
+   if (buflen >= taglen && XMEM_NEQ(buf, tag, taglen) == 0) {
       *stat = 1;
    }
 
@@ -103,6 +104,6 @@ LBL_ERR:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

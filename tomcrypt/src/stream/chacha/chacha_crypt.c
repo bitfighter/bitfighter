@@ -57,9 +57,11 @@ int chacha_crypt(chacha_state *st, const unsigned char *in, unsigned long inlen,
    unsigned long i, j;
 
    if (inlen == 0) return CRYPT_OK; /* nothing to do */
-   LTC_ARGCHK(st  != NULL);
-   LTC_ARGCHK(in  != NULL);
-   LTC_ARGCHK(out != NULL);
+
+   LTC_ARGCHK(st        != NULL);
+   LTC_ARGCHK(in        != NULL);
+   LTC_ARGCHK(out       != NULL);
+   LTC_ARGCHK(st->ivlen != 0);
 
    if (st->ksleft > 0) {
       j = MIN(st->ksleft, inlen);
@@ -71,8 +73,14 @@ int chacha_crypt(chacha_state *st, const unsigned char *in, unsigned long inlen,
    }
    for (;;) {
      _chacha_block(buf, st->input, st->rounds);
-     /* increment the counter */
-     if (!++st->input[12] && !++st->input[13] && !++st->input[14]) { ++st->input[15]; }
+     if (st->ivlen == 8) {
+       /* IV-64bit, increment 64bit counter */
+       if (0 == ++st->input[12] && 0 == ++st->input[13]) return CRYPT_OVERFLOW;
+     }
+     else {
+       /* IV-96bit, increment 32bit counter */
+       if (0 == ++st->input[12]) return CRYPT_OVERFLOW;
+     }
      if (inlen <= 64) {
        for (i = 0; i < inlen; ++i) out[i] = in[i] ^ buf[i];
        st->ksleft = 64 - inlen;
@@ -87,3 +95,7 @@ int chacha_crypt(chacha_state *st, const unsigned char *in, unsigned long inlen,
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -27,7 +27,7 @@ int chacha20poly1305_done(chacha20poly1305_state *st, unsigned char *tag, unsign
 
    LTC_ARGCHK(st != NULL);
 
-   padlen = 16 - (st->ctlen % 16);
+   padlen = 16 - (unsigned long)(st->ctlen % 16);
    if (padlen < 16) {
      if ((err = poly1305_process(&st->poly, padzero, padlen)) != CRYPT_OK) return err;
    }
@@ -40,3 +40,7 @@ int chacha20poly1305_done(chacha20poly1305_state *st, unsigned char *tag, unsign
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

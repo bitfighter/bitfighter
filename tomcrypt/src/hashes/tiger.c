@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 #include "tomcrypt.h"
@@ -737,7 +735,7 @@ int  tiger_test(void)
     return CRYPT_NOP;
  #else
   static const struct {
-      char *msg;
+      const char *msg;
       unsigned char hash[24];
   } tests[] = {
     { "",
@@ -775,7 +773,7 @@ int  tiger_test(void)
       tiger_init(&md);
       tiger_process(&md, (unsigned char *)tests[i].msg, (unsigned long)strlen(tests[i].msg));
       tiger_done(&md, tmp);
-      if (XMEMCMP(tmp, tests[i].hash, 24) != 0) {
+      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "TIGER", i)) {
           return CRYPT_FAIL_TESTVECTOR;
       }
   }
@@ -809,6 +807,6 @@ Hash of "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-ABCDEFG
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */
