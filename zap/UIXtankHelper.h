@@ -9,6 +9,7 @@
 #include "helperMenu.h"
 #include "XtankShape.h"    // for XtankDesign, XtankBody, XtankWeapon
 #include "tnlVector.h"
+#include <string>
 
 
 namespace Zap
@@ -17,7 +18,7 @@ namespace Zap
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
 // engines, treads, heat sinks, and weapons to each turret slot.  Supports
-// bidirectional carousel navigation (LEFT = go back, RIGHT/ENTER = confirm).
+// bidirectional carousel navigation (LEFT/RIGHT = phase navigation, ENTER = confirm).
 //
 // Phase 0:  Select a vehicle body (14 options, keys 1-9, 0, A-D).
 // Phase 1:  Select engine type   (options, keys 1-N).
@@ -77,6 +78,7 @@ private:
    void buildWeaponItems();
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
+   void navigateForward();             // Move to next phase (carousel forward)
    void navigateBackward();            // Move to previous phase (carousel back)
    void applyDesign();                 // Finalise and propagate the chosen design
 
@@ -98,6 +100,18 @@ private:
    void renderFullBuildStats(S32 cx, S32 y,
                              S32 previewBodyIdx, S32 previewEngIdx,
                              S32 previewTreadIdx, S32 previewHeatSinks) const;
+
+   // Draw custom floating-card selector UI (active center card + adjacent cards).
+   void renderFloatingMenus();
+
+   // Draw details/specs for the highlighted item inside the active center card.
+   void renderInlineHighlightedDetails(S32 left, S32 right, S32 yTop) const;
+
+   // Returns the item vector for a given phase.
+   const Vector<OverlayMenuItem> *getItemsForPhase(S32 phase) const;
+
+   // Returns display label for the selected value of the given phase.
+   std::string getSelectedLabelForPhase(S32 phase) const;
 
    // Returns the item count for the current phase (used by UP/DOWN cycling).
    S32 currentPhaseItemCount() const;

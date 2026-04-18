@@ -31,6 +31,8 @@ namespace Zap
 // For clarity and consistency with other helpers
 #define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
 
+static const S32 kXtankMaxWeaponSlots = 4;
+
 
 // Keys used for the 14 bodies: 1-9, 0, A-D.
 static const InputCode sBodyKeys[XtankBodyCount] =
@@ -345,52 +347,13 @@ void UIXtankHelper::onActivated()
 
 void UIXtankHelper::render()
 {
-   if(mPhase == PHASE_BODY)
-   {
-      updateItemColors(mBodyItems);
-      drawItemMenu("Choose vehicle body:",
-                   mBodyItems.address(), mBodyItems.size(),
-                   NULL, 0,
-                   mBodyButtonsWidth, mBodyItemsDisplayWidth);
-   }
-   else if(mPhase == PHASE_ENGINE)
-   {
-      updateItemColors(mEngineItems);
-      drawItemMenu("Choose engine:",
-                   mEngineItems.address(), mEngineItems.size(),
-                   mBodyItems.address(),   mBodyItems.size(),
-                   mEngineButtonsWidth, mEngineItemsDisplayWidth);
-   }
-   else if(mPhase == PHASE_TREADS)
-   {
-      updateItemColors(mTreadItems);
-      drawItemMenu("Choose treads:",
-                   mTreadItems.address(), mTreadItems.size(),
-                   mBodyItems.address(),  mBodyItems.size(),
-                   mTreadButtonsWidth, mTreadItemsDisplayWidth);
-   }
-   else if(mPhase == PHASE_HEATSINK)
-   {
-      updateItemColors(mHeatSinkItems);
-      drawItemMenu("Choose heat sinks:",
-                   mHeatSinkItems.address(), mHeatSinkItems.size(),
-                   mBodyItems.address(),     mBodyItems.size(),
-                   mHeatSinkButtonsWidth, mHeatSinkItemsDisplayWidth);
-   }
-   else
-   {
-      // Weapon slot selection: slot indices 0..mSlotCount-1.
-      S32 slot = mPhase - PHASE_WEAPONS;   // 0-based slot index
-      char title[80];
-      dSprintf(title, sizeof(title), "Slot %d of %d — pick weapon:", slot + 1, mSlotCount);
+   if(mPhase == PHASE_BODY)          updateItemColors(mBodyItems);
+   else if(mPhase == PHASE_ENGINE)   updateItemColors(mEngineItems);
+   else if(mPhase == PHASE_TREADS)   updateItemColors(mTreadItems);
+   else if(mPhase == PHASE_HEATSINK) updateItemColors(mHeatSinkItems);
+   else                              updateItemColors(mWeaponItems);
 
-      updateItemColors(mWeaponItems);
-      drawItemMenu(title,
-                   mWeaponItems.address(), mWeaponItems.size(),
-                   mBodyItems.address(),   mBodyItems.size(),
-                   mWeaponButtonsWidth, mWeaponItemsDisplayWidth);
-   }
-
+   renderFloatingMenus();
    renderPreviewPanel();
 }
 
@@ -408,9 +371,12 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       return true;
    }
 
-   // RIGHT arrow: confirm the highlighted item (same as ENTER).
+   // RIGHT arrow: carousel forward navigation.
    if(inputCode == KEY_RIGHT)
-      inputCode = KEY_ENTER;
+   {
+      navigateForward();
+      return true;
+   }
 
    // UP/DOWN arrows cycle through the highlighted item in the current phase.
    S32 itemCount = currentPhaseItemCount();
@@ -562,14 +528,27 @@ void UIXtankHelper::advanceToNextPhaseOrFinish()
 }
 
 
+void UIXtankHelper::navigateForward()
+{
+   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
+   if(totalPhases < 1)
+      return;
+
+   mPhase = (mPhase + 1) % totalPhases;
+   S32 newWidth = widthForPhase(mPhase);
+   setExpectedWidth_MidTransition(newWidth);
+   resetScrollTimer();
+   setHighlightedIndexForPhase(mPhase);
+}
+
+
 // Move to the previous phase, restoring the highlighted index from the
 // existing design so the player sees their previous choice pre-selected.
 void UIXtankHelper::navigateBackward()
 {
-   if(mPhase <= PHASE_BODY)
-      return;  // Already at the first phase
+   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
 
-   mPhase--;
+   mPhase = (mPhase - 1 + totalPhases) % totalPhases;
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
    resetScrollTimer();
@@ -639,6 +618,233 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
 }
 
 
+const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(S32 phase) const
+{
+   if(phase == PHASE_BODY)     return &mBodyItems;
+   if(phase == PHASE_ENGINE)   return &mEngineItems;
+   if(phase == PHASE_TREADS)   return &mTreadItems;
+   if(phase == PHASE_HEATSINK) return &mHeatSinkItems;
+   return &mWeaponItems;
+}
+
+
+std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
+{
+   if(phase == PHASE_BODY)
+   {
+      S32 idx = mDesignInProgress.bodyIndex;
+      if(idx < 0 || idx >= XtankBodyCount) idx = 0;
+      return xtankBodyNames[idx];
+   }
+
+   if(phase == PHASE_ENGINE)
+   {
+      S32 idx = (S32)mDesignInProgress.engineType;
+      if(idx < 0 || idx >= XtankEngineCount) idx = 0;
+      return xtankEngineInfos[idx].name;
+   }
+
+   if(phase == PHASE_TREADS)
+   {
+      S32 idx = (S32)mDesignInProgress.treadType;
+      if(idx < 0 || idx >= XtankTreadCount) idx = 0;
+      return xtankTreadInfos[idx].name;
+   }
+
+   if(phase == PHASE_HEATSINK)
+   {
+      S32 n = (S32)mDesignInProgress.heatSinkCount;
+      if(n < XtankHeatSinkMin) n = XtankHeatSinkMin;
+      if(n > XtankHeatSinkMax) n = XtankHeatSinkMax;
+      return std::string("Heat Sinks: ") + itos(n);
+   }
+
+   S32 slot = phase - PHASE_WEAPONS;
+   if(slot < 0 || slot >= kXtankMaxWeaponSlots || slot >= mSlotCount)
+      return "";
+
+   XtankWeapon w = mDesignInProgress.weapons[slot];
+   if(w == XtankWeaponNone)
+      return "None";
+   if((S32)w < 0 || (S32)w >= XtankWeaponCount)
+      return "None";
+
+   return xtankWeaponInfos[(S32)w].name;
+}
+
+
+void UIXtankHelper::renderInlineHighlightedDetails(S32 left, S32 right, S32 yTop) const
+{
+   Renderer &r = Renderer::get();
+   static const S32 STAT_SZ = 12;
+   static const S32 GAP = STAT_SZ + 4;
+   S32 y = yTop;
+
+   r.setColor(Colors::gray45);
+   drawHorizLine(left, right, y - 6);
+
+   r.setColor(Colors::gray70);
+   drawString(left, y, STAT_SZ, "Highlighted item");
+   y += GAP;
+
+   r.setColor(Colors::cyan);
+   if(mPhase == PHASE_BODY)
+   {
+      S32 idx = mHighlightedIndex;
+      if(idx < 0 || idx >= XtankBodyCount) idx = 0;
+      const TankPhysicsInfo &phy = xtankPhysicsInfos[idx];
+      drawStringf(left, y, STAT_SZ, "Speed %d  Rev %d", (S32)phy.maxSpeed, (S32)phy.maxReverseSpeed);
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Accel %d  Turn %.1f", (S32)phy.acceleration, phy.turnRate);
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Armor %.2f  Turrets %d", phy.armor, xtankTurretInfos[idx].count);
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Weight %d  Cost %d", body_stat[idx].weight, body_stat[idx].cost);
+   }
+   else if(mPhase == PHASE_ENGINE)
+   {
+      S32 idx = mHighlightedIndex;
+      if(idx < 0 || idx >= XtankEngineCount) idx = 0;
+      const XtankEngineInfo &ei = xtankEngineInfos[idx];
+      drawStringf(left, y, STAT_SZ, "Top speed %+d%%", S32((ei.speedMult - 1.0f) * 100.0f + 0.5f));
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Acceleration %+d%%", S32((ei.accelMult - 1.0f) * 100.0f + 0.5f));
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Power %d  Fuel %d", ei.power, ei.fuel);
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Weight %d  Cost %d", ei.weight, ei.cost);
+   }
+   else if(mPhase == PHASE_TREADS)
+   {
+      S32 idx = mHighlightedIndex;
+      if(idx < 0 || idx >= XtankTreadCount) idx = 0;
+      const XtankTreadInfo &ti = xtankTreadInfos[idx];
+      drawStringf(left, y, STAT_SZ, "Turn/handling mult %.2f", ti.friction);
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Cost %d", ti.cost);
+   }
+   else if(mPhase == PHASE_HEATSINK)
+   {
+      S32 n = mHighlightedIndex + XtankHeatSinkMin;
+      if(n < XtankHeatSinkMin) n = XtankHeatSinkMin;
+      if(n > XtankHeatSinkMax) n = XtankHeatSinkMax;
+      drawStringf(left, y, STAT_SZ, "Count %d  Fire-rate +%d%%",
+                  n, S32((1.0f - xtankHeatSinkFireDelayMult(n)) * 100.0f + 0.5f));
+      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Weight %d  Cost %d",
+                  heatSinkStat.weight * n, heatSinkStat.cost * n);
+   }
+   else
+   {
+      S32 idx = mHighlightedIndex;
+      if(idx <= 0)
+      {
+         drawString(left, y, STAT_SZ, "Empty slot");
+      }
+      else
+      {
+         S32 w = idx - 1;
+         if(w < 0 || w >= XtankWeaponCount) w = 0;
+         const XtankWeaponInfo &wi = xtankWeaponInfos[w];
+         drawStringf(left, y, STAT_SZ, "Delay %dms  Energy %d", (S32)xtankFireDelayMs(wi), (S32)wi.heat);
+         y += GAP;
+         drawStringf(left, y, STAT_SZ, "Proj %du/s  Life %dms", (S32)xtankProjVelocity(wi), (S32)xtankProjLiveTime(wi));
+         y += GAP;
+         drawStringf(left, y, STAT_SZ, "Weight %d  Cost %d", wi.weight, wi.cost);
+      }
+   }
+}
+
+
+void UIXtankHelper::renderFloatingMenus()
+{
+   const Vector<OverlayMenuItem> *items = getItemsForPhase(mPhase);
+   if(!items || items->size() <= 0)
+      return;
+
+   static const S32 CENTER_LEFT  = 120;
+   static const S32 CENTER_RIGHT = 630;
+   static const S32 CENTER_TOP   = 125;
+   static const S32 CENTER_BOT   = 500;
+   static const S32 ADJ_TOP      = 425;
+   static const S32 ADJ_BOT      = 548;
+   static const S32 LEFT_ADJ_L   = 26;
+   static const S32 LEFT_ADJ_R   = 235;
+   static const S32 RIGHT_ADJ_L  = 515;
+   static const S32 RIGHT_ADJ_R  = 724;
+   static const S32 CORNER       = 8;
+
+   auto phaseTitle = [this](S32 phase) -> std::string
+   {
+      if(phase == PHASE_BODY)     return "Body";
+      if(phase == PHASE_ENGINE)   return "Engine";
+      if(phase == PHASE_TREADS)   return "Treads";
+      if(phase == PHASE_HEATSINK) return "Heat Sinks";
+      S32 slot = phase - PHASE_WEAPONS;
+      return std::string("Weapon ") + itos(slot + 1);
+   };
+
+   Renderer &r = Renderer::get();
+   FontManager::pushFontContext(HelperMenuContext);
+
+   // Active center card
+   drawFilledFancyBox(CENTER_LEFT, CENTER_TOP, CENTER_RIGHT, CENTER_BOT, CORNER,
+                      Colors::black, 0.78f, Colors::red35);
+
+   const S32 cx = (CENTER_LEFT + CENTER_RIGHT) / 2;
+   r.setColor(Colors::white);
+   drawCenteredStringf(cx, CENTER_TOP + 10, 18, "%s", phaseTitle(mPhase).c_str());
+   r.setColor(Colors::gray40);
+   drawHorizLine(CENTER_LEFT + 10, CENTER_RIGHT - 10, CENTER_TOP + 34);
+
+   S32 listY = CENTER_TOP + 48;
+   const S32 listGap = 20;
+   const S32 visible = 9;
+   S32 count = items->size();
+   S32 start = mHighlightedIndex - visible / 2;
+   if(start < 0) start = 0;
+   if(start > MAX(0, count - visible)) start = MAX(0, count - visible);
+   S32 end = MIN(count, start + visible);
+
+   for(S32 i = start; i < end; i++)
+   {
+      if(i == mHighlightedIndex)
+      {
+         r.setColor(Colors::yellow);
+         drawString(CENTER_LEFT + 18, listY, 14, ">");
+      }
+      r.setColor(i == mHighlightedIndex ? Colors::overlayMenuSelectedItemColor : Colors::overlayMenuUnselectedItemColor);
+      drawString(CENTER_LEFT + 34, listY, 14, (*items)[i].name);
+      listY += listGap;
+   }
+
+   renderInlineHighlightedDetails(CENTER_LEFT + 16, CENTER_RIGHT - 16, CENTER_BOT - 98);
+
+   // Adjacent phase cards (Android-task-style depth cue)
+   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
+   if(totalPhases > 1)
+   {
+      S32 prevPhase = (mPhase - 1 + totalPhases) % totalPhases;
+      S32 nextPhase = (mPhase + 1) % totalPhases;
+
+      drawFilledFancyBox(LEFT_ADJ_L, ADJ_TOP, LEFT_ADJ_R, ADJ_BOT, CORNER,
+                         Colors::black, 0.62f, Colors::gray35);
+      drawFilledFancyBox(RIGHT_ADJ_L, ADJ_TOP, RIGHT_ADJ_R, ADJ_BOT, CORNER,
+                         Colors::black, 0.62f, Colors::gray35);
+
+      r.setColor(Colors::gray80);
+      drawCenteredString((LEFT_ADJ_L + LEFT_ADJ_R) / 2, ADJ_TOP + 10, 13, phaseTitle(prevPhase).c_str());
+      drawCenteredString((RIGHT_ADJ_L + RIGHT_ADJ_R) / 2, ADJ_TOP + 10, 13, phaseTitle(nextPhase).c_str());
+
+      r.setColor(Colors::gray60);
+      drawCenteredString((LEFT_ADJ_L + LEFT_ADJ_R) / 2, ADJ_TOP + 34, 11, getSelectedLabelForPhase(prevPhase).c_str());
+      drawCenteredString((RIGHT_ADJ_L + RIGHT_ADJ_R) / 2, ADJ_TOP + 34, 11, getSelectedLabelForPhase(nextPhase).c_str());
+   }
+
+   FontManager::popFontContext();
+}
+
+
 void UIXtankHelper::applyDesign()
 {
    GameUserInterface *gui = getGame()->getUIManager()->getUI<GameUserInterface>();
@@ -669,405 +875,155 @@ S32 UIXtankHelper::currentPhaseItemCount() const
 }
 
 
-// Draw a floating preview panel on the right side of the screen.  The panel
-// shows a rendered shape (for bodies) or stat text (for all phases) for the
-// currently highlighted item, plus a "Combined Build Stats" section that
-// reflects the effective vehicle performance as the design evolves.
+// Draw overall ship preview/spec panel on the right side of the screen.
+// This is intentionally aggregate-focused: highlighted-item details live in
+// the active center card, while this panel shows what the ship becomes.
 void UIXtankHelper::renderPreviewPanel() const
 {
-   // Preview panel geometry (in game canvas coordinates: 1066 × 600, Y down).
-   // PNL_TOP moved up and PNL_BOT extended to accommodate the new sections.
    static const S32 PNL_LEFT   = 680;
    static const S32 PNL_RIGHT  = 1050;
    static const S32 PNL_TOP    = 130;
    static const S32 PNL_BOT    = 585;
-   static const S32 PNL_CX     = (PNL_LEFT + PNL_RIGHT) / 2;   // 865
+   static const S32 PNL_CX     = (PNL_LEFT + PNL_RIGHT) / 2;
    static const S32 CORNER     = 8;
 
    static const S32 TITLE_SZ   = 16;
    static const S32 STAT_SZ    = 13;
    static const S32 LINE_GAP   = STAT_SZ + 6;
+   static const S32 TITLE_Y    = PNL_TOP + 10;
+   static const S32 BODY_CY    = PNL_TOP + 118;
+   static const S32 STATS_Y    = PNL_TOP + 205;
+   static const S32 BUILD_Y    = PNL_TOP + 430;
+   static const S32 DOTS_Y     = PNL_TOP + 525;
+   static const S32 HINT_Y     = PNL_TOP + 548;
+   static const F32 BODY_SCALE = 2.2f;
 
-   // Vertical positions for graphic and text elements within the panel.
-   // All relative to PNL_TOP for clarity.
-   static const S32 TITLE_Y     = PNL_TOP + 10;
-   static const S32 GRAPHIC_Y   = PNL_TOP + 160;  // centre of engine/tread graphic
-   static const S32 HS_ROW1_Y   = PNL_TOP + 120;  // top row of heat-sink crosses
-   static const S32 ENG_TEXT_Y  = PNL_TOP + 210;  // first stat line for engine phase
-   static const S32 TRD_TEXT_Y  = PNL_TOP + 215;  // first stat line for tread phase
-   static const S32 HS_TEXT_Y   = PNL_TOP + 230;  // stat line for heat-sink phase
-
-   // Armor classification thresholds (body phase).
-   static const F32 ARMOR_HEAVY_LIMIT    = 0.70f;
-   static const F32 ARMOR_MED_LIMIT      = 0.95f;
-
-   // Y position where the "Combined Build Stats" section begins.
-   static const S32 BUILD_SECT_Y = PNL_TOP + 305;
-   // Y position for carousel dots.
-   static const S32 DOTS_Y       = BUILD_SECT_Y + 95;
-   // Y position for the navigation hint text.
-   static const S32 HINT_Y       = DOTS_Y + 22;
-
-   // Semi-transparent dark background, red border to match helper menus.
    drawFilledFancyBox(PNL_LEFT, PNL_TOP, PNL_RIGHT, PNL_BOT, CORNER,
                       Colors::black, 0.75f, Colors::red35);
 
    FontManager::pushFontContext(HelperMenuContext);
-
    Renderer &r = Renderer::get();
 
-   // -------------------------------------------------------------------------
-   // BODY PHASE
-   // -------------------------------------------------------------------------
+   XtankDesign preview = mDesignInProgress;
    if(mPhase == PHASE_BODY)
    {
-      S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankBodyCount) idx = 0;
-
-      // Title: body name
-      r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, xtankBodyNames[idx]);
-
-      // Horizontal divider
-      r.setColor(Colors::gray40);
-      S32 divY = TITLE_Y + TITLE_SZ + 4;
-      drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
-
-      // Render the vehicle body shape, centered in the upper portion of the
-      // panel.  Scale so the largest bodies (~44 units) fit within ~130 px.
-      // Use a fixed display scale that looks good across all 14 bodies.
-      static const F32 BODY_SCALE = 2.8f;
-      static const S32 BODY_CY    = PNL_TOP + 150;  // vertical centre for body graphic
-
-      // Thrusts: [forward, reverse, port, starboard] — all zero for a static preview.
-      static const F32 thrusts[4] = { 0, 0, 0, 0 };
-
-      r.pushMatrix();
-      r.translate(F32(PNL_CX), F32(BODY_CY), 0);
-      r.scale(BODY_SCALE);
-      // Rotate so the nose points up on screen.  In the xtank vertex space the
-      // nose is at +Y; with Y-down screen coords that puts the nose at the
-      // bottom.  A 180° rotation flips it so the nose points up.
-      r.rotate(180.0f, 0, 0, 1.0f);
-
-      const ShipShapeInfo* shapeInfo = &xtankBodyInfos[idx];
-      const Color* shipColor = &Colors::blue;
-      renderShip(shapeInfo, shipColor, Colors::blue, 1.0f,
-                 const_cast<F32*>(thrusts), 1.0f, F32(Ship::CollisionRadius), 0,
-                 false, false, false, false);
-
-      // Draw turrets pointing straight up
-      renderXtankTurrets(Point(0, 0), 0, 0, 1.0f,
-                         xtankTurretInfos[idx], &Colors::blue, 1.0f);
-
-      r.popMatrix();
-
-      // Stats text
-      const TankPhysicsInfo &phy = xtankPhysicsInfos[idx];
-      S32 turrets = xtankTurretInfos[idx].count;
-
-      const char *armClass = (phy.armor <= ARMOR_HEAVY_LIMIT) ? "Heavy" :
-                             (phy.armor <= ARMOR_MED_LIMIT)   ? "Med"   : "Light";
-
-      S32 ty = BODY_CY + S32(xtankBodyCollisionRadius[idx] * BODY_SCALE) + 16;
-
-      r.setColor(Colors::cyan);
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Speed: %d  Rev: %d", (S32)phy.maxSpeed, (S32)phy.maxReverseSpeed);
-      ty += LINE_GAP;
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Accel: %d  Friction: %d", (S32)phy.acceleration, (S32)phy.friction);
-      ty += LINE_GAP;
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Turn: %.1f rad/s", phy.turnRate);
-      ty += LINE_GAP;
-      r.setColor(Colors::yellow);
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Armor: %s  Turrets: %d", armClass, turrets);
-
-      // Body phase: combined stats use the highlighted body with the existing
-      // engine/tread/heatsink choices (or defaults if not yet set).
-      renderFullBuildStats(PNL_CX, BUILD_SECT_Y,
-                           idx,
-                           (S32)mDesignInProgress.engineType,
-                           (S32)mDesignInProgress.treadType,
-                           (S32)mDesignInProgress.heatSinkCount);
+      S32 bodyIdx = mHighlightedIndex;
+      if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) bodyIdx = 0;
+      XtankDesign bodyPreview;
+      bodyPreview.initForBody(bodyIdx);
+      bodyPreview.engineType = preview.engineType;
+      bodyPreview.treadType = preview.treadType;
+      bodyPreview.heatSinkCount = preview.heatSinkCount;
+      bodyPreview.armorType = preview.armorType;
+      for(S32 i = 0; i < MIN(xtankTurretInfos[bodyIdx].count, kXtankMaxWeaponSlots); i++)
+         bodyPreview.weapons[i] = preview.weapons[i];
+      preview = bodyPreview;
    }
-
-   // -------------------------------------------------------------------------
-   // ENGINE PHASE
-   // -------------------------------------------------------------------------
    else if(mPhase == PHASE_ENGINE)
    {
-      S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankEngineCount) idx = 0;
-
-      const XtankEngineInfo &ei = xtankEngineInfos[idx];
-
-      r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, ei.name);
-
-      r.setColor(Colors::gray40);
-      S32 divY = TITLE_Y + TITLE_SZ + 4;
-      drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
-
-      // Draw the engine diamond symbol, coloured to match the in-game overlay.
-      static const F32    DIAM_SZ         = 30.0f;
-      // Colors mirror those used in renderXtankVehicleOverlay() in gameObjectRender.cpp.
-      static const Color  ENGINE_LIGHT_COLOR(0.3f, 0.4f, 1.0f);    // dim blue
-      static const Color  ENGINE_STD_COLOR  (0.95f, 0.35f, 0.05f); // orange-red
-      static const Color  ENGINE_HEAVY_COLOR(1.0f, 0.65f, 0.0f);   // bright orange
-      Color engColor;
-      switch((XtankEngine)idx)
-      {
-         case XtankEngine::Small_Electric:
-         case XtankEngine::Small_Combustion:
-         case XtankEngine::Small_Turbine:
-            engColor = ENGINE_LIGHT_COLOR;
-            break;
-
-         case XtankEngine::Medium_Electric:
-         case XtankEngine::Medium_Combustion:
-         case XtankEngine::Medium_Turbine:
-         case XtankEngine::Fuel_Cell:
-            engColor = ENGINE_STD_COLOR;
-            break;
-
-         default:
-            engColor = ENGINE_HEAVY_COLOR;
-            break;
-      }
-      F32 gy = F32(GRAPHIC_Y);
-      F32 diam[] = {
-          F32(PNL_CX),           gy - DIAM_SZ,
-          F32(PNL_CX) + DIAM_SZ, gy,
-          F32(PNL_CX),           gy + DIAM_SZ,
-          F32(PNL_CX) - DIAM_SZ, gy,
-          F32(PNL_CX),           gy - DIAM_SZ,
-      };
-      r.setColor(engColor);
-      r.renderVertexArray(diam, 5, RenderType::LineStrip);
-
-      S32 ty = ENG_TEXT_Y;
-      r.setColor(Colors::cyan);
-      S32 spdPct = S32((ei.speedMult - 1.0f) * 100.0f + 0.5f);
-      S32 accPct = S32((ei.accelMult - 1.0f) * 100.0f + 0.5f);
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                          "Top speed:    %+d%%", spdPct);
-      ty += LINE_GAP;
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                          "Acceleration: %+d%%", accPct);
-
-      // Flavour text
-      static const char *engDesc[XtankEngineCount] = {
-         "Lighter plant, reduced power",
-         "Balanced performance",
-         "Heavy plant, maximum power",
-      };
-      ty += LINE_GAP * 2;
-      if(idx < XtankEngineCount && engDesc[idx] != nullptr)
-      {
-         r.setColor(Colors::gray70);
-         drawCenteredString(PNL_CX, ty, STAT_SZ, engDesc[idx]);
-      }
-
-      renderFullBuildStats(PNL_CX, BUILD_SECT_Y,
-                           (S32)mDesignInProgress.bodyIndex,
-                           idx,
-                           (S32)mDesignInProgress.treadType,
-                           (S32)mDesignInProgress.heatSinkCount);
+      preview.engineType = (XtankEngine)mHighlightedIndex;
    }
-
-   // -------------------------------------------------------------------------
-   // TREADS PHASE
-   // -------------------------------------------------------------------------
    else if(mPhase == PHASE_TREADS)
    {
-      S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankTreadCount) idx = 0;
-
-      const XtankTreadInfo &ti = xtankTreadInfos[idx];
-
-      r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, ti.name);
-
-      r.setColor(Colors::gray40);
-      S32 divY = TITLE_Y + TITLE_SZ + 4;
-      drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
-
-      // Simple tread-track graphic: two parallel rectangles.
-      static const F32 TR_W   = 12.0f;
-      static const F32 TR_H   = 60.0f;
-      static const F32 TR_SEP = 28.0f;  // distance from centre to each track
-
-      F32 trCy = F32(GRAPHIC_Y);
-      Color trColor = Colors::green65;
-      r.setColor(trColor);
-      // Left track
-      drawHollowRect(PNL_CX - TR_SEP - TR_W, trCy - TR_H * 0.5f,
-                     PNL_CX - TR_SEP + TR_W, trCy + TR_H * 0.5f);
-      // Right track
-      drawHollowRect(PNL_CX + TR_SEP - TR_W, trCy - TR_H * 0.5f,
-                     PNL_CX + TR_SEP + TR_W, trCy + TR_H * 0.5f);
-
-      S32 ty = TRD_TEXT_Y;
-      r.setColor(Colors::cyan);
-      S32 turnPct = S32((ti.friction - 1.0f) * 100.0f + 0.5f);
-      S32 fricPct = S32((ti.friction - 1.0f) * 100.0f + 0.5f);
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                          "Turn rate:   %+d%%", turnPct);
-      ty += LINE_GAP;
-      drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                          "Braking:     %+d%%", fricPct);
-
-      static const char *trdDesc[XtankTreadCount] = {
-         "Nimble steering, less grip",
-         "Balanced handling",
-         "Slower turns, heavy braking",
-      };
-      ty += LINE_GAP * 2;
-      if(idx < XtankTreadCount && trdDesc[idx] != nullptr)
-      { 
-         r.setColor(Colors::gray70);
-         drawCenteredString(PNL_CX, ty, STAT_SZ, trdDesc[idx]);
-      }
-
-      renderFullBuildStats(PNL_CX, BUILD_SECT_Y,
-                           (S32)mDesignInProgress.bodyIndex,
-                           (S32)mDesignInProgress.engineType,
-                           idx,
-                           (S32)mDesignInProgress.heatSinkCount);
+      preview.treadType = (XtankTread)mHighlightedIndex;
    }
-
-   // -------------------------------------------------------------------------
-   // HEAT SINK PHASE
-   // -------------------------------------------------------------------------
    else if(mPhase == PHASE_HEATSINK)
    {
-      S32 idx  = mHighlightedIndex;
-      S32 n    = idx + XtankHeatSinkMin;   // actual sink count (1-6)
-      if(n < XtankHeatSinkMin) n = XtankHeatSinkMin;
-      if(n > XtankHeatSinkMax) n = XtankHeatSinkMax;
-
-      char titleBuf[32];
-      dSprintf(titleBuf, sizeof(titleBuf), "Heat Sinks: %d", n);
-      r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, titleBuf);
-
-      r.setColor(Colors::gray40);
-      S32 divY = TITLE_Y + TITLE_SZ + 4;
-      drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
-
-      // Draw N small cyan cross (+) symbols arranged in a 3-column grid.
-      static const F32 HS_SPACING = 40.0f;
-      static const F32 HS_ARM     = 10.0f;
-      r.setColor(Colors::cyan);
-      for(S32 i = 0; i < n; i++)
-      {
-         F32 col = F32(i % 3);
-         F32 row = F32(i / 3);
-         F32 cx  = F32(PNL_CX) - HS_SPACING + col * HS_SPACING;
-         F32 cy  = F32(HS_ROW1_Y) + row * HS_SPACING;
-         F32 h[] = { cx - HS_ARM, cy,   cx + HS_ARM, cy };
-         F32 v[] = { cx, cy - HS_ARM,   cx, cy + HS_ARM };
-         r.renderVertexArray(h, 2, RenderType::Lines);
-         r.renderVertexArray(v, 2, RenderType::Lines);
-      }
-
-      F32 mult = xtankHeatSinkFireDelayMult(n);
-      S32 pct  = S32((1.0f - mult) * 100.0f + 0.5f);
-
-      S32 ty = HS_TEXT_Y;
-      r.setColor(Colors::cyan);
-      if(pct == 0)
-         drawCenteredString(PNL_CX, ty, STAT_SZ, "No fire-rate bonus");
-      else
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Fire-rate: +%d%%", pct);
-
-      ty += LINE_GAP;
-      r.setColor(Colors::gray70);
-      drawCenteredString(PNL_CX, ty, STAT_SZ, "More sinks = faster cycling");
-
-      renderFullBuildStats(PNL_CX, BUILD_SECT_Y,
-                           (S32)mDesignInProgress.bodyIndex,
-                           (S32)mDesignInProgress.engineType,
-                           (S32)mDesignInProgress.treadType,
-                           n);
+      preview.heatSinkCount = (S8)(mHighlightedIndex + XtankHeatSinkMin);
    }
-
-   // -------------------------------------------------------------------------
-   // WEAPON PHASE
-   // -------------------------------------------------------------------------
    else
    {
-      S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= mWeaponItems.size()) idx = 0;
-
-      r.setColor(Colors::white);
-
-      if(idx == 0)
+      S32 slot = mPhase - PHASE_WEAPONS;
+      if(slot >= 0 && slot < kXtankMaxWeaponSlots)
       {
-         // "None" option
-         drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, "None");
-         r.setColor(Colors::gray40);
-         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, TITLE_Y + TITLE_SZ + 4);
-         r.setColor(Colors::gray67);
-         drawCenteredString(PNL_CX, HS_ROW1_Y, STAT_SZ, "Empty turret slot");
+         if(mHighlightedIndex <= 0) preview.weapons[slot] = XtankWeaponNone;
+         else if(mHighlightedIndex < mWeaponItems.size())
+            preview.weapons[slot] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
       }
-      else
-      {
-         S32 w = idx - 1;  // 0-based weapon index
-         if(w < 0 || w >= XtankWeaponCount) w = 0;
-         const XtankWeaponInfo &wi = xtankWeaponInfos[w];
-
-         drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, wi.name);
-         r.setColor(Colors::gray40);
-         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, TITLE_Y + TITLE_SZ + 4);
-
-         S32 ty = TITLE_Y + TITLE_SZ + 4 + 20;
-         r.setColor(Colors::cyan);
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Fire delay:  %d ms", (S32)xtankFireDelayMs(wi));
-         ty += LINE_GAP;
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Energy:      %d/shot", (S32)wi.heat);
-         ty += LINE_GAP;
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Speed:       %d u/s", (S32)xtankProjVelocity(wi));
-         ty += LINE_GAP;
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ,
-                             "Lifetime:    %d ms", (S32)xtankProjLiveTime(wi));
-      }
-
-      // Weapon phase: mobility stats reflect the completed chassis choices.
-      renderFullBuildStats(PNL_CX, BUILD_SECT_Y,
-                           (S32)mDesignInProgress.bodyIndex,
-                           (S32)mDesignInProgress.engineType,
-                           (S32)mDesignInProgress.treadType,
-                           (S32)mDesignInProgress.heatSinkCount);
    }
 
-   // Carousel position indicator and navigation hints.
+   S32 bodyIdx = preview.bodyIndex;
+   if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) bodyIdx = 0;
+   S32 engineIdx = (S32)preview.engineType;
+   if(engineIdx < 0 || engineIdx >= XtankEngineCount) engineIdx = 0;
+   S32 treadIdx = (S32)preview.treadType;
+   if(treadIdx < 0 || treadIdx >= XtankTreadCount) treadIdx = 0;
+   S32 heatSinks = (S32)preview.heatSinkCount;
+   if(heatSinks < XtankHeatSinkMin) heatSinks = XtankHeatSinkMin;
+   if(heatSinks > XtankHeatSinkMax) heatSinks = XtankHeatSinkMax;
+
+   const TankPhysicsInfo &phy = xtankPhysicsInfos[bodyIdx];
+   const XtankEngineInfo &eng = xtankEngineInfos[engineIdx];
+   const XtankTreadInfo  &trd = xtankTreadInfos[treadIdx];
+
+   F32 effSpeed = phy.maxSpeed * eng.speedMult;
+   F32 effRev   = phy.maxReverseSpeed * eng.speedMult;
+   F32 effAccel = phy.acceleration * eng.accelMult;
+   F32 effTurn  = phy.turnRate * trd.friction;
+   S32 fireRatePct = S32((1.0f - xtankHeatSinkFireDelayMult(heatSinks)) * 100.0f + 0.5f);
+
+   S32 totalWeight = body_stat[bodyIdx].weight + eng.weight + heatSinkStat.weight * heatSinks;
+   S32 totalCost   = body_stat[bodyIdx].cost   + eng.cost   + trd.cost + heatSinkStat.cost * heatSinks;
+   S32 slotCount   = xtankTurretInfos[bodyIdx].count;
+   for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = preview.weapons[i];
+      if(w == XtankWeaponNone) continue;
+      if((S32)w < 0 || (S32)w >= XtankWeaponCount) continue;
+      totalWeight += xtankWeaponInfos[(S32)w].weight;
+      totalCost   += xtankWeaponInfos[(S32)w].cost;
+   }
+
+   r.setColor(Colors::white);
+   drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, "Ship Preview");
+   r.setColor(Colors::gray40);
+   drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, TITLE_Y + TITLE_SZ + 4);
+
+   static const F32 thrusts[4] = { 0, 0, 0, 0 };
+   r.pushMatrix();
+   r.translate(F32(PNL_CX), F32(BODY_CY), 0);
+   r.scale(BODY_SCALE);
+   r.rotate(180.0f, 0, 0, 1.0f);
+   renderShip(&xtankBodyInfos[bodyIdx], &Colors::blue, Colors::blue, 1.0f,
+              const_cast<F32*>(thrusts), 1.0f, F32(Ship::CollisionRadius), 0,
+              false, false, false, false);
+   renderXtankTurrets(Point(0, 0), 0, 0, 1.0f,
+                      xtankTurretInfos[bodyIdx], &Colors::blue, 1.0f);
+   r.popMatrix();
+
+   S32 ty = STATS_Y;
+   r.setColor(Colors::cyan);
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Body: %s", xtankBodyNames[bodyIdx]); ty += LINE_GAP;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Wt: %d   Cost: %d", totalWeight, totalCost); ty += LINE_GAP;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Speed: %d   Rev: %d", (S32)effSpeed, (S32)effRev); ty += LINE_GAP;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Accel: %d   Turn: %.1f", (S32)effAccel, effTurn); ty += LINE_GAP;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Armor: %.2f   Turrets: %d", phy.armor, slotCount); ty += LINE_GAP;
+   if(fireRatePct > 0)
+      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Fire-rate bonus: +%d%%", fireRatePct);
+   else
+      drawCenteredString(PNL_CX, ty, STAT_SZ, "Fire-rate bonus: base");
+
+   renderFullBuildStats(PNL_CX, BUILD_Y, bodyIdx, engineIdx, treadIdx, heatSinks);
    renderCarouselDots(PNL_CX, DOTS_Y);
 
    r.setColor(Colors::gray50);
-   drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] preview  [Lt]/[Rt] navigate");
+   drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  [Lt]/[Rt] carousel");
 
    FontManager::popFontContext();
 }
 
 
-// Draw a row of small filled/hollow circles indicating the current carousel
-// position.  Past phases are half-bright; future phases are dim; the current
-// phase is bright white.  < and > arrow glyphs flank the dots and are grayed
-// out when at the first or last phase respectively.
+// Draw a row of small circles indicating the current carousel position.
+// Since phase navigation wraps, both arrows are always active.
 void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
 {
-   // Total number of phases including all weapon slots.
-   // Before the body is selected mSlotCount may be 0; show at least 4 dots.
    S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
 
-   static const F32 DOT_R      = 4.0f;   // radius of the current-phase dot
-   static const F32 DOT_R_SM   = 3.0f;   // radius of past/future dots
-   static const F32 DOT_STEP   = 14.0f;  // horizontal spacing between dot centres
-   static const S32 ARROW_GAP  = 12;     // gap from outermost dot to arrow glyph
-   static const S32 ARROW_SZ   = 11;     // font size for < > glyphs
+   static const F32 DOT_R      = 4.0f;
+   static const F32 DOT_R_SM   = 3.0f;
+   static const F32 DOT_STEP   = 14.0f;
+   static const S32 ARROW_GAP  = 12;
+   static const S32 ARROW_SZ   = 11;
 
    // Centre the dots row at cx.
    F32 rowWidth   = F32(totalPhases - 1) * DOT_STEP;
@@ -1080,9 +1036,8 @@ void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
    {
       F32 dx  = dotsLeft + F32(i) * DOT_STEP;
       F32 rad = (i == mPhase) ? DOT_R : DOT_R_SM;
-      bool filled = (i <= mPhase);
+      bool filled = (i == mPhase);
 
-      // Colour: current = white, past = gray67, future = gray40.
       if(i == mPhase)
          r.setColor(Colors::white);
       else if(i < mPhase)
@@ -1092,12 +1047,9 @@ void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
 
       if(filled)
       {
-         // Filled circle via TriangleFan (center + SEG edge + 1 closing vertex).
          F32 verts[2 + (SEG + 1) * 2];
          verts[0] = dx;
          verts[1] = F32(y);
-         // Loop s from 0..SEG: the extra s==SEG iteration wraps via % SEG to
-         // repeat the first edge vertex, closing the filled circle.
          for(S32 s = 0; s <= SEG; s++)
          {
             F32 a = FloatPi * 2.0f * F32(s % SEG) / F32(SEG);
@@ -1108,7 +1060,6 @@ void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
       }
       else
       {
-         // Hollow circle via LineLoop.
          F32 verts[SEG * 2];
          for(S32 s = 0; s < SEG; s++)
          {
@@ -1120,15 +1071,14 @@ void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
       }
    }
 
-   // Left arrow < — grayed out when at first phase.
+   // Wrap navigation is always available both directions.
    S32 arrowY = y - ARROW_SZ / 2;
    S32 leftArrowX = S32(dotsLeft) - ARROW_GAP - ARROW_SZ;
-   r.setColor((mPhase > PHASE_BODY) ? Colors::gray67 : Colors::gray20);
+   r.setColor(Colors::gray67);
    drawCenteredString(leftArrowX, arrowY, ARROW_SZ, "<");
 
-   // Right arrow > — grayed out when at last phase.
    S32 rightArrowX = S32(dotsLeft + rowWidth) + ARROW_GAP;
-   r.setColor((mPhase < totalPhases - 1) ? Colors::gray67 : Colors::gray20);
+   r.setColor(Colors::gray67);
    drawCenteredString(rightArrowX, arrowY, ARROW_SZ, ">");
 }
 
