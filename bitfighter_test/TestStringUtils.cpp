@@ -677,6 +677,21 @@ TEST(StringUtilsTest, sortingNumericPrefixAlphaSuffix)
 }
 
 
+// Verify that alphaNumberSort handles numbers larger than S32_MAX correctly.
+TEST(StringUtilsTest, sortingLargeNumbers)
+{
+   EXPECT_TRUE(alphaNumberSort("2147483647", "2147483648"));
+   EXPECT_FALSE(alphaNumberSort("2147483648", "2147483647"));
+   EXPECT_TRUE(alphaNumberSort("10000000000000000000", "10000000000000000001"));
+   EXPECT_FALSE(alphaNumberSort("10000000000000000000", "2"));
+   EXPECT_TRUE(alphaNumberSort("2", "10000000000000000000"));
+
+   // Mixed strings with large numbers
+   EXPECT_TRUE(alphaNumberSort("2abc", "2147483648abc"));
+   EXPECT_FALSE(alphaNumberSort("2147483648abc", "2abc"));
+}
+
+
 TEST(StringUtilsTest, formatMessage)
 {
    Vector<StringTableEntry> e;
