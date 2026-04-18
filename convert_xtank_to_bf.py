@@ -3,41 +3,46 @@
 Convert xtank .m maze files to Bitfighter .level files.
 
 Usage:
-  python3 convert_xtank_to_bf.py <input.m> <output.level>
-  python3 convert_xtank_to_bf.py <input_dir/> <output_dir/>   (batch)
+    python convert_xtank_to_bf.py <input.m> <output.level>
+    python convert_xtank_to_bf.py <input_dir/> <output_dir/>   (batch)
 
 Xtank maze file format (binary):
-  Byte 0        : game type  (0=Combat, 1=War, 2=Ultimate, 3=Capture, 4=Race, 5=Madman)
-  Null string   : maze name
-  Null string   : designer
-  Null string   : description
-  Binary data   : maze grid (column-major, run-length encoded, null terminated)
+    Byte 0        : game type  (0=Combat, 1=War, 2=Ultimate, 3=Capture, 4=Race, 5=Madman)
+    Null string   : maze name
+    Null string   : designer
+    Null string   : description
+    Binary data   : maze grid (column-major, run-length encoded, null terminated)
 
-  Grid encoding:
-    - Column-major order: outer loop x (0..29), inner loop y (0..29)
-    - EMPTY_BOXES (0x80) | count : run of (count+1) empty/default cells
-    - Otherwise: flags byte + optional type + optional teleport_code + optional team
-    - Flags bits: INSIDE_MAZE(1) NORTH_WALL(2) WEST_WALL(4) NORTH_DEST(8) WEST_DEST(16)
-                  TYPE_EXISTS(32) TEAM_EXISTS(64) EMPTY_BOXES(128)
-    - Type byte uses external_type[] index: 0=NORMAL, 1=FUEL, 2=AMMO, 3=ARMOR,
-      4=GOAL, 5=OUTPOST, 6=SCROLL_N..13=SCROLL_NW, 14=SLIP, 15=SLOW, 16=START_POS,
-      17=NORTH_SYM, 18=WEST_SYM, 19=NORTH_DEST_SYM, 20=WEST_DEST_SYM,
-      21=PEACE, 22=TELEPORT
-    - TELEPORT type is followed by an extra teleport_code byte
-    - Team byte: 0=NEUTRAL, 1..6=teams (xtank team 1 -> BF team 0)
+    Grid encoding:
+        - Column-major order: outer loop x (0..29), inner loop y (0..29)
+        - EMPTY_BOXES (0x80) | count : run of (count+1) empty/default cells
+        - Otherwise: flags byte + optional type + optional teleport_code + optional team
+        - Flags bits: INSIDE_MAZE(1) NORTH_WALL(2) WEST_WALL(4) NORTH_DEST(8) WEST_DEST(16)
+                    TYPE_EXISTS(32) TEAM_EXISTS(64) EMPTY_BOXES(128)
+        - Type byte uses external_type[] index: 0=NORMAL, 1=FUEL, 2=AMMO, 3=ARMOR,
+        4=GOAL, 5=OUTPOST, 6=SCROLL_N..13=SCROLL_NW, 14=SLIP, 15=SLOW, 16=START_POS,
+        17=NORTH_SYM, 18=WEST_SYM, 19=NORTH_DEST_SYM, 20=WEST_DEST_SYM,
+        21=PEACE, 22=TELEPORT
+        - TELEPORT type is followed by an extra teleport_code byte
+        - Team byte: 0=NEUTRAL, 1..6=teams (xtank team 1 -> BF team 0)
 
 Scale:
-  1 xtank cell = 255 BF world units  (matches the legacy GridSize=255 convention)
-  BarrierMaker wall width = 50 BF units (standard BF wall thickness)
-  BF ship CollisionRadius = 24 units; ship diameter = 48 units
-  This means each xtank cell is about 5 ship-widths wide
+    1 xtank cell = 255 BF world units  (matches the legacy GridSize=255 convention)
+
+    [In-repo rationale: BF ship diameter is 48 units, Xtank vehicles are ~30–50 px in a 192 px cell,
+    yielding ~242–338 units/cell; 255 is chosen as a practical mapping (CELL_SIZE = 255).]
+
+
+    BarrierMaker wall width = 50 BF units (standard BF wall thickness)
+    BF ship CollisionRadius = 24 units; ship diameter = 48 units
+    This means each xtank cell is about 5 ship-widths wide
 
 Unsupported xtank features (written as comments in output):
-  - AMMO boxes      : no ammo concept in BF; converted to EnergyItem
-  - SLOW boxes      : no slowdown zones in BF; skipped
-  - PEACE boxes     : no damage-protection zones in BF; skipped
-  - RACE_GAME       : no dedicated race mode in BF; uses GameType
-  - Destructible walls (NORTH_DEST, WEST_DEST): not directly supported in BF
+    - AMMO boxes      : no ammo concept in BF; converted to EnergyItem
+    - SLOW boxes      : no slowdown zones in BF; skipped
+    - PEACE boxes     : no damage-protection zones in BF; skipped
+    - RACE_GAME       : no dedicated race mode in BF; uses GameType
+    - Destructible walls (NORTH_DEST, WEST_DEST): not directly supported in BF
 """
 
 import os
@@ -154,11 +159,11 @@ SCROLL_DIR = {
 # ---- Coordinate helpers -----------------------------------------------------
 
 def cx(ci):
-    """X world coordinate of left edge of cell column ci."""
+    """ X world coordinate of left edge of cell column ci. """
     return (ci - MAZE_LEFT) * CELL_SIZE - CENTER_X
 
 def cy(cj):
-    """Y world coordinate of top edge of cell row cj."""
+    """ Y world coordinate of top edge of cell row cj. """
     return (cj - MAZE_TOP) * CELL_SIZE - CENTER_Y
 
 def cell_center(ci, cj):
@@ -167,7 +172,7 @@ def cell_center(ci, cj):
     return round(x, 1), round(y, 1)
 
 def xt2bf(xt_team):
-    """Convert xtank team (0=neutral, 1+=teams) to BF team (-1=neutral, 0+=teams).
+    """ Convert xtank team (0=neutral, 1+=teams) to BF team (-1=neutral, 0+=teams).
 
     255 is treated as neutral because some xtank maze files store 255 (0xFF) in
     the team byte when no team was explicitly set (uninitialized / NO_TEAM).
@@ -187,7 +192,7 @@ def _read_null_str(data, pos):
 
 
 def parse_maze(path):
-    """Parse an xtank .m file.  Returns a dict with maze metadata and grid."""
+    """ Parse an xtank .m file.  Returns a dict with maze metadata and grid. """
     with open(path, 'rb') as f:
         data = f.read()
 
@@ -207,21 +212,25 @@ def parse_maze(path):
         if empties:
             empties -= 1
         else:
-            b = data[pos]; pos += 1
+            b = data[pos]
+            pos += 1
             if b == 0:
                 break
             if b & EMPTY_BOXES:
                 empties = b & ~EMPTY_BOXES  # additional empty cells after this
             else:
                 box = boxes[ix][iy]
-                box['flags'] = b & MAZE_FLAGS
+                box["flags"] = b & MAZE_FLAGS
                 if b & TYPE_EXISTS:
-                    tb = data[pos]; pos += 1
-                    box['type'] = LANDMARK_TYPES[tb] if tb < len(LANDMARK_TYPES) else 'NORMAL'
-                    if box['type'] == 'TELEPORT':
-                        box['tc'] = data[pos]; pos += 1
+                    tb = data[pos]
+                    pos += 1
+                    box["type"] = LANDMARK_TYPES[tb] if tb < len(LANDMARK_TYPES) else "NORMAL"
+                    if box["type"] == "TELEPORT":
+                        box["tc"] = data[pos]
+                        pos += 1
                 if b & TEAM_EXISTS:
-                    box['team'] = data[pos]; pos += 1
+                    box["team"] = data[pos]
+                    pos += 1
         # Column-major advance
         iy += 1
         if iy >= GRID_HEIGHT:
@@ -229,19 +238,19 @@ def parse_maze(path):
             ix += 1
 
     return {
-        'game_type': game_type,
-        'game_name': GAME_TYPES.get(game_type, 'COMBAT_GAME'),
-        'name':      name,
-        'designer':  designer,
-        'desc':      desc,
-        'boxes':     boxes,
+        "game_type": game_type,
+        "game_name": GAME_TYPES.get(game_type, "COMBAT_GAME"),
+        "name":      name,
+        "designer":  designer,
+        "desc":      desc,
+        "boxes":     boxes,
     }
 
 
 # ---- Wall generation --------------------------------------------------------
 
 def _merge_runs(vals):
-    """Merge a sorted list of integers into (start, end) run tuples."""
+    """ Merge a sorted list of integers into (start, end) run tuples. """
     if not vals:
         return []
     runs, start, prev = [], vals[0], vals[0]
@@ -285,7 +294,7 @@ def collect_walls(boxes):
         # NORTH_SYM types also count as north walls for that cell
         sym_wall = [ci for ci in range(MAZE_LEFT, MAZE_RIGHT + 1)
                     if cj <= MAZE_BOTTOM and
-                    boxes[ci][cj]['type'] in ('NORTH_SYM', 'NORTH_DEST_SYM')]
+                    boxes[ci][cj]['type'] in ("NORTH_SYM", "NORTH_DEST_SYM")]
         all_wall = sorted(set(has_wall) | set(sym_wall))
         for ci_s, ci_e in _merge_runs(all_wall):
             x1 = round(cx(ci_s), 1)
@@ -315,7 +324,7 @@ def collect_walls(boxes):
 # ---- Active maze bounds -----------------------------------------------------
 
 def find_active_bounds(boxes):
-    """Return (min_ci, max_ci, min_cj, max_cj) of cells that are part of the maze."""
+    """ Return (min_ci, max_ci, min_cj, max_cj) of cells that are part of the maze. """
     min_ci, max_ci = MAZE_RIGHT, MAZE_LEFT
     min_cj, max_cj = MAZE_BOTTOM, MAZE_TOP
 
@@ -437,7 +446,7 @@ def collect_objects(boxes, game_name):
 # ---- Level generation -------------------------------------------------------
 
 def generate_level(maze_data, output_path):
-    """Write a .level file from parsed maze_data.  Returns list of warnings."""
+    """ Write a .level file from parsed maze_data.  Returns list of warnings. """
     boxes  = maze_data['boxes']
     gname  = maze_data['game_name']
     name   = maze_data['name']   or 'Untitled'
