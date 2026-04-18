@@ -645,6 +645,17 @@ TEST(StringUtilsTest, sorting)
    EXPECT_TRUE(alphaNumberSort("1abc", "2abc"));    // 1 < 2
    EXPECT_FALSE(alphaNumberSort("10foo", "9foo"));  // 10 > 9
    EXPECT_FALSE(alphaNumberSort("2xyz", "2xyz"));   // equal -> alphaSort tie-break (false: not strictly less)
+
+   // Test for overflow with large integers
+   EXPECT_TRUE(alphaNumberSort("2147483647", "2147483648"));
+   EXPECT_TRUE(alphaNumberSort("2147483648", "2147483649"));
+   EXPECT_TRUE(alphaNumberSort("10000000000", "10000000001"));
+
+   // Test leading zeros
+   EXPECT_TRUE(alphaNumberSort("001", "02"));
+   EXPECT_TRUE(alphaNumberSort("01", "1"));      // Equal numerically -> alphaSort
+   EXPECT_FALSE(alphaNumberSort("1", "01"));     // Equal numerically -> alphaSort
+   EXPECT_TRUE(alphaNumberSort("0", "00"));      // Equal numerically -> alphaSort
 }
 
 

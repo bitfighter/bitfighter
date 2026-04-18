@@ -1067,13 +1067,24 @@ bool alphaNumberSort(const string &a, const string &b)
 
    if(aIsNum && bIsNum)
    {
-      int aNum = atoi(a.c_str());
-      int bNum = atoi(b.c_str());
+      const char *aPtr = a.c_str();
+      const char *bPtr = b.c_str();
 
-      if(aNum == bNum)
-         return alphaSort(a, b);
+      // Skip leading zeros for numeric comparison, but keep at least one digit
+      while(*aPtr == '0' && isDigit(aPtr[1])) aPtr++;
+      while(*bPtr == '0' && isDigit(bPtr[1])) bPtr++;
 
-      return aNum < bNum;
+      size_t aLen = strlen(aPtr);
+      size_t bLen = strlen(bPtr);
+
+      if(aLen != bLen)
+         return aLen < bLen;
+
+      int cmp = strcmp(aPtr, bPtr);
+      if(cmp != 0)
+         return cmp < 0;
+
+      return alphaSort(a, b);
    }
 
    if(aIsNum)
@@ -1083,18 +1094,29 @@ bool alphaNumberSort(const string &a, const string &b)
       return false;
 
    // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
-   // Compare the leading numeric portions numerically; atoi stops at the first non-digit,
-   // which is exactly the behavior we want here. Fall back to alphabetical on a tie.
+   // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
    bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
    bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
 
    if(aStartsWithDigit && bStartsWithDigit)
    {
-      int aNum = atoi(a.c_str());
-      int bNum = atoi(b.c_str());
+      const char *aPtr = a.c_str();
+      const char *bPtr = b.c_str();
 
-      if(aNum != bNum)
-         return aNum < bNum;
+      while(*aPtr == '0' && isDigit(aPtr[1])) aPtr++;
+      while(*bPtr == '0' && isDigit(bPtr[1])) bPtr++;
+
+      size_t aDigits = 0;
+      while(isDigit(aPtr[aDigits])) aDigits++;
+      size_t bDigits = 0;
+      while(isDigit(bPtr[bDigits])) bDigits++;
+
+      if(aDigits != bDigits)
+         return aDigits < bDigits;
+
+      int cmp = strncmp(aPtr, bPtr, aDigits);
+      if(cmp != 0)
+         return cmp < 0;
    }
 
    return alphaSort(a, b);
