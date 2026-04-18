@@ -33,6 +33,7 @@ TEST(TimerTest, UpdateAlreadyExpired)
 {
    Timer t(100);
    EXPECT_TRUE(t.update(100));
+   EXPECT_EQ(0u, t.getCurrent());
    EXPECT_FALSE(t.update(1)); // Already 0, should return false
 }
 
@@ -65,6 +66,7 @@ TEST(TimerTest, Reset)
 {
    Timer t(100);
    t.update(50);
+   EXPECT_EQ(50u, t.getCurrent());
    t.reset();
    EXPECT_EQ(100u, t.getCurrent());
    EXPECT_EQ(100u, t.getPeriod());
@@ -88,7 +90,8 @@ TEST(TimerTest, Clear)
 TEST(TimerTest, Extend)
 {
    Timer t(100);
-   t.update(40); // 60 left
+   t.update(40); 
+   EXPECT_EQ(60u, t.getCurrent());
 
    t.extend(20);
    EXPECT_EQ(120u, t.getPeriod());
@@ -106,7 +109,6 @@ TEST(TimerTest, ExtendOverflow)
 
    t.extend(60);
    // mPeriod was U32_MAX - 50. Adding 60 should cap it at U32_MAX.
-   // Currently it might set it to 60 due to the bug I suspect.
    EXPECT_EQ(U32_MAX, t.getPeriod());
    EXPECT_EQ(U32_MAX - 100 + 60, t.getCurrent());
 }
