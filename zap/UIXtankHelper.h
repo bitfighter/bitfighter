@@ -16,16 +16,16 @@ namespace Zap
 
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
-// engines, treads, heat sinks, and weapons to each turret slot.  Follows a
-// sequential phase-based selection pattern analogous to LoadoutHelper.
+// engines, treads, heat sinks, and weapons to each turret slot.  Supports
+// bidirectional carousel navigation (LEFT = go back, RIGHT/ENTER = confirm).
 //
 // Phase 0:  Select a vehicle body (14 options, keys 1-9, 0, A-D).
-// Phase 1:  Select engine type   (3 options, keys 1-3).
-// Phase 2:  Select tread type    (3 options, keys 1-3).
+// Phase 1:  Select engine type   (options, keys 1-N).
+// Phase 2:  Select tread type    (options, keys 1-N).
 // Phase 3:  Select heat-sink count (6 options, keys 1-6).
-// Phase 4+: For each turret slot select a weapon (10 options, keys 0-9).
+// Phase 4+: For each turret slot select a weapon (options, keys 0-9/A-P).
 //
-// When all slots have been assigned the design is applied to the local ship
+// When all slots have been confirmed the design is applied to the local ship
 // via GameUserInterface::applyXtankDesign().
 class UIXtankHelper : public HelperMenu
 {
@@ -77,10 +77,27 @@ private:
    void buildWeaponItems();
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
+   void navigateBackward();            // Move to previous phase (carousel back)
    void applyDesign();                 // Finalise and propagate the chosen design
+
+   // Restore mHighlightedIndex from mDesignInProgress when entering a phase.
+   void setHighlightedIndexForPhase(S32 phase);
+
+   // Returns the menu-panel display width for a given phase.
+   S32 widthForPhase(S32 phase) const;
 
    // Draw the floating preview panel on the right side of the screen.
    void renderPreviewPanel() const;
+
+   // Draw the carousel position dots + arrows inside the preview panel.
+   void renderCarouselDots(S32 cx, S32 y) const;
+
+   // Draw combined effective vehicle stats (speed/accel/turn/fire-rate).
+   // previewBodyIdx, previewEngIdx, previewTreadIdx, previewHeatSinks are the
+   // "what-if" values for whichever phase is currently being previewed.
+   void renderFullBuildStats(S32 cx, S32 y,
+                             S32 previewBodyIdx, S32 previewEngIdx,
+                             S32 previewTreadIdx, S32 previewHeatSinks) const;
 
    // Returns the item count for the current phase (used by UP/DOWN cycling).
    S32 currentPhaseItemCount() const;
