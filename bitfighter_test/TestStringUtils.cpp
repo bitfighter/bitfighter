@@ -386,6 +386,13 @@ TEST(StringUtilsTest, countCharInString)
    EXPECT_EQ(3, countCharInString("banana", 'a'));
    EXPECT_EQ(0, countCharInString("banana", 'z'));
    EXPECT_EQ(1, countCharInString("banana", 'b'));
+
+   // Test with embedded null characters
+   string s = "abc";
+   s += '\0';
+   s += "abc";
+   // s is "abc\0abc", length is 7
+   EXPECT_EQ(2, countCharInString(s, 'a'));
 }
 
 
@@ -408,6 +415,7 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
    EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("", sanitizeForJson(NULL));
 }
 
 
