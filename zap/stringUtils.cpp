@@ -252,6 +252,9 @@ bool isPositiveInteger(const char *str)
 // Sanitize strings before inclusion into JSON
 string sanitizeForJson(const char *value)
 {
+   if(!value)
+      return "";
+
    size_t maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
    std::string result;
    result.reserve(maxsize);  // memory management
@@ -786,13 +789,12 @@ void trim_in_place(string& source, const string &t)
 // count the occurrence of a specific character in a string
 S32 countCharInString(const string &source, char search)
 {
-    S32 count = 0, c = 0;
+    S32 count = 0;
 
-    while(source[c] != '\0')
+    for(size_t i = 0; i < source.length(); i++)
     {
-      if (source[c] == search)
+      if (source[i] == search)
          count++;
-      c++;
     }
     return count;
 }
