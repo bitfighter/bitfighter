@@ -136,6 +136,12 @@ string stripZeros(string str)
 
 string ftos(F32 f, S32 digits)
 {
+   if(digits < 0)
+      return ftos(f);
+
+   if(digits > 30)
+      digits = 30;
+
    char outString[100];
    dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
 
