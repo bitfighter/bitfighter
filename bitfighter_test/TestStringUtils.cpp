@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <vector>
 
-#ifdef TNL_OS_WIN32 
+#ifdef TNL_OS_WIN32
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
 
@@ -56,7 +56,7 @@ TEST(StringUtilsTest, isHex)
    EXPECT_FALSE(isHex("g"));
    EXPECT_FALSE(isHex("deadbeet"));
    EXPECT_FALSE(isHex("G"));
-   EXPECT_FALSE(isHex("44/"));      // '/' comes just before '0' 
+   EXPECT_FALSE(isHex("44/"));      // '/' comes just before '0'
    EXPECT_FALSE(isHex("12:345"));   // ':' comes just after '9'
    EXPECT_FALSE(isHex("@bcdef"));   // '@' comes just before 'A'
    EXPECT_FALSE(isHex("c01`"));     // '`' comes just before 'a'
@@ -624,6 +624,59 @@ TEST(StringUtilsTest, s_fprintf)
 
    EXPECT_EQ("123 test", readFile(testFile));
    remove(testFile.c_str());
+}
+
+
+TEST(StringUtilsTest, comma)
+{
+   // Zero
+   EXPECT_EQ("0", comma(0));
+
+   // Small positive values (no commas needed)
+   EXPECT_EQ("1", comma(1));
+   EXPECT_EQ("12", comma(12));
+   EXPECT_EQ("999", comma(999));
+
+   // Boundary: exactly 1000
+   EXPECT_EQ("1,000", comma(1000));
+
+   // Larger values
+   EXPECT_EQ("1,234", comma(1234));
+   EXPECT_EQ("12,345", comma(12345));
+   EXPECT_EQ("123,456", comma(123456));
+   EXPECT_EQ("1,234,567", comma(1234567));
+   EXPECT_EQ("12,345,678", comma(12345678));
+   EXPECT_EQ("123,456,789", comma(123456789));
+   EXPECT_EQ("1,000,000", comma(1000000));
+   EXPECT_EQ("999,999", comma(999999));
+
+   // Negative values
+   EXPECT_EQ("-1", comma(-1));
+   EXPECT_EQ("-999", comma(-999));
+   EXPECT_EQ("-1,000", comma(-1000));
+   EXPECT_EQ("-12,345", comma(-12345));
+   EXPECT_EQ("-1,234,567", comma(-1234567));
+
+   // Explicit S32
+   EXPECT_EQ("42", comma((S32)42));
+   EXPECT_EQ("-42", comma((S32)-42));
+
+   // U32 (unsigned)
+   EXPECT_EQ("4,000,000", comma((U32)4000000));
+   EXPECT_EQ("0", comma((U32)0));
+
+   // S64 (large 64-bit)
+   EXPECT_EQ("1,000,000,000", comma((S64)1000000000LL));
+   EXPECT_EQ("-1,000,000,000", comma((S64)-1000000000LL));
+
+   // F32 (float — truncated to integer)
+   EXPECT_EQ("1,234", comma((F32)1234.56f));
+   EXPECT_EQ("-1,234", comma((F32)-1234.56f));
+   EXPECT_EQ("0", comma((F32)0.99f));
+
+   // F64 (double — truncated to integer)
+   EXPECT_EQ("99,999", comma((F64)99999.9));
+   EXPECT_EQ("-99,999", comma((F64)-99999.9));
 }
 
 

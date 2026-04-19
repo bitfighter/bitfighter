@@ -30,6 +30,9 @@ F32 gLineWidth4 = 4.0f;
 
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
+   if (string == nullptr || string == "")
+      return;
+
    Renderer& r = Renderer::get();
 
    r.pushMatrix();

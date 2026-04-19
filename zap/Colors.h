@@ -25,7 +25,10 @@ namespace Colors
 
    // Grays
    const Color gray20(0.20);
+   const Color gray30(0.30);
+   const Color gray35(0.35);
    const Color gray40(0.40);
+   const Color gray45(0.45);
    const Color gray50(0.50);
    const Color gray60(0.60);
    const Color gray67(0.67);

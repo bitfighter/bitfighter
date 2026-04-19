@@ -20,28 +20,34 @@ namespace Zap
 // engines, treads, heat sinks, and weapons to each turret slot.  Supports
 // bidirectional carousel navigation (LEFT/RIGHT = phase navigation, ENTER = confirm).
 //
-// Phase 0:  Select a vehicle body (14 options, keys 1-9, 0, A-D).
-// Phase 1:  Select engine type   (options, keys 1-N).
-// Phase 2:  Select tread type    (options, keys 1-N).
-// Phase 3:  Select heat-sink count (6 options, keys 1-6).
-// Phase 4+: For each turret slot select a weapon (options, keys 0-9/A-P).
-//
-// When all slots have been confirmed the design is applied to the local ship
-// via GameUserInterface::applyXtankDesign().
+// Phase 0:  Select a vehicle body      (14 options, keys 1-9,0,A-D).
+// Phase 1:  Select engine type         (16 options).
+// Phase 2:  Select tread type          (5 options).
+// Phase 3:  Select armor type          (9 options).
+// Phase 4:  Select suspension type     (4 options).
+// Phase 5:  Select bumper type         (4 options).
+// Phase 6:  Select heat-sink count     (6 options).
+// Phase 7+: For each turret slot select a weapon.
 class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
 
 private:
    // Phase constants.
-   static const S32 PHASE_BODY     = 0;
-   static const S32 PHASE_ENGINE   = 1;
-   static const S32 PHASE_TREADS   = 2;
-   static const S32 PHASE_HEATSINK = 3;
-   static const S32 PHASE_WEAPONS  = 4;  // weapon slots start here
+   static const S32 PHASE_BODY       = 0;
+   static const S32 PHASE_ENGINE     = 1;
+   static const S32 PHASE_TREADS     = 2;
+   static const S32 PHASE_ARMOR      = 3;
+   static const S32 PHASE_SUSPENSION = 4;
+   static const S32 PHASE_BUMPERS    = 5;
+   static const S32 PHASE_HEATSINK   = 6;
+   static const S32 PHASE_WEAPONS    = 7;  // weapon slots start here
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
+
+   // Snapshot of the design when the helper was opened — restored on ESC.
+   XtankDesign mOriginalDesign;
 
    // Current phase (see phase constants above).
    S32 mPhase;
@@ -53,6 +59,9 @@ private:
    Vector<OverlayMenuItem> mBodyItems;
    Vector<OverlayMenuItem> mEngineItems;
    Vector<OverlayMenuItem> mTreadItems;
+   Vector<OverlayMenuItem> mArmorItems;
+   Vector<OverlayMenuItem> mSuspensionItems;
+   Vector<OverlayMenuItem> mBumperItems;
    Vector<OverlayMenuItem> mHeatSinkItems;
    Vector<OverlayMenuItem> mWeaponItems;
 
@@ -62,6 +71,12 @@ private:
    S32 mEngineItemsDisplayWidth;
    S32 mTreadButtonsWidth;
    S32 mTreadItemsDisplayWidth;
+   S32 mArmorButtonsWidth;
+   S32 mArmorItemsDisplayWidth;
+   S32 mSuspensionButtonsWidth;
+   S32 mSuspensionItemsDisplayWidth;
+   S32 mBumperButtonsWidth;
+   S32 mBumperItemsDisplayWidth;
    S32 mHeatSinkButtonsWidth;
    S32 mHeatSinkItemsDisplayWidth;
    S32 mWeaponButtonsWidth;
@@ -71,14 +86,23 @@ private:
    // item list.  Wraps within the valid range.  Cycled by UP/DOWN arrow keys.
    S32 mHighlightedIndex;
 
+   // Carousel transition animation state.
+   Timer mTransitionTimer;     // Tracks transition progress (0-1)
+   S32 mTransitionFromPhase;   // Previous phase before transition (-1 = no transition)
+   bool mTransitionForward;    // true = forward, false = backward
+
    void buildBodyItems();
    void buildEngineItems();
    void buildTreadItems();
+   void buildArmorItems();
+   void buildSuspensionItems();
+   void buildBumperItems();
    void buildHeatSinkItems();
    void buildWeaponItems();
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
-   void navigateForward();             // Move to next phase (carousel forward)
+   void commitHighlightedSelection();  // Save highlighted item into design before navigating
+   void navigateForward();             // Commit + move to next phase (carousel forward)
    void navigateBackward();            // Move to previous phase (carousel back)
    void applyDesign();                 // Finalise and propagate the chosen design
 
@@ -102,10 +126,15 @@ private:
                              S32 previewTreadIdx, S32 previewHeatSinks) const;
 
    // Draw custom floating-card selector UI (active center card + adjacent cards).
-   void renderFloatingMenus();
+   // transitionFraction: 0.0 = no transition, 1.0 = fully transitioned (for animation)
+   void renderFloatingMenus(F32 transitionFraction);
 
-   // Draw details/specs for the highlighted item inside the active center card.
-   void renderInlineHighlightedDetails(S32 left, S32 right, S32 yTop) const;
+   // Draw a single card at the given screen rect.
+   // centerFraction: 0.0=fully adjacent/background, 1.0=fully center/active
+   void renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 centerFraction) const;
+
+   // Draw detailed stats for the highlighted item (right column of center card).
+   void renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alpha = 1.0f) const;
 
    // Returns the item vector for a given phase.
    const Vector<OverlayMenuItem> *getItemsForPhase(S32 phase) const;
@@ -124,6 +153,7 @@ public:
 
    void onActivated();
    void render();
+   void idle(U32 delta);  // Update transition animation
    bool processInputCode(InputCode inputCode);
 
    void activateHelp(UIManager *uiManager);

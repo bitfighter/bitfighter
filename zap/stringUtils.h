@@ -18,6 +18,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <cmath>
 
 namespace Zap
 {
@@ -49,6 +50,27 @@ string itos(S64 i);
 string stripZeros(string str);
 string ftos(F32 f, int digits);
 string ftos(F32 f);
+
+// Convert numeric value to int and format with thousands-separator commas (e.g. 12345 -> "12,345").
+template<typename T>
+string comma(T n)
+{
+   S64 v = (S64)n;
+   string s = itos((S64)(v < 0 ? -v : v));
+
+   for (S32 i = (S32)s.size() - 3; i > 0; i -= 3)	  // Have to use S32 to avoid underflow when i goes below 0
+	  s.insert(i, ",");
+
+   if (v < 0)
+	  s.insert(0, "-");
+
+   return s;
+}
+
+// Helper to pass std::string to printf-style functions (%s format specifier).
+// Usage: drawStringf(..., "%s", cs(someString));
+//        drawStringf(..., "%s", cs(comma(n)));
+inline const char *cs(const string &s) { return s.c_str(); }
 
 F64 stof(const string &s);
 
@@ -103,7 +125,7 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 
 // By default we'll mimic the behavior or PHP.  Because that's something to aspire to!
 // http://lu1.php.net/trim
-#define DEFAULT_TRIM_CHARS " \n\r\t\0\x0B"   
+#define DEFAULT_TRIM_CHARS " \n\r\t\0\x0B"
 
 string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
@@ -134,11 +156,11 @@ string getExecutableDir();
 
 bool stringContainsAllTheSameCharacter(const string &str);
 
-string toString(const string &val);      
-string toString(S32 val);                
+string toString(const string &val);
+string toString(S32 val);
 string toString(DisplayMode displayMode);
-string toString(YesNo yesNo);            
-string toString(RelAbs relAbs); 
+string toString(YesNo yesNo);
+string toString(RelAbs relAbs);
 string toString(ColorEntryMode colorMode);
 
 bool isPrintable(char c);

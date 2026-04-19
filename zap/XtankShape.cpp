@@ -712,10 +712,12 @@ BumperStat bumperStat[] =
    bodyIndex = (S8)XtankBodyNone;
    for(S32 i = 0; i < 4; i++)
       weapons[i] = XtankWeaponNone;
-   engineType    = XtankEngineDefault;
-   treadType     = XtankTreadDefault;
-   heatSinkCount = (S8)XtankHeatSinkDefault;
-   armorType     = XtankArmorDefault;
+   engineType     = XtankEngineDefault;
+   treadType      = XtankTreadDefault;
+   heatSinkCount  = (S8)XtankHeatSinkDefault;
+   armorType      = XtankArmorDefault;
+   suspensionType = (S8)XtankSuspensionDefault;
+   bumperType     = (S8)XtankBumperDefault;
 }
 
 
@@ -736,6 +738,8 @@ void XtankDesign::initForBody(S32 bodyIdx)
    treadType     = XtankTreadDefault;
    heatSinkCount = (S8)XtankHeatSinkDefault;
    armorType     = XtankArmorDefault;
+   suspensionType = (S8)XtankSuspensionDefault;
+   bumperType     = (S8)XtankBumperDefault;
 }
 
 } /* namespace Zap */

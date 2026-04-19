@@ -369,6 +369,16 @@ namespace Zap
    extern XtankArmorInfo xtankArmorInfos[];
    extern HeatSinkStat heatSinkStat;
 
+   // Suspension: 4 options (Light, Normal, Heavy, Active)
+   static const S32 XtankSuspensionCount   = 4;
+   static const S32 XtankSuspensionDefault = 1;  // Normal
+   extern SuspensionStat suspensionStat[];
+
+   // Bumpers: 4 options (None, Normal, Rubber, Retro)
+   static const S32 XtankBumperCount   = 4;
+   static const S32 XtankBumperDefault = 0;  // None
+   extern BumperStat bumperStat[];
+
    // ---------------------------------------------------------------------------
    // Heat sinks: player-selectable count (1-6) that reduces weapon fire delay.
    // More heat sinks allow the weapons to cycle faster.
@@ -410,6 +420,8 @@ namespace Zap
       XtankTread treadType;   // selected tread type
       S8 heatSinkCount;       // number of heat sinks (1-6)
       XtankArmor armorType;
+      S8 suspensionType;      // index into suspensionStat[]
+      S8 bumperType;          // index into bumperStat[]
 
       XtankDesign();                 // Default constructor (bodyIndex = None)
       void initForBody(S32 bodyIdx); // Set body + reset all components to defaults
