@@ -191,6 +191,20 @@ TEST(StringUtilsTest, ftos)
 }
 
 
+TEST(StringUtilsTest, ftosBugReproduction)
+{
+   // Large digits value - could cause buffer overflow if not handled
+   // itos(200) is "200", format string becomes "%2.200f"
+   // outString has size 100.
+   string result = ftos(1.23456f, 200);
+   EXPECT_TRUE(result.length() < 100);
+
+   // Negative digits value
+   // itos(-1) is "-1", format string becomes "%2.-1f"
+   EXPECT_EQ("1.23456", ftos(1.23456f, -1));
+}
+
+
 TEST(StringUtilsTest, stof)
 {
    EXPECT_DOUBLE_EQ(1.23, stof("1.23"));
