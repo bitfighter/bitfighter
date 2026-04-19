@@ -350,6 +350,9 @@ void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 
 S32 FontManager::getStringLength(const char *string)
 {
+   if (string == nullptr || string == "")
+      return 0;
+
    BfFont *font = getFont(currentFontId);
 
    if(font->isStrokeFont())
@@ -361,6 +364,10 @@ S32 FontManager::getStringLength(const char *string)
 
 void FontManager::renderString(F32 size, const char *string)
 {
+   if (string == nullptr || string == "")
+      return;
+
+
    BfFont *font = getFont(currentFontId);
 
    if(font->isStrokeFont())
