@@ -102,7 +102,7 @@ bool Move::isEqualMove(const Move *move) const
    return move->x == x &&
           move->y == y &&
           move->angle == angle &&
-          move->fire == fire &&
+           move->fire == fire &&
            move->bodyIndex == bodyIndex &&
            move->engineType == engineType &&
            move->treadType == treadType &&

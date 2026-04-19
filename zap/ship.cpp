@@ -461,11 +461,16 @@ F32 Ship::processMove(U32 stateIndex)
 // The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
 F32 Ship::processTankMove(U32 stateIndex)
 {
+   const S32 engineIdx = MAX(0, MIN((S32)mXtankDesign.engineType, XtankEngineCount - 1));
+   const S32 treadIdx = MAX(0, MIN((S32)mXtankDesign.treadType, XtankTreadCount - 1));
+   const S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
+   const S32 suspensionIdx = MAX(0, MIN((S32)mXtankDesign.suspensionType, XtankSuspensionCount - 1));
+
    const XtankBodyInfo   &body   = body_stat[mXtankBodyIndex];
-   const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
-   const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
-   const XtankArmorInfo  &armor  = xtankArmorInfos[(S32)mXtankDesign.armorType];
-   const SuspensionStat  &suspension = suspensionStat[mXtankDesign.suspensionType];
+   const XtankEngineInfo &engine = xtankEngineInfos[engineIdx];
+   const XtankTreadInfo  &tread  = xtankTreadInfos[treadIdx];
+   const XtankArmorInfo  &armor  = xtankArmorInfos[armorIdx];
+   const SuspensionStat  &suspensionInfo = suspensionStat[suspensionIdx];
 
    F32 dt = mCurrentMove.time * 0.001f;
    if(dt <= 0)
@@ -513,7 +518,15 @@ F32 Ship::processTankMove(U32 stateIndex)
    // that feels right for hold-to-spin: ~3.5 rad/s for handling=8 (Lightcycle)
    // down to ~1.3 rad/s for handling=3 (Rhino/Panzy).
    static const F32 TURN_SCALE = 3.5f;  // target rad/s for handling/8 = 1.0
-   F32 xt_max_turn = (F32)(body.handling + suspension.friction) / 8.0f;
+   // suspensionInfo.friction is expected to stay in a small range [-1.0, 2.0].
+   TNLAssert(suspensionInfo.friction >= -1.0f && suspensionInfo.friction <= 2.0f,
+             "Unexpected suspension handling modifier");
+   static const F32 MIN_EFFECTIVE_HANDLING = 1.0f;
+   // body.handling values are currently 3..8; this lower bound keeps turn math stable
+   // even if future data pushes handling lower.
+   F32 bodyHandling = (F32)body.handling;
+   F32 effectiveHandling = MAX(MIN_EFFECTIVE_HANDLING, bodyHandling + suspensionInfo.friction);
+   F32 xt_max_turn = effectiveHandling / 8.0f;
 
    // --- Convert xtank per-frame units to BF per-second units ---
    // Xtank runs at ~20 fps.  BF_SCALE maps xtank distance to BF distance.
