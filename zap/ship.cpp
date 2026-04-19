@@ -348,19 +348,27 @@ F32 Ship::processMove(U32 stateIndex)
          }
       }
 
-      // Sync engine, tread and heat sink settings from the move.
+      // Sync engine/tread/heat sink/armor/suspension/bumper settings from the move.
       XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
       XtankTread newTread  = (XtankTread)(S32)mCurrentMove.treadType;
-
-      S8 newHS = mCurrentMove.heatSinkCount;
+      XtankArmor newArmor  = (XtankArmor)(S32)mCurrentMove.armorType;
+      S8 newSuspension     = mCurrentMove.suspensionType;
+      S8 newBumper         = mCurrentMove.bumperType;
+      S8 newHS             = mCurrentMove.heatSinkCount;
 
       if(newEngine != mXtankDesign.engineType ||
          newTread  != mXtankDesign.treadType  ||
-         newHS     != mXtankDesign.heatSinkCount)
+         newHS     != mXtankDesign.heatSinkCount ||
+         newArmor  != mXtankDesign.armorType ||
+         newSuspension != mXtankDesign.suspensionType ||
+         newBumper != mXtankDesign.bumperType)
       {
          mXtankDesign.engineType    = newEngine;
          mXtankDesign.treadType     = newTread;
          mXtankDesign.heatSinkCount = newHS;
+         mXtankDesign.armorType     = newArmor;
+         mXtankDesign.suspensionType = newSuspension;
+         mXtankDesign.bumperType     = newBumper;
          designChanged = true;
       }
 
@@ -457,6 +465,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
    const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
    const XtankArmorInfo  &armor  = xtankArmorInfos[(S32)mXtankDesign.armorType];
+   const SuspensionStat  &suspension = suspensionStat[mXtankDesign.suspensionType];
 
    F32 dt = mCurrentMove.time * 0.001f;
    if(dt <= 0)
@@ -504,7 +513,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    // that feels right for hold-to-spin: ~3.5 rad/s for handling=8 (Lightcycle)
    // down to ~1.3 rad/s for handling=3 (Rhino/Panzy).
    static const F32 TURN_SCALE = 3.5f;  // target rad/s for handling/8 = 1.0
-   F32 xt_max_turn = (F32)body.handling / 8.0f;
+   F32 xt_max_turn = (F32)(body.handling + suspension.friction) / 8.0f;
 
    // --- Convert xtank per-frame units to BF per-second units ---
    // Xtank runs at ~20 fps.  BF_SCALE maps xtank distance to BF distance.
@@ -1832,6 +1841,12 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
             stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeaponCount);
+         stream->writeRangedU32((U32)mXtankDesign.engineType, 0, XtankEngineCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.treadType, 0, XtankTreadCount - 1);
+         stream->writeRangedU32((U32)(mXtankDesign.heatSinkCount - XtankHeatSinkMin), 0, XtankHeatSinkMax - XtankHeatSinkMin);
+         stream->writeRangedU32((U32)mXtankDesign.armorType, 0, XtankArmorCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.suspensionType, 0, XtankSuspensionCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.bumperType, 0, XtankBumperCount - 1);
       }
    }
 
@@ -2027,6 +2042,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
             mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, XtankWeaponCount) - 1);
+         mXtankDesign.engineType = (XtankEngine)(S32)stream->readRangedU32(0, XtankEngineCount - 1);
+         mXtankDesign.treadType = (XtankTread)(S32)stream->readRangedU32(0, XtankTreadCount - 1);
+         mXtankDesign.heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + XtankHeatSinkMin);
+         mXtankDesign.armorType = (XtankArmor)(S32)stream->readRangedU32(0, XtankArmorCount - 1);
+         mXtankDesign.suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
+         mXtankDesign.bumperType = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
          mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
       }
       else
@@ -3524,4 +3545,3 @@ S32 Ship::lua_setTeam(lua_State *L)
 }
 
 };
-

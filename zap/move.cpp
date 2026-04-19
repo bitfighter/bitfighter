@@ -61,6 +61,9 @@ void Move::initialize()
    engineType    = (S8)XtankEngineDefault;
    treadType     = (S8)XtankTreadDefault;
    heatSinkCount = (S8)XtankHeatSinkDefault;
+   armorType     = (S8)XtankArmorDefault;
+   suspensionType = (S8)XtankSuspensionDefault;
+   bumperType     = (S8)XtankBumperDefault;
 }
 
 
@@ -100,10 +103,13 @@ bool Move::isEqualMove(const Move *move) const
           move->y == y &&
           move->angle == angle &&
           move->fire == fire &&
-          move->bodyIndex == bodyIndex &&
-          move->engineType == engineType &&
-          move->treadType == treadType &&
-          move->heatSinkCount == heatSinkCount;
+           move->bodyIndex == bodyIndex &&
+           move->engineType == engineType &&
+           move->treadType == treadType &&
+           move->heatSinkCount == heatSinkCount &&
+           move->armorType == armorType &&
+           move->suspensionType == suspensionType &&
+           move->bumperType == bumperType;
 }
 
 
@@ -152,6 +158,15 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
 
          // Heat sink count: 1..6, stored as 0..5
          stream->writeRangedU32((U32)(heatSinkCount - 1), 0, XtankHeatSinkMax - XtankHeatSinkMin);
+
+         // Armor type: 0..XtankArmorCount-1
+         stream->writeRangedU32((U32)armorType, 0, XtankArmorCount - 1);
+
+         // Suspension type: 0..XtankSuspensionCount-1
+         stream->writeRangedU32((U32)suspensionType, 0, XtankSuspensionCount - 1);
+
+         // Bumper type: 0..XtankBumperCount-1
+         stream->writeRangedU32((U32)bumperType, 0, XtankBumperCount - 1);
       }
    }
    if(packTime)
@@ -201,6 +216,9 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          engineType    = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
          treadType     = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
          heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + 1);
+         armorType     = (S8)stream->readRangedU32(0, XtankArmorCount - 1);
+         suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
+         bumperType     = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
       }
       else
       {
@@ -209,6 +227,9 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          engineType    = (S8)XtankEngineDefault;
          treadType     = (S8)XtankTreadDefault;
          heatSinkCount = (S8)XtankHeatSinkDefault;
+         armorType     = (S8)XtankArmorDefault;
+         suspensionType = (S8)XtankSuspensionDefault;
+         bumperType     = (S8)XtankBumperDefault;
       }
    }
 
@@ -251,4 +272,3 @@ string Move::toString()
 
 
 };
-

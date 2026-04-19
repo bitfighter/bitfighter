@@ -38,6 +38,9 @@ public:
    S8 engineType;    // XtankEngine::Type; valid when bodyIndex >= 0
    S8 treadType;     // XtankTread::Type; valid when bodyIndex >= 0
    S8 heatSinkCount; // heat sink count (1-6); valid when bodyIndex >= 0
+   S8 armorType;     // XtankArmor::Type; valid when bodyIndex >= 0
+   S8 suspensionType; // Xtank suspension index; valid when bodyIndex >= 0
+   S8 bumperType;     // Xtank bumper index; valid when bodyIndex >= 0
 
    static const S32 MaxMoveTime = 127;
 
@@ -54,5 +57,4 @@ public:
 };
 
 #endif
-
 
