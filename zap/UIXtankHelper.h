@@ -24,25 +24,28 @@ namespace Zap
 // Phase 1:  Select engine type         (16 options).
 // Phase 2:  Select tread type          (5 options).
 // Phase 3:  Select armor type          (9 options).
-// Phase 4:  Select suspension type     (4 options).
-// Phase 5:  Select bumper type         (4 options).
-// Phase 6:  Select heat-sink count     (6 options).
-// Phase 7+: For each turret slot select a weapon.
+// Phase 4:  Allocate armor budget across Front/Back/Left/Right (+/- to redistribute).
+// Phase 5:  Select suspension type     (4 options).
+// Phase 6:  Select bumper type         (4 options).
+// Phase 7:  Select special equipment   (12 toggleable options).
+// Phase 8:  Select heat-sink count     (6 options).
+// Phase 9+: For each turret slot select a weapon.
 class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
 
 private:
    // Phase constants.
-   static const S32 PHASE_BODY       = 0;
-   static const S32 PHASE_ENGINE     = 1;
-   static const S32 PHASE_TREADS     = 2;
-   static const S32 PHASE_ARMOR      = 3;
-   static const S32 PHASE_SUSPENSION = 4;
-   static const S32 PHASE_BUMPERS    = 5;
-   static const S32 PHASE_SPECIALS   = 6;
-   static const S32 PHASE_HEATSINK   = 7;
-   static const S32 PHASE_WEAPONS    = 8;  // weapon slots start here
+   static const S32 PHASE_BODY        = 0;
+   static const S32 PHASE_ENGINE      = 1;
+   static const S32 PHASE_TREADS      = 2;
+   static const S32 PHASE_ARMOR       = 3;
+   static const S32 PHASE_ARMOR_SIDES = 4;  // per-side armor point allocation
+   static const S32 PHASE_SUSPENSION  = 5;
+   static const S32 PHASE_BUMPERS     = 6;
+   static const S32 PHASE_SPECIALS    = 7;
+   static const S32 PHASE_HEATSINK    = 8;
+   static const S32 PHASE_WEAPONS     = 9;  // weapon slots start here
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -61,6 +64,7 @@ private:
    Vector<OverlayMenuItem> mEngineItems;
    Vector<OverlayMenuItem> mTreadItems;
    Vector<OverlayMenuItem> mArmorItems;
+   Vector<OverlayMenuItem> mArmorSidesItems;  // 4 items: Front/Back/Left/Right
    Vector<OverlayMenuItem> mSuspensionItems;
    Vector<OverlayMenuItem> mBumperItems;
    Vector<OverlayMenuItem> mSpecialsItems;
@@ -75,6 +79,8 @@ private:
    S32 mTreadItemsDisplayWidth;
    S32 mArmorButtonsWidth;
    S32 mArmorItemsDisplayWidth;
+   S32 mArmorSidesButtonsWidth;
+   S32 mArmorSidesItemsDisplayWidth;
    S32 mSuspensionButtonsWidth;
    S32 mSuspensionItemsDisplayWidth;
    S32 mBumperButtonsWidth;
@@ -99,6 +105,7 @@ private:
    void buildEngineItems();
    void buildTreadItems();
    void buildArmorItems();
+   void buildArmorSidesItems();  // 4 static items (Front/Back/Left/Right) for point allocation
    void buildSuspensionItems();
    void buildBumperItems();
    void buildSpecialsItems();

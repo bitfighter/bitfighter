@@ -1187,6 +1187,8 @@ void GameUserInterface::applyXtankDesign(const XtankDesign &design)
    mCurrentMove.bumperType     = design.bumperType;
    mCurrentMove.specials       = design.specials;
    for(S32 i = 0; i < 4; i++)
+      mCurrentMove.armorSides[i] = design.armorSides[i];
+   for(S32 i = 0; i < 4; i++)
       mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
 
    // Update the local ship immediately (client-side prediction).
