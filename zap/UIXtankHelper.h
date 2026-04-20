@@ -48,7 +48,7 @@ private:
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
    static const S32 PHASE_WEAPONS     = 9;   // final phase category; mWeaponSide selects slot
-   static const S32 TOTAL_PHASES      = 10;  // phase indices 0..9
+   static const S32 TOTAL_PHASES      = 10;  // phase count (indices 0..9)
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;

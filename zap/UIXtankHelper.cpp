@@ -1318,7 +1318,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    };
    auto phaseTitle = [&](S32 p) -> const char *
    {
-      if(p >= 0 && p < TOTAL_PHASES)
+      if(p >= 0 && p < (S32)ARRAYSIZE(sPhaseTitles))
          return sPhaseTitles[p];
       return "Weapon";
    };
