@@ -41,6 +41,7 @@ public:
    S8 armorType;     // XtankArmor::Type; valid when bodyIndex >= 0
    S8 suspensionType; // XtankSuspension index; valid when bodyIndex >= 0
    S8 bumperType;     // XtankBumper index; valid when bodyIndex >= 0
+   U16 specials;      // XtankSpecial bitmask; valid when bodyIndex >= 0
 
    static const S32 MaxMoveTime = 127;
 

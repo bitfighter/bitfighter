@@ -19,7 +19,7 @@
 //   - ship.h / ship.cpp  (mXtankBodyIndex/mXtankDesign fields, cycleXtankBody(), tank physics)
 //   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey; BINDING_LOADOUT xtank design menu)
 //   - move.h / move.cpp  (Move::bodyIndex, Move::weaponSlot[], Move::engineType,
-//                         Move::treadType, Move::heatSinkCount fields)
+//                         Move::treadType, Move::heatSinkCount, Move::specials fields)
 //   - gameWeapons.h/cpp  (GameWeapon::createXtankProjectile)
 //   - UIXtankHelper.h/cpp (vehicle design helper menu)
 //   - LoadoutIndicator.h/cpp (HUD panel)
@@ -410,8 +410,50 @@ namespace Zap
    // One entry per XtankBody value.
    extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBodyCount];
 
+   // ---------------------------------------------------------------------------
+   // Xtank special equipment: player-selectable extras that provide gameplay bonuses.
+   // Each special is independently toggleable (bitmask in XtankDesign::specials).
+   // ---------------------------------------------------------------------------
+   enum XtankSpecial
+   {
+      SPECIAL_CONSOLE     = 0,  // Chat/command access
+      SPECIAL_MAPPER      = 1,  // Show full map
+      SPECIAL_RADAR       = 2,  // Enhanced enemy detection
+      SPECIAL_REPAIR      = 3,  // Auto-repair over time
+      SPECIAL_RAMPLATE    = 4,  // Bonus damage when ramming
+      SPECIAL_HUD         = 5,  // Heads-up display upgrades
+      SPECIAL_STEALTH     = 6,  // Reduced sensor visibility
+      SPECIAL_NAVIGATION  = 7,  // Navigation aids
+      SPECIAL_NEW_RADAR   = 8,  // Next-gen radar
+      SPECIAL_TACLINK     = 9,  // Tactical data-link with allies
+      SPECIAL_CAMO        = 10, // Camouflage
+      SPECIAL_RDF         = 11, // Radio direction-finding
+      XtankSpecialCount   = 12,
+   };
+
+   struct XtankSpecialInfo
+   {
+      const char *name;        // Display name
+      const char *description; // Short gameplay effect description
+      S32 weight;              // Equipment weight
+      S32 space;               // Space required
+      S32 cost;                // Purchase cost
+   };
+
+   extern XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount];
+
+   inline bool hasSpecial(U16 specials, XtankSpecial s)
+   {
+      return (specials & (U16)(1u << (U32)s)) != 0;
+   }
+
+   inline U16 toggleSpecial(U16 specials, XtankSpecial s)
+   {
+      return specials ^ (U16)(1u << (U32)s);
+   }
+
    // The player's active vehicle configuration.  Stored in Ship and communicated
-   // via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount).
+   // via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount, specials).
    struct XtankDesign
    {
       S8 bodyIndex;           // XtankBody, -1 = normal BF ship
@@ -422,6 +464,8 @@ namespace Zap
       XtankArmor armorType;
       S8 suspensionType;      // index into suspensionStat[]
       S8 bumperType;          // index into bumperStat[]
+      U16 specials;           // bitmask of XtankSpecial bits
+      U8 armorSides[4];       // per-side armor points (front=0, back=1, left=2, right=3)
 
       XtankDesign();                 // Default constructor (bodyIndex = None)
       void initForBody(S32 bodyIdx); // Set body + reset all components to defaults

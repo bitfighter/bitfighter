@@ -348,20 +348,22 @@ F32 Ship::processMove(U32 stateIndex)
          }
       }
 
-      // Sync engine/tread/heat sink/armor/suspension/bumper settings from the move.
+      // Sync engine/tread/heat sink/armor/suspension/bumper/specials settings from the move.
       XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
       XtankTread newTread  = (XtankTread)(S32)mCurrentMove.treadType;
       XtankArmor newArmor  = (XtankArmor)(S32)mCurrentMove.armorType;
       S8 newSuspension     = mCurrentMove.suspensionType;
       S8 newBumper         = mCurrentMove.bumperType;
       S8 newHS             = mCurrentMove.heatSinkCount;
+      U16 newSpecials      = mCurrentMove.specials;
 
       if(newEngine != mXtankDesign.engineType ||
          newTread  != mXtankDesign.treadType  ||
          newHS     != mXtankDesign.heatSinkCount ||
          newArmor  != mXtankDesign.armorType ||
          newSuspension != mXtankDesign.suspensionType ||
-         newBumper != mXtankDesign.bumperType)
+         newBumper != mXtankDesign.bumperType ||
+         newSpecials != mXtankDesign.specials)
       {
          mXtankDesign.engineType    = newEngine;
          mXtankDesign.treadType     = newTread;
@@ -369,6 +371,7 @@ F32 Ship::processMove(U32 stateIndex)
          mXtankDesign.armorType     = newArmor;
          mXtankDesign.suspensionType = newSuspension;
          mXtankDesign.bumperType     = newBumper;
+         mXtankDesign.specials       = newSpecials;
          designChanged = true;
       }
 
@@ -1573,6 +1576,43 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Xtank body armor multiplier: heavy tanks absorb more damage
       if(mXtankBodyIndex >= 0)
          damageAmount *= xtankPhysicsInfos[mXtankBodyIndex].armor;
+
+      // Xtank directional armor: reduce damage based on which hull side was hit
+      if(mXtankBodyIndex >= 0 && theInfo->impulseVector.lenSquared() > 0)
+      {
+         // Determine which side of the ship was hit.
+         // impulseVector points FROM projectile TO ship (direction of impact).
+         Point hitDir = theInfo->impulseVector;
+         hitDir.normalize();
+
+         // Ship facing: heading 0 means nose points up (+y), so nose = (sin(h), cos(h)).
+         F32 heading = mTankHeadingAngle;
+         Point nose(sinf(heading), cosf(heading));
+         Point right(cosf(heading), -sinf(heading));  // 90 CW = right side
+
+         F32 dotFront = hitDir.dot(nose);   // +1 = hit from front, -1 = hit from back
+         F32 dotRight = hitDir.dot(right);  // +1 = hit from right, -1 = hit from left
+
+         // armorSides: 0=front, 1=back, 2=left, 3=right
+         S32 hitSide;
+         if(fabsf(dotFront) >= fabsf(dotRight))
+            hitSide = (dotFront >= 0) ? 0 : 1;  // front or back
+         else
+            hitSide = (dotRight >= 0) ? 3 : 2;  // right or left
+
+         U8 points = mXtankDesign.armorSides[hitSide];
+         if(points > 0)
+         {
+            S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
+            S32 defense = xtankArmorInfos[armorIdx].defense;
+            // Each armor point absorbs 'defense' hundredths of damage; capped at 80%.
+            F32 absorption = MIN(0.80f, (F32)(points * defense) / 100.0f);
+            damageAmount *= (1.0f - absorption);
+         }
+      }
+
+      // TODO: RAMPLATE special increases collision damage dealt; implement when
+      // ramming damage is applied from the attacker side.
    }
 
    // Healing (damageAmount < 0)
@@ -1860,6 +1900,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeRangedU32((U32)mXtankDesign.armorType, 0, XtankArmorCount - 1);
          stream->writeRangedU32((U32)mXtankDesign.suspensionType, 0, XtankSuspensionCount - 1);
          stream->writeRangedU32((U32)mXtankDesign.bumperType, 0, XtankBumperCount - 1);
+         stream->writeInt((U32)mXtankDesign.specials, 16);
       }
    }
 
@@ -2061,6 +2102,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mXtankDesign.armorType = (XtankArmor)(S32)stream->readRangedU32(0, XtankArmorCount - 1);
          mXtankDesign.suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
          mXtankDesign.bumperType = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
+         mXtankDesign.specials = (U16)stream->readInt(16);
          mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
       }
       else

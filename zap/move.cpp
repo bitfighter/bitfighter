@@ -64,6 +64,7 @@ void Move::initialize()
    armorType     = (S8)XtankArmorDefault;
    suspensionType = (S8)XtankSuspensionDefault;
    bumperType     = (S8)XtankBumperDefault;
+   specials       = 0;
 }
 
 
@@ -109,7 +110,8 @@ bool Move::isEqualMove(const Move *move) const
            move->heatSinkCount == heatSinkCount &&
            move->armorType == armorType &&
            move->suspensionType == suspensionType &&
-           move->bumperType == bumperType;
+           move->bumperType == bumperType &&
+           move->specials == specials;
 }
 
 
@@ -167,6 +169,9 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
 
          // Bumper type: 0..XtankBumperCount-1
          stream->writeRangedU32((U32)bumperType, 0, XtankBumperCount - 1);
+
+         // Specials bitmask: 0..4095 (12 bits used)
+         stream->writeInt(specials, 16);
       }
    }
    if(packTime)
@@ -219,6 +224,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          armorType     = (S8)stream->readRangedU32(0, XtankArmorCount - 1);
          suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
          bumperType     = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
+         specials       = (U16)stream->readInt(16);
       }
       else
       {
@@ -230,6 +236,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          armorType     = (S8)XtankArmorDefault;
          suspensionType = (S8)XtankSuspensionDefault;
          bumperType     = (S8)XtankBumperDefault;
+         specials       = 0;
       }
    }
 
