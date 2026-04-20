@@ -21,10 +21,6 @@
 
 #include <cmath>
 
-#ifdef TNL_OS_WIN32
-#  include <windows.h>     // For ARRAYSIZE
-#endif
-
 namespace Zap
 {
 
@@ -1319,7 +1315,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    };
    auto phaseTitle = [&](S32 p) -> const char *
    {
-      if(p >= 0 && p < (S32)ARRAYSIZE(sPhaseTitles))
+      if(p >= 0 && p < (S32)(sizeof(sPhaseTitles) / sizeof(sPhaseTitles[0])))
          return sPhaseTitles[p];
       return "Weapon";
    };
