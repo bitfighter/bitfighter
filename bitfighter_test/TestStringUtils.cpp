@@ -360,6 +360,10 @@ TEST(StringUtilsTest, parseStringAndStripLeadingSlash)
    EXPECT_EQ("cmd", result[0]);
    EXPECT_EQ("arg1", result[1]);
    EXPECT_EQ("arg2", result[2]);
+
+   // Bug fix: NULL input
+   result = parseStringAndStripLeadingSlash(NULL);
+   EXPECT_TRUE(result.empty());
 }
 
 
@@ -373,6 +377,9 @@ TEST(StringUtilsTest, findPointerOfArg)
    EXPECT_STREQ("", findPointerOfArg(msg, 4));
    EXPECT_STREQ("", findPointerOfArg(msg, 40));
    EXPECT_STREQ("", findPointerOfArg(msg, -1));
+
+   // Bug fix: NULL input
+   EXPECT_STREQ("", findPointerOfArg(NULL, 0));
 }
 
 
@@ -382,6 +389,9 @@ TEST(StringUtilsTest, concatenate)
    Vector<string> words(wordArry, ARRAYSIZE(wordArry));
    EXPECT_EQ("one two three", concatenate(words));
    EXPECT_EQ("two three", concatenate(words, 1));
+
+   // Bug fix: negative startingWith
+   EXPECT_EQ("one two three", concatenate(words, -1));
 }
 
 
@@ -572,6 +582,9 @@ TEST(StringUtilsTest, safeFilename)
    EXPECT_TRUE(safeFilename("file.txt"));
    EXPECT_FALSE(safeFilename("path/file.txt"));
    EXPECT_FALSE(safeFilename("path\\file.txt"));
+
+   // Bug fix: NULL input
+   EXPECT_FALSE(safeFilename(NULL));
 }
 
 
