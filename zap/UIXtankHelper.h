@@ -17,8 +17,21 @@ namespace Zap
 
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
+<<<<<<< HEAD
 // engines, treads, heat sinks, and weapons to each turret slot.  Supports
 // bidirectional carousel navigation (LEFT/RIGHT = phase navigation, ENTER = confirm).
+=======
+// engines, treads, heat sinks, and weapons to each turret slot / vehicle side.
+//
+// Navigation model:
+//   Tab / Shift-Tab  – advance / retreat through the phase carousel.
+//   LEFT / RIGHT     – in the Weapons phase: cycle through turret slots (sides);
+//                      in all other phases: same as Shift-Tab / Tab (phase nav).
+//   UP / DOWN        – cycle through the options within the current phase / slot.
+//   hotkeys (1-9, A-Z) – select an item directly, auto-advancing to the next slot.
+//   ENTER            – confirm design and apply; in Specials phase: toggle item.
+//   ESC              – cancel and restore previous design.
+>>>>>>> bcbbf813c (Add side-based weapon assignment UI for xtank vehicle designer (UIXtankHelper.h / .cpp))
 //
 // Phase 0:  Select a vehicle body      (14 options, keys 1-9,0,A-D).
 // Phase 1:  Select engine type         (16 options).
@@ -26,8 +39,14 @@ namespace Zap
 // Phase 3:  Select armor type          (9 options).
 // Phase 4:  Select suspension type     (4 options).
 // Phase 5:  Select bumper type         (4 options).
+<<<<<<< HEAD
 // Phase 6:  Select heat-sink count     (6 options).
 // Phase 7+: For each turret slot select a weapon.
+=======
+// Phase 6:  Select specials            (12 toggles).
+// Phase 7:  Select heat-sink count     (6 options).
+// Phase 8:  Assign weapons to turret slots (LEFT/RIGHT cycles sides/slots).
+>>>>>>> bcbbf813c (Add side-based weapon assignment UI for xtank vehicle designer (UIXtankHelper.h / .cpp))
 class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -42,7 +61,12 @@ private:
    static const S32 PHASE_BUMPERS    = 5;
    static const S32 PHASE_SPECIALS   = 6;
    static const S32 PHASE_HEATSINK   = 7;
+<<<<<<< HEAD
    static const S32 PHASE_WEAPONS    = 8;  // weapon slots start here
+=======
+   static const S32 PHASE_WEAPONS    = 8;  // single phase for all weapon slots
+   static const S32 TOTAL_PHASES     = 9;  // fixed: weapon slots handled within PHASE_WEAPONS
+>>>>>>> bcbbf813c (Add side-based weapon assignment UI for xtank vehicle designer (UIXtankHelper.h / .cpp))
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -56,6 +80,13 @@ private:
    // Number of turret slots on the selected body (set once the body is chosen).
    S32 mSlotCount;
 
+<<<<<<< HEAD
+=======
+   // Which weapon slot (0-based) is currently being configured in PHASE_WEAPONS.
+   // Left/Right arrows cycle this within [0, mSlotCount).
+   S32 mWeaponSide;
+
+>>>>>>> bcbbf813c (Add side-based weapon assignment UI for xtank vehicle designer (UIXtankHelper.h / .cpp))
    // Pre-built overlay item arrays — rebuilt in onActivated().
    Vector<OverlayMenuItem> mBodyItems;
    Vector<OverlayMenuItem> mEngineItems;
@@ -111,6 +142,13 @@ private:
    void navigateBackward();            // Move to previous phase (carousel back)
    void applyDesign();                 // Finalise and propagate the chosen design
 
+<<<<<<< HEAD
+=======
+   // Returns a human-readable side label ("Front", "Rear", "Left", "Right", or "Center")
+   // for a given turret slot on a given body, based on the turret's x/y mount position.
+   static const char *getTurretSideLabel(S32 bodyIdx, S32 slot);
+
+>>>>>>> bcbbf813c (Add side-based weapon assignment UI for xtank vehicle designer (UIXtankHelper.h / .cpp))
    // Restore mHighlightedIndex from mDesignInProgress when entering a phase.
    void setHighlightedIndexForPhase(S32 phase);
 
