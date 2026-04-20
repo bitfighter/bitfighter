@@ -405,6 +405,24 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
 }
 
 
+TEST(StringUtilsTest, caseInsensitiveStringCompareNonASCII)
+{
+   // Use characters with the high bit set, which would be negative if treated as signed char
+   std::string s1 = "test";
+   s1 += (char)0xDF;
+   std::string s2 = "TEST";
+   s2 += (char)0xDF;
+
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+
+   std::string s3 = "test";
+   s3 += (char)0xDF;
+   std::string s4 = "test";
+   s4 += (char)0xE0;
+   EXPECT_FALSE(caseInsensitiveStringCompare(s3, s4));
+}
+
+
 TEST(StringUtilsTest, countCharInString)
 {
    EXPECT_EQ(3, countCharInString("banana", 'a'));

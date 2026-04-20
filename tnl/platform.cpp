@@ -521,21 +521,21 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 
 int stricmp(const char *str1, const char *str2)
 {
-   while(toupper(*str1) == toupper(*str2) && *str1)
+   while(toupper((unsigned char)*str1) == toupper((unsigned char)*str2) && *str1)
    {
       str1++;
       str2++;
    }
-   return (toupper(*str1) > toupper(*str2)) ? 1 : ((toupper(*str1) < toupper(*str2)) ? -1 : 0);
+   return (toupper((unsigned char)*str1) > toupper((unsigned char)*str2)) ? 1 : ((toupper((unsigned char)*str1) < toupper((unsigned char)*str2)) ? -1 : 0);
 }
 
 int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
    for(unsigned int i = 0; i < len; i++)
    {
-      if(toupper(str1[i]) == toupper(str2[i]))
+      if(toupper((unsigned char)str1[i]) == toupper((unsigned char)str2[i]))
          continue;
-      return (toupper(str1[i]) > toupper(str2[i])) ? 1 : ((toupper(str1[i]) < toupper(str2[i])) ? -1 : 0);
+      return (toupper((unsigned char)str1[i]) > toupper((unsigned char)str2[i])) ? 1 : ((toupper((unsigned char)str1[i]) < toupper((unsigned char)str2[i])) ? -1 : 0);
    }
    return 0;
 }
