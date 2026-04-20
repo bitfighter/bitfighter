@@ -31,6 +31,9 @@ namespace Zap
 // Phase 7:  Select special equipment   (12 toggleable options).
 // Phase 8:  Select heat-sink count     (6 options).
 // Phase 9+: For each turret slot select a weapon.
+// Phase 6:  Select heat-sink count     (6 options).
+// Phase 7+: For each turret slot select a weapon.
+
 class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -47,6 +50,7 @@ private:
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
    static const S32 PHASE_WEAPONS     = 9;  // weapon slots start here
+   static const S32 PHASE_WEAPONS    = 8;  // weapon slots start here
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;

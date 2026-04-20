@@ -63,6 +63,23 @@ static const InputCode sHeatSinkKeys[XtankHeatSinkMax] =
 };
 
 
+// Returns a human-readable side label for a turret based on its mount position
+// in body space (+Y = forward/nose).  Thresholds are intentionally generous so
+// all layouts produce a useful label.
+const char *UIXtankHelper::getTurretSideLabel(S32 bodyIdx, S32 slot)
+{
+   if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) return "Slot";
+   const XtankBodyTurrets &bt = xtankTurretInfos[bodyIdx];
+   if(slot < 0 || slot >= bt.count) return "Slot";
+   F32 x = bt.turrets[slot].x;
+   F32 y = bt.turrets[slot].y;
+   if(fabsf(x) < 2.0f && fabsf(y) < 2.0f) return "Center";
+   if(fabsf(y) >= fabsf(x))
+      return (y > 0.0f) ? "Front" : "Rear";
+   return (x > 0.0f) ? "Right" : "Left";
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -71,6 +88,7 @@ UIXtankHelper::UIXtankHelper()
 {
    mPhase      = 0;
    mSlotCount  = 0;
+   mWeaponSide = 0;
    mHighlightedIndex = 0;
    mTransitionFromPhase = -1;
    mTransitionForward = true;
@@ -445,6 +463,7 @@ void UIXtankHelper::onActivated()
 {
    mPhase = 0;
    mHighlightedIndex = 0;
+   mWeaponSide = 0;
 
    // Pre-populate the design from the ship's current state.
    Ship *ship = getGame()->getLocalPlayerShip();
@@ -607,15 +626,15 @@ void UIXtankHelper::commitHighlightedSelection()
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mHeatSinkItems.size())
          mDesignInProgress.heatSinkCount = (S8)(mHighlightedIndex + XtankHeatSinkMin);
    }
-   else
+   else  // PHASE_WEAPONS
    {
-      S32 slot = mPhase - PHASE_WEAPONS;
-      if(slot >= 0 && slot < kXtankMaxWeaponSlots && mHighlightedIndex >= 0 && mHighlightedIndex < mWeaponItems.size())
+      if(mWeaponSide >= 0 && mWeaponSide < kXtankMaxWeaponSlots &&
+         mHighlightedIndex >= 0 && mHighlightedIndex < mWeaponItems.size())
       {
          if(mHighlightedIndex == 0)
-            mDesignInProgress.weapons[slot] = XtankWeaponNone;
+            mDesignInProgress.weapons[mWeaponSide] = XtankWeaponNone;
          else
-            mDesignInProgress.weapons[slot] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
+            mDesignInProgress.weapons[mWeaponSide] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
       }
    }
 }
@@ -653,21 +672,54 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       return true;
    }
 
-   // LEFT / BACKSPACE / SHIFT-TAB: carousel backward navigation (commits current selection).
    bool shiftDown = InputCodeManager::checkModifier(KEY_SHIFT);
-   if(inputCode == KEY_LEFT || inputCode == KEY_BACKSPACE ||
-      (inputCode == KEY_TAB && shiftDown))
+
+   // TAB / SHIFT-TAB: always navigate the phase carousel (forward / backward).
+   if(inputCode == KEY_TAB)
    {
       commitHighlightedSelection();
-      navigateBackward();
+      if(shiftDown)
+         navigateBackward();
+      else
+         navigateForward();
       return true;
    }
 
-   // RIGHT / TAB: carousel forward navigation (commits current selection).
-   if(inputCode == KEY_RIGHT || (inputCode == KEY_TAB && !shiftDown))
+   // LEFT / BACKSPACE:
+   //   • In PHASE_WEAPONS with multiple slots: cycle to the previous weapon slot (side).
+   //   • Everywhere else: carousel backward (same as Shift-Tab).
+   if(inputCode == KEY_LEFT || inputCode == KEY_BACKSPACE)
    {
-      commitHighlightedSelection();
-      navigateForward();
+      if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
+      {
+         commitHighlightedSelection();
+         mWeaponSide = (mWeaponSide - 1 + mSlotCount) % mSlotCount;
+         setHighlightedIndexForPhase(PHASE_WEAPONS);
+      }
+      else
+      {
+         commitHighlightedSelection();
+         navigateBackward();
+      }
+      return true;
+   }
+
+   // RIGHT:
+   //   • In PHASE_WEAPONS with multiple slots: cycle to the next weapon slot (side).
+   //   • Everywhere else: carousel forward (same as Tab).
+   if(inputCode == KEY_RIGHT)
+   {
+      if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
+      {
+         commitHighlightedSelection();
+         mWeaponSide = (mWeaponSide + 1) % mSlotCount;
+         setHighlightedIndexForPhase(PHASE_WEAPONS);
+      }
+      else
+      {
+         commitHighlightedSelection();
+         navigateForward();
+      }
       return true;
    }
 
@@ -831,19 +883,27 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
          }
       }
    }
-   else
+   else if(mPhase == PHASE_WEAPONS)
    {
-      S32 slot = mPhase - PHASE_WEAPONS;
+      // Hotkeys assign a weapon to the current side/slot and advance to the next slot,
+      // or navigate forward if the last slot has been assigned.
       for(S32 i = 0; i < mWeaponItems.size(); i++)
       {
          if(inputCode == mWeaponItems[i].key)
          {
             if(i == 0)
-               mDesignInProgress.weapons[slot] = XtankWeaponNone;
+               mDesignInProgress.weapons[mWeaponSide] = XtankWeaponNone;
             else
-               mDesignInProgress.weapons[slot] = (XtankWeapon)mWeaponItems[i].itemIndex;
+               mDesignInProgress.weapons[mWeaponSide] = (XtankWeapon)mWeaponItems[i].itemIndex;
             mHighlightedIndex = i;
-            navigateForward();
+            // Advance to next slot, or leave weapon phase if last slot done.
+            if(mSlotCount > 1 && mWeaponSide < mSlotCount - 1)
+            {
+               mWeaponSide++;
+               setHighlightedIndexForPhase(PHASE_WEAPONS);
+            }
+            else
+               navigateForward();
             return true;
          }
       }
@@ -862,8 +922,8 @@ void UIXtankHelper::advanceToNextPhaseOrFinish()
 
 void UIXtankHelper::navigateForward()
 {
-   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
-   if(totalPhases < 1)
+   // All weapon slots are now handled within the single PHASE_WEAPONS phase.
+   if(TOTAL_PHASES < 1)
       return;
 
    // Start transition animation
@@ -871,7 +931,12 @@ void UIXtankHelper::navigateForward()
    mTransitionForward = true;
    mTransitionTimer.reset(250);  // 250ms transition
 
-   mPhase = (mPhase + 1) % totalPhases;
+   mPhase = (mPhase + 1) % TOTAL_PHASES;
+
+   // When entering the weapons phase (from any other phase), start at slot 0.
+   if(mPhase == PHASE_WEAPONS)
+      mWeaponSide = 0;
+
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
    resetScrollTimer();
@@ -883,14 +948,18 @@ void UIXtankHelper::navigateForward()
 // existing design so the player sees their previous choice pre-selected.
 void UIXtankHelper::navigateBackward()
 {
-   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
-
    // Start transition animation
    mTransitionFromPhase = mPhase;
    mTransitionForward = false;
    mTransitionTimer.reset(250);  // 250ms transition
 
-   mPhase = (mPhase - 1 + totalPhases) % totalPhases;
+   mPhase = (mPhase - 1 + TOTAL_PHASES) % TOTAL_PHASES;
+
+   // When entering the weapons phase from another phase, start at the last slot
+   // so backward navigation feels natural (most-recently assigned slot).
+   if(mPhase == PHASE_WEAPONS)
+      mWeaponSide = MAX(0, mSlotCount - 1);
+
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
    resetScrollTimer();
@@ -965,9 +1034,9 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
    {
       mHighlightedIndex = (S32)mDesignInProgress.heatSinkCount - XtankHeatSinkMin;
    }
-   else
+   else  // PHASE_WEAPONS: read from mWeaponSide (caller sets mWeaponSide before calling)
    {
-      S32 slot = phase - PHASE_WEAPONS;
+      S32 slot = mWeaponSide;
       if(slot < 0 || slot >= (S32)(sizeof(mDesignInProgress.weapons) / sizeof(mDesignInProgress.weapons[0])))
       {
          mHighlightedIndex = 0;
@@ -1071,15 +1140,15 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
       if(n > XtankHeatSinkMax) n = XtankHeatSinkMax;
       return std::string("Heat Sinks: ") + itos(n);
    }
-   S32 slot = phase - PHASE_WEAPONS;
-   if(slot < 0 || slot >= kXtankMaxWeaponSlots || slot >= mSlotCount)
-      return "";
-   XtankWeapon w = mDesignInProgress.weapons[slot];
-   if(w == XtankWeaponNone)
-      return "None";
-   if((S32)w < 0 || (S32)w >= XtankWeaponCount)
-      return "None";
-   return xtankWeaponInfos[(S32)w].name;
+   if(phase == PHASE_WEAPONS)
+   {
+      // Show a summary of how many weapon slots are filled.
+      S32 filled = 0;
+      for(S32 i = 0; i < mSlotCount && i < kXtankMaxWeaponSlots; i++)
+         if(mDesignInProgress.weapons[i] != XtankWeaponNone) filled++;
+      return itos(filled) + "/" + itos(mSlotCount) + " armed";
+   }
+   return "";
 }
 
 
@@ -1236,7 +1305,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    // Approximate available list height on the center card (matches SLOT C geometry: bot=595, top=135).
    static const S32 CTR_LIST_AVAIL = 595 - 6 - (135 + 8 + TITLE_SZ + 4 + 6);  // 595-6-169 = 420
 
-   // Phase title — one entry per non-weapon phase, plus per-slot weapon buffers.
+   // Phase title — one entry per non-weapon phase; PHASE_WEAPONS gets a single title.
    static const char *sPhaseTitles[] =
    {
       "Body",         // 0
@@ -1249,17 +1318,10 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       "Specials",     // 7
       "Heat Sinks",   // 8
    };
-   static char sWeaponTitles[8][24];
    auto phaseTitle = [&](S32 p) -> const char *
    {
-      if(p >= 0 && p < PHASE_WEAPONS)
+      if(p >= 0 && p < TOTAL_PHASES)
          return sPhaseTitles[p];
-      S32 slot = p - PHASE_WEAPONS;
-      if(slot >= 0 && slot < 8)
-      {
-         dSprintf(sWeaponTitles[slot], sizeof(sWeaponTitles[slot]), "Weapon %d", slot + 1);
-         return sWeaponTitles[slot];
-      }
       return "Weapon";
    };
 
@@ -1291,9 +1353,27 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       return;
 
    const S32 count   = items->size();
-   const S32 listTop = divY + 6;
+   S32 listTop = divY + 6;
    // Use a small fixed bottom margin; blank space accumulates below items.
    const S32 listBot = bot - 6;
+
+   // Weapons phase (center card only): draw a slot-selector banner above the weapon list
+   // so the player knows which slot they are configuring and can cycle with LEFT/RIGHT.
+   if(isCenter && phase == PHASE_WEAPONS)
+   {
+      static char slotBuf[64];
+      S32 bodyIdx = mDesignInProgress.bodyIndex;
+      if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) bodyIdx = 0;
+      const char *sideName = getTurretSideLabel(bodyIdx, mWeaponSide);
+      dSprintf(slotBuf, sizeof(slotBuf), "\x11  Slot %d / %d : %s  \x10",
+               mWeaponSide + 1, mSlotCount, sideName);
+      r.setColor(Colors::cyan);
+      drawCenteredString(cx, listTop, ITEM_SZ, slotBuf);
+      listTop += ITEM_SZ + 8;  // push the weapon list down past the banner
+      r.setColor(Colors::gray40);
+      drawHorizLine(left + 8, right - 8, listTop - 3);
+   }
+
    const S32 avail   = listBot - listTop;
 
    // Center card: fixed CTR_ROW_GAP so all menus look the same.
@@ -1425,7 +1505,7 @@ void UIXtankHelper::renderFloatingMenus(F32 /*unused*/)
       { 910,  55,  210, 520,  0.0f },  // 4 = R2  off-screen
    };
 
-   const S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
+   const S32 totalPhases = TOTAL_PHASES;
 
    // Smoothstepped elapsed fraction: 0 at start of transition, 1 at end.
    F32 t = 0.0f;
@@ -1577,9 +1657,9 @@ void UIXtankHelper::renderPreviewPanel() const
    {
       preview.heatSinkCount = (S8)(mHighlightedIndex + XtankHeatSinkMin);
    }
-   else
+   else  // PHASE_WEAPONS: preview the weapon currently highlighted for the active side
    {
-      S32 slot = mPhase - PHASE_WEAPONS;
+      S32 slot = mWeaponSide;
       if(slot >= 0 && slot < kXtankMaxWeaponSlots)
       {
          if(mHighlightedIndex <= 0) preview.weapons[slot] = XtankWeaponNone;
@@ -1713,13 +1793,16 @@ void UIXtankHelper::renderPreviewPanel() const
    for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
    {
       XtankWeapon w = preview.weapons[i];
-      // Highlight the slot being edited
-      bool activeSlot = (mPhase >= PHASE_WEAPONS && (mPhase - PHASE_WEAPONS) == i);
+      // Highlight whichever slot is being edited in PHASE_WEAPONS.
+      bool activeSlot = (mPhase == PHASE_WEAPONS && mWeaponSide == i);
+      S32 bodyIdx2 = preview.bodyIndex;
+      if(bodyIdx2 < 0 || bodyIdx2 >= XtankBodyCount) bodyIdx2 = 0;
+      const char *sideName = getTurretSideLabel(bodyIdx2, i);
       r.setColor(activeSlot ? Colors::overlayMenuSelectedItemColor : Colors::cyan);
       if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount)
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Slot %d: --", i + 1);
+         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "%s: --", sideName);
       else
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Slot %d: %s", i + 1, xtankWeaponInfos[(S32)w].name);
+         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "%s: %s", sideName, xtankWeaponInfos[(S32)w].name);
       ty += LINE_GAP;
    }
 
@@ -1738,7 +1821,10 @@ void UIXtankHelper::renderPreviewPanel() const
    renderCarouselDots(PNL_CX, DOTS_Y);
 
    r.setColor(Colors::gray50);
-   drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  [Lt]/[Rt] carousel");
+   if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
+      drawCenteredStringf(PNL_CX, HINT_Y, 11, "[Lt]/[Rt] slot  [Up]/[Dn] weapon  Tab phase");
+   else
+      drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  Tab/[Lt]/[Rt] phase");
 
    FontManager::popFontContext();
 }
@@ -1747,7 +1833,7 @@ void UIXtankHelper::renderPreviewPanel() const
 // Since phase navigation wraps, both arrows are always active.
 void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
 {
-   S32 totalPhases = PHASE_WEAPONS + (mSlotCount > 0 ? mSlotCount : 4);
+   S32 totalPhases = TOTAL_PHASES;
 
    static const F32 DOT_R      = 4.0f;
    static const F32 DOT_R_SM   = 3.0f;
