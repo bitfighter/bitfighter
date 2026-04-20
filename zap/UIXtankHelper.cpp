@@ -924,9 +924,6 @@ void UIXtankHelper::advanceToNextPhaseOrFinish()
 void UIXtankHelper::navigateForward()
 {
    // All weapon slots are now handled within the single PHASE_WEAPONS phase.
-   if(TOTAL_PHASES < 1)
-      return;
-
    // Start transition animation
    mTransitionFromPhase = mPhase;
    mTransitionForward = true;
