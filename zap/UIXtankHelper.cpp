@@ -1267,7 +1267,7 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       if(n < XtankHeatSinkMin) n = XtankHeatSinkMin;
       if(n > XtankHeatSinkMax) n = XtankHeatSinkMax;
       drawStringf(left, y, STAT_SZ, "Count: %d", n);                                                                  y += GAP;
-      drawStringf(left, y, STAT_SZ, "Fire rate +%:d%%", S32((1.0f - xtankHeatSinkFireDelayMult(n)) * 100.0f + 0.5f)); y += GAP;
+      drawStringf(left, y, STAT_SZ, "Fire rate +%d%%", S32((1.0f - xtankHeatSinkFireDelayMult(n)) * 100.0f + 0.5f)); y += GAP;
       drawStringf(left, y, STAT_SZ, "Weight: %s", cs(comma(heatSinkStat.weight * n)));                                y += GAP;
       drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(heatSinkStat.cost * n)));                                    y += GAP;
    }
