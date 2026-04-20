@@ -159,6 +159,9 @@ if(NOT SQLITE3_FOUND)
 endif()
 
 
+# libtommath (in-tree)
+add_subdirectory(libtommath)
+
 # libtomcrypt
 find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
 if(NOT TOMCRYPT_FOUND)

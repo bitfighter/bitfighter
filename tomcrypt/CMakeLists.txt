@@ -1,29 +1,4 @@
-# libtommath is required for the in-tree libtomcrypt build.
-# If not found via find_package, provide a hint:
-#   cmake -DTOMMATH_ROOT=/path/to/libtommath ..
-# or install it with:
-#   Ubuntu/Debian: sudo apt install libtommath-dev
-#   macOS:         brew install libtommath
-#   Windows (vcpkg): vcpkg install libtommath
-find_path(TOMMATH_INCLUDE_DIR tommath.h
-    HINTS ${TOMMATH_ROOT}/include ${TOMMATH_ROOT}
-          /usr/include /usr/local/include)
-find_library(TOMMATH_LIBRARY
-    NAMES tommath
-    HINTS ${TOMMATH_ROOT}/lib ${TOMMATH_ROOT}
-          /usr/lib /usr/local/lib)
-
-if(NOT TOMMATH_INCLUDE_DIR OR NOT TOMMATH_LIBRARY)
-    message(FATAL_ERROR
-        "libtommath not found. The in-tree libtomcrypt 1.18.2 requires "
-        "libtommath for big-integer arithmetic (ECC/RSA).\n"
-        "  Ubuntu/Debian: sudo apt install libtommath-dev\n"
-        "  macOS:         brew install libtommath\n"
-        "  Windows:       vcpkg install libtommath\n"
-        "Or set TOMMATH_ROOT to the install prefix.")
-endif()
-
-message(STATUS "Found libtommath: ${TOMMATH_LIBRARY} (headers: ${TOMMATH_INCLUDE_DIR})")
+# libtommath is built in-tree from the libtommath/ subdirectory.
 
 add_library(tomcrypt STATIC
 ${CMAKE_CURRENT_SOURCE_DIR}/src/ciphers/aes/aes.c
@@ -205,7 +180,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_argchk.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_cipher_descriptor.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_cipher_is_valid.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_constants.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_find_cipher.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_find_cipher_any.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_find_cipher_id.c
@@ -217,18 +191,12 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_find_prng.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_fsa.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_hash_descriptor.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_hash_is_valid.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_inits.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_ltc_mp_descriptor.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_prng_descriptor.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_prng_is_valid.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_prng_rng_descriptor.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_all_ciphers.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_all_hashes.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_all_prngs.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_cipher.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_hash.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_register_prng.c
-${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_sizes.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_unregister_cipher.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_unregister_hash.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/misc/crypt/crypt_unregister_prng.c
@@ -444,7 +412,7 @@ target_include_directories(tomcrypt
     SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/headers
     PRIVATE
-    ${TOMMATH_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/libtommath
 )
 
 # Keep warning policy strict for project code, but suppress third-party warnings.
@@ -478,6 +446,4 @@ set_source_files_properties(
     COMPILE_DEFINITIONS "ENCRYPT_ONLY"
 )
 
-# Expose libtommath to consumers of the tomcrypt target
-set(TOMMATH_LIBRARY "${TOMMATH_LIBRARY}" CACHE INTERNAL "")
-target_link_libraries(tomcrypt PUBLIC ${TOMMATH_LIBRARY})
+target_link_libraries(tomcrypt PUBLIC tommath)
