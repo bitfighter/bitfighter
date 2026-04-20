@@ -21,7 +21,7 @@ namespace Zap
 // bidirectional carousel navigation (Tab/Shift-Tab or arrow keys = phase navigation,
 // Enter = confirm, Esc = cancel).
 //
-// Phase 0:  Select a vehicle body      (14 options, keys 1-9,0,A-D).
+// Phase 0:  Select a vehicle body      (14 options; keys 1-9,0,A-D).
 // Phase 1:  Select engine type         (16 options).
 // Phase 2:  Select tread type          (5 options).
 // Phase 3:  Select armor type          (9 options).
@@ -48,7 +48,7 @@ private:
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
    static const S32 PHASE_WEAPONS     = 9;   // final phase category; mWeaponSide selects slot
-   static const S32 TOTAL_PHASES      = 10;  // phase count (indices 0..9)
+   static const S32 TOTAL_PHASES      = 10;  // total number of phases (indices 0..9)
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;

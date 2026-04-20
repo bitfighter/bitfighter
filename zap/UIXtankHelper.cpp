@@ -1304,6 +1304,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    static const S32 CTR_LIST_AVAIL = 595 - 6 - (135 + 8 + TITLE_SZ + 4 + 6);  // 595-6-169 = 420
 
    // Phase title — one entry per non-weapon phase; PHASE_WEAPONS gets a single title.
+   // Non-weapon phase titles only (0..PHASE_HEATSINK). PHASE_WEAPONS uses fallback below.
    static const char *sPhaseTitles[] =
    {
       "Body",         // 0
