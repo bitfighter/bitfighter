@@ -357,13 +357,19 @@ F32 Ship::processMove(U32 stateIndex)
       S8 newHS             = mCurrentMove.heatSinkCount;
       U16 newSpecials      = mCurrentMove.specials;
 
+      bool armorSidesChanged = false;
+      for(S32 i = 0; i < 4; i++)
+         if(mCurrentMove.armorSides[i] != mXtankDesign.armorSides[i])
+            armorSidesChanged = true;
+
       if(newEngine != mXtankDesign.engineType ||
          newTread  != mXtankDesign.treadType  ||
          newHS     != mXtankDesign.heatSinkCount ||
          newArmor  != mXtankDesign.armorType ||
          newSuspension != mXtankDesign.suspensionType ||
          newBumper != mXtankDesign.bumperType ||
-         newSpecials != mXtankDesign.specials)
+         newSpecials != mXtankDesign.specials ||
+         armorSidesChanged)
       {
          mXtankDesign.engineType    = newEngine;
          mXtankDesign.treadType     = newTread;
@@ -372,6 +378,8 @@ F32 Ship::processMove(U32 stateIndex)
          mXtankDesign.suspensionType = newSuspension;
          mXtankDesign.bumperType     = newBumper;
          mXtankDesign.specials       = newSpecials;
+         for(S32 i = 0; i < 4; i++)
+            mXtankDesign.armorSides[i] = mCurrentMove.armorSides[i];
          designChanged = true;
       }
 
@@ -488,9 +496,11 @@ F32 Ship::processTankMove(U32 stateIndex)
       if(w != XtankWeaponNone)
          weaponWeight += xtankWeaponInfos[(S32)w].weight;
    }
-   // Approximate armor weight: body.size * 30 armor points at selected type weight-per-point.
-   // (Full xtank has per-side armor amounts; this is a reasonable default.)
-   S32 armorWeight = body.size * 30 * armor.weight;
+   // Actual armor weight: sum of per-side armor points * weight-per-point for the selected type.
+   S32 totalArmorPts = 0;
+   for(S32 i = 0; i < 4; i++)
+      totalArmorPts += (S32)mXtankDesign.armorSides[i];
+   S32 armorWeight = totalArmorPts * armor.weight;
 
    S32 totalWeight = body.weight + engine.weight + weaponWeight
                    + armorWeight + heatSinkStat.weight * mXtankDesign.heatSinkCount;
