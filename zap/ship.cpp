@@ -348,19 +348,30 @@ F32 Ship::processMove(U32 stateIndex)
          }
       }
 
-      // Sync engine, tread and heat sink settings from the move.
+      // Sync engine/tread/heat sink/armor/suspension/bumper/specials settings from the move.
       XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
       XtankTread newTread  = (XtankTread)(S32)mCurrentMove.treadType;
-
-      S8 newHS = mCurrentMove.heatSinkCount;
+      XtankArmor newArmor  = (XtankArmor)(S32)mCurrentMove.armorType;
+      S8 newSuspension     = mCurrentMove.suspensionType;
+      S8 newBumper         = mCurrentMove.bumperType;
+      S8 newHS             = mCurrentMove.heatSinkCount;
+      U16 newSpecials      = mCurrentMove.specials;
 
       if(newEngine != mXtankDesign.engineType ||
          newTread  != mXtankDesign.treadType  ||
-         newHS     != mXtankDesign.heatSinkCount)
+         newHS     != mXtankDesign.heatSinkCount ||
+         newArmor  != mXtankDesign.armorType ||
+         newSuspension != mXtankDesign.suspensionType ||
+         newBumper != mXtankDesign.bumperType ||
+         newSpecials != mXtankDesign.specials)
       {
          mXtankDesign.engineType    = newEngine;
          mXtankDesign.treadType     = newTread;
          mXtankDesign.heatSinkCount = newHS;
+         mXtankDesign.armorType     = newArmor;
+         mXtankDesign.suspensionType = newSuspension;
+         mXtankDesign.bumperType     = newBumper;
+         mXtankDesign.specials       = newSpecials;
          designChanged = true;
       }
 
@@ -453,10 +464,16 @@ F32 Ship::processMove(U32 stateIndex)
 // The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
 F32 Ship::processTankMove(U32 stateIndex)
 {
+   const S32 engineIdx = MAX(0, MIN((S32)mXtankDesign.engineType, XtankEngineCount - 1));
+   const S32 treadIdx = MAX(0, MIN((S32)mXtankDesign.treadType, XtankTreadCount - 1));
+   const S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
+   const S32 suspensionIdx = MAX(0, MIN((S32)mXtankDesign.suspensionType, XtankSuspensionCount - 1));
+
    const XtankBodyInfo   &body   = body_stat[mXtankBodyIndex];
-   const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
-   const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
-   const XtankArmorInfo  &armor  = xtankArmorInfos[(S32)mXtankDesign.armorType];
+   const XtankEngineInfo &engine = xtankEngineInfos[engineIdx];
+   const XtankTreadInfo  &tread  = xtankTreadInfos[treadIdx];
+   const XtankArmorInfo  &armor  = xtankArmorInfos[armorIdx];
+   const SuspensionStat  &suspensionInfo = suspensionStat[suspensionIdx];
 
    F32 dt = mCurrentMove.time * 0.001f;
    if(dt <= 0)
@@ -504,7 +521,15 @@ F32 Ship::processTankMove(U32 stateIndex)
    // that feels right for hold-to-spin: ~3.5 rad/s for handling=8 (Lightcycle)
    // down to ~1.3 rad/s for handling=3 (Rhino/Panzy).
    static const F32 TURN_SCALE = 3.5f;  // target rad/s for handling/8 = 1.0
-   F32 xt_max_turn = (F32)body.handling / 8.0f;
+   // suspensionInfo.friction is expected to stay in a small range [-1.0, 2.0].
+   TNLAssert(suspensionInfo.friction >= -1.0f && suspensionInfo.friction <= 2.0f,
+             "Unexpected suspension handling modifier");
+   static const F32 MIN_EFFECTIVE_HANDLING = 1.0f;
+   // body.handling values are currently 3..8; this lower bound keeps turn math stable
+   // even if future data pushes handling lower.
+   F32 bodyHandling = (F32)body.handling;
+   F32 effectiveHandling = MAX(MIN_EFFECTIVE_HANDLING, bodyHandling + suspensionInfo.friction);
+   F32 xt_max_turn = effectiveHandling / 8.0f;
 
    // --- Convert xtank per-frame units to BF per-second units ---
    // Xtank runs at ~20 fps.  BF_SCALE maps xtank distance to BF distance.
@@ -1551,6 +1576,43 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Xtank body armor multiplier: heavy tanks absorb more damage
       if(mXtankBodyIndex >= 0)
          damageAmount *= xtankPhysicsInfos[mXtankBodyIndex].armor;
+
+      // Xtank directional armor: reduce damage based on which hull side was hit
+      if(mXtankBodyIndex >= 0 && theInfo->impulseVector.lenSquared() > 0)
+      {
+         // Determine which side of the ship was hit.
+         // impulseVector points FROM projectile TO ship (direction of impact).
+         Point hitDir = theInfo->impulseVector;
+         hitDir.normalize();
+
+         // Ship facing: heading 0 means nose points up (+y), so nose = (sin(h), cos(h)).
+         F32 heading = mTankHeadingAngle;
+         Point nose(sinf(heading), cosf(heading));
+         Point right(cosf(heading), -sinf(heading));  // 90 CW = right side
+
+         F32 dotFront = hitDir.dot(nose);   // +1 = hit from front, -1 = hit from back
+         F32 dotRight = hitDir.dot(right);  // +1 = hit from right, -1 = hit from left
+
+         // armorSides: 0=front, 1=back, 2=left, 3=right
+         S32 hitSide;
+         if(fabsf(dotFront) >= fabsf(dotRight))
+            hitSide = (dotFront >= 0) ? 0 : 1;  // front or back
+         else
+            hitSide = (dotRight >= 0) ? 3 : 2;  // right or left
+
+         U8 points = mXtankDesign.armorSides[hitSide];
+         if(points > 0)
+         {
+            S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
+            S32 defense = xtankArmorInfos[armorIdx].defense;
+            // Each armor point absorbs 'defense' hundredths of damage; capped at 80%.
+            F32 absorption = MIN(0.80f, (F32)(points * defense) / 100.0f);
+            damageAmount *= (1.0f - absorption);
+         }
+      }
+
+      // TODO: RAMPLATE special increases collision damage dealt; implement when
+      // ramming damage is applied from the attacker side.
    }
 
    // Healing (damageAmount < 0)
@@ -1832,6 +1894,13 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
             stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeaponCount);
+         stream->writeRangedU32((U32)mXtankDesign.engineType, 0, XtankEngineCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.treadType, 0, XtankTreadCount - 1);
+         stream->writeRangedU32((U32)(mXtankDesign.heatSinkCount - XtankHeatSinkMin), 0, XtankHeatSinkMax - XtankHeatSinkMin);
+         stream->writeRangedU32((U32)mXtankDesign.armorType, 0, XtankArmorCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.suspensionType, 0, XtankSuspensionCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.bumperType, 0, XtankBumperCount - 1);
+         stream->writeInt((U32)mXtankDesign.specials, 16);
       }
    }
 
@@ -2027,6 +2096,13 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
             mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, XtankWeaponCount) - 1);
+         mXtankDesign.engineType = (XtankEngine)(S32)stream->readRangedU32(0, XtankEngineCount - 1);
+         mXtankDesign.treadType = (XtankTread)(S32)stream->readRangedU32(0, XtankTreadCount - 1);
+         mXtankDesign.heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + XtankHeatSinkMin);
+         mXtankDesign.armorType = (XtankArmor)(S32)stream->readRangedU32(0, XtankArmorCount - 1);
+         mXtankDesign.suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
+         mXtankDesign.bumperType = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
+         mXtankDesign.specials = (U16)stream->readInt(16);
          mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
       }
       else
@@ -3524,4 +3600,3 @@ S32 Ship::lua_setTeam(lua_State *L)
 }
 
 };
-

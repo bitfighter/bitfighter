@@ -83,6 +83,8 @@ UIXtankHelper::UIXtankHelper()
    mSuspensionItemsDisplayWidth = 0;
    mBumperButtonsWidth      = 0;
    mBumperItemsDisplayWidth = 0;
+   mSpecialsButtonsWidth      = 0;
+   mSpecialsItemsDisplayWidth = 0;
    mHeatSinkButtonsWidth      = 0;
    mHeatSinkItemsDisplayWidth = 0;
    mWeaponButtonsWidth      = 0;
@@ -286,6 +288,35 @@ void UIXtankHelper::buildBumperItems()
 }
 
 
+// Build the special equipment selection menu items.
+void UIXtankHelper::buildSpecialsItems()
+{
+   mSpecialsItems.clear();
+   static string specHelpTexts[XtankSpecialCount];
+
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+   {
+      const XtankSpecialInfo &info = xtankSpecialInfos[s];
+      char buf[128];
+      dSprintf(buf, sizeof(buf), "%s  Wt:%d Sp:%d Cost:%d",
+               info.description, info.weight, info.space, info.cost);
+      specHelpTexts[s] = buf;
+
+      OverlayMenuItem item;
+      item.key                 = getKeyForIndex(s);
+      item.button              = KEY_NONE;
+      item.showOnMenu          = true;
+      item.itemIndex           = (U32)s;
+      item.name                = info.name;
+      item.itemColor           = UNSEL_COLOR;
+      item.help                = specHelpTexts[s].c_str();
+      item.helpColor           = UNSEL_COLOR;
+      item.buttonOverrideColor = NULL;
+      mSpecialsItems.push_back(item);
+   }
+}
+
+
 // Build the heat-sink count selection menu items (1-6).
 void UIXtankHelper::buildHeatSinkItems()
 {
@@ -415,6 +446,7 @@ void UIXtankHelper::onActivated()
    buildArmorItems();
    buildSuspensionItems();
    buildBumperItems();
+   buildSpecialsItems();
    buildHeatSinkItems();
    buildWeaponItems();
 
@@ -436,6 +468,9 @@ void UIXtankHelper::onActivated()
    mBumperButtonsWidth      = getButtonWidth(mBumperItems.address(), mBumperItems.size());
    mBumperItemsDisplayWidth = getMaxItemWidth(mBumperItems.address(), mBumperItems.size());
 
+   mSpecialsButtonsWidth      = getButtonWidth(mSpecialsItems.address(), mSpecialsItems.size());
+   mSpecialsItemsDisplayWidth = getMaxItemWidth(mSpecialsItems.address(), mSpecialsItems.size());
+
    mHeatSinkButtonsWidth      = getButtonWidth(mHeatSinkItems.address(), mHeatSinkItems.size());
    mHeatSinkItemsDisplayWidth = getMaxItemWidth(mHeatSinkItems.address(), mHeatSinkItems.size());
 
@@ -453,11 +488,15 @@ void UIXtankHelper::onActivated()
 
 void UIXtankHelper::render()
 {
-   if(mPhase == PHASE_BODY)          updateItemColors(mBodyItems);
-   else if(mPhase == PHASE_ENGINE)   updateItemColors(mEngineItems);
-   else if(mPhase == PHASE_TREADS)   updateItemColors(mTreadItems);
-   else if(mPhase == PHASE_HEATSINK) updateItemColors(mHeatSinkItems);
-   else                              updateItemColors(mWeaponItems);
+   if(mPhase == PHASE_BODY)           updateItemColors(mBodyItems);
+   else if(mPhase == PHASE_ENGINE)    updateItemColors(mEngineItems);
+   else if(mPhase == PHASE_TREADS)    updateItemColors(mTreadItems);
+   else if(mPhase == PHASE_ARMOR)     updateItemColors(mArmorItems);
+   else if(mPhase == PHASE_SUSPENSION)updateItemColors(mSuspensionItems);
+   else if(mPhase == PHASE_BUMPERS)   updateItemColors(mBumperItems);
+   else if(mPhase == PHASE_SPECIALS)  { /* active state handled in renderCard */ }
+   else if(mPhase == PHASE_HEATSINK)  updateItemColors(mHeatSinkItems);
+   else                               updateItemColors(mWeaponItems);
 
    // Compute transition fraction (0.0 to 1.0)
    F32 transitionFraction = 0.0f;
@@ -518,6 +557,10 @@ void UIXtankHelper::commitHighlightedSelection()
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mBumperItems.size())
          mDesignInProgress.bumperType = (S8)mBumperItems[mHighlightedIndex].itemIndex;
    }
+   else if(mPhase == PHASE_SPECIALS)
+   {
+      // Specials are toggled interactively in processInputCode; nothing to commit here.
+   }
    else if(mPhase == PHASE_HEATSINK)
    {
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mHeatSinkItems.size())
@@ -557,6 +600,13 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    // ENTER: commit current selection and finalize the design.
    if(inputCode == KEY_ENTER)
    {
+      if(mPhase == PHASE_SPECIALS)
+      {
+         // ENTER toggles the highlighted special
+         if(mHighlightedIndex >= 0 && mHighlightedIndex < XtankSpecialCount)
+            mDesignInProgress.specials = toggleSpecial(mDesignInProgress.specials, (XtankSpecial)mHighlightedIndex);
+         return true;
+      }
       commitHighlightedSelection();
       applyDesign();
       return true;
@@ -680,6 +730,18 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
          }
       }
    }
+   else if(mPhase == PHASE_SPECIALS)
+   {
+      for(S32 s = 0; s < mSpecialsItems.size(); s++)
+      {
+         if(inputCode == mSpecialsItems[s].key)
+         {
+            mDesignInProgress.specials = toggleSpecial(mDesignInProgress.specials, (XtankSpecial)s);
+            mHighlightedIndex = s;
+            return true;
+         }
+      }
+   }
    else if(mPhase == PHASE_HEATSINK)
    {
       for(S32 n = 0; n < mHeatSinkItems.size(); n++)
@@ -769,6 +831,7 @@ S32 UIXtankHelper::widthForPhase(S32 phase) const
    if(phase == PHASE_ARMOR)      return getTotalDisplayWidth(mArmorButtonsWidth,      mArmorItemsDisplayWidth);
    if(phase == PHASE_SUSPENSION) return getTotalDisplayWidth(mSuspensionButtonsWidth, mSuspensionItemsDisplayWidth);
    if(phase == PHASE_BUMPERS)    return getTotalDisplayWidth(mBumperButtonsWidth,     mBumperItemsDisplayWidth);
+   if(phase == PHASE_SPECIALS)   return getTotalDisplayWidth(mSpecialsButtonsWidth,   mSpecialsItemsDisplayWidth);
    if(phase == PHASE_HEATSINK)   return getTotalDisplayWidth(mHeatSinkButtonsWidth,   mHeatSinkItemsDisplayWidth);
    return getTotalDisplayWidth(mWeaponButtonsWidth, mWeaponItemsDisplayWidth);
 }
@@ -802,6 +865,19 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
    else if(phase == PHASE_BUMPERS)
    {
       mHighlightedIndex = (S32)mDesignInProgress.bumperType;
+   }
+   else if(phase == PHASE_SPECIALS)
+   {
+      // Position cursor on the first active special, or 0 if none active.
+      mHighlightedIndex = 0;
+      for(S32 i = 0; i < XtankSpecialCount; i++)
+      {
+         if(hasSpecial(mDesignInProgress.specials, (XtankSpecial)i))
+         {
+            mHighlightedIndex = i;
+            break;
+         }
+      }
    }
    else if(phase == PHASE_HEATSINK)
    {
@@ -842,6 +918,7 @@ const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(S32 phase) const
    if(phase == PHASE_ARMOR)      return &mArmorItems;
    if(phase == PHASE_SUSPENSION) return &mSuspensionItems;
    if(phase == PHASE_BUMPERS)    return &mBumperItems;
+   if(phase == PHASE_SPECIALS)   return &mSpecialsItems;
    if(phase == PHASE_HEATSINK)   return &mHeatSinkItems;
    return &mWeaponItems;
 }
@@ -884,6 +961,14 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
       S32 idx = (S32)mDesignInProgress.bumperType;
       if(idx < 0 || idx >= XtankBumperCount) idx = 0;
       return bumperStat[idx].name;
+   }
+   if(phase == PHASE_SPECIALS)
+   {
+      S32 count = 0;
+      for(S32 i = 0; i < XtankSpecialCount; i++)
+         if(hasSpecial(mDesignInProgress.specials, (XtankSpecial)i))
+            count++;
+      return count == 0 ? "None" : itos(count) + " selected";
    }
    if(phase == PHASE_HEATSINK)
    {
@@ -981,6 +1066,19 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       drawStringf(left, y, STAT_SZ, "Elasticity: %.2f", bi.elasticity); y += GAP;
       drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(bi.cost)));    y += GAP;
    }
+   else if(mPhase == PHASE_SPECIALS)
+   {
+      S32 idx = mHighlightedIndex;
+      if(idx < 0 || idx >= XtankSpecialCount) idx = 0;
+      const XtankSpecialInfo &si = xtankSpecialInfos[idx];
+      bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)idx);
+      r.setColor(active ? Colors::green : Colors::overlayMenuUnselectedItemColor);
+      drawString(left, y, STAT_SZ, active ? "ACTIVE" : "inactive");  y += GAP;
+      r.setColor(Color(0.0f, alpha, alpha));
+      drawStringf(left, y, STAT_SZ, "Weight: %d", si.weight);  y += GAP;
+      drawStringf(left, y, STAT_SZ, "Space:  %d", si.space);   y += GAP;
+      drawStringf(left, y, STAT_SZ, "Cost:   %s", cs(comma(si.cost)));  y += GAP;
+   }
    else if(mPhase == PHASE_HEATSINK)
    {
       S32 n = mHighlightedIndex + XtankHeatSinkMin;
@@ -1034,7 +1132,8 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       "Armor",       // 3
       "Suspension",  // 4
       "Bumpers",     // 5
-      "Heat Sinks",  // 6
+      "Specials",    // 6
+      "Heat Sinks",  // 7
    };
    static char sWeaponTitles[8][24];
    auto phaseTitle = [&](S32 p) -> const char *
@@ -1112,6 +1211,16 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
 
       const char *name = (*items)[i].name;
       if(!name) name = "";
+
+      // For specials phase, prefix with toggle state indicator
+      static char sSpecialNameBuf[XtankSpecialCount][64];
+      if(phase == PHASE_SPECIALS && i < XtankSpecialCount)
+      {
+         bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)i);
+         dSprintf(sSpecialNameBuf[i], sizeof(sSpecialNameBuf[i]), "%s %s",
+                  active ? "[X]" : "[ ]", name);
+         name = sSpecialNameBuf[i];
+      }
 
       bool sel = isCenter && (i == mHighlightedIndex);
 
@@ -1279,6 +1388,7 @@ S32 UIXtankHelper::currentPhaseItemCount() const
    if(mPhase == PHASE_ARMOR)      return mArmorItems.size();
    if(mPhase == PHASE_SUSPENSION) return mSuspensionItems.size();
    if(mPhase == PHASE_BUMPERS)    return mBumperItems.size();
+   if(mPhase == PHASE_SPECIALS)   return mSpecialsItems.size();
    if(mPhase == PHASE_HEATSINK)   return mHeatSinkItems.size();
    return mWeaponItems.size();
 }
@@ -1383,6 +1493,47 @@ void UIXtankHelper::renderPreviewPanel() const
       totalCost   += xtankWeaponInfos[(S32)w].cost;
    }
 
+   // Armor cost and weight: per-side armor points * per-point stats
+   S32 armorIdx = MAX(0, MIN((S32)preview.armorType, XtankArmorCount - 1));
+   S32 totalArmorPoints = 0;
+   for(S32 i = 0; i < 4; i++)
+      totalArmorPoints += preview.armorSides[i];
+   totalWeight += totalArmorPoints * xtankArmorInfos[armorIdx].weight;
+   totalCost   += totalArmorPoints * xtankArmorInfos[armorIdx].cost;
+
+   // Suspension and bumper costs
+   totalCost += suspensionStat[MAX(0, MIN((S32)preview.suspensionType, XtankSuspensionCount - 1))].cost;
+   totalCost += bumperStat[MAX(0, MIN((S32)preview.bumperType, XtankBumperCount - 1))].cost;
+
+   // Specials costs and weights
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+   {
+      if(hasSpecial(preview.specials, (XtankSpecial)s))
+      {
+         totalWeight += xtankSpecialInfos[s].weight;
+         totalCost   += xtankSpecialInfos[s].cost;
+      }
+   }
+
+   // Space tracking
+   S32 spaceLimit = body_stat[bodyIdx].space;
+   S32 totalSpace = eng.space;
+   totalSpace += totalArmorPoints * xtankArmorInfos[armorIdx].space;
+   totalSpace += heatSinkStat.space * heatSinks;
+   for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = preview.weapons[i];
+      if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount) continue;
+      totalSpace += xtankWeaponInfos[(S32)w].space;
+   }
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+      if(hasSpecial(preview.specials, (XtankSpecial)s))
+         totalSpace += xtankSpecialInfos[s].space;
+
+   S32 weightLimit = body_stat[bodyIdx].weightLimit;
+   bool overWeight = totalWeight > weightLimit;
+   bool overSpace  = totalSpace  > spaceLimit;
+
    r.setColor(Colors::white);
    drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, "Ship Preview");
    r.setColor(Colors::gray40);
@@ -1414,10 +1565,16 @@ void UIXtankHelper::renderPreviewPanel() const
    else
       drawCenteredString(PNL_CX, ty, STAT_SZ, "Fire bonus: base");
    ty += LINE_GAP;
+   r.setColor(overWeight ? Colors::red : Colors::green);
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Weight: %s / %s%s",
+       cs(comma(totalWeight)), cs(comma(weightLimit)),
+       overWeight ? " OVER!" : ""); ty += LINE_GAP;
+   r.setColor(overSpace ? Colors::red : Colors::cyan);
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Space:  %s / %s%s",
+       cs(comma(totalSpace)), cs(comma(spaceLimit)),
+       overSpace ? " OVER!" : ""); ty += LINE_GAP;
    r.setColor(Colors::yellow);
-   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Total Cost: %s", cs(comma(totalCost))); ty += LINE_GAP;
-   r.setColor(Colors::gray45);
-   drawCenteredStringf(PNL_CX, ty, STAT_SZ - 1, "(Weight: %s)", cs(comma(totalWeight))); ty += LINE_GAP + 2;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Cost: %s", cs(comma(totalCost))); ty += LINE_GAP + 2;
 
    // Show weapon loadout
    r.setColor(Colors::gray45);
@@ -1437,6 +1594,17 @@ void UIXtankHelper::renderPreviewPanel() const
       else
          drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Slot %d: %s", i + 1, xtankWeaponInfos[(S32)w].name);
       ty += LINE_GAP;
+   }
+
+   // Active specials count
+   S32 specialCount = 0;
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+      if(hasSpecial(preview.specials, (XtankSpecial)s))
+         specialCount++;
+   if(specialCount > 0)
+   {
+      r.setColor(Colors::cyan);
+      drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Specials: %d active", specialCount); ty += LINE_GAP;
    }
 
    renderFullBuildStats(PNL_CX, BUILD_Y, bodyIdx, engineIdx, treadIdx, heatSinks);

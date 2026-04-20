@@ -707,6 +707,23 @@ BumperStat bumperStat[] =
 // XtankDesign implementation
 // ---------------------------------------------------------------------------
 
+XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount] =
+{
+   // name            description                         weight space  cost
+   { "Console",       "Chat commands",                       50,    1,   250 },
+   { "Mapper",        "Show full map",                      100,    2,   500 },
+   { "Radar",         "Detect hidden enemies",              200,    3,  1000 },
+   { "Repair",        "Auto-repair hull (+0.5%/s)",         400,    5, 30000 },
+   { "Ram Plate",     "Bonus collision damage",             800,    4,  2000 },
+   { "HUD",           "Heads-up display upgrades",           10,    1,     1 },
+   { "Stealth",       "Reduce radar cross-section",         300,    3, 20000 },
+   { "Navigation",    "Route-planning aid",                  10,    1,    20 },
+   { "New Radar",     "Enhanced radar suite",               300,    4,  3000 },
+   { "Tac-Link",      "Share allied telemetry",             100,    2,  1000 },
+   { "Camo",          "Visual camouflage",                  200,    3,  2000 },
+   { "RDF",           "Radio direction-finding",             50,    2,  1000 },
+};
+
     XtankDesign::XtankDesign()
 {
    bodyIndex = (S8)XtankBodyNone;
@@ -718,6 +735,9 @@ BumperStat bumperStat[] =
    armorType      = XtankArmorDefault;
    suspensionType = (S8)XtankSuspensionDefault;
    bumperType     = (S8)XtankBumperDefault;
+   specials       = 0;
+   for(S32 i = 0; i < 4; i++)
+      armorSides[i] = 0;
 }
 
 
@@ -728,11 +748,17 @@ void XtankDesign::initForBody(S32 bodyIdx)
    {
       for(S32 i = 0; i < 4; i++)
          weapons[i] = xtankDefaultWeapons[bodyIdx].weapons[i];
+      // Default armor: uniform distribution of 10*body.size total points
+      S32 sideDefault = (10 * body_stat[bodyIdx].size) / 4;
+      for(S32 i = 0; i < 4; i++)
+         armorSides[i] = (U8)sideDefault;
    }
    else
    {
       for(S32 i = 0; i < 4; i++)
          weapons[i] = XtankWeaponNone;
+      for(S32 i = 0; i < 4; i++)
+         armorSides[i] = 0;
    }
    engineType    = XtankEngineDefault;
    treadType     = XtankTreadDefault;
@@ -740,6 +766,7 @@ void XtankDesign::initForBody(S32 bodyIdx)
    armorType     = XtankArmorDefault;
    suspensionType = (S8)XtankSuspensionDefault;
    bumperType     = (S8)XtankBumperDefault;
+   specials       = 0;
 }
 
 } /* namespace Zap */

@@ -40,8 +40,9 @@ private:
    static const S32 PHASE_ARMOR      = 3;
    static const S32 PHASE_SUSPENSION = 4;
    static const S32 PHASE_BUMPERS    = 5;
-   static const S32 PHASE_HEATSINK   = 6;
-   static const S32 PHASE_WEAPONS    = 7;  // weapon slots start here
+   static const S32 PHASE_SPECIALS   = 6;
+   static const S32 PHASE_HEATSINK   = 7;
+   static const S32 PHASE_WEAPONS    = 8;  // weapon slots start here
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -62,6 +63,7 @@ private:
    Vector<OverlayMenuItem> mArmorItems;
    Vector<OverlayMenuItem> mSuspensionItems;
    Vector<OverlayMenuItem> mBumperItems;
+   Vector<OverlayMenuItem> mSpecialsItems;
    Vector<OverlayMenuItem> mHeatSinkItems;
    Vector<OverlayMenuItem> mWeaponItems;
 
@@ -77,6 +79,8 @@ private:
    S32 mSuspensionItemsDisplayWidth;
    S32 mBumperButtonsWidth;
    S32 mBumperItemsDisplayWidth;
+   S32 mSpecialsButtonsWidth;
+   S32 mSpecialsItemsDisplayWidth;
    S32 mHeatSinkButtonsWidth;
    S32 mHeatSinkItemsDisplayWidth;
    S32 mWeaponButtonsWidth;
@@ -97,6 +101,7 @@ private:
    void buildArmorItems();
    void buildSuspensionItems();
    void buildBumperItems();
+   void buildSpecialsItems();
    void buildHeatSinkItems();
    void buildWeaponItems();
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item

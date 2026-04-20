@@ -283,3 +283,4 @@ resource/music/menu_old.ogg
 
 .claude/settings.local.json
 build_check/**
+cmake-build/

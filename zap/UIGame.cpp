@@ -1182,6 +1182,10 @@ void GameUserInterface::applyXtankDesign(const XtankDesign &design)
    mCurrentMove.engineType   = (S8)design.engineType;
    mCurrentMove.treadType    = (S8)design.treadType;
    mCurrentMove.heatSinkCount = design.heatSinkCount;
+   mCurrentMove.armorType     = (S8)design.armorType;
+   mCurrentMove.suspensionType = design.suspensionType;
+   mCurrentMove.bumperType     = design.bumperType;
+   mCurrentMove.specials       = design.specials;
    for(S32 i = 0; i < 4; i++)
       mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
 
