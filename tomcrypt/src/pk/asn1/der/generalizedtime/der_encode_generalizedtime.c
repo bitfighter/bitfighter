@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -34,8 +32,8 @@ static const char * const baseten = "0123456789";
 
 /**
   Encodes a Generalized time structure in DER format
-  @param utctime      The UTC time structure to encode
-  @param out          The destination of the DER encoding of the UTC time structure
+  @param gtime        The GeneralizedTime structure to encode
+  @param out          The destination of the DER encoding of the GeneralizedTime structure
   @param outlen       [in/out] The length of the DER encoding
   @return CRYPT_OK if successful
 */
@@ -105,6 +103,6 @@ int der_encode_generalizedtime(ltc_generalizedtime *gtime,
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

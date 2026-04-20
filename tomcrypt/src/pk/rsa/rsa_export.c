@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -60,7 +58,7 @@ int rsa_export(unsigned char *out, unsigned long *outlen, int type, rsa_key *key
       unsigned char* tmp = NULL;
 
       if (type & PK_STD) {
-          tmplen = (mp_count_bits(key->N)/8)*2+8;
+          tmplen = (unsigned long)(mp_count_bits(key->N) / 8) * 2 + 8;
           tmp = XMALLOC(tmplen);
           ptmplen = &tmplen;
           if (tmp == NULL) {
@@ -94,6 +92,6 @@ finish:
 
 #endif /* LTC_MRSA */
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

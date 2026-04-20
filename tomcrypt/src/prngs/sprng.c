@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -135,7 +133,22 @@ int sprng_import(const unsigned char *in, unsigned long inlen, prng_state *prng)
 */
 int sprng_test(void)
 {
+#ifndef LTC_TEST
+   return CRYPT_NOP;
+#else
+   prng_state st;
+   unsigned char en[] = { 0x01, 0x02, 0x03, 0x04 };
+   unsigned char out[1000];
+   int err;
+
+   if ((err = sprng_start(&st)) != CRYPT_OK)                         return err;
+   if ((err = sprng_add_entropy(en, sizeof(en), &st)) != CRYPT_OK)   return err;
+   if ((err = sprng_ready(&st)) != CRYPT_OK)                         return err;
+   if (sprng_read(out, 500, &st) != 500)                             return CRYPT_ERROR_READPRNG; /* skip 500 bytes */
+   if ((err = sprng_done(&st)) != CRYPT_OK)                          return err;
+
    return CRYPT_OK;
+#endif
 }
 
 #endif
@@ -143,6 +156,6 @@ int sprng_test(void)
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

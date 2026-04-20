@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -38,7 +36,7 @@ const struct ltc_cipher_descriptor des3_desc =
 {
     "3des",
     14,
-    24, 24, 8, 16,
+    16, 24, 8, 16,
     &des3_setup,
     &des3_ecb_encrypt,
     &des3_ecb_decrypt,
@@ -1385,7 +1383,7 @@ static void cookey(const ulong32 *raw1, ulong32 *keyout)
         *cook++ |= (*raw1 & 0x0000003fL);
     }
 
-    XMEMCPY(keyout, dough, sizeof dough);
+    XMEMCPY(keyout, dough, sizeof(dough));
 }
 
 #ifdef LTC_CLEAN_STACK
@@ -1979,7 +1977,7 @@ int des_test(void)
            des_ecb_decrypt(cases[i].txt, tmp, &des);
         }
 
-        if (XMEMCMP(cases[i].out, tmp, sizeof(tmp)) != 0) {
+        if (compare_testvector(cases[i].out, sizeof(tmp), tmp, sizeof(tmp), "DES", i) != 0) {
            return CRYPT_FAIL_TESTVECTOR;
         }
 
@@ -2022,7 +2020,7 @@ int des3_test(void)
    des3_ecb_encrypt(pt, ct, &skey);
    des3_ecb_decrypt(ct, tmp, &skey);
 
-   if (XMEMCMP(pt, tmp, 8) != 0) {
+   if (compare_testvector(pt, 8, tmp, 8, "3DES", 0) != 0) {
       return CRYPT_FAIL_TESTVECTOR;
    }
 
@@ -2070,8 +2068,11 @@ int des_keysize(int *keysize)
 int des3_keysize(int *keysize)
 {
     LTC_ARGCHK(keysize != NULL);
-    if(*keysize < 24) {
-        return CRYPT_INVALID_KEYSIZE;
+    if (*keysize < 16)
+       return CRYPT_INVALID_KEYSIZE;
+    if (*keysize < 24) {
+       *keysize = 16;
+       return CRYPT_OK;
     }
     *keysize = 24;
     return CRYPT_OK;
@@ -2080,6 +2081,6 @@ int des3_keysize(int *keysize)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -77,7 +75,7 @@ int hmac_init(hmac_state *hmac, int hash, const unsigned char *key, unsigned lon
        zeromem((hmac->key) + keylen, (size_t)(LTC_HMAC_BLOCKSIZE - keylen));
     }
 
-    /* Create the initial vector for step (3) */
+    /* Create the initialization vector for step (3) */
     for(i=0; i < LTC_HMAC_BLOCKSIZE;   i++) {
        buf[i] = hmac->key[i] ^ 0x36;
     }
@@ -105,6 +103,6 @@ done:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

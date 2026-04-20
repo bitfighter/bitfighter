@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -52,14 +50,15 @@ int hash_filehandle(int hash, FILE *in, unsigned char *out, unsigned long *outle
        goto LBL_ERR;
     }
 
-    *outlen = hash_descriptor[hash].hashsize;
     do {
         x = fread(buf, 1, LTC_FILE_READ_BUFSIZE, in);
         if ((err = hash_descriptor[hash].process(&md, buf, (unsigned long)x)) != CRYPT_OK) {
            goto LBL_CLEANBUF;
         }
     } while (x == LTC_FILE_READ_BUFSIZE);
-    err = hash_descriptor[hash].done(&md, out);
+    if ((err = hash_descriptor[hash].done(&md, out)) == CRYPT_OK) {
+       *outlen = hash_descriptor[hash].hashsize;
+    }
 
 LBL_CLEANBUF:
     zeromem(buf, LTC_FILE_READ_BUFSIZE);
@@ -70,6 +69,6 @@ LBL_ERR:
 #endif /* #ifndef LTC_NO_FILE */
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -18,8 +16,8 @@
 #ifdef LTC_F8_MODE
 
 /**
-   Set an initial vector
-   @param IV   The initial vector
+   Set an initialization vector
+   @param IV   The initialization vector
    @param len  The length of the vector (in octets)
    @param f8   The F8 state
    @return CRYPT_OK if successful
@@ -47,6 +45,6 @@ int f8_setiv(const unsigned char *IV, unsigned long len, symmetric_F8 *f8)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

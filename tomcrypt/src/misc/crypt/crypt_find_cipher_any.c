@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -26,10 +24,10 @@ int find_cipher_any(const char *name, int blocklen, int keylen)
 {
    int x;
 
-   LTC_ARGCHK(name != NULL);
-
-   x = find_cipher(name);
-   if (x != -1) return x;
+   if(name != NULL) {
+      x = find_cipher(name);
+      if (x != -1) return x;
+   }
 
    LTC_MUTEX_LOCK(&ltc_cipher_mutex);
    for (x = 0; x < TAB_SIZE; x++) {
@@ -45,6 +43,6 @@ int find_cipher_any(const char *name, int blocklen, int keylen)
    return -1;
 }
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

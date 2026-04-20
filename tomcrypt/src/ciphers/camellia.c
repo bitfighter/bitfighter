@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -699,22 +697,8 @@ int camellia_test(void)
          return err;
       }
       camellia_done(&skey);
-      if (XMEMCMP(tests[x].ct, buf[0], 16) || XMEMCMP(tests[x].pt, buf[1], 16)) {
-#if 0
-         int i, j;
-         printf ("\n\nLTC_CAMELLIA failed for x=%d, I got:\n", x);
-         for (i = 0; i < 2; i++) {
-            const unsigned char *expected, *actual;
-            expected = (i ? tests[x].pt : tests[x].ct);
-            actual = buf[i];
-            printf ("expected    actual   (%s)\n", (i ? "plaintext" : "ciphertext"));
-            for (j = 0; j < 16; j++) {
-               const char *eq = (expected[j] == actual[j] ? "==" : "!=");
-               printf ("     %02x  %s  %02x\n", expected[j], eq, actual[j]);
-            }
-            printf ("\n");
-         }
-#endif
+      if (compare_testvector(tests[x].ct, 16, buf[0], 16, "Camellia Encrypt", x) ||
+            compare_testvector(tests[x].pt, 16, buf[1], 16, "Camellia Decrypt", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
    }
@@ -737,6 +721,6 @@ int camellia_keysize(int *keysize)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

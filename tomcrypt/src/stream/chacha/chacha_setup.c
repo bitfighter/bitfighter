@@ -35,6 +35,8 @@ int chacha_setup(chacha_state *st, const unsigned char *key, unsigned long keyle
    LTC_ARGCHK(key != NULL);
    LTC_ARGCHK(keylen == 32 || keylen == 16);
 
+   if (rounds == 0) rounds = 20;
+
    LOAD32L(st->input[4], key + 0);
    LOAD32L(st->input[5], key + 4);
    LOAD32L(st->input[6], key + 8);
@@ -53,8 +55,13 @@ int chacha_setup(chacha_state *st, const unsigned char *key, unsigned long keyle
    LOAD32L(st->input[1],  constants + 4);
    LOAD32L(st->input[2],  constants + 8);
    LOAD32L(st->input[3],  constants + 12);
-   st->rounds  = rounds; /* e.g. 20 for chacha20 */
+   st->rounds = rounds; /* e.g. 20 for chacha20 */
+   st->ivlen = 0; /* will be set later by chacha_ivctr(32|64) */
    return CRYPT_OK;
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

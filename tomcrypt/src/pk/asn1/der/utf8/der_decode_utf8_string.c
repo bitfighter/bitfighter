@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -31,6 +29,7 @@ int der_decode_utf8_string(const unsigned char *in,  unsigned long inlen,
 {
    wchar_t       tmp;
    unsigned long x, y, z, len;
+   int err;
 
    LTC_ARGCHK(in     != NULL);
    LTC_ARGCHK(out    != NULL);
@@ -87,25 +86,30 @@ int der_decode_utf8_string(const unsigned char *in,  unsigned long inlen,
       /* grab remaining bytes */
       if (z > 1) { --z; }
       while (z-- != 0) {
-         if ((in[x] & 0xC0) != 0x80) {
+         /* CVE-2019-17362: check bounds before reading continuation byte */
+         if (x >= inlen || (in[x] & 0xC0) != 0x80) {
             return CRYPT_INVALID_PACKET;
          }
          tmp = (tmp << 6) | ((wchar_t)in[x++] & 0x3F);
       }
 
-      if (y > *outlen) {
-         *outlen = y;
-         return CRYPT_BUFFER_OVERFLOW;
+      if (y < *outlen) {
+         out[y] = tmp;
       }
-      out[y++] = tmp;
+      y++;
+   }
+   if (y > *outlen) {
+      err = CRYPT_BUFFER_OVERFLOW;
+   } else {
+      err = CRYPT_OK;
    }
    *outlen = y;
 
-   return CRYPT_OK;
+   return err;
 }
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

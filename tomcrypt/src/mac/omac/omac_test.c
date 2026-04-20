@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -90,12 +88,7 @@ int omac_test(void)
           return err;
        }
 
-       if (XMEMCMP(out, tests[x].tag, 16) != 0) {
-#if 0
-          int y;
-          printf("\n\nTag: ");
-          for (y = 0; y < 16; y++) printf("%02x", out[y]); printf("\n\n");
-#endif
+       if (compare_testvector(out, len, tests[x].tag, sizeof(tests[x].tag), "OMAC", x) != 0) {
           return CRYPT_FAIL_TESTVECTOR;
        }
     }
@@ -105,6 +98,6 @@ int omac_test(void)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

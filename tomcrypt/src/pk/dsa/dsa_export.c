@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -71,7 +69,7 @@ int dsa_export(unsigned char *out, unsigned long *outlen, int type, dsa_key *key
       }
    } else {
       if (std) {
-          unsigned long tmplen = (mp_count_bits(key->y) / 8) + 8;
+          unsigned long tmplen = (unsigned long)(mp_count_bits(key->y) / 8) + 8;
           unsigned char* tmp = XMALLOC(tmplen);
           ltc_asn1_list int_list[3];
 
@@ -113,6 +111,6 @@ error:
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

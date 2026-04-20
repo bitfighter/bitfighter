@@ -15,7 +15,7 @@
   Set IV + counter data (with RFC7905-magic) to the ChaCha20Poly1305 state and reset the context
   @param st     The ChaCha20Poly1305 state
   @param iv     The IV data to add
-  @param inlen  The length of the IV (must be 12 or 8)
+  @param ivlen  The length of the IV (must be 12 or 8)
   @param sequence_number   64bit sequence number which is incorporated into IV as described in RFC7905
   @return CRYPT_OK on success
  */
@@ -34,3 +34,7 @@ int chacha20poly1305_setiv_rfc7905(chacha20poly1305_state *st, const unsigned ch
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -1,8 +1,18 @@
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
+ *
+ * LibTomCrypt is a library that provides various cryptographic
+ * algorithms in a highly modular and flexible manner.
+ *
+ * The library is free for all purposes without any express
+ * guarantee it works.
+ */
+
 /* ---- HASH FUNCTIONS ---- */
 #ifdef LTC_SHA3
 struct sha3_state {
     ulong64 saved;                  /* the portion of the input message that we didn't consume yet */
-    union { ulong64 s[25]; unsigned char sb[25 * 8]; };
+    ulong64 s[25];
+    unsigned char sb[25 * 8];       /* used for storing `ulong64 s[25]` as little-endian bytes */
     unsigned short byte_index;      /* 0..7--the next byte after the set one (starts from 0; 0--none are buffered) */
     unsigned short word_index;      /* 0..24--the next word to integrate input (starts from 0) */
     unsigned short capacity_words;  /* the double size of the hash output in words (e.g. 16 for Keccak 512) */
@@ -194,7 +204,7 @@ typedef union Hash_state {
 /** hash descriptor */
 extern  struct ltc_hash_descriptor {
     /** name of hash */
-    char *name;
+    const char *name;
     /** internal ID */
     unsigned char ID;
     /** Size of digest in octets */
@@ -460,6 +470,7 @@ int find_hash_oid(const unsigned long *ID, unsigned long IDlen);
 int find_hash_any(const char *name, int digestlen);
 int register_hash(const struct ltc_hash_descriptor *hash);
 int unregister_hash(const struct ltc_hash_descriptor *hash);
+int register_all_hashes(void);
 int hash_is_valid(int idx);
 
 LTC_MUTEX_PROTO(ltc_hash_mutex)
@@ -486,7 +497,7 @@ int func_name (hash_state * md, const unsigned char *in, unsigned long inlen)   
     if (md-> state_var .curlen > sizeof(md-> state_var .buf)) {                             \
        return CRYPT_INVALID_ARG;                                                            \
     }                                                                                       \
-    if ((md-> state_var .length + inlen) < md-> state_var .length) {                       \
+    if ((md-> state_var .length + inlen) < md-> state_var .length) {                        \
       return CRYPT_HASH_OVERFLOW;                                                           \
     }                                                                                       \
     while (inlen > 0) {                                                                     \
@@ -499,7 +510,7 @@ int func_name (hash_state * md, const unsigned char *in, unsigned long inlen)   
            inlen          -= block_size;                                                    \
         } else {                                                                            \
            n = MIN(inlen, (block_size - md-> state_var .curlen));                           \
-           XMEMCPY(md-> state_var .buf + md-> state_var.curlen, in, (size_t)n);              \
+           XMEMCPY(md-> state_var .buf + md-> state_var.curlen, in, (size_t)n);             \
            md-> state_var .curlen += n;                                                     \
            in             += n;                                                             \
            inlen          -= n;                                                             \
@@ -515,6 +526,6 @@ int func_name (hash_state * md, const unsigned char *in, unsigned long inlen)   
     return CRYPT_OK;                                                                        \
 }
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

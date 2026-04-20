@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -516,7 +514,8 @@ int saferp_test(void)
       saferp_ecb_decrypt(tmp[0], tmp[1], &skey);
 
       /* compare */
-      if (XMEMCMP(tmp[0], tests[i].ct, 16) || XMEMCMP(tmp[1], tests[i].pt, 16)) {
+      if (compare_testvector(tmp[0], 16, tests[i].ct, 16, "Safer+ Encrypt", i) ||
+            compare_testvector(tmp[1], 16, tests[i].pt, 16, "Safer+ Decrypt", i)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
 
@@ -564,6 +563,6 @@ int saferp_keysize(int *keysize)
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

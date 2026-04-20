@@ -30,7 +30,7 @@ int chacha20poly1305_encrypt(chacha20poly1305_state *st, const unsigned char *in
 
    if ((err = chacha_crypt(&st->chacha, in, inlen, out)) != CRYPT_OK)         return err;
    if (st->aadflg) {
-      padlen = 16 - (st->aadlen % 16);
+      padlen = 16 - (unsigned long)(st->aadlen % 16);
       if (padlen < 16) {
         if ((err = poly1305_process(&st->poly, padzero, padlen)) != CRYPT_OK) return err;
       }
@@ -42,3 +42,7 @@ int chacha20poly1305_encrypt(chacha20poly1305_state *st, const unsigned char *in
 }
 
 #endif
+
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -111,7 +109,7 @@ int xcbc_test(void)
      if ((err = xcbc_memory(idx, tests[x].K, 16, tests[x].M, tests[x].msglen, T, &taglen)) != CRYPT_OK) {
         return err;
      }
-     if (taglen != 16 || XMEMCMP(T, tests[x].T, 16)) {
+     if (compare_testvector(T, taglen, tests[x].T, 16, "XCBC", x)) {
         return CRYPT_FAIL_TESTVECTOR;
      }
   }
@@ -122,7 +120,7 @@ int xcbc_test(void)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */
 

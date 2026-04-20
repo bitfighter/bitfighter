@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
  /**
@@ -659,10 +657,8 @@ int twofish_test(void)
     }
     twofish_ecb_encrypt(tests[i].pt, tmp[0], &key);
     twofish_ecb_decrypt(tmp[0], tmp[1], &key);
-    if (XMEMCMP(tmp[0], tests[i].ct, 16) != 0 || XMEMCMP(tmp[1], tests[i].pt, 16) != 0) {
-#if 0
-       printf("Twofish failed test %d, %d, %d\n", i, XMEMCMP(tmp[0], tests[i].ct, 16), XMEMCMP(tmp[1], tests[i].pt, 16));
-#endif
+    if (compare_testvector(tmp[0], 16, tests[i].ct, 16, "Twofish Encrypt", i) != 0 ||
+          compare_testvector(tmp[1], 16, tests[i].pt, 16, "Twofish Decrypt", i) != 0) {
        return CRYPT_FAIL_TESTVECTOR;
     }
     /* now see if we can encrypt all zero bytes 1000 times, decrypt and come back where we started */
@@ -710,6 +706,6 @@ int twofish_keysize(int *keysize)
 
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

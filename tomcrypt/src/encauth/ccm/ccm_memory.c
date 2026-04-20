@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -54,7 +52,7 @@ int ccm_memory(int cipher,
    int            err;
    unsigned long  len, L, x, y, z, CTRlen;
 #ifdef LTC_FAST
-   LTC_FAST_TYPE fastMask = -1; /* initialize fastMask at all zeroes */
+   LTC_FAST_TYPE fastMask = ~(LTC_FAST_TYPE)0; /* initialize fastMask at all zeroes */
 #endif
    unsigned char mask = 0xff; /* initialize mask at all zeroes */
 
@@ -144,7 +142,7 @@ int ccm_memory(int cipher,
    }
 
    /* initialize buffer for pt */
-   if (direction == CCM_DECRYPT) {
+   if (direction == CCM_DECRYPT && ptlen > 0) {
       pt_work = XMALLOC(ptlen);
       if (pt_work == NULL) {
          goto error;
@@ -335,6 +333,9 @@ int ccm_memory(int cipher,
 
    if (skey != uskey) {
       cipher_descriptor[cipher].done(skey);
+#ifdef LTC_CLEAN_STACK
+      zeromem(skey,   sizeof(*skey));
+#endif
    }
 
    if (direction == CCM_ENCRYPT) {
@@ -378,9 +379,10 @@ int ccm_memory(int cipher,
    }
 
 #ifdef LTC_CLEAN_STACK
+#ifdef LTC_FAST
    fastMask = 0;
+#endif
    mask = 0;
-   zeromem(skey,   sizeof(*skey));
    zeromem(PAD,    sizeof(PAD));
    zeromem(CTRPAD, sizeof(CTRPAD));
    if (pt_work != NULL) {
@@ -400,6 +402,6 @@ error:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

@@ -40,7 +40,7 @@ int hkdf_test(void)
 
     static const struct hkdf_test_case {
         int num;
-        char* Hash;
+        const char* Hash;
         unsigned char IKM[80];
         unsigned long IKM_l;
         unsigned char salt[80];
@@ -265,34 +265,14 @@ int hkdf_test(void)
                         cases[i].info, cases[i].info_l,
                         cases[i].IKM,   cases[i].IKM_l,
                         OKM, cases[i].OKM_l)) != CRYPT_OK) {
-#if 0
+#if defined(LTC_TEST_DBG) && (LTC_TEST_DBG > 1)
             printf("LTC_HKDF-%s test #%d, %s\n", cases[i].Hash, i, error_to_string(err));
 #endif
             return err;
         }
 
-        if(XMEMCMP(OKM, cases[i].OKM, (size_t)cases[i].OKM_l) != 0)  {
+        if(compare_testvector(OKM, cases[i].OKM_l, cases[i].OKM, (size_t)cases[i].OKM_l, "HKDF", cases[i].num)) {
             failed++;
-#if 0
-          {
-            unsigned int j;
-            printf("\nLTC_HKDF-%s test #%d:\n", cases[i].Hash, cases[i].num);
-            printf(  "Result:  0x");
-            for(j=0; j < cases[i].OKM_l; j++) {
-                printf("%02x ", OKM[j]);
-            }
-            printf("\nCorrect: 0x");
-            for(j=0; j < cases[i].OKM_l; j++) {
-               printf("%02x ", cases[i].OKM[j]);
-            }
-            printf("\n");
-            return CRYPT_ERROR;
-          }
-#endif
-#if 0
-        } else {
-            printf("LTC_HKDF-%s test #%d: Passed\n", cases[i].Hash, cases[i].num);
-#endif
         }
     }
 
@@ -309,6 +289,6 @@ int hkdf_test(void)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

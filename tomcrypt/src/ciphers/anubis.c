@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -899,7 +897,7 @@ int  anubis_setup(const unsigned char *key, int keylen, int num_rounds, symmetri
 {
    int N, R, i, pos, r;
    ulong32 kappa[MAX_N];
-   ulong32 inter[MAX_N];
+   ulong32 inter[MAX_N] = { 0 }; /* initialize as all zeroes */
    ulong32 v, K0, K1, K2, K3;
 
    LTC_ARGCHK(key  != NULL);
@@ -1500,13 +1498,14 @@ int anubis_test(void)
        anubis_setup(tests[x].key, tests[x].keylen, 0, &skey);
        anubis_ecb_encrypt(tests[x].pt, buf[0], &skey);
        anubis_ecb_decrypt(buf[0], buf[1], &skey);
-       if (XMEMCMP(buf[0], tests[x].ct, 16) || XMEMCMP(buf[1], tests[x].pt, 16)) {
+       if (compare_testvector(buf[0], 16, tests[x].ct, 16, "Anubis Encrypt", x) ||
+             compare_testvector(buf[1], 16, tests[x].pt, 16, "Anubis Decrypt", x)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
        for (y = 0; y < 1000; y++) anubis_ecb_encrypt(buf[0], buf[0], &skey);
        for (y = 0; y < 1000; y++) anubis_ecb_decrypt(buf[0], buf[0], &skey);
-       if (XMEMCMP(buf[0], tests[x].ct, 16)) {
+       if (compare_testvector(buf[0], 16, tests[x].ct, 16, "Anubis 1000", 1000)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
 
@@ -1554,6 +1553,6 @@ int anubis_keysize(int *keysize)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

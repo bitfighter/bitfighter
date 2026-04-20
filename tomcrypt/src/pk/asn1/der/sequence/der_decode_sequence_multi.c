@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 #include <stdarg.h>
@@ -41,7 +39,7 @@ int der_decode_sequence_multi(const unsigned char *in, unsigned long inlen, ...)
    va_start(args, inlen);
    x = 0;
    for (;;) {
-       type = va_arg(args, ltc_asn1_type);
+       type = (ltc_asn1_type)va_arg(args, int);
        size = va_arg(args, unsigned long);
        data = va_arg(args, void*);
        LTC_UNUSED_PARAM(size);
@@ -96,7 +94,7 @@ int der_decode_sequence_multi(const unsigned char *in, unsigned long inlen, ...)
    va_start(args, inlen);
    x = 0;
    for (;;) {
-       type = va_arg(args, ltc_asn1_type);
+       type = (ltc_asn1_type)va_arg(args, int);
        size = va_arg(args, unsigned long);
        data = va_arg(args, void*);
 
@@ -142,6 +140,6 @@ int der_decode_sequence_multi(const unsigned char *in, unsigned long inlen, ...)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

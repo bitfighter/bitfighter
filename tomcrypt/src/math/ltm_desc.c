@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 #define DESC_DEF_ONLY
@@ -88,7 +86,7 @@ static int init_copy(void **a, void *b)
 }
 
 /* ---- trivial ---- */
-static int set_int(void *a, unsigned long b)
+static int set_int(void *a, ltc_mp_digit b)
 {
    LTC_ARGCHK(a != NULL);
    return mpi_to_ltc_error(mp_set_int(a, b));
@@ -130,7 +128,7 @@ static int compare(void *a, void *b)
    }
 }
 
-static int compare_d(void *a, unsigned long b)
+static int compare_d(void *a, ltc_mp_digit b)
 {
    int ret;
    LTC_ARGCHK(a != NULL);
@@ -212,7 +210,7 @@ static int add(void *a, void *b, void *c)
    return mpi_to_ltc_error(mp_add(a, b, c));
 }
 
-static int addi(void *a, unsigned long b, void *c)
+static int addi(void *a, ltc_mp_digit b, void *c)
 {
    LTC_ARGCHK(a != NULL);
    LTC_ARGCHK(c != NULL);
@@ -228,7 +226,7 @@ static int sub(void *a, void *b, void *c)
    return mpi_to_ltc_error(mp_sub(a, b, c));
 }
 
-static int subi(void *a, unsigned long b, void *c)
+static int subi(void *a, ltc_mp_digit b, void *c)
 {
    LTC_ARGCHK(a != NULL);
    LTC_ARGCHK(c != NULL);
@@ -244,7 +242,7 @@ static int mul(void *a, void *b, void *c)
    return mpi_to_ltc_error(mp_mul(a, b, c));
 }
 
-static int muli(void *a, unsigned long b, void *c)
+static int muli(void *a, ltc_mp_digit b, void *c)
 {
    LTC_ARGCHK(a != NULL);
    LTC_ARGCHK(c != NULL);
@@ -275,7 +273,7 @@ static int div_2(void *a, void *b)
 }
 
 /* modi */
-static int modi(void *a, unsigned long b, unsigned long *c)
+static int modi(void *a, ltc_mp_digit b, ltc_mp_digit *c)
 {
    mp_digit tmp;
    int      err;
@@ -406,7 +404,7 @@ static int isprime(void *a, int b, int *c)
    LTC_ARGCHK(a != NULL);
    LTC_ARGCHK(c != NULL);
    if (b == 0) {
-       b = 8;
+       b = LTC_MILLER_RABIN_REPS;
    } /* if */
    err = mpi_to_ltc_error(mp_prime_is_prime(a, b, c));
    *c = (*c == MP_YES) ? LTC_MP_YES : LTC_MP_NO;
@@ -510,6 +508,6 @@ const ltc_math_descriptor ltm_desc = {
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

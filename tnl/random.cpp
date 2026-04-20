@@ -40,6 +40,12 @@ static U32 entropyAdded = 0;
 static void initialize()
 {
    initialized = true;
+   // libtomcrypt requires a math descriptor to be installed before any
+   // public-key operations (ECC, RSA).  When the in-tree libtomcrypt is used
+   // it is compiled with LTM_DESC, so we register LibTomMath here.
+   // On systems where a system libtomcrypt is used, ltc_mp is already
+   // initialised by that library; registering ltm_desc again is harmless.
+   ltc_mp = ltm_desc;
    yarrow_start(&prng);
    yarrow_ready(&prng);
 }

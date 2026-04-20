@@ -1,3 +1,12 @@
+/* LibTomCrypt, modular cryptographic library -- Tom St Denis
+ *
+ * LibTomCrypt is a library that provides various cryptographic
+ * algorithms in a highly modular and flexible manner.
+ *
+ * The library is free for all purposes without any express
+ * guarantee it works.
+ */
+
 #ifdef LTC_HMAC
 typedef struct Hmac_state {
      hash_state     md;
@@ -109,12 +118,33 @@ typedef struct {
 int poly1305_init(poly1305_state *st, const unsigned char *key, unsigned long keylen);
 int poly1305_process(poly1305_state *st, const unsigned char *in, unsigned long inlen);
 int poly1305_done(poly1305_state *st, unsigned char *mac, unsigned long *maclen);
-int poly1305_test(void);
 int poly1305_memory(const unsigned char *key, unsigned long keylen, const unsigned char *in, unsigned long inlen, unsigned char *mac, unsigned long *maclen);
 int poly1305_memory_multi(const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen, const unsigned char *in,  unsigned long inlen, ...);
 int poly1305_file(const char *fname, const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen);
 int poly1305_test(void);
 #endif /* LTC_POLY1305 */
+
+#ifdef LTC_BLAKE2SMAC
+typedef hash_state blake2smac_state;
+int blake2smac_init(blake2smac_state *st, unsigned long outlen, const unsigned char *key, unsigned long keylen);
+int blake2smac_process(blake2smac_state *st, const unsigned char *in, unsigned long inlen);
+int blake2smac_done(blake2smac_state *st, unsigned char *mac, unsigned long *maclen);
+int blake2smac_memory(const unsigned char *key, unsigned long keylen, const unsigned char *in, unsigned long inlen, unsigned char *mac, unsigned long *maclen);
+int blake2smac_memory_multi(const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen, const unsigned char *in,  unsigned long inlen, ...);
+int blake2smac_file(const char *fname, const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen);
+int blake2smac_test(void);
+#endif /* LTC_BLAKE2SMAC */
+
+#ifdef LTC_BLAKE2BMAC
+typedef hash_state blake2bmac_state;
+int blake2bmac_init(blake2bmac_state *st, unsigned long outlen, const unsigned char *key, unsigned long keylen);
+int blake2bmac_process(blake2bmac_state *st, const unsigned char *in, unsigned long inlen);
+int blake2bmac_done(blake2bmac_state *st, unsigned char *mac, unsigned long *maclen);
+int blake2bmac_memory(const unsigned char *key, unsigned long keylen, const unsigned char *in, unsigned long inlen, unsigned char *mac, unsigned long *maclen);
+int blake2bmac_memory_multi(const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen, const unsigned char *in,  unsigned long inlen, ...);
+int blake2bmac_file(const char *fname, const unsigned char *key, unsigned long keylen, unsigned char *mac, unsigned long *maclen);
+int blake2bmac_test(void);
+#endif /* LTC_BLAKE2BMAC */
 
 #ifdef LTC_EAX_MODE
 
@@ -233,12 +263,14 @@ typedef struct {
    symmetric_key     key;                     /* scheduled key for cipher */
    unsigned long     block_index;             /* index # for current data block */
    int               cipher,                  /* cipher idx */
+                     tag_len,                 /* length of tag */
                      block_len;               /* length of block */
 } ocb3_state;
 
 int ocb3_init(ocb3_state *ocb, int cipher,
              const unsigned char *key, unsigned long keylen,
-             const unsigned char *nonce, unsigned long noncelen);
+             const unsigned char *nonce, unsigned long noncelen,
+             unsigned long taglen);
 
 int ocb3_encrypt(ocb3_state *ocb, const unsigned char *pt, unsigned long ptlen, unsigned char *ct);
 int ocb3_decrypt(ocb3_state *ocb, const unsigned char *ct, unsigned long ctlen, unsigned char *pt);
@@ -266,18 +298,18 @@ int ocb3_decrypt_verify_memory(int cipher,
 
 int ocb3_test(void);
 
+#ifdef LTC_SOURCE
 /* internal helper functions */
-int ocb3_int_aad_add_block(ocb3_state *ocb, const unsigned char *aad_block);
-void ocb3_int_calc_offset_zero(ocb3_state *ocb, const unsigned char *nonce, unsigned long noncelen);
 int ocb3_int_ntz(unsigned long x);
 void ocb3_int_xor_blocks(unsigned char *out, const unsigned char *block_a, const unsigned char *block_b, unsigned long block_len);
+#endif /* LTC_SOURCE */
 
 #endif /* LTC_OCB3_MODE */
 
 #ifdef LTC_CCM_MODE
 
-#define CCM_ENCRYPT 0
-#define CCM_DECRYPT 1
+#define CCM_ENCRYPT LTC_ENCRYPT
+#define CCM_DECRYPT LTC_DECRYPT
 
 typedef struct {
    symmetric_key       K;
@@ -343,8 +375,8 @@ extern const unsigned char gcm_shift_table[];
 
 #ifdef LTC_GCM_MODE
 
-#define GCM_ENCRYPT 0
-#define GCM_DECRYPT 1
+#define GCM_ENCRYPT LTC_ENCRYPT
+#define GCM_DECRYPT LTC_DECRYPT
 
 #define LTC_GCM_MODE_IV    0
 #define LTC_GCM_MODE_AAD   1
@@ -507,8 +539,8 @@ typedef struct {
    int aadflg;
 } chacha20poly1305_state;
 
-#define CHCHA20POLY1305_ENCRYPT 0
-#define CHCHA20POLY1305_DECRYPT 1
+#define CHACHA20POLY1305_ENCRYPT LTC_ENCRYPT
+#define CHACHA20POLY1305_DECRYPT LTC_DECRYPT
 
 int chacha20poly1305_init(chacha20poly1305_state *st, const unsigned char *key, unsigned long keylen);
 int chacha20poly1305_setiv(chacha20poly1305_state *st, const unsigned char *iv, unsigned long ivlen);
@@ -528,6 +560,6 @@ int chacha20poly1305_test(void);
 
 #endif /* LTC_CHACHA20POLY1305_MODE */
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

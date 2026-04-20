@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -147,6 +145,17 @@ int ccm_test(void)
                                tag, &taglen, 0)) != CRYPT_OK) {
             return err;
          }
+         /* run a second time to make sure skey is not touched */
+         if ((err = ccm_memory(idx,
+                               tests[x].key, 16,
+                               &skey,
+                               tests[x].nonce, tests[x].noncelen,
+                               tests[x].header, tests[x].headerlen,
+                               (unsigned char*)tests[x].pt, tests[x].ptlen,
+                               buf,
+                               tag, &taglen, 0)) != CRYPT_OK) {
+            return err;
+         }
       } else {
          if ((err = ccm_init(&ccm, idx, tests[x].key, 16, tests[x].ptlen, tests[x].taglen, tests[x].headerlen)) != CRYPT_OK) {
             return err;
@@ -165,27 +174,10 @@ int ccm_test(void)
          }
       }
 
-      if (XMEMCMP(buf, tests[x].ct, tests[x].ptlen)) {
-#if defined(LTC_TEST_DBG)
-         printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-         print_hex("ct is    ", buf, tests[x].ptlen);
-         print_hex("ct should", tests[x].ct, tests[x].ptlen);
-#endif
+      if (compare_testvector(buf, tests[x].ptlen, tests[x].ct, tests[x].ptlen, "CCM encrypt data", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
-      if (tests[x].taglen != taglen) {
-#if defined(LTC_TEST_DBG)
-         printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-         printf("taglen %lu (is) %lu (should)\n", taglen, tests[x].taglen);
-#endif
-         return CRYPT_FAIL_TESTVECTOR;
-      }
-      if (XMEMCMP(tag, tests[x].tag, tests[x].taglen)) {
-#if defined(LTC_TEST_DBG)
-         printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-         print_hex("tag is    ", tag, tests[x].taglen);
-         print_hex("tag should", tests[x].tag, tests[x].taglen);
-#endif
+      if (compare_testvector(tag, taglen, tests[x].tag, tests[x].taglen, "CCM encrypt tag", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
 
@@ -220,12 +212,8 @@ int ccm_test(void)
          }
       }
 
-      if (XMEMCMP(buf2, tests[x].pt, tests[x].ptlen)) {
-#if defined(LTC_TEST_DBG)
-         printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-         print_hex("pt is    ", buf2, tests[x].ptlen);
-         print_hex("pt should", tests[x].pt, tests[x].ptlen);
-#endif
+
+      if (compare_testvector(buf2, tests[x].ptlen, tests[x].pt, tests[x].ptlen, "CCM decrypt data", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
       if (y == 0) {
@@ -243,27 +231,12 @@ int ccm_test(void)
                               tag3, &taglen, 1   )) != CRYPT_ERROR) {
           return CRYPT_FAIL_TESTVECTOR;
         }
-        if (XMEMCMP(buf2, zero, tests[x].ptlen)) {
-#if defined(LTC_CCM_TEST_DBG)
-          printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-          print_hex("pt is    ", buf2, tests[x].ptlen);
-          print_hex("pt should", zero, tests[x].ptlen);
-#endif
-          return CRYPT_FAIL_TESTVECTOR;
+        if (compare_testvector(buf2, tests[x].ptlen, zero, tests[x].ptlen, "CCM decrypt wrong tag", x)) {
+           return CRYPT_FAIL_TESTVECTOR;
         }
       } else {
-        /* FIXME: Only check the tag if ccm_memory was not called: ccm_memory already
-           validates the tag. ccm_process and ccm_done should somehow do the same,
-           although with current setup it is impossible to keep the plaintext hidden
-           if the tag is incorrect.
-        */
-        if (XMEMCMP(tag2, tests[x].tag, tests[x].taglen)) {
-#if defined(LTC_TEST_DBG)
-          printf("\n%d: x=%lu y=%lu\n", __LINE__, x, y);
-          print_hex("tag is    ", tag2, tests[x].taglen);
-          print_hex("tag should", tests[x].tag, tests[x].taglen);
-#endif
-          return CRYPT_FAIL_TESTVECTOR;
+        if (compare_testvector(tag2, taglen, tests[x].tag, tests[x].taglen, "CCM decrypt tag", x)) {
+           return CRYPT_FAIL_TESTVECTOR;
         }
       }
 
@@ -279,6 +252,6 @@ int ccm_test(void)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

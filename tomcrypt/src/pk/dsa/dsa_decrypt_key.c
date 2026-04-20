@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -32,7 +30,8 @@ int dsa_decrypt_key(const unsigned char *in,  unsigned long  inlen,
 {
    unsigned char  *skey, *expt;
    void           *g_pub;
-   unsigned long  x, y, hashOID[32];
+   unsigned long  x, y;
+   unsigned long  hashOID[32] = { 0 };
    int            hash, err;
    ltc_asn1_list  decode[3];
 
@@ -48,8 +47,8 @@ int dsa_decrypt_key(const unsigned char *in,  unsigned long  inlen,
 
    /* decode to find out hash */
    LTC_SET_ASN1(decode, 0, LTC_ASN1_OBJECT_IDENTIFIER, hashOID, sizeof(hashOID)/sizeof(hashOID[0]));
-
-   if ((err = der_decode_sequence(in, inlen, decode, 1)) != CRYPT_OK) {
+   err = der_decode_sequence(in, inlen, decode, 1);
+   if (err != CRYPT_OK && err != CRYPT_INPUT_TOO_LONG) {
       return err;
    }
 
@@ -92,7 +91,8 @@ int dsa_decrypt_key(const unsigned char *in,  unsigned long  inlen,
       goto LBL_ERR;
    }
 
-   y = MIN(mp_unsigned_bin_size(key->p) + 1, MAXBLOCKSIZE);
+   y = mp_unsigned_bin_size(key->p) + 1;
+   y = MIN(y, MAXBLOCKSIZE);
    if ((err = hash_memory(hash, expt, x, expt, &y)) != CRYPT_OK) {
       goto LBL_ERR;
    }
@@ -133,7 +133,7 @@ LBL_ERR:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */
 

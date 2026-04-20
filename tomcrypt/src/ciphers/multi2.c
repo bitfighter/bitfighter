@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -258,14 +256,14 @@ int multi2_test(void)
          return err;
       }
 
-      if (XMEMCMP(buf, tests[x].ct, 8)) {
+      if (compare_testvector(buf, 8, tests[x].ct, 8, "Multi2 Encrypt", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
 
       if ((err = multi2_ecb_decrypt(buf, buf, &skey)) != CRYPT_OK) {
          return err;
       }
-      if (XMEMCMP(buf, tests[x].pt, 8)) {
+      if (compare_testvector(buf, 8, tests[x].pt, 8, "Multi2 Decrypt", x)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
    }
@@ -282,7 +280,7 @@ int multi2_test(void)
         if ((err = multi2_ecb_decrypt(ct, buf, &skey)) != CRYPT_OK) {
                 return err;
         }
-        if (XMEMCMP(buf, tests[0].pt, 8)) {
+        if (compare_testvector(buf, 8, tests[0].pt, 8, "Multi2 Rounds", x)) {
                 return CRYPT_FAIL_TESTVECTOR;
         }
    }
@@ -316,6 +314,6 @@ int multi2_keysize(int *keysize)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

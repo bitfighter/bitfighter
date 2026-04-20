@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -21,7 +19,7 @@
 /**
    Initialize an F8 context
    @param cipher      The index of the cipher desired
-   @param IV          The initial vector
+   @param IV          The initialization vector
    @param key         The secret key
    @param keylen      The length of the secret key (octets)
    @param salt_key    The salting key for the IV
@@ -93,6 +91,6 @@ int f8_start(                int  cipher, const unsigned char *IV,
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

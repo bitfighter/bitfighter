@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -193,8 +191,8 @@ int md2_test(void)
     return CRYPT_NOP;
  #else
    static const struct {
-        char *msg;
-        unsigned char md[16];
+        const char *msg;
+        unsigned char hash[16];
    } tests[] = {
       { "",
         {0x83,0x50,0xe5,0xa3,0xe2,0x4c,0x15,0x3d,
@@ -227,15 +225,16 @@ int md2_test(void)
         }
       }
    };
+
    int i;
+   unsigned char tmp[16];
    hash_state md;
-   unsigned char buf[16];
 
    for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
        md2_init(&md);
        md2_process(&md, (unsigned char*)tests[i].msg, (unsigned long)strlen(tests[i].msg));
-       md2_done(&md, buf);
-       if (XMEMCMP(buf, tests[i].md, 16) != 0) {
+       md2_done(&md, tmp);
+       if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "MD2", i)) {
           return CRYPT_FAIL_TESTVECTOR;
        }
    }
@@ -246,6 +245,6 @@ int md2_test(void)
 #endif
 
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

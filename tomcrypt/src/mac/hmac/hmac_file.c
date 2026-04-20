@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -32,6 +30,12 @@ int hmac_file(int hash, const char *fname,
                     unsigned char *out, unsigned long *outlen)
 {
 #ifdef LTC_NO_FILE
+   LTC_UNUSED_PARAM(hash);
+   LTC_UNUSED_PARAM(fname);
+   LTC_UNUSED_PARAM(key);
+   LTC_UNUSED_PARAM(keylen);
+   LTC_UNUSED_PARAM(out);
+   LTC_UNUSED_PARAM(outlen);
     return CRYPT_NOP;
 #else
    hmac_state hmac;
@@ -91,6 +95,6 @@ LBL_ERR:
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

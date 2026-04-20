@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -99,12 +97,7 @@ int pelican_test(void)
           return err;
        }
 
-       if (XMEMCMP(out, tests[x].T, 16)) {
-#if 0
-           int y;
-           printf("\nFailed test %d\n", x);
-           printf("{ "); for (y = 0; y < 16; ) { printf("0x%02x, ", out[y]); if (!(++y & 7)) printf("\n"); } printf(" }\n");
-#endif
+       if (compare_testvector(out, 16, tests[x].T, 16, "PELICAN", x)) {
            return CRYPT_FAIL_TESTVECTOR;
        }
    }
@@ -115,6 +108,6 @@ int pelican_test(void)
 
 #endif
 
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

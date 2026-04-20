@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /* Implements ECC over Z/pZ for curve y^2 = x^3 - 3x + b
@@ -23,7 +21,7 @@
 
 #ifdef LTC_MECC
 
-static int is_point(ecc_key *key)
+static int _is_point(ecc_key *key)
 {
    void *prime, *b, *t1, *t2;
    int err;
@@ -107,9 +105,9 @@ int ecc_import_ex(const unsigned char *in, unsigned long inlen, ecc_key *key, co
    }
 
    /* find out what type of key it is */
-   if ((err = der_decode_sequence_multi(in, inlen,
-                                  LTC_ASN1_BIT_STRING, 1UL, flags,
-                                  LTC_ASN1_EOL,        0UL, NULL)) != CRYPT_OK) {
+   err = der_decode_sequence_multi(in, inlen, LTC_ASN1_BIT_STRING, 1UL, flags,
+                                              LTC_ASN1_EOL,        0UL, NULL);
+   if (err != CRYPT_OK && err != CRYPT_INPUT_TOO_LONG) {
       goto done;
    }
 
@@ -126,7 +124,7 @@ int ecc_import_ex(const unsigned char *in, unsigned long inlen, ecc_key *key, co
                                      LTC_ASN1_EOL,             0UL, NULL)) != CRYPT_OK) {
          goto done;
       }
-   } else {
+   } else if (flags[0] == 0) {
       /* public key */
       key->type = PK_PUBLIC;
       if ((err = der_decode_sequence_multi(in, inlen,
@@ -137,6 +135,10 @@ int ecc_import_ex(const unsigned char *in, unsigned long inlen, ecc_key *key, co
                                      LTC_ASN1_EOL,             0UL, NULL)) != CRYPT_OK) {
          goto done;
       }
+   }
+   else {
+      err = CRYPT_INVALID_PACKET;
+      goto done;
    }
 
    if (dp == NULL) {
@@ -155,7 +157,7 @@ int ecc_import_ex(const unsigned char *in, unsigned long inlen, ecc_key *key, co
    if ((err = mp_set(key->pubkey.z, 1)) != CRYPT_OK) { goto done; }
 
    /* is it a point on the curve?  */
-   if ((err = is_point(key)) != CRYPT_OK) {
+   if ((err = _is_point(key)) != CRYPT_OK) {
       goto done;
    }
 
@@ -166,7 +168,7 @@ done:
    return err;
 }
 #endif
-/* $Source$ */
-/* $Revision$ */
-/* $Date$ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */
 
