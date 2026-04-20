@@ -33,6 +33,9 @@ namespace Zap
 
 static const S32 kXtankMaxWeaponSlots = 4;
 
+// Armor budget = this multiplier × body.size, distributed equally across 4 sides initially.
+static const S32 kArmorPointsPerBodySize = 10;
+
 
 // Keys used for the 14 bodies: 1-9, 0, A-D.
 static const InputCode sBodyKeys[XtankBodyCount] =
@@ -561,7 +564,7 @@ void UIXtankHelper::commitHighlightedSelection()
          for(S32 i = mSlotCount; i < kXtankMaxWeaponSlots; i++)
             mDesignInProgress.weapons[i] = XtankWeaponNone;
          // Reset per-side armor budget for the new body.
-         S32 sideDefault = (10 * body_stat[bodyIdx].size) / 4;
+         S32 sideDefault = (kArmorPointsPerBodySize * body_stat[bodyIdx].size) / 4;
          for(S32 i = 0; i < 4; i++)
             mDesignInProgress.armorSides[i] = (U8)sideDefault;
       }
@@ -698,7 +701,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
             for(S32 j = mSlotCount; j < kXtankMaxWeaponSlots; j++)
                mDesignInProgress.weapons[j] = XtankWeaponNone;
             // Reset armor budget for the new body.
-            S32 sideDefault = (10 * body_stat[bodyIdx].size) / 4;
+            S32 sideDefault = (kArmorPointsPerBodySize * body_stat[bodyIdx].size) / 4;
             for(S32 k = 0; k < 4; k++)
                mDesignInProgress.armorSides[k] = (U8)sideDefault;
             mHighlightedIndex = i;
@@ -1148,12 +1151,12 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       r.setColor(Color(0.7f * alpha, 0.7f * alpha, 0.7f * alpha));
       drawString (left, y, STAT_SZ, "+/- to shift pts"); y += GAP;
       r.setColor(Color(0.0f, alpha, alpha));
-      const char *sideNames2[4] = { "Front", "Back", "Left", "Right" };
+      const char *sideLabels[4] = { "Front", "Back", "Left", "Right" };
       for(S32 i = 0; i < 4; i++)
       {
          bool hl = (i == mHighlightedIndex);
          r.setColor(hl ? Colors::yellow : Color(0.0f, alpha, alpha));
-         drawStringf(left, y, STAT_SZ, "%s: %d", sideNames2[i],
+         drawStringf(left, y, STAT_SZ, "%s: %d", sideLabels[i],
                      (S32)mDesignInProgress.armorSides[i]);
          y += GAP;
       }
@@ -1381,7 +1384,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    {
       r.setColor(Colors::gray60);
       if(phase == PHASE_ARMOR_SIDES)
-         drawCenteredString(cx, bot - 14, 10, "\x11 \x10 side  +/- pts  Tab=next  Esc=cancel");
+         drawCenteredString(cx, bot - 14, 10, "Up/Dn=side  +/-=pts  Tab=next  Esc=cancel");
       else
          drawCenteredString(cx, bot - 14, 10, "\x11 \x10  Tab  Enter=confirm  Esc=cancel");
    }

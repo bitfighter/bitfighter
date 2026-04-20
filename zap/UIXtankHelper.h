@@ -18,13 +18,14 @@ namespace Zap
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
 // engines, treads, heat sinks, and weapons to each turret slot.  Supports
-// bidirectional carousel navigation (LEFT/RIGHT = phase navigation, ENTER = confirm).
+// bidirectional carousel navigation (Tab/Shift-Tab or arrow keys = phase navigation,
+// Enter = confirm, Esc = cancel).
 //
 // Phase 0:  Select a vehicle body      (14 options, keys 1-9,0,A-D).
 // Phase 1:  Select engine type         (16 options).
 // Phase 2:  Select tread type          (5 options).
 // Phase 3:  Select armor type          (9 options).
-// Phase 4:  Allocate armor budget across Front/Back/Left/Right (+/- to redistribute).
+// Phase 4:  Allocate armor budget across Front/Back/Left/Right (Up/Down = select side, +/- = shift points).
 // Phase 5:  Select suspension type     (4 options).
 // Phase 6:  Select bumper type         (4 options).
 // Phase 7:  Select special equipment   (12 toggleable options).
