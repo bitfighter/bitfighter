@@ -555,7 +555,8 @@ void UIXtankHelper::render()
    if(mTransitionTimer.getCurrent() > 0)
       transitionFraction = MIN(1.0f, mTransitionTimer.getFraction());
 
-   renderFloatingMenus(transitionFraction);   renderPreviewPanel();
+   renderFloatingMenus(transitionFraction);
+   renderPreviewPanel();
 }
 
 

@@ -47,8 +47,8 @@ private:
    static const S32 PHASE_BUMPERS     = 6;
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
-   static const S32 PHASE_WEAPONS     = 9;  // weapon slots start here
-   static const S32 TOTAL_PHASES      = 10;
+   static const S32 PHASE_WEAPONS     = 9;   // weapon slots start here
+   static const S32 TOTAL_PHASES      = 10;  // phases are indexed 0..9
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
