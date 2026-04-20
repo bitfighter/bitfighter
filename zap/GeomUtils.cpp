@@ -1513,6 +1513,9 @@ Vector<Point> floatsToPoints(const Vector<F32> floats)
 // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
 bool isWoundClockwise(const Vector<Point>& inputPoly)
 {
+   if(inputPoly.size() < 2)
+      return true;
+
    F64 finalSum = 0;
    S32 i_prev = inputPoly.size() - 1;
 

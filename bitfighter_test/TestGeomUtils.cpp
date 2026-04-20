@@ -1306,6 +1306,12 @@ TEST(GeomUtilsTest, isWoundClockwiseCCW)
    EXPECT_FALSE(isWoundClockwise(ccw));
 }
 
+TEST(GeomUtilsTest, isWoundClockwiseEmpty)
+{
+   Vector<Point> empty;
+   EXPECT_TRUE(isWoundClockwise(empty));
+}
+
 TEST(GeomUtilsTest, isWoundClockwiseLargeCoordinates)
 {
    F32 offset = 1e7;

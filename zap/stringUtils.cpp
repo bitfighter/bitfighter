@@ -221,7 +221,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = tolower(strToConvert[i]);
+      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
    return strToConvert;
 }
 
@@ -230,12 +230,13 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 string ucase(string strToConvert)
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = toupper(strToConvert[i]);
+      strToConvert[i] = (char)toupper((unsigned char)strToConvert[i]);
    return strToConvert;
 }
 
 
 // Return true if str looks like a non-negative int
+// Returns false if str is NULL or empty
 bool isPositiveInteger(const char *str)
 {
    if(!str || str[0] == 0)
@@ -491,6 +492,9 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 
 Vector<string> parseStringAndStripLeadingSlash(const char *str)
 {
+   if(!str)
+      return Vector<string>();
+
    Vector<string> words = parseString(str);
 
    if(words.size() > 0 && words[0][0] == '/')
@@ -503,6 +507,9 @@ Vector<string> parseStringAndStripLeadingSlash(const char *str)
 // Returns a pointer of string of chars, after "count" number of args
 const char *findPointerOfArg(const char *message, S32 count)
 {
+   if(!message)
+      return "";
+
    S32 spacecount = 0;
    S32 cur = 0;
    char prevchar = 0;
@@ -523,6 +530,9 @@ const char *findPointerOfArg(const char *message, S32 count)
 // TODO: Merge with listToString below
 string concatenate(const Vector<string> &words, S32 startingWith)
 {
+   if(startingWith < 0)
+      startingWith = 0;
+
    string concatenated = "";
    for(S32 i = startingWith; i < words.size(); i++)
       concatenated += (i == startingWith ? "" : " ") + words[i];
@@ -644,6 +654,9 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
 // Make sure a file name is 'safe', i.e. not having a path component
 bool safeFilename(const char *str)
 {
+   if(!str)
+      return false;
+
    char chr = str[0];
    S32 i = 0;
    while(chr != 0)
