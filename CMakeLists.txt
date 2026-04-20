@@ -166,8 +166,8 @@ add_subdirectory(libtommath)
 find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
 if(NOT TOMCRYPT_FOUND)
 	message(STATUS "Using in-tree libtomcrypt")
-	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/tomcrypt/src/headers")
-	add_subdirectory(tomcrypt)
+	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libtomcrypt/src/headers")
+	add_subdirectory(libtomcrypt)
 endif()
 
 
