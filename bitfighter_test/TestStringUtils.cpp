@@ -380,6 +380,13 @@ TEST(StringUtilsTest, findPointerOfArg)
 
    // Bug fix: NULL input
    EXPECT_STREQ("", findPointerOfArg(NULL, 0));
+
+   // Test with leading spaces
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
 }
 
 

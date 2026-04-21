@@ -510,18 +510,29 @@ const char *findPointerOfArg(const char *message, S32 count)
    if(!message)
       return "";
 
-   S32 spacecount = 0;
-   S32 cur = 0;
-   char prevchar = 0;
+   if(count < 0)
+      return "";
 
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
-   {
-      if(message[cur] == ' ' && prevchar != ' ')
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
+   S32 cur = 0;
+
+   // Skip leading whitespace
+   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
       cur++;
+
+   for(S32 i = 0; i < count; i++)
+   {
+      if(message[cur] == '\0')
+         return &message[cur];
+
+      // Skip current argument (non-whitespace)
+      while(message[cur] != '\0' && !isspace((unsigned char)message[cur]))
+         cur++;
+
+      // Skip whitespace separating this arg from the next
+      while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+         cur++;
    }
+
    return &message[cur];
 }
 
