@@ -17,7 +17,8 @@ namespace Zap
 
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
-// engines, treads, heat sinks, and weapons to each turret slot.  Supports
+// engines, treads, heat sinks, armor distribution, and weapons to each turret
+// slot. Supports
 // bidirectional carousel navigation (Tab/Shift-Tab or arrow keys = phase navigation,
 // Enter = confirm, Esc = cancel).
 //
@@ -30,9 +31,7 @@ namespace Zap
 // Phase 6:  Select bumper type         (4 options).
 // Phase 7:  Select special equipment   (12 toggleable options).
 // Phase 8:  Select heat-sink count     (6 options).
-// Phase 9+: For each turret slot select a weapon.
-// Phase 6:  Select heat-sink count     (6 options).
-// Phase 7+: For each turret slot select a weapon.
+// Phase 9:  Assign weapons to turret slots (LEFT/RIGHT cycles sides/slots).
 
 class UIXtankHelper : public HelperMenu
 {
@@ -50,7 +49,7 @@ private:
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
    static const S32 PHASE_WEAPONS     = 9;  // weapon slots start here
-   static const S32 PHASE_WEAPONS    = 8;  // weapon slots start here
+   static const S32 TOTAL_PHASES      = 10; // fixed phase count; weapon slots are in PHASE_WEAPONS
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -63,6 +62,10 @@ private:
 
    // Number of turret slots on the selected body (set once the body is chosen).
    S32 mSlotCount;
+
+   // Which weapon slot (0-based) is currently being configured in PHASE_WEAPONS.
+   // Left/Right arrows cycle this within [0, mSlotCount).
+   S32 mWeaponSide;
 
    // Pre-built overlay item arrays — rebuilt in onActivated().
    Vector<OverlayMenuItem> mBodyItems;
@@ -122,6 +125,10 @@ private:
    void navigateForward();             // Commit + move to next phase (carousel forward)
    void navigateBackward();            // Move to previous phase (carousel back)
    void applyDesign();                 // Finalise and propagate the chosen design
+
+   // Returns a human-readable side label ("Front", "Rear", "Left", "Right", or "Center")
+   // for a given turret slot on a given body, based on the turret's x/y mount position.
+   static const char *getTurretSideLabel(S32 bodyIdx, S32 slot);
 
    // Restore mHighlightedIndex from mDesignInProgress when entering a phase.
    void setHighlightedIndexForPhase(S32 phase);
