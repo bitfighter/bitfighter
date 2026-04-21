@@ -209,7 +209,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
         return false;
     }
     for(string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if(tolower((unsigned char)*c1) != tolower((unsigned char)*c2)) {
+        if(tolower(*c1) != tolower(*c2)) {
             return false;
         }
     }
@@ -221,7 +221,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
+      strToConvert[i] = (char)tolower(strToConvert[i]);
    return strToConvert;
 }
 
@@ -230,7 +230,7 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 string ucase(string strToConvert)
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)toupper((unsigned char)strToConvert[i]);
+      strToConvert[i] = (char)toupper(strToConvert[i]);
    return strToConvert;
 }
 

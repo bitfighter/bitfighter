@@ -128,6 +128,15 @@ extern int    dSprintf(char *buffer, U32 bufferSize, const char *format, ...);
 inline char dToupper(const char c) { if (c >= char('a') && c <= char('z')) return char(c + 'A' - 'a'); else return c; } ///< Converts an ASCII character to upper case.
 inline char dTolower(const char c) { if (c >= char('A') && c <= char('Z')) return char(c - 'A' + 'a'); else return c; } ///< Converts an ASCII character to lower case.
 
+} // namespace TNL
+
+#include <cctype>
+
+namespace TNL {
+// Safe overloads for tolower and toupper to prevent UB when called with signed char
+inline int tolower(char c) { return std::tolower((unsigned char)c); }
+inline int toupper(char c) { return std::toupper((unsigned char)c); }
+
 #define QSORT_CALLBACK FN_CDECL
 
 };

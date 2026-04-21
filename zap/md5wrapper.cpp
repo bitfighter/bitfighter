@@ -27,6 +27,9 @@
 //my includes
 #include "md5wrapper.h"
 #include <tomcrypt.h>
+#include "tnlPlatform.h"
+
+using namespace TNL;
 
 
 
@@ -73,7 +76,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 std::string lcase(std::string strToConvert)
 {
    for(std::string::size_type i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
+      strToConvert[i] = tolower(strToConvert[i]);
    return strToConvert;
 }
 
