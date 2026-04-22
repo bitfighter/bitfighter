@@ -467,7 +467,7 @@ void ToggleMenuItem::handleTextInput(char ascii)
       for(S32 i = 0; i < mOptions.size(); i++)
       {
          S32 index = (i + mIndex + 1) % mOptions.size();
-         if(tolower(ascii) == tolower(mOptions[index].data()[0]))
+         if(tolower((unsigned char)ascii) == tolower((unsigned char)mOptions[index].data()[0]))
          {
             mIndex = index;
 

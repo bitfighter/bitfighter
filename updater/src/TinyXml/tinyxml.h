@@ -176,7 +176,7 @@ protected:
 	};
 
 	static const char*	SkipWhiteSpace( const char* );
-	inline static bool	IsWhiteSpace( int c )		{ return ( isspace( c ) || c == '\n' || c == '\r' ); }
+	inline static bool	IsWhiteSpace( int c )		{ return ( isspace( (unsigned char)c ) || c == '\n' || c == '\r' ); }
 
 	virtual void StreamOut (TIXML_OSTREAM *) const = 0;
 

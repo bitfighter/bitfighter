@@ -56,11 +56,11 @@ static bool lineContainsTimestamp(const std::string &line)
    // Look for timestamp pattern like "[2025-11-22" at the beginning
    int pos = 1;      // Where we expect the start of the date
    return (line.length() >= pos + 10 &&
-           isdigit(line[pos + 0]) && isdigit(line[pos + 1]) && isdigit(line[pos + 2]) && isdigit(line[pos + 3]) &&
+           isdigit((unsigned char)line[pos + 0]) && isdigit((unsigned char)line[pos + 1]) && isdigit((unsigned char)line[pos + 2]) && isdigit((unsigned char)line[pos + 3]) &&
            line[pos + 4] == '-' &&
-           isdigit(line[pos + 5]) && isdigit(line[pos + 6]) &&
+           isdigit((unsigned char)line[pos + 5]) && isdigit((unsigned char)line[pos + 6]) &&
            line[pos + 7] == '-' &&
-           isdigit(line[pos + 8]) && isdigit(line[pos + 9]));
+           isdigit((unsigned char)line[pos + 8]) && isdigit((unsigned char)line[pos + 9]));
 }
 
 

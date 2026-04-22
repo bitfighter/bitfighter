@@ -209,7 +209,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
         return false;
     }
     for(string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if(tolower(*c1) != tolower(*c2)) {
+        if(tolower((unsigned char)*c1) != tolower((unsigned char)*c2)) {
             return false;
         }
     }

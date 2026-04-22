@@ -412,6 +412,38 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
 }
 
 
+TEST(StringUtilsTest, caseInsensitiveStringCompareNonASCII)
+{
+   // Use characters with the high bit set to ensure we handle them correctly.
+   // On systems where char is signed, passing a char with the high bit set
+   // to tolower() without a cast to unsigned char is undefined behavior.
+   string s1 = "\xFF";
+   string s2 = "\xFF";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+
+   s1 = "A\x80";
+   s2 = "a\x80";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+}
+
+
+TEST(StringUtilsTest, stricmpNonASCII)
+{
+   EXPECT_EQ(0, stricmp("\xFF", "\xFF"));
+   EXPECT_EQ(0, stricmp("A\x80", "a\x80"));
+   EXPECT_NE(0, stricmp("\xFF", "\xFE"));
+}
+
+
+TEST(StringUtilsTest, strnicmpNonASCII)
+{
+   EXPECT_EQ(0, strnicmp("\xFF", "\xFF", 1));
+   EXPECT_EQ(0, strnicmp("A\x80", "a\x80", 2));
+   EXPECT_NE(0, strnicmp("\xFF", "\xFE", 1));
+   EXPECT_EQ(0, strnicmp("abc\xFF", "ABC\xFF", 3));
+}
+
+
 TEST(StringUtilsTest, countCharInString)
 {
    EXPECT_EQ(3, countCharInString("banana", 'a'));
