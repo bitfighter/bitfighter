@@ -8,7 +8,7 @@
 
 #include "moveObject.h"
 #include "LoadoutTracker.h"
-#include "XtankShape.h"     // For XtankBody::Count, TankPhysicsInfo
+#include "XtankShape.h"     // For xtank body/design data
 
 #include "Timer.h"
 

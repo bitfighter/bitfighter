@@ -42,8 +42,8 @@ Move::~Move()
 
 void Move::initialize()
 {
-   fire = false; 
-   time = 32; 
+   fire = false;
+   time = 32;
    x = 0;
    y = 0;
    angle = 0;
@@ -57,6 +57,8 @@ void Move::initialize()
 
    for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
       weaponSlot[i] = -1;   // -1 = XtankWeaponNone
+   for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+      weaponMount[i] = -1;
 
    engineType    = (S8)XtankEngineDefault;
    treadType     = (S8)XtankTreadDefault;
@@ -102,6 +104,10 @@ bool Move::isEqualMove(const Move *move) const
       if(move->weaponSlot[i] != weaponSlot[i])
          return false;
 
+   for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+      if(move->weaponMount[i] != weaponMount[i])
+         return false;
+
    for(U32 i = 0; i < 4; i++)
       if(move->armorSides[i] != armorSides[i])
          return false;
@@ -134,7 +140,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFloat(fabs(y), XYBits);
       stream->writeFlag(y < 0);
 
-      // This needs to be signed, otherwise, the ship can't face up!  
+      // This needs to be signed, otherwise, the ship can't face up!
       // The writeAngle here will be between -2048 and 2048 because the 'angle' is
       // always between -tau/2 and tau/2 due to the output of the various atan2() calls we make
       S32 writeAngle = (S32) floor(radiansToUnit(angle) * (1 << AngleBits) + 0.5f);     // floor(angle / 2pi * 4096 + .5)
@@ -151,12 +157,14 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       // Body index: -1 (BF ship) through XtankBodyCount-1; stored as 0..XtankBodyCount
       stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBodyCount);
 
-      // Weapon slots: only present when an xtank body is active.
+      // Weapon slots + mount assignments: only present when an xtank body is active.
       // Each slot value -1..XtankWeaponCount-1 is stored as 0..XtankWeaponCount.
       if(bodyIndex >= 0)
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeaponCount);
+         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+            stream->writeRangedU32((U32)(weaponMount[i] + 1), 0, XtankMountCount);
 
          // Engine type: 0..XtankEngineCount-1
          stream->writeRangedU32((U32)engineType, 0, XtankEngineCount - 1);
@@ -202,11 +210,11 @@ void Move::unpack(BitStream *stream, bool unpackTime)
    if(!stream->readFlag())
    {
       x = stream->readFloat(XYBits);
-      if(stream->readFlag()) 
+      if(stream->readFlag())
          x = -x;
 
       y = stream->readFloat(XYBits);
-      if(stream->readFlag()) 
+      if(stream->readFlag())
          y = -y;
 
       // angle must output between -tau/2 and tau/2
@@ -222,11 +230,13 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       // Body index: stored as 0..XtankBodyCount, representing -1..XtankBodyCount-1
       bodyIndex = (S8)(stream->readRangedU32(0, XtankBodyCount) - 1);
 
-      // Weapon slots: present only when an xtank body is active.
+      // Weapon slots + mount assignments: present only when an xtank body is active.
       if(bodyIndex >= 0)
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeaponCount) - 1);
+         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+            weaponMount[i] = (S8)(stream->readRangedU32(0, XtankMountCount) - 1);
 
          engineType    = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
          treadType     = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
@@ -242,6 +252,8 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             weaponSlot[i] = -1;
+         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+            weaponMount[i] = -1;
          engineType    = (S8)XtankEngineDefault;
          treadType     = (S8)XtankTreadDefault;
          heatSinkCount = (S8)XtankHeatSinkDefault;
@@ -264,7 +276,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 
 
 // Pack and unpack the move to ensure the effects of rounding are same on client and server
-void Move::prepare()    
+void Move::prepare()
 {
    PacketStream stream;
    pack(&stream, NULL, false);

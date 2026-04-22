@@ -37,6 +37,8 @@ namespace Zap
 #define MAX_ACCEL 2.5   // The amount a vehicle can accelerate under perfect conditions
 #define MAX_WEAPONS 6   // Number of weapons allowed on any one tank
 
+   static const S32 XtankMaxWeapons = MAX_WEAPONS;
+
    // Names of each xtank body, kept in the same order as the enum below.
    // Used for on-screen display when the player cycles bodies.
    extern const char *xtankBodyNames[];
@@ -117,29 +119,9 @@ namespace Zap
    // One entry per XtankBody value.
    extern XtankBodyTurrets xtankTurretInfos[XtankBodyCount];
 
-   // ---------------------------------------------------------------------------
-   // Tank driving physics parameters for xtank vehicle bodies.
-   //
-   // All speed/acceleration values are in game-units per second (or per second²).
-   // turnRate is in radians per second.
-   //
-   // These represent a "middle-of-the-road" tuning for each body so they handle
-   // distinctly (heavy Rhino vs. nimble Lightcycle) while remaining playable.
-   // ---------------------------------------------------------------------------
-
-   struct TankPhysicsInfo
-   {
-      F32 maxSpeed;        // Maximum forward speed (units/sec)
-      F32 maxReverseSpeed; // Maximum reverse speed (units/sec)
-      F32 acceleration;    // Throttle acceleration (units/sec²)
-      F32 friction;        // Passive deceleration when no throttle (units/sec²)
-      F32 turnRate;        // Rotation rate of the hull (radians/sec)
-      F32 armor;           // Incoming-damage multiplier (0 = immune, 1 = normal)
-   };
-
-   // One entry per XtankBody value.
-   extern TankPhysicsInfo xtankPhysicsInfos[XtankBodyCount]; // AI data
-   extern XtankBodyInfo body_stat[];                         // Original data
+   // Original xtank body data (objects.c/body-defs.h style fields).
+   // Movement is derived from this table plus selected engine/treads.
+   extern XtankBodyInfo body_stat[];
 
    // ---------------------------------------------------------------------------
    // Xtank weapon catalogue.
@@ -400,11 +382,30 @@ namespace Zap
    // Vehicle design: per-player xtank configuration (body + weapon loadout).
    // ---------------------------------------------------------------------------
 
-   // Default weapons for each body (first slotCount entries are valid;
-   // slotCount comes from xtankTurretInfos[bodyIdx].count).
+   enum XtankMountLocation
+   {
+      MOUNT_TURRET1 = 0,
+      MOUNT_TURRET2,
+      MOUNT_TURRET3,
+      MOUNT_TURRET4,
+      MOUNT_FRONT,
+      MOUNT_BACK,
+      MOUNT_LEFT,
+      MOUNT_RIGHT,
+      XtankMountCount,
+      XtankMountNone = -1,
+   };
+
+   struct XtankWeaponAssignment
+   {
+      XtankWeapon weapon;
+      XtankMountLocation mount;
+   };
+
+   // Default weapon assignments for each body.
    struct XtankBodyDefaultWeapons
    {
-      XtankWeapon weapons[4];
+      XtankWeaponAssignment slots[XtankMaxWeapons];
    };
 
    // One entry per XtankBody value.
@@ -453,11 +454,13 @@ namespace Zap
    }
 
    // The player's active vehicle configuration.  Stored in Ship and communicated
-   // via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount, specials).
+   // via Move (bodyIndex, weaponSlot[], weaponMount[], engineType, treadType,
+   // heatSinkCount, specials).
    struct XtankDesign
    {
       S8 bodyIndex;           // XtankBody, -1 = normal BF ship
-      XtankWeapon weapons[4]; // active weapon per turret slot (extras = None)
+      XtankWeapon weapons[XtankMaxWeapons];      // active weapon per weapon number slot (0..5)
+      S8 weaponMounts[XtankMaxWeapons];          // XtankMountLocation per weapon slot
       XtankEngine engineType; // selected engine
       XtankTread treadType;   // selected tread type
       S8 heatSinkCount;       // number of heat sinks (1-6)

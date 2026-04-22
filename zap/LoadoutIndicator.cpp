@@ -20,6 +20,22 @@ using namespace Zap;
 
 namespace Zap { namespace UI {
 
+static const char *getMountLabel(S8 mount)
+{
+   switch((XtankMountLocation)mount)
+   {
+      case MOUNT_TURRET1: return "T1";
+      case MOUNT_TURRET2: return "T2";
+      case MOUNT_TURRET3: return "T3";
+      case MOUNT_TURRET4: return "T4";
+      case MOUNT_FRONT:   return "F";
+      case MOUNT_BACK:    return "B";
+      case MOUNT_LEFT:    return "L";
+      case MOUNT_RIGHT:   return "R";
+      default:            return "-";
+   }
+}
+
 
 // Constructor
 LoadoutIndicator::LoadoutIndicator()
@@ -182,16 +198,17 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
 
       xPos += GapBetweenTheGroups;
 
-      // One box per weapon slot
-      S32 slotCount = xtankTurretInfos[bodyIdx].count;
-      for(S32 i = 0; i < slotCount; i++)
+      // One box per xtank weapon-number slot
+      for(S32 i = 0; i < XtankMaxWeapons; i++)
       {
          XtankWeapon wt = xtankDesign.weapons[i];
-         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
-                                   ? xtankWeaponInfos[(S32)wt].name
-                                   : "---";
+         char weapBuf[96];
+         if((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
+            dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountLabel(xtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
+         else
+            dSprintf(weapBuf, sizeof(weapBuf), "#%d --", i + 1);
          r.setColor(*INDICATOR_INACTIVE_COLOR);
-         width = renderComponentIndicator(xPos, top, weapName);
+         width = renderComponentIndicator(xPos, top, weapBuf);
          xPos += width + IndicatorHorizPadding;
       }
 
@@ -256,16 +273,17 @@ S32 LoadoutIndicator::getWidth() const
       width += getComponentIndicatorWidth(hsBuf) + IndicatorHorizPadding;
 
       width += GapBetweenTheGroups;
-      S32 slotCount = xtankTurretInfos[bodyIdx].count;
-      for(S32 i = 0; i < slotCount; i++)
+      for(S32 i = 0; i < XtankMaxWeapons; i++)
       {
          XtankWeapon wt = mXtankDesign.weapons[i];
-         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
-                                   ? xtankWeaponInfos[(S32)wt].name
-                                   : "---";
-         width += getComponentIndicatorWidth(weapName) + IndicatorHorizPadding;
+         char weapBuf[96];
+         if((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
+            dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountLabel(mXtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
+         else
+            dSprintf(weapBuf, sizeof(weapBuf), "#%d --", i + 1);
+         width += getComponentIndicatorWidth(weapBuf) + IndicatorHorizPadding;
       }
-      if(slotCount > 0)
+      if(XtankMaxWeapons > 0)
          width -= IndicatorHorizPadding;
       return width;
    }

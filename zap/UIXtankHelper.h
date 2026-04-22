@@ -31,7 +31,7 @@ namespace Zap
 // Phase 6:  Select bumper type         (4 options).
 // Phase 7:  Select special equipment   (12 toggleable options).
 // Phase 8:  Select heat-sink count     (6 options).
-// Phase 9:  Assign weapons to turret slots (LEFT/RIGHT cycles sides/slots).
+// Phase 9:  Assign weapon types and mounts to numbered slots.
 
 class UIXtankHelper : public HelperMenu
 {
@@ -48,8 +48,9 @@ private:
    static const S32 PHASE_BUMPERS     = 6;
    static const S32 PHASE_SPECIALS    = 7;
    static const S32 PHASE_HEATSINK    = 8;
-   static const S32 PHASE_WEAPONS     = 9;  // weapon slots start here
-   static const S32 TOTAL_PHASES      = 10; // fixed phase count; weapon slots are in PHASE_WEAPONS
+   static const S32 PHASE_WEAPONS     = 9;
+   static const S32 PHASE_WEAPON_MOUNT = 10;
+   static const S32 TOTAL_PHASES      = 10;
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -78,6 +79,7 @@ private:
    Vector<OverlayMenuItem> mSpecialsItems;
    Vector<OverlayMenuItem> mHeatSinkItems;
    Vector<OverlayMenuItem> mWeaponItems;
+   Vector<OverlayMenuItem> mWeaponMountItems;
 
    S32 mBodyButtonsWidth;
    S32 mBodyItemsDisplayWidth;
@@ -99,6 +101,8 @@ private:
    S32 mHeatSinkItemsDisplayWidth;
    S32 mWeaponButtonsWidth;
    S32 mWeaponItemsDisplayWidth;
+   S32 mWeaponMountButtonsWidth;
+   S32 mWeaponMountItemsDisplayWidth;
 
    // Index of the currently highlighted (preview) item in the active phase's
    // item list.  Wraps within the valid range.  Cycled by UP/DOWN arrow keys.
@@ -119,6 +123,8 @@ private:
    void buildSpecialsItems();
    void buildHeatSinkItems();
    void buildWeaponItems();
+   void buildWeaponMountItems();
+   void normalizeWeaponPanels();
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
    void commitHighlightedSelection();  // Save highlighted item into design before navigating
@@ -142,12 +148,9 @@ private:
    // Draw the carousel position dots + arrows inside the preview panel.
    void renderCarouselDots(S32 cx, S32 y) const;
 
-   // Draw combined effective vehicle stats (speed/accel/turn/fire-rate).
-   // previewBodyIdx, previewEngIdx, previewTreadIdx, previewHeatSinks are the
-   // "what-if" values for whichever phase is currently being previewed.
-   void renderFullBuildStats(S32 cx, S32 y,
-                             S32 previewBodyIdx, S32 previewEngIdx,
-                             S32 previewTreadIdx, S32 previewHeatSinks) const;
+   // Draw combined effective vehicle stats (speed/reverse/accel/turn/fire-rate)
+   // derived from the full current preview design.
+   void renderFullBuildStats(S32 cx, S32 y, const XtankDesign &preview) const;
 
    // Draw custom floating-card selector UI (active center card + adjacent cards).
    // transitionFraction: 0.0 = no transition, 1.0 = fully transitioned (for animation)
@@ -155,7 +158,7 @@ private:
 
    // Draw a single card at the given screen rect.
    // centerFraction: 0.0=fully adjacent/background, 1.0=fully center/active
-   void renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 centerFraction) const;
+   void renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 centerFraction, S32 weaponSideOverride = -1) const;
 
    // Draw detailed stats for the highlighted item (right column of center card).
    void renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alpha = 1.0f) const;

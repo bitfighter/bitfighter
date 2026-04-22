@@ -444,44 +444,6 @@ XtankBodyTurrets xtankTurretInfos[] =
 }; // xtankTurretInfos[]
 
 
-// ---------------------------------------------------------------------------
-// Per-body tank driving physics parameters.
-//
-// Ordered to match XtankBodyType enum values.
-//
-// Design intent:
-//   - Light/small bodies (Lightcycle, Trike) are fast and nimble.
-//   - Medium bodies (Hexo, Spider, Tornado, Delta) offer balanced handling.
-//   - Heavy bodies (Tiger, Rhino, Medusa, Malice, Panzy) are slow but
-//     hit hard and are hard to redirect.
-//   - Disk has unusually high turnRate (saucer can spin in place easily).
-//   - Marauder and Psycho are spirited "sports" tanks.
-//   - All reverse speeds are ~55-60 % of forward max.
-//
-// Units:  speed / reverseSpeed in units/sec  (BF ship MaxVelocity = 450)
-//         acceleration / friction in units/sec²  (BF ship Acceleration = 2500)
-//         turnRate in radians/sec
-// ---------------------------------------------------------------------------
-// AI generated:
-TankPhysicsInfo xtankPhysicsInfos[] =
-{
-   // maxSpd  maxRevSpd  accel   friction  turnRate  armor
-   {  600,    340,      3500,    180,      2.6f,    1.10f },      // Lightcycle
-   {  560,    320,      3200,    200,      2.3f,    1.05f },      // Trike
-   {  520,    290,      3000,    230,      2.0f,    0.95f },      // Hexo
-   {  490,    275,      2800,    240,      2.2f,    0.90f },      // Spider
-   {  545,    310,      3250,    210,      2.4f,    1.00f },      // Psycho
-   {  510,    285,      2950,    235,      2.1f,    0.90f },      // Tornado
-   {  475,    265,      2650,    260,      1.9f,    0.85f },      // Marauder
-   {  450,    250,      2500,    280,      1.6f,    0.80f },      // Tiger
-   {  400,    220,      2100,    310,      1.2f,    0.60f },      // Rhino
-   {  420,    235,      2250,    295,      1.5f,    0.70f },      // Medusa
-   {  490,    275,      2750,    250,      1.9f,    0.85f },      // Delta
-   {  515,    290,      3000,    190,      3.0f,    0.95f },      // Disk
-   {  430,    240,      2300,    290,      1.4f,    0.75f },      // Malice
-   {  370,    205,      1900,    340,      1.0f,    0.50f },      // Panzy
-};
-
 // Original xtank
 XtankBodyInfo body_stat[] =
 {
@@ -662,20 +624,20 @@ XtankWeaponInfo xtankWeaponInfos[] =
 
 XtankBodyDefaultWeapons xtankDefaultWeapons[] =
 {
-   { { XtankWeapon::MACHINE_GUN,         XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Lightcycle  – 1 turret
-   { { XtankWeapon::LIGHT_MACHINE_GUN,   XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Trike       – 1 turret
-   { { XtankWeapon::ACID_SPRAYER,        XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Hexo        – 1 turret
-   { { XtankWeapon::FLAME_THROWER,       XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Spider      – 1 turret
-   { { XtankWeapon::PULSE_LASER,         XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Psycho      – 1 turret
-   { { XtankWeapon::AUTOCANNON,          XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Tornado     – 1 turret
-   { { XtankWeapon::LIGHT_RKT_LAUNCHER,  XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Marauder    – 1 turret
-   { { XtankWeapon::MACHINE_GUN, XtankWeapon::MACHINE_GUN, XtankWeaponNone, XtankWeaponNone } },  // Tiger       – 2 turrets
-   { { XtankWeapon::BLAST_CANNON, XtankWeapon::BLAST_CANNON, XtankWeaponNone, XtankWeaponNone } },  // Rhino       – 2 turrets
-   { { XtankWeapon::HEAT_SEEKER, XtankWeapon::HEAT_SEEKER, XtankWeaponNone, XtankWeaponNone } },  // Medusa      – 2 turrets
-   { { XtankWeapon::PULSE_LASER, XtankWeapon::PULSE_LASER, XtankWeaponNone, XtankWeaponNone } },  // Delta       – 2 turrets
-   { { XtankWeapon::FLAME_THROWER,       XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Disk        – 1 turret
-   { { XtankWeapon::LIGHT_RKT_LAUNCHER,  XtankWeaponNone, XtankWeaponNone, XtankWeaponNone } },  // Malice      – 1 turret
-   { { XtankWeapon::HEAVY_AUTOCANNON, XtankWeapon::HEAVY_AUTOCANNON, XtankWeapon::HEAVY_AUTOCANNON, XtankWeapon::HEAVY_AUTOCANNON } },  // Panzy – 4 turrets
+   { { { XtankWeapon::MACHINE_GUN,        MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Lightcycle
+   { { { XtankWeapon::LIGHT_MACHINE_GUN,  MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Trike
+   { { { XtankWeapon::ACID_SPRAYER,       MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Hexo
+   { { { XtankWeapon::FLAME_THROWER,      MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Spider
+   { { { XtankWeapon::PULSE_LASER,        MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Psycho
+   { { { XtankWeapon::AUTOCANNON,         MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Tornado
+   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Marauder
+   { { { XtankWeapon::MACHINE_GUN,        MOUNT_TURRET1 }, { XtankWeapon::MACHINE_GUN, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Tiger
+   { { { XtankWeapon::BLAST_CANNON,       MOUNT_TURRET1 }, { XtankWeapon::BLAST_CANNON, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Rhino
+   { { { XtankWeapon::HEAT_SEEKER,        MOUNT_TURRET1 }, { XtankWeapon::HEAT_SEEKER, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Medusa
+   { { { XtankWeapon::PULSE_LASER,        MOUNT_TURRET1 }, { XtankWeapon::PULSE_LASER, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Delta
+   { { { XtankWeapon::FLAME_THROWER,      MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Disk
+   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Malice
+   { { { XtankWeapon::HEAVY_AUTOCANNON,   MOUNT_TURRET1 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET2 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET3 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET4 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Panzy
 };
 
 
@@ -727,8 +689,11 @@ XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount] =
     XtankDesign::XtankDesign()
 {
    bodyIndex = (S8)XtankBodyNone;
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < XtankMaxWeapons; i++)
+   {
       weapons[i] = XtankWeaponNone;
+      weaponMounts[i] = (S8)XtankMountNone;
+   }
    engineType     = XtankEngineDefault;
    treadType      = XtankTreadDefault;
    heatSinkCount  = (S8)XtankHeatSinkDefault;
@@ -746,17 +711,22 @@ void XtankDesign::initForBody(S32 bodyIdx)
    bodyIndex = (S8)bodyIdx;
    if(bodyIdx >= 0 && bodyIdx < XtankBodyCount)
    {
+      for(S32 i = 0; i < XtankMaxWeapons; i++)
+      {
+         weapons[i] = xtankDefaultWeapons[bodyIdx].slots[i].weapon;
+         weaponMounts[i] = (S8)xtankDefaultWeapons[bodyIdx].slots[i].mount;
+      }
+      // Xtank-style default armor: all sides start at 0 and are set explicitly.
       for(S32 i = 0; i < 4; i++)
-         weapons[i] = xtankDefaultWeapons[bodyIdx].weapons[i];
-      // Default armor: uniform distribution of 10*body.size total points
-      S32 sideDefault = (10 * body_stat[bodyIdx].size) / 4;
-      for(S32 i = 0; i < 4; i++)
-         armorSides[i] = (U8)sideDefault;
+         armorSides[i] = 0;
    }
    else
    {
-      for(S32 i = 0; i < 4; i++)
+      for(S32 i = 0; i < XtankMaxWeapons; i++)
+      {
          weapons[i] = XtankWeaponNone;
+         weaponMounts[i] = (S8)XtankMountNone;
+      }
       for(S32 i = 0; i < 4; i++)
          armorSides[i] = 0;
    }

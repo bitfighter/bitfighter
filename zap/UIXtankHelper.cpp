@@ -31,10 +31,101 @@ namespace Zap
 // For clarity and consistency with other helpers
 #define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
 
-static const S32 kXtankMaxWeaponSlots = 4;
+static const S32 kXtankMaxWeaponSlots = XtankMaxWeapons;
 
-// Armor budget = this multiplier × body.size, distributed equally across 4 sides initially.
-static const S32 kArmorPointsPerBodySize = 10;
+struct XtankDerivedStats
+{
+   F32 maxSpeed;
+   F32 maxReverseSpeed;
+   F32 maxAccel;
+   F32 maxTurnRate;
+};
+
+// Returns max total armor units a bare hull can carry for the specified armor type,
+// limited by both weight limit and space limit (xtank-style size scaling).
+static S32 getBodyArmorCapacityUnits(S32 bodyIdx, S32 armorIdx)
+{
+   bodyIdx = MAX(0, MIN(bodyIdx, XtankBodyCount - 1));
+   armorIdx = MAX(0, MIN(armorIdx, XtankArmorCount - 1));
+
+   const XtankBodyInfo &body = body_stat[bodyIdx];
+   const XtankArmorInfo &armor = xtankArmorInfos[armorIdx];
+
+   S32 weightBudget = MAX(0, body.weightLimit - body.weight);
+   S32 unitWeight = armor.weight * body.size;
+   S32 unitSpace  = armor.space * body.size;
+
+   S32 byWeight = (unitWeight > 0) ? (weightBudget / unitWeight) : S32_MAX;
+   S32 bySpace  = (unitSpace  > 0) ? (body.space   / unitSpace)  : S32_MAX;
+
+   return MAX(0, MIN(byWeight, bySpace));
+}
+
+// Derive movement values from original xtank stats (body_stat + engine/treads).
+static XtankDerivedStats getDerivedStats(const XtankDesign &design)
+{
+   static const F32 XTANK_FPS = 20.0f;
+   static const F32 BF_SCALE  = 1.5f;
+   static const F32 TURN_SCALE = 3.5f;
+   static const F32 MIN_EFFECTIVE_HANDLING = 1.0f;
+
+   S32 bodyIdx = MAX(0, MIN((S32)design.bodyIndex, XtankBodyCount - 1));
+   S32 engineIdx = MAX(0, MIN((S32)design.engineType, XtankEngineCount - 1));
+   S32 treadIdx = MAX(0, MIN((S32)design.treadType, XtankTreadCount - 1));
+   S32 armorIdx = MAX(0, MIN((S32)design.armorType, XtankArmorCount - 1));
+   S32 suspensionIdx = MAX(0, MIN((S32)design.suspensionType, XtankSuspensionCount - 1));
+   S32 heatSinks = MAX(XtankHeatSinkMin, MIN((S32)design.heatSinkCount, XtankHeatSinkMax));
+
+   const XtankBodyInfo   &body = body_stat[bodyIdx];
+   const XtankEngineInfo &engine = xtankEngineInfos[engineIdx];
+   const XtankTreadInfo  &tread = xtankTreadInfos[treadIdx];
+   const XtankArmorInfo  &armor = xtankArmorInfos[armorIdx];
+   const SuspensionStat  &suspension = suspensionStat[suspensionIdx];
+
+   S32 weaponWeight = 0;
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = design.weapons[i];
+      if(w != XtankWeaponNone && (S32)w >= 0 && (S32)w < XtankWeaponCount)
+         weaponWeight += xtankWeaponInfos[(S32)w].weight;
+   }
+
+   S32 totalArmorPts = 0;
+   for(S32 i = 0; i < 4; i++)
+      totalArmorPts += (S32)design.armorSides[i];
+   S32 armorWeight = totalArmorPts * armor.weight * body.size;
+
+   S32 specialsWeight = 0;
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+      if(hasSpecial(design.specials, (XtankSpecial)s))
+         specialsWeight += xtankSpecialInfos[s].weight;
+
+   S32 totalWeight = body.weight + engine.weight + weaponWeight + armorWeight +
+                     heatSinkStat.weight * heatSinks + specialsWeight;
+   if(totalWeight < 1) totalWeight = 1;
+
+   F32 drag = MAX(0.01f, body.drag);
+   F32 treadFric = MAX(0.01f, tread.friction);
+   bool isHover = ((S32)design.treadType == (S32)TREAD_HOVER);
+
+   F32 xt_max_speed = powf((F32)engine.power / drag, 1.0f / 3.0f) / treadFric;
+   if(isHover)
+      xt_max_speed *= 0.5f;
+
+   F32 xt_engine_acc = 16.0f * (F32)engine.power / (F32)totalWeight;
+   F32 xt_tread_acc = isHover ? 1.0f : (treadFric * (F32)MAX_ACCEL);
+
+   F32 effectiveHandling = MAX(MIN_EFFECTIVE_HANDLING,
+                               (F32)body.handling + suspension.friction);
+   F32 xt_max_turn = effectiveHandling / 8.0f;
+
+   XtankDerivedStats out;
+   out.maxSpeed = xt_max_speed * XTANK_FPS * BF_SCALE;
+   out.maxReverseSpeed = out.maxSpeed * 0.4f;
+   out.maxAccel = MIN(xt_engine_acc, xt_tread_acc) * XTANK_FPS * XTANK_FPS * BF_SCALE;
+   out.maxTurnRate = xt_max_turn * TURN_SCALE;
+   return out;
+}
 
 
 // Keys used for the 14 bodies: 1-9, 0, A-D.
@@ -80,6 +171,80 @@ const char *UIXtankHelper::getTurretSideLabel(S32 bodyIdx, S32 slot)
 }
 
 
+static const char *getMountLabel(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+      case MOUNT_TURRET1: return "Turret 1";
+      case MOUNT_TURRET2: return "Turret 2";
+      case MOUNT_TURRET3: return "Turret 3";
+      case MOUNT_TURRET4: return "Turret 4";
+      case MOUNT_FRONT:   return "Front";
+      case MOUNT_BACK:    return "Back";
+      case MOUNT_LEFT:    return "Left";
+      case MOUNT_RIGHT:   return "Right";
+      default:            return "None";
+   }
+}
+
+
+static S32 getXtankMountBit(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+      case MOUNT_TURRET1:
+      case MOUNT_TURRET2:
+      case MOUNT_TURRET3:
+      case MOUNT_TURRET4: return M_TURRET;
+      case MOUNT_FRONT:   return M_FRONT;
+      case MOUNT_BACK:    return M_BACK;
+      case MOUNT_LEFT:    return M_LEFT;
+      case MOUNT_RIGHT:   return M_RIGHT;
+      default:            return 0;
+   }
+}
+
+
+static bool bodySupportsMount(S32 bodyIdx, XtankMountLocation mount)
+{
+   if(bodyIdx < 0 || bodyIdx >= XtankBodyCount)
+      return false;
+
+   if(mount >= MOUNT_TURRET1 && mount <= MOUNT_TURRET4)
+      return ((S32)mount - (S32)MOUNT_TURRET1) < xtankTurretInfos[bodyIdx].count;
+
+   return mount == MOUNT_FRONT || mount == MOUNT_BACK || mount == MOUNT_LEFT || mount == MOUNT_RIGHT;
+}
+
+
+static bool mountCompatible(S32 bodyIdx, XtankWeapon weapon, XtankMountLocation mount)
+{
+   if((S32)weapon < 0 || (S32)weapon >= XtankWeaponCount)
+      return false;
+   if(mount < 0 || mount >= XtankMountCount)
+      return false;
+   if(!bodySupportsMount(bodyIdx, mount))
+      return false;
+   return (xtankWeaponInfos[(S32)weapon].mount & getXtankMountBit(mount)) != 0;
+}
+
+
+static XtankMountLocation firstValidMount(S32 bodyIdx, XtankWeapon weapon, XtankMountLocation preferred)
+{
+   if(mountCompatible(bodyIdx, weapon, preferred))
+      return preferred;
+
+   for(S32 m = 0; m < XtankMountCount; m++)
+   {
+      XtankMountLocation mount = (XtankMountLocation)m;
+      if(mountCompatible(bodyIdx, weapon, mount))
+         return mount;
+   }
+
+   return XtankMountNone;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -112,6 +277,8 @@ UIXtankHelper::UIXtankHelper()
    mHeatSinkItemsDisplayWidth = 0;
    mWeaponButtonsWidth      = 0;
    mWeaponItemsDisplayWidth = 0;
+   mWeaponMountButtonsWidth      = 0;
+   mWeaponMountItemsDisplayWidth = 0;
 }
 
 
@@ -131,22 +298,23 @@ void UIXtankHelper::buildBodyItems()
    mBodyItems.clear();
    for(S32 i = 0; i < XtankBodyCount; i++)
    {
-      const TankPhysicsInfo &physics = xtankPhysicsInfos[i];
+      XtankDesign bodyDefaults;
+      bodyDefaults.initForBody(i);
+      XtankDerivedStats stats = getDerivedStats(bodyDefaults);
       S32 turrets = xtankTurretInfos[i].count;
+      S32 armorIdx = MAX(0, MIN((S32)mDesignInProgress.armorType, XtankArmorCount - 1));
+      S32 armorCap = getBodyArmorCapacityUnits(i, armorIdx);
 
       // Speed class string (rough bands)
-      const char *spdClass = (physics.maxSpeed >= 550) ? "Fast" :
-                             (physics.maxSpeed >= 480) ? "Med"  : "Slow";
-
-      // Armor class string (armor < 0.8 = heavy, < 1.0 = medium, else light)
-      const char *armClass = (physics.armor <= 0.7f) ? "Heavy" :
-                             (physics.armor <= 0.95f) ? "Med"   : "Light";
+      const char *spdClass = (stats.maxSpeed >= 550.0f) ? "Fast" :
+                             (stats.maxSpeed >= 480.0f) ? "Med"  : "Slow";
 
       // We store per-item help text in persistent strings (one per body).
       // Use static storage so the c_str() pointers remain valid.
       static string helpTexts[XtankBodyCount];
       helpTexts[i] = string("SPD:") + spdClass +
-                     "  ARM:" + armClass +
+                     "  HNDL:" + itos(body_stat[i].handling) +
+                     "  ACAP:" + itos(armorCap) +
                      "  TURR:" + itos(turrets);
 
       OverlayMenuItem item;
@@ -438,6 +606,87 @@ void UIXtankHelper::buildWeaponItems()
 }
 
 
+void UIXtankHelper::buildWeaponMountItems()
+{
+   mWeaponMountItems.clear();
+
+   // Slot can be empty, in which case mount is None.
+   {
+      OverlayMenuItem item;
+      item.key                 = KEY_0;
+      item.button              = KEY_NONE;
+      item.showOnMenu          = true;
+      item.itemIndex           = (U32)XtankMountCount;
+      item.name                = "None";
+      item.itemColor           = UNSEL_COLOR;
+      item.help                = "No mount (empty weapon slot)";
+      item.helpColor           = UNSEL_COLOR;
+      item.buttonOverrideColor = NULL;
+      mWeaponMountItems.push_back(item);
+   }
+
+   for(S32 m = 0; m < XtankMountCount; m++)
+   {
+      OverlayMenuItem item;
+      item.key                 = getKeyForIndex(m);
+      item.button              = KEY_NONE;
+      item.showOnMenu          = true;
+      item.itemIndex           = (U32)m;
+      item.name                = getMountLabel((XtankMountLocation)m);
+      item.itemColor           = UNSEL_COLOR;
+      item.help                = "";
+      item.helpColor           = UNSEL_COLOR;
+      item.buttonOverrideColor = NULL;
+      mWeaponMountItems.push_back(item);
+   }
+}
+
+
+void UIXtankHelper::normalizeWeaponPanels()
+{
+   // Compact all active weapons to the front so the weapon panel sequence is
+   // always: [selected weapons...] + [one trailing None], capped at 6.
+   XtankWeapon compactWeapons[kXtankMaxWeaponSlots];
+   S8 compactMounts[kXtankMaxWeaponSlots];
+   S32 writeIdx = 0;
+
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = mDesignInProgress.weapons[i];
+      if(w == XtankWeaponNone)
+         continue;
+      compactWeapons[writeIdx] = w;
+      compactMounts[writeIdx] = mDesignInProgress.weaponMounts[i];
+      writeIdx++;
+   }
+
+   for(S32 i = 0; i < writeIdx; i++)
+   {
+      mDesignInProgress.weapons[i] = compactWeapons[i];
+      mDesignInProgress.weaponMounts[i] = compactMounts[i];
+   }
+   for(S32 i = writeIdx; i < kXtankMaxWeaponSlots; i++)
+   {
+      mDesignInProgress.weapons[i] = XtankWeaponNone;
+      mDesignInProgress.weaponMounts[i] = (S8)XtankMountNone;
+   }
+
+   // Show one menu panel per selected weapon, plus one "No weapon" panel,
+   // up to the max slot count.
+   if(writeIdx >= kXtankMaxWeaponSlots)
+      mSlotCount = kXtankMaxWeaponSlots;
+   else
+      mSlotCount = writeIdx + 1;
+
+   if(mSlotCount < 1)
+      mSlotCount = 1;
+   if(mWeaponSide >= mSlotCount)
+      mWeaponSide = mSlotCount - 1;
+   if(mWeaponSide < 0)
+      mWeaponSide = 0;
+}
+
+
 // Update the colors of items in a menu to highlight the selected one.
 // The highlighted item (at mHighlightedIndex) gets the selected color,
 // all others get the unselected color.
@@ -480,12 +729,8 @@ void UIXtankHelper::onActivated()
    // Snapshot so ESC can restore the original.
    mOriginalDesign = mDesignInProgress;
 
-   // Derive slot count from the current body.
-   {
-      S32 bodyIdx = (S32)mDesignInProgress.bodyIndex;
-      if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) bodyIdx = 0;
-      mSlotCount = xtankTurretInfos[bodyIdx].count;
-   }
+   // Build dynamic weapon panel count: selected weapons + one trailing empty.
+   normalizeWeaponPanels();
 
    buildBodyItems();
    buildEngineItems();
@@ -497,6 +742,7 @@ void UIXtankHelper::onActivated()
    buildSpecialsItems();
    buildHeatSinkItems();
    buildWeaponItems();
+   buildWeaponMountItems();
 
    mBodyButtonsWidth      = getButtonWidth(mBodyItems.address(), mBodyItems.size());
    mBodyItemsDisplayWidth = getMaxItemWidth(mBodyItems.address(), mBodyItems.size());
@@ -527,6 +773,8 @@ void UIXtankHelper::onActivated()
 
    mWeaponButtonsWidth      = getButtonWidth(mWeaponItems.address(), mWeaponItems.size());
    mWeaponItemsDisplayWidth = getMaxItemWidth(mWeaponItems.address(), mWeaponItems.size());
+   mWeaponMountButtonsWidth      = getButtonWidth(mWeaponMountItems.address(), mWeaponMountItems.size());
+   mWeaponMountItemsDisplayWidth = getMaxItemWidth(mWeaponMountItems.address(), mWeaponMountItems.size());
 
    setExpectedWidth(getTotalDisplayWidth(mBodyButtonsWidth, mBodyItemsDisplayWidth));
 
@@ -548,7 +796,8 @@ void UIXtankHelper::render()
    else if(mPhase == PHASE_BUMPERS)   updateItemColors(mBumperItems);
    else if(mPhase == PHASE_SPECIALS)  { /* active state handled in renderCard */ }
    else if(mPhase == PHASE_HEATSINK)  updateItemColors(mHeatSinkItems);
-   else                               updateItemColors(mWeaponItems);
+   else if(mPhase == PHASE_WEAPONS)   updateItemColors(mWeaponItems);
+   else                               updateItemColors(mWeaponMountItems);
 
    // Compute transition fraction (0.0 to 1.0)
    F32 transitionFraction = 0.0f;
@@ -576,16 +825,8 @@ void UIXtankHelper::commitHighlightedSelection()
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mBodyItems.size())
       {
          S32 bodyIdx = (S32)mBodyItems[mHighlightedIndex].itemIndex;
-         // Update body and slot count only — preserve engine, treads, weapons, etc.
+         // Update body only — preserve engine, treads, weapons, and mount allocations.
          mDesignInProgress.bodyIndex = (S8)bodyIdx;
-         mSlotCount = xtankTurretInfos[bodyIdx].count;
-         // Clamp weapons to the new slot count (extra slots become None).
-         for(S32 i = mSlotCount; i < kXtankMaxWeaponSlots; i++)
-            mDesignInProgress.weapons[i] = XtankWeaponNone;
-         // Reset per-side armor budget for the new body.
-         S32 sideDefault = (kArmorPointsPerBodySize * body_stat[bodyIdx].size) / 4;
-         for(S32 i = 0; i < 4; i++)
-            mDesignInProgress.armorSides[i] = (U8)sideDefault;
       }
    }
    else if(mPhase == PHASE_ENGINE)
@@ -605,7 +846,7 @@ void UIXtankHelper::commitHighlightedSelection()
    }
    else if(mPhase == PHASE_ARMOR_SIDES)
    {
-      // Points are redistributed live via +/- in processInputCode; nothing to commit here.
+      // Armor side values are edited live with +/- and arrow shortcuts.
    }
    else if(mPhase == PHASE_SUSPENSION)
    {
@@ -626,15 +867,78 @@ void UIXtankHelper::commitHighlightedSelection()
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mHeatSinkItems.size())
          mDesignInProgress.heatSinkCount = (S8)(mHighlightedIndex + XtankHeatSinkMin);
    }
-   else  // PHASE_WEAPONS
+   else if(mPhase == PHASE_WEAPONS)
    {
       if(mWeaponSide >= 0 && mWeaponSide < kXtankMaxWeaponSlots &&
          mHighlightedIndex >= 0 && mHighlightedIndex < mWeaponItems.size())
       {
-         if(mHighlightedIndex == 0)
-            mDesignInProgress.weapons[mWeaponSide] = XtankWeaponNone;
+         XtankWeapon selectedWeapon = XtankWeaponNone;
+         if(mHighlightedIndex > 0)
+            selectedWeapon = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
+
+         XtankWeapon currentWeapon = mDesignInProgress.weapons[mWeaponSide];
+         S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+
+         // Compute how many panels are currently filled with weapons.
+         S32 activeCount = 0;
+         for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+            if(mDesignInProgress.weapons[i] != XtankWeaponNone)
+               activeCount++;
+
+         if(selectedWeapon == XtankWeaponNone)
+         {
+            // Remove current weapon panel (shift down) only if this panel is armed.
+            if(currentWeapon != XtankWeaponNone)
+            {
+               for(S32 i = mWeaponSide; i < kXtankMaxWeaponSlots - 1; i++)
+               {
+                  mDesignInProgress.weapons[i] = mDesignInProgress.weapons[i + 1];
+                  mDesignInProgress.weaponMounts[i] = mDesignInProgress.weaponMounts[i + 1];
+               }
+               mDesignInProgress.weapons[kXtankMaxWeaponSlots - 1] = XtankWeaponNone;
+               mDesignInProgress.weaponMounts[kXtankMaxWeaponSlots - 1] = (S8)XtankMountNone;
+            }
+         }
          else
-            mDesignInProgress.weapons[mWeaponSide] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
+         {
+            if(currentWeapon == XtankWeaponNone && activeCount < kXtankMaxWeaponSlots)
+            {
+               // Insert a new weapon panel at this position (shift up).
+               for(S32 i = kXtankMaxWeaponSlots - 1; i > mWeaponSide; i--)
+               {
+                  mDesignInProgress.weapons[i] = mDesignInProgress.weapons[i - 1];
+                  mDesignInProgress.weaponMounts[i] = mDesignInProgress.weaponMounts[i - 1];
+               }
+            }
+
+            mDesignInProgress.weapons[mWeaponSide] = selectedWeapon;
+            XtankMountLocation preferred = (XtankMountLocation)mDesignInProgress.weaponMounts[mWeaponSide];
+            mDesignInProgress.weaponMounts[mWeaponSide] = (S8)firstValidMount(bodyIdx, selectedWeapon, preferred);
+         }
+
+         normalizeWeaponPanels();
+      }
+   }
+   else if(mPhase == PHASE_WEAPON_MOUNT)
+   {
+      if(mWeaponSide >= 0 && mWeaponSide < kXtankMaxWeaponSlots &&
+         mHighlightedIndex >= 0 && mHighlightedIndex < mWeaponMountItems.size())
+      {
+         XtankWeapon w = mDesignInProgress.weapons[mWeaponSide];
+         S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+
+         if(mHighlightedIndex == 0 || w == XtankWeaponNone)
+         {
+            mDesignInProgress.weaponMounts[mWeaponSide] = (S8)XtankMountNone;
+         }
+         else
+         {
+            XtankMountLocation mount = (XtankMountLocation)(S32)mWeaponMountItems[mHighlightedIndex].itemIndex;
+            if(mountCompatible(bodyIdx, w, mount))
+               mDesignInProgress.weaponMounts[mWeaponSide] = (S8)mount;
+            else
+               mDesignInProgress.weaponMounts[mWeaponSide] = (S8)firstValidMount(bodyIdx, w, mount);
+         }
       }
    }
 }
@@ -674,10 +978,42 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
 
    bool shiftDown = InputCodeManager::checkModifier(KEY_SHIFT);
 
-   // TAB / SHIFT-TAB: always navigate the phase carousel (forward / backward).
+   // TAB / SHIFT-TAB: the only menu navigation.
+   // In weapon phase, they move between weapon-number panels.
    if(inputCode == KEY_TAB)
    {
       commitHighlightedSelection();
+
+      if(mPhase == PHASE_WEAPONS)
+      {
+         if(shiftDown)
+         {
+            if(mWeaponSide > 0)
+            {
+               mTransitionFromPhase = mPhase;
+               mTransitionForward = false;
+               mTransitionTimer.reset(250);
+               mWeaponSide--;
+               setHighlightedIndexForPhase(PHASE_WEAPONS);
+               return true;
+            }
+            navigateBackward();
+            return true;
+         }
+
+         if(mWeaponSide < MAX(0, mSlotCount - 1))
+         {
+            mTransitionFromPhase = mPhase;
+            mTransitionForward = true;
+            mTransitionTimer.reset(250);
+            mWeaponSide++;
+            setHighlightedIndexForPhase(PHASE_WEAPONS);
+            return true;
+         }
+         navigateForward();
+         return true;
+      }
+
       if(shiftDown)
          navigateBackward();
       else
@@ -685,42 +1021,77 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       return true;
    }
 
-   // LEFT / BACKSPACE:
-   //   • In PHASE_WEAPONS with multiple slots: cycle to the previous weapon slot (side).
-   //   • Everywhere else: carousel backward (same as Shift-Tab).
+   // LEFT/BACKSPACE and RIGHT are not used for phase navigation.
+   // In the weapon phase they toggle mount choice for the current weapon panel.
+   // In armor-allocation phase they mirror '-' and '+' respectively.
    if(inputCode == KEY_LEFT || inputCode == KEY_BACKSPACE)
    {
-      if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
+      if(mPhase == PHASE_WEAPONS)
       {
+         // Apply current highlighted weapon selection before toggling mount.
          commitHighlightedSelection();
-         mWeaponSide = (mWeaponSide - 1 + mSlotCount) % mSlotCount;
-         setHighlightedIndexForPhase(PHASE_WEAPONS);
+         XtankWeapon w = mDesignInProgress.weapons[mWeaponSide];
+         S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+         if((S32)w >= 0 && (S32)w < XtankWeaponCount)
+         {
+            S32 start = (S32)mDesignInProgress.weaponMounts[mWeaponSide];
+            if(start < 0 || start >= XtankMountCount)
+               start = 0;
+            for(S32 step = 1; step <= XtankMountCount; step++)
+            {
+               S32 idx = (start - step + XtankMountCount * 4) % XtankMountCount;
+               XtankMountLocation mount = (XtankMountLocation)idx;
+               if(mountCompatible(bodyIdx, w, mount))
+               {
+                  mDesignInProgress.weaponMounts[mWeaponSide] = (S8)mount;
+                  break;
+               }
+            }
+         }
+         return true;
       }
-      else
+      if(mPhase == PHASE_ARMOR_SIDES)
       {
-         commitHighlightedSelection();
-         navigateBackward();
+         S32 side = mHighlightedIndex;
+         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] > 0)
+            mDesignInProgress.armorSides[side]--;
+         return true;
       }
-      return true;
    }
 
-   // RIGHT:
-   //   • In PHASE_WEAPONS with multiple slots: cycle to the next weapon slot (side).
-   //   • Everywhere else: carousel forward (same as Tab).
    if(inputCode == KEY_RIGHT)
    {
-      if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
+      if(mPhase == PHASE_WEAPONS)
       {
+         // Apply current highlighted weapon selection before toggling mount.
          commitHighlightedSelection();
-         mWeaponSide = (mWeaponSide + 1) % mSlotCount;
-         setHighlightedIndexForPhase(PHASE_WEAPONS);
+         XtankWeapon w = mDesignInProgress.weapons[mWeaponSide];
+         S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+         if((S32)w >= 0 && (S32)w < XtankWeaponCount)
+         {
+            S32 start = (S32)mDesignInProgress.weaponMounts[mWeaponSide];
+            if(start < 0 || start >= XtankMountCount)
+               start = 0;
+            for(S32 step = 1; step <= XtankMountCount; step++)
+            {
+               S32 idx = (start + step + XtankMountCount * 4) % XtankMountCount;
+               XtankMountLocation mount = (XtankMountLocation)idx;
+               if(mountCompatible(bodyIdx, w, mount))
+               {
+                  mDesignInProgress.weaponMounts[mWeaponSide] = (S8)mount;
+                  break;
+               }
+            }
+         }
+         return true;
       }
-      else
+      if(mPhase == PHASE_ARMOR_SIDES)
       {
-         commitHighlightedSelection();
-         navigateForward();
+         S32 side = mHighlightedIndex;
+         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] < 255)
+            mDesignInProgress.armorSides[side]++;
+         return true;
       }
-      return true;
    }
 
    // UP/DOWN arrows cycle through the highlighted item in the current phase.
@@ -749,13 +1120,6 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
             S32 bodyIdx = (S32)mBodyItems[i].itemIndex;
             // Update body only — preserve other components.
             mDesignInProgress.bodyIndex = (S8)bodyIdx;
-            mSlotCount = xtankTurretInfos[bodyIdx].count;
-            for(S32 j = mSlotCount; j < kXtankMaxWeaponSlots; j++)
-               mDesignInProgress.weapons[j] = XtankWeaponNone;
-            // Reset armor budget for the new body.
-            S32 sideDefault = (kArmorPointsPerBodySize * body_stat[bodyIdx].size) / 4;
-            for(S32 k = 0; k < 4; k++)
-               mDesignInProgress.armorSides[k] = (U8)sideDefault;
             mHighlightedIndex = i;
             navigateForward();
             return true;
@@ -764,32 +1128,20 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    }
    else if(mPhase == PHASE_ARMOR_SIDES)
    {
-      // '+' / '=' : move 1 point from another side to the highlighted side.
+      // '+' / '=' : add 1 point to the highlighted side (xtank-style independent sides).
       if(inputCode == KEY_EQUALS)
       {
-         S32 to = mHighlightedIndex;
-         for(S32 k = 1; k <= 3; k++)
-         {
-            S32 from = (to + k) % 4;
-            if(mDesignInProgress.armorSides[from] > 0)
-            {
-               mDesignInProgress.armorSides[from]--;
-               mDesignInProgress.armorSides[to]++;
-               break;
-            }
-         }
+         S32 side = mHighlightedIndex;
+         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] < 255)
+            mDesignInProgress.armorSides[side]++;
          return true;
       }
-      // '-' : move 1 point from the highlighted side to the next side.
+      // '-' : remove 1 point from the highlighted side.
       if(inputCode == KEY_MINUS)
       {
-         S32 from = mHighlightedIndex;
-         if(mDesignInProgress.armorSides[from] > 0)
-         {
-            S32 to = (from + 1) % 4;
-            mDesignInProgress.armorSides[from]--;
-            mDesignInProgress.armorSides[to]++;
-         }
+         S32 side = mHighlightedIndex;
+         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] > 0)
+            mDesignInProgress.armorSides[side]--;
          return true;
       }
    }
@@ -885,25 +1237,27 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    }
    else if(mPhase == PHASE_WEAPONS)
    {
-      // Hotkeys assign a weapon to the current side/slot and advance to the next slot,
-      // or navigate forward if the last slot has been assigned.
+      // Hotkeys apply through commitHighlightedSelection so panel insertion/removal
+      // semantics are identical to tabbing away from the panel.
       for(S32 i = 0; i < mWeaponItems.size(); i++)
       {
          if(inputCode == mWeaponItems[i].key)
          {
-            if(i == 0)
-               mDesignInProgress.weapons[mWeaponSide] = XtankWeaponNone;
-            else
-               mDesignInProgress.weapons[mWeaponSide] = (XtankWeapon)mWeaponItems[i].itemIndex;
             mHighlightedIndex = i;
-            // Advance to next slot, or leave weapon phase if last slot done.
-            if(mSlotCount > 1 && mWeaponSide < mSlotCount - 1)
-            {
-               mWeaponSide++;
-               setHighlightedIndexForPhase(PHASE_WEAPONS);
-            }
-            else
-               navigateForward();
+            commitHighlightedSelection();
+            setHighlightedIndexForPhase(PHASE_WEAPONS);
+            return true;
+         }
+      }
+   }
+   else if(mPhase == PHASE_WEAPON_MOUNT)
+   {
+      for(S32 i = 0; i < mWeaponMountItems.size(); i++)
+      {
+         if(inputCode == mWeaponMountItems[i].key)
+         {
+            mHighlightedIndex = i;
+            commitHighlightedSelection();
             return true;
          }
       }
@@ -922,7 +1276,6 @@ void UIXtankHelper::advanceToNextPhaseOrFinish()
 
 void UIXtankHelper::navigateForward()
 {
-   // All weapon slots are now handled within the single PHASE_WEAPONS phase.
    if(TOTAL_PHASES < 1)
       return;
 
@@ -933,8 +1286,9 @@ void UIXtankHelper::navigateForward()
 
    mPhase = (mPhase + 1) % TOTAL_PHASES;
 
-   // When entering the weapons phase (from any other phase), start at slot 0.
-   if(mPhase == PHASE_WEAPONS)
+   // When entering weapon phases from non-weapon phases, reset to slot 0.
+   if((mPhase == PHASE_WEAPONS || mPhase == PHASE_WEAPON_MOUNT) &&
+      !(mTransitionFromPhase == PHASE_WEAPONS || mTransitionFromPhase == PHASE_WEAPON_MOUNT))
       mWeaponSide = 0;
 
    S32 newWidth = widthForPhase(mPhase);
@@ -955,9 +1309,9 @@ void UIXtankHelper::navigateBackward()
 
    mPhase = (mPhase - 1 + TOTAL_PHASES) % TOTAL_PHASES;
 
-   // When entering the weapons phase from another phase, start at the last slot
-   // so backward navigation feels natural (most-recently assigned slot).
-   if(mPhase == PHASE_WEAPONS)
+   // When entering weapon phases from non-weapon phases, start at last slot.
+   if((mPhase == PHASE_WEAPONS || mPhase == PHASE_WEAPON_MOUNT) &&
+      !(mTransitionFromPhase == PHASE_WEAPONS || mTransitionFromPhase == PHASE_WEAPON_MOUNT))
       mWeaponSide = MAX(0, mSlotCount - 1);
 
    S32 newWidth = widthForPhase(mPhase);
@@ -979,7 +1333,8 @@ S32 UIXtankHelper::widthForPhase(S32 phase) const
    if(phase == PHASE_BUMPERS)     return getTotalDisplayWidth(mBumperButtonsWidth,      mBumperItemsDisplayWidth);
    if(phase == PHASE_SPECIALS)    return getTotalDisplayWidth(mSpecialsButtonsWidth,    mSpecialsItemsDisplayWidth);
    if(phase == PHASE_HEATSINK)    return getTotalDisplayWidth(mHeatSinkButtonsWidth,    mHeatSinkItemsDisplayWidth);
-   return getTotalDisplayWidth(mWeaponButtonsWidth, mWeaponItemsDisplayWidth);
+   if(phase == PHASE_WEAPONS)     return getTotalDisplayWidth(mWeaponButtonsWidth,      mWeaponItemsDisplayWidth);
+   return getTotalDisplayWidth(mWeaponMountButtonsWidth, mWeaponMountItemsDisplayWidth);
 }
 
 
@@ -1034,7 +1389,7 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
    {
       mHighlightedIndex = (S32)mDesignInProgress.heatSinkCount - XtankHeatSinkMin;
    }
-   else  // PHASE_WEAPONS: read from mWeaponSide (caller sets mWeaponSide before calling)
+   else if(phase == PHASE_WEAPONS)
    {
       S32 slot = mWeaponSide;
       if(slot < 0 || slot >= (S32)(sizeof(mDesignInProgress.weapons) / sizeof(mDesignInProgress.weapons[0])))
@@ -1058,6 +1413,44 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
          }
       }
    }
+   else if(phase == PHASE_WEAPON_MOUNT)
+   {
+      S32 slot = mWeaponSide;
+      if(slot < 0 || slot >= kXtankMaxWeaponSlots)
+      {
+         mHighlightedIndex = 0;
+         return;
+      }
+
+      XtankWeapon w = mDesignInProgress.weapons[slot];
+      if(w == XtankWeaponNone)
+      {
+         mHighlightedIndex = 0;
+         return;
+      }
+
+      XtankMountLocation mount = (XtankMountLocation)mDesignInProgress.weaponMounts[slot];
+      mHighlightedIndex = 0;
+      for(S32 i = 1; i < mWeaponMountItems.size(); i++)
+      {
+         if((S32)mWeaponMountItems[i].itemIndex == (S32)mount)
+         {
+            mHighlightedIndex = i;
+            return;
+         }
+      }
+
+      S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+      XtankMountLocation fallback = firstValidMount(bodyIdx, w, MOUNT_TURRET1);
+      for(S32 i = 1; i < mWeaponMountItems.size(); i++)
+      {
+         if((S32)mWeaponMountItems[i].itemIndex == (S32)fallback)
+         {
+            mHighlightedIndex = i;
+            break;
+         }
+      }
+   }
 }
 
 
@@ -1072,7 +1465,8 @@ const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(S32 phase) const
    if(phase == PHASE_BUMPERS)     return &mBumperItems;
    if(phase == PHASE_SPECIALS)    return &mSpecialsItems;
    if(phase == PHASE_HEATSINK)    return &mHeatSinkItems;
-   return &mWeaponItems;
+   if(phase == PHASE_WEAPONS)     return &mWeaponItems;
+   return &mWeaponMountItems;
 }
 
 
@@ -1148,6 +1542,11 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
          if(mDesignInProgress.weapons[i] != XtankWeaponNone) filled++;
       return itos(filled) + "/" + itos(mSlotCount) + " armed";
    }
+   if(phase == PHASE_WEAPON_MOUNT)
+   {
+      S32 slot = MAX(0, MIN(mWeaponSide, kXtankMaxWeaponSlots - 1));
+      return std::string("#") + itos(slot + 1) + " " + getMountLabel((XtankMountLocation)mDesignInProgress.weaponMounts[slot]);
+   }
    return "";
 }
 
@@ -1170,15 +1569,29 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
    {
       S32 idx = mHighlightedIndex;
       if(idx < 0 || idx >= XtankBodyCount) idx = 0;
-      const TankPhysicsInfo &phy = xtankPhysicsInfos[idx];
-      drawStringf(left, y, STAT_SZ, "Speed: %s", cs(comma(phy.maxSpeed)));           y += GAP;
-      drawStringf(left, y, STAT_SZ, "Reverse: %s", cs(comma(phy.maxReverseSpeed)));  y += GAP;
-      drawStringf(left, y, STAT_SZ, "Accel: %s", cs(comma(phy.acceleration)));       y += GAP;
-      drawStringf(left, y, STAT_SZ, "Turn: %.1f", phy.turnRate);                     y += GAP;
-      drawStringf(left, y, STAT_SZ, "Armor: %.2f", phy.armor);                       y += GAP;
+      XtankDesign bodyDefaults;
+      bodyDefaults.initForBody(idx);
+      XtankDerivedStats stats = getDerivedStats(bodyDefaults);
+      S32 armorIdx = MAX(0, MIN((S32)mDesignInProgress.armorType, XtankArmorCount - 1));
+      S32 armorCap = getBodyArmorCapacityUnits(idx, armorIdx);
+      drawStringf(left, y, STAT_SZ, "Speed: %s", cs(comma(stats.maxSpeed)));              y += GAP;
+      drawStringf(left, y, STAT_SZ, "Reverse: %s", cs(comma(stats.maxReverseSpeed)));      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Accel: %s", cs(comma(stats.maxAccel)));               y += GAP;
+      drawStringf(left, y, STAT_SZ, "Turn: %.1f", stats.maxTurnRate);                      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Drag: %.2f", body_stat[idx].drag);                    y += GAP;
+      drawStringf(left, y, STAT_SZ, "Handling: %d", body_stat[idx].handling);               y += GAP;
       drawStringf(left, y, STAT_SZ, "Turrets: %d", xtankTurretInfos[idx].count);     y += GAP;
       drawStringf(left, y, STAT_SZ, "Weight: %s", cs(comma(body_stat[idx].weight))); y += GAP;
-      drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(body_stat[idx].cost)));     y += GAP;
+
+      r.setColor(Color(0.7f * alpha, 0.7f * alpha, 0.7f * alpha));
+      drawString(left, y, STAT_SZ, "Limits");                                          y += GAP;
+
+      r.setColor(Color(0.0f, alpha, alpha));
+      drawStringf(left + 10, y, STAT_SZ, "Weight: %s", cs(comma(body_stat[idx].weightLimit))); y += GAP;
+      drawStringf(left + 10, y, STAT_SZ, "Space: %s", cs(comma(body_stat[idx].space)));         y += GAP;
+      drawStringf(left + 10, y, STAT_SZ, "Armor cap: %d", armorCap);                             y += GAP;
+
+      drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(body_stat[idx].cost)));       y += GAP;
    }
    else if(mPhase == PHASE_ENGINE)
    {
@@ -1216,9 +1629,9 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       S32 total = 0;
       for(S32 i = 0; i < 4; i++)
          total += (S32)mDesignInProgress.armorSides[i];
-      drawStringf(left, y, STAT_SZ, "Budget: %d pts", total); y += GAP;
+      drawStringf(left, y, STAT_SZ, "Total: %d pts", total); y += GAP;
       r.setColor(Color(0.7f * alpha, 0.7f * alpha, 0.7f * alpha));
-      drawString (left, y, STAT_SZ, "+/- to shift pts"); y += GAP;
+      drawString (left, y, STAT_SZ, "+/- to adjust"); y += GAP;
       r.setColor(Color(0.0f, alpha, alpha));
       const char *sideLabels[4] = { "Front", "Back", "Left", "Right" };
       for(S32 i = 0; i < 4; i++)
@@ -1271,6 +1684,21 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       drawStringf(left, y, STAT_SZ, "Weight: %s", cs(comma(heatSinkStat.weight * n)));                                y += GAP;
       drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(heatSinkStat.cost * n)));                                    y += GAP;
    }
+   else if(mPhase == PHASE_WEAPON_MOUNT)
+   {
+      S32 slot = MAX(0, MIN(mWeaponSide, kXtankMaxWeaponSlots - 1));
+      XtankWeapon w = mDesignInProgress.weapons[slot];
+      if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount)
+         drawString(left, y, STAT_SZ, "No weapon in slot");
+      else
+      {
+         S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+         XtankMountLocation mount = (XtankMountLocation)mDesignInProgress.weaponMounts[slot];
+         drawStringf(left, y, STAT_SZ, "Weapon: %s", xtankWeaponInfos[(S32)w].name); y += GAP;
+         drawStringf(left, y, STAT_SZ, "Mount: %s", getMountLabel(mount));            y += GAP;
+         drawStringf(left, y, STAT_SZ, "Valid: %s", mountCompatible(bodyIdx, w, mount) ? "Yes" : "No"); y += GAP;
+      }
+   }
    else
    {
       // Weapon slot
@@ -1295,7 +1723,7 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
 
 // Render one card.
 // centerFraction: 0.0 = fully background (adjacent), 1.0 = fully foreground (center).
-void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 cf) const
+void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 cf, S32 weaponSideOverride) const
 {
    static const S32 CORNER    = 10;
    static const S32 ITEM_SZ   = 13;   // fixed item font size, same on ALL cards
@@ -1305,24 +1733,26 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    // Approximate available list height on the center card (matches SLOT C geometry: bot=595, top=135).
    static const S32 CTR_LIST_AVAIL = 595 - 6 - (135 + 8 + TITLE_SZ + 4 + 6);  // 595-6-169 = 420
 
-   // Phase title — one entry per non-weapon phase; PHASE_WEAPONS gets a single title.
+   // Phase title — one entry per phase.
    static const char *sPhaseTitles[] =
    {
-      "Body",         // 0
-      "Engine",       // 1
-      "Treads",       // 2
-      "Armor Type",   // 3
-      "Armor Sides",  // 4 (point allocation)
-      "Suspension",   // 5
-      "Bumpers",      // 6
-      "Specials",     // 7
-      "Heat Sinks",   // 8
+      "Body",              // 0
+      "Engine",            // 1
+      "Treads",            // 2
+      "Armor Type",        // 3
+      "Armor Allocation",  // 4 (point allocation)
+      "Suspension",        // 5
+      "Bumpers",           // 6
+      "Specials",          // 7
+      "Heat Sinks",        // 8
+      "Weapons",           // 9
+      "Mounts",            // 10
    };
    auto phaseTitle = [&](S32 p) -> const char *
    {
       if(p >= 0 && p < TOTAL_PHASES)
          return sPhaseTitles[p];
-      return "Weapon";
+      return "";
    };
 
    // Background alpha: 0.30 (distant) → 0.82 (center)
@@ -1357,20 +1787,44 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    // Use a small fixed bottom margin; blank space accumulates below items.
    const S32 listBot = bot - 6;
 
-   // Weapons phase (center card only): draw a slot-selector banner above the weapon list
-   // so the player knows which slot they are configuring and can cycle with LEFT/RIGHT.
-   if(isCenter && phase == PHASE_WEAPONS)
+   // Weapon phases: draw a slot-selector banner above the list so the player
+   // can see which weapon panel this card represents.
+   if(phase == PHASE_WEAPONS || phase == PHASE_WEAPON_MOUNT)
    {
-      static char slotBuf[64];
-      S32 bodyIdx = mDesignInProgress.bodyIndex;
-      if(bodyIdx < 0 || bodyIdx >= XtankBodyCount) bodyIdx = 0;
-      const char *sideName = getTurretSideLabel(bodyIdx, mWeaponSide);
-      dSprintf(slotBuf, sizeof(slotBuf), "\x11  Slot %d / %d : %s  \x10",
-               mWeaponSide + 1, mSlotCount, sideName);
-      r.setColor(Colors::cyan);
+      static char slotBuf[128];
+      S32 weaponSide = (weaponSideOverride >= 0) ? weaponSideOverride : mWeaponSide;
+      S32 slot = MAX(0, MIN(weaponSide, kXtankMaxWeaponSlots - 1));
+      XtankWeapon weapon = mDesignInProgress.weapons[slot];
+      XtankMountLocation mount = (XtankMountLocation)mDesignInProgress.weaponMounts[slot];
+
+      // On the active center weapons card, show the live highlighted selection
+      // (same preview behavior as the right-side vehicle panel) before commit.
+      if(phase == PHASE_WEAPONS && isCenter && slot == mWeaponSide)
+      {
+         if(mHighlightedIndex <= 0)
+         {
+            weapon = XtankWeaponNone;
+            mount = XtankMountNone;
+         }
+         else if(mHighlightedIndex < mWeaponItems.size())
+         {
+            weapon = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
+            S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+            mount = firstValidMount(bodyIdx, weapon, mount);
+         }
+      }
+
+      const char *mode = (phase == PHASE_WEAPONS) ? "Weapon" : "Mount";
+      const char *weaponName = "No Weapon";
+      if((S32)weapon >= 0 && (S32)weapon < XtankWeaponCount)
+         weaponName = xtankWeaponInfos[(S32)weapon].name;
+
+      dSprintf(slotBuf, sizeof(slotBuf), "\x11  %s #%d / %d : %s (%s)  \x10",
+               mode, slot + 1, mSlotCount, weaponName, getMountLabel(mount));
+      r.setColor(isCenter ? Colors::cyan : Color(grayLevel, grayLevel, grayLevel));
       drawCenteredString(cx, listTop, ITEM_SZ, slotBuf);
       listTop += ITEM_SZ + 8;  // push the weapon list down past the banner
-      r.setColor(Colors::gray40);
+      r.setColor(isCenter ? Colors::gray40 : Color(grayLevel * 0.6f, grayLevel * 0.6f, grayLevel * 0.6f));
       drawHorizLine(left + 8, right - 8, listTop - 3);
    }
 
@@ -1464,7 +1918,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    {
       r.setColor(Colors::gray60);
       if(phase == PHASE_ARMOR_SIDES)
-         drawCenteredString(cx, bot - 14, 10, "Up/Dn=side  +/-=pts  Tab=next  Esc=cancel");
+         drawCenteredString(cx, bot - 14, 10, "Up/Dn=side  +/-=adjust  Tab=next  Esc=cancel");
       else
          drawCenteredString(cx, bot - 14, 10, "\x11 \x10  Tab  Enter=confirm  Esc=cancel");
    }
@@ -1519,24 +1973,43 @@ void UIXtankHelper::renderFloatingMenus(F32 /*unused*/)
    // "toSlot" is where each card ends up; "fromSlot" is where it starts.
    // phaseAtSlot[i]: which phase lives in the i-th slot in the "to" arrangement.
    S32 phaseAtSlot[5];
+   S32 weaponSideAtSlot[5];
    for(S32 i = 0; i < 5; i++)
+   {
       phaseAtSlot[i] = (mPhase + (i - 2) + totalPhases * 10) % totalPhases;
+      weaponSideAtSlot[i] = -1;
+   }
 
-   struct CardAnim { S32 phase; S32 fromSlot; S32 toSlot; };
+   // In weapon phase, represent previous/next weapon panels on adjacent cards
+   // instead of unrelated phases whenever those panels exist.
+   if(mPhase == PHASE_WEAPONS)
+   {
+      for(S32 i = 0; i < 5; i++)
+      {
+         S32 side = mWeaponSide + (i - 2);
+         if(side >= 0 && side < mSlotCount)
+         {
+            phaseAtSlot[i] = PHASE_WEAPONS;
+            weaponSideAtSlot[i] = side;
+         }
+      }
+   }
+
+   struct CardAnim { S32 phase; S32 weaponSide; S32 fromSlot; S32 toSlot; };
    CardAnim cards[5];
 
    if(mTransitionTimer.getCurrent() > 0 && mTransitionFromPhase >= 0)
    {
       if(mTransitionForward)
          for(S32 i = 0; i < 5; i++)
-         { cards[i] = { phaseAtSlot[i], MIN(i + 1, 4), i }; }
+         { cards[i] = { phaseAtSlot[i], weaponSideAtSlot[i], MIN(i + 1, 4), i }; }
       else
          for(S32 i = 0; i < 5; i++)
-         { cards[i] = { phaseAtSlot[i], MAX(i - 1, 0), i }; }
+         { cards[i] = { phaseAtSlot[i], weaponSideAtSlot[i], MAX(i - 1, 0), i }; }
    }
    else
       for(S32 i = 0; i < 5; i++)
-         cards[i] = { phaseAtSlot[i], i, i };
+         cards[i] = { phaseAtSlot[i], weaponSideAtSlot[i], i, i };
 
    FontManager::pushFontContext(HelperMenuContext);
 
@@ -1559,7 +2032,7 @@ void UIXtankHelper::renderFloatingMenus(F32 /*unused*/)
       if(cf < 0.02f && half_w < 70) continue;
       if(cx + half_w < 0 || cx - half_w > 800) continue;
 
-      renderCard(cx - half_w, top, cx + half_w, bot, ca.phase, cf);
+      renderCard(cx - half_w, top, cx + half_w, bot, ca.phase, cf, ca.weaponSide);
    }
 
    FontManager::popFontContext();
@@ -1597,7 +2070,8 @@ S32 UIXtankHelper::currentPhaseItemCount() const
    if(mPhase == PHASE_BUMPERS)     return mBumperItems.size();
    if(mPhase == PHASE_SPECIALS)    return mSpecialsItems.size();
    if(mPhase == PHASE_HEATSINK)    return mHeatSinkItems.size();
-   return mWeaponItems.size();
+   if(mPhase == PHASE_WEAPONS)     return mWeaponItems.size();
+   return mWeaponMountItems.size();
 }
 
 
@@ -1641,8 +2115,11 @@ void UIXtankHelper::renderPreviewPanel() const
       bodyPreview.treadType = preview.treadType;
       bodyPreview.heatSinkCount = preview.heatSinkCount;
       bodyPreview.armorType = preview.armorType;
-      for(S32 i = 0; i < MIN(xtankTurretInfos[bodyIdx].count, kXtankMaxWeaponSlots); i++)
+      for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+      {
          bodyPreview.weapons[i] = preview.weapons[i];
+         bodyPreview.weaponMounts[i] = preview.weaponMounts[i];
+      }
       preview = bodyPreview;
    }
    else if(mPhase == PHASE_ENGINE)
@@ -1657,14 +2134,34 @@ void UIXtankHelper::renderPreviewPanel() const
    {
       preview.heatSinkCount = (S8)(mHighlightedIndex + XtankHeatSinkMin);
    }
-   else  // PHASE_WEAPONS: preview the weapon currently highlighted for the active side
+   else if(mPhase == PHASE_WEAPONS)
    {
       S32 slot = mWeaponSide;
       if(slot >= 0 && slot < kXtankMaxWeaponSlots)
       {
-         if(mHighlightedIndex <= 0) preview.weapons[slot] = XtankWeaponNone;
+         if(mHighlightedIndex <= 0)
+         {
+            preview.weapons[slot] = XtankWeaponNone;
+            preview.weaponMounts[slot] = (S8)XtankMountNone;
+         }
          else if(mHighlightedIndex < mWeaponItems.size())
+         {
             preview.weapons[slot] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
+            XtankMountLocation preferred = (XtankMountLocation)preview.weaponMounts[slot];
+            S32 previewBodyIdx = MAX(0, MIN((S32)preview.bodyIndex, XtankBodyCount - 1));
+            preview.weaponMounts[slot] = (S8)firstValidMount(previewBodyIdx, preview.weapons[slot], preferred);
+         }
+      }
+   }
+   else if(mPhase == PHASE_WEAPON_MOUNT)
+   {
+      S32 slot = mWeaponSide;
+      if(slot >= 0 && slot < kXtankMaxWeaponSlots)
+      {
+         if(mHighlightedIndex == 0)
+            preview.weaponMounts[slot] = (S8)XtankMountNone;
+         else if(mHighlightedIndex > 0 && mHighlightedIndex < mWeaponMountItems.size())
+            preview.weaponMounts[slot] = (S8)(S32)mWeaponMountItems[mHighlightedIndex].itemIndex;
       }
    }
 
@@ -1678,20 +2175,19 @@ void UIXtankHelper::renderPreviewPanel() const
    if(heatSinks < XtankHeatSinkMin) heatSinks = XtankHeatSinkMin;
    if(heatSinks > XtankHeatSinkMax) heatSinks = XtankHeatSinkMax;
 
-   const TankPhysicsInfo &phy = xtankPhysicsInfos[bodyIdx];
    const XtankEngineInfo &eng = xtankEngineInfos[engineIdx];
    const XtankTreadInfo  &trd = xtankTreadInfos[treadIdx];
+   XtankDerivedStats derived = getDerivedStats(preview);
 
-   F32 effSpeed = phy.maxSpeed * eng.speedMult;
-   F32 effRev   = phy.maxReverseSpeed * eng.speedMult;
-   F32 effAccel = phy.acceleration * eng.accelMult;
-   F32 effTurn  = phy.turnRate * trd.friction;
+   F32 effSpeed = derived.maxSpeed;
+   F32 effRev   = derived.maxReverseSpeed;
+   F32 effAccel = derived.maxAccel;
+   F32 effTurn  = derived.maxTurnRate;
    S32 fireRatePct = S32((1.0f - xtankHeatSinkFireDelayMult(heatSinks)) * 100.0f + 0.5f);
 
    S32 totalWeight = body_stat[bodyIdx].weight + eng.weight + heatSinkStat.weight * heatSinks;
    S32 totalCost   = body_stat[bodyIdx].cost   + eng.cost   + trd.cost + heatSinkStat.cost * heatSinks;
-   S32 slotCount   = xtankTurretInfos[bodyIdx].count;
-   for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
    {
       XtankWeapon w = preview.weapons[i];
       if(w == XtankWeaponNone) continue;
@@ -1700,17 +2196,18 @@ void UIXtankHelper::renderPreviewPanel() const
       totalCost   += xtankWeaponInfos[(S32)w].cost;
    }
 
-   // Armor cost and weight: per-side armor points * per-point stats
+   // Armor cost and weight: xtank-style scaling by body size.
    S32 armorIdx = MAX(0, MIN((S32)preview.armorType, XtankArmorCount - 1));
    S32 totalArmorPoints = 0;
    for(S32 i = 0; i < 4; i++)
       totalArmorPoints += preview.armorSides[i];
-   totalWeight += totalArmorPoints * xtankArmorInfos[armorIdx].weight;
-   totalCost   += totalArmorPoints * xtankArmorInfos[armorIdx].cost;
+   totalWeight += totalArmorPoints * xtankArmorInfos[armorIdx].weight * body_stat[bodyIdx].size;
+   totalCost   += totalArmorPoints * xtankArmorInfos[armorIdx].cost * body_stat[bodyIdx].size;
 
-   // Suspension and bumper costs
-   totalCost += suspensionStat[MAX(0, MIN((S32)preview.suspensionType, XtankSuspensionCount - 1))].cost;
-   totalCost += bumperStat[MAX(0, MIN((S32)preview.bumperType, XtankBumperCount - 1))].cost;
+   // Suspension, treads, and bumpers scale by body size in xtank.
+   totalCost += suspensionStat[MAX(0, MIN((S32)preview.suspensionType, XtankSuspensionCount - 1))].cost * body_stat[bodyIdx].size;
+   totalCost += trd.cost * body_stat[bodyIdx].size;
+   totalCost += bumperStat[MAX(0, MIN((S32)preview.bumperType, XtankBumperCount - 1))].cost * body_stat[bodyIdx].size;
 
    // Specials costs and weights
    for(S32 s = 0; s < XtankSpecialCount; s++)
@@ -1725,9 +2222,9 @@ void UIXtankHelper::renderPreviewPanel() const
    // Space tracking
    S32 spaceLimit = body_stat[bodyIdx].space;
    S32 totalSpace = eng.space;
-   totalSpace += totalArmorPoints * xtankArmorInfos[armorIdx].space;
+   totalSpace += totalArmorPoints * xtankArmorInfos[armorIdx].space * body_stat[bodyIdx].size;
    totalSpace += heatSinkStat.space * heatSinks;
-   for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
    {
       XtankWeapon w = preview.weapons[i];
       if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount) continue;
@@ -1766,7 +2263,7 @@ void UIXtankHelper::renderPreviewPanel() const
    drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Body: %s", xtankBodyNames[bodyIdx]);                                    ty += LINE_GAP;
    drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Speed: %s  Rev: %s", cs(comma(effSpeed)), cs(comma(effRev)));           ty += LINE_GAP;
    drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Accel: %s  Turn: %.1f", cs(comma(effAccel)), effTurn);                  ty += LINE_GAP;
-   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Armor: %.2f  Turrets: %d", phy.armor, slotCount);                       ty += LINE_GAP;
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Handling: %d  Turrets: %d", body_stat[bodyIdx].handling, xtankTurretInfos[bodyIdx].count);    ty += LINE_GAP;
    if(fireRatePct > 0)
       drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Fire bonus: +%d%%", fireRatePct);
    else
@@ -1790,19 +2287,18 @@ void UIXtankHelper::renderPreviewPanel() const
    r.setColor(Colors::gray70);
    drawCenteredString(PNL_CX, ty, STAT_SZ - 1, "Weapons");
    ty += LINE_GAP;
-   for(S32 i = 0; i < slotCount && i < kXtankMaxWeaponSlots; i++)
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
    {
       XtankWeapon w = preview.weapons[i];
       // Highlight whichever slot is being edited in PHASE_WEAPONS.
-      bool activeSlot = (mPhase == PHASE_WEAPONS && mWeaponSide == i);
-      S32 bodyIdx2 = preview.bodyIndex;
-      if(bodyIdx2 < 0 || bodyIdx2 >= XtankBodyCount) bodyIdx2 = 0;
-      const char *sideName = getTurretSideLabel(bodyIdx2, i);
+      bool activeSlot = ((mPhase == PHASE_WEAPONS || mPhase == PHASE_WEAPON_MOUNT) && mWeaponSide == i);
+      XtankMountLocation mount = (XtankMountLocation)preview.weaponMounts[i];
+      const char *mountName = getMountLabel(mount);
       r.setColor(activeSlot ? Colors::overlayMenuSelectedItemColor : Colors::cyan);
       if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount)
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "%s: --", sideName);
+         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "#%d %s: --", i + 1, mountName);
       else
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "%s: %s", sideName, xtankWeaponInfos[(S32)w].name);
+         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "#%d %s: %s", i + 1, mountName, xtankWeaponInfos[(S32)w].name);
       ty += LINE_GAP;
    }
 
@@ -1817,14 +2313,14 @@ void UIXtankHelper::renderPreviewPanel() const
       drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Specials: %d active", specialCount); ty += LINE_GAP;
    }
 
-   renderFullBuildStats(PNL_CX, BUILD_Y, bodyIdx, engineIdx, treadIdx, heatSinks);
+   renderFullBuildStats(PNL_CX, BUILD_Y, preview);
    renderCarouselDots(PNL_CX, DOTS_Y);
 
    r.setColor(Colors::gray50);
    if(mPhase == PHASE_WEAPONS && mSlotCount > 1)
-      drawCenteredStringf(PNL_CX, HINT_Y, 11, "[Lt]/[Rt] slot  [Up]/[Dn] weapon  Tab phase");
+      drawCenteredStringf(PNL_CX, HINT_Y, 11, "[Lt]/[Rt] mount  [Up]/[Dn] weapon  Tab next slot");
    else
-      drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  Tab/[Lt]/[Rt] phase");
+      drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  Tab/Shift-Tab phase");
 
    FontManager::popFontContext();
 }
@@ -1901,29 +2397,14 @@ void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
 
 // Draw a "Combined Build Stats" section showing effective vehicle performance
 // with the given (potentially preview) component indices applied.
-void UIXtankHelper::renderFullBuildStats(S32 cx, S32 y,
-                                         S32 previewBodyIdx, S32 previewEngIdx,
-                                         S32 previewTreadIdx, S32 previewHeatSinks) const
+void UIXtankHelper::renderFullBuildStats(S32 cx, S32 y, const XtankDesign &preview) const
 {
    static const S32 BSTAT_SZ  = 12;
    static const S32 BSTAT_GAP = BSTAT_SZ + 5;
 
-   // Clamp indices to valid ranges.
-   if(previewBodyIdx  < 0 || previewBodyIdx  >= XtankBodyCount)   previewBodyIdx  = 0;
-   if(previewEngIdx   < 0 || previewEngIdx   >= XtankEngineCount) previewEngIdx   = 0;
-   if(previewTreadIdx < 0 || previewTreadIdx >= XtankTreadCount)  previewTreadIdx = 0;
-   if(previewHeatSinks < XtankHeatSinkMin) previewHeatSinks = XtankHeatSinkMin;
-   if(previewHeatSinks > XtankHeatSinkMax) previewHeatSinks = XtankHeatSinkMax;
-
-   const TankPhysicsInfo &phy = xtankPhysicsInfos[previewBodyIdx];
-   const XtankEngineInfo &eng = xtankEngineInfos[previewEngIdx];
-   const XtankTreadInfo  &trd = xtankTreadInfos[previewTreadIdx];
-
-   // Effective combined stats.
-   F32 effSpeed = phy.maxSpeed * eng.speedMult;
-   F32 effAccel = phy.acceleration * eng.accelMult;
-   F32 effTurn  = phy.turnRate * trd.friction;
-   S32 fireRatePct = S32((1.0f - xtankHeatSinkFireDelayMult(previewHeatSinks)) * 100.0f + 0.5f);
+   XtankDerivedStats derived = getDerivedStats(preview);
+   S32 hs = MAX(XtankHeatSinkMin, MIN((S32)preview.heatSinkCount, XtankHeatSinkMax));
+   S32 fireRatePct = S32((1.0f - xtankHeatSinkFireDelayMult(hs)) * 100.0f + 0.5f);
 
    Renderer &r = Renderer::get();
 
@@ -1939,9 +2420,9 @@ void UIXtankHelper::renderFullBuildStats(S32 cx, S32 y,
    // Stat lines.
    S32 ty = y + 4;
    r.setColor(Colors::green);
-   drawCenteredStringf(cx, ty, BSTAT_SZ, "Spd: %d  Acc: %d", (S32)effSpeed, (S32)effAccel);
+   drawCenteredStringf(cx, ty, BSTAT_SZ, "Spd: %d  Rev: %d", (S32)derived.maxSpeed, (S32)derived.maxReverseSpeed);
    ty += BSTAT_GAP;
-   drawCenteredStringf(cx, ty, BSTAT_SZ, "Turn: %.1f r/s", effTurn);
+   drawCenteredStringf(cx, ty, BSTAT_SZ, "Acc: %d  Turn: %.1f", (S32)derived.maxAccel, derived.maxTurnRate);
    ty += BSTAT_GAP;
    if(fireRatePct > 0)
       drawCenteredStringf(cx, ty, BSTAT_SZ, "Fire rate: +%d%%", fireRatePct);

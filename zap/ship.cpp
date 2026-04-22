@@ -35,6 +35,81 @@
 namespace Zap
 {
 
+static S32 getXtankMountBit(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+      case MOUNT_TURRET1:
+      case MOUNT_TURRET2:
+      case MOUNT_TURRET3:
+      case MOUNT_TURRET4: return M_TURRET;
+      case MOUNT_FRONT:   return M_FRONT;
+      case MOUNT_BACK:    return M_BACK;
+      case MOUNT_LEFT:    return M_LEFT;
+      case MOUNT_RIGHT:   return M_RIGHT;
+      default:            return 0;
+   }
+}
+
+
+static bool isXtankBodyMountAvailable(S32 bodyIndex, XtankMountLocation mount)
+{
+   if(bodyIndex < 0 || bodyIndex >= XtankBodyCount)
+      return false;
+
+   if(mount >= MOUNT_TURRET1 && mount <= MOUNT_TURRET4)
+   {
+      S32 turretIdx = (S32)mount - (S32)MOUNT_TURRET1;
+      return turretIdx < xtankTurretInfos[bodyIndex].count;
+   }
+
+   return mount == MOUNT_FRONT || mount == MOUNT_BACK || mount == MOUNT_LEFT || mount == MOUNT_RIGHT;
+}
+
+
+static bool isXtankWeaponMountCompatible(S32 bodyIndex, XtankWeapon weapon, XtankMountLocation mount)
+{
+   if((S32)weapon < 0 || (S32)weapon >= XtankWeaponCount)
+      return false;
+
+   if(mount < 0 || mount >= XtankMountCount)
+      return false;
+
+   if(!isXtankBodyMountAvailable(bodyIndex, mount))
+      return false;
+
+   const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
+   return (wi.mount & getXtankMountBit(mount)) != 0;
+}
+
+
+static Point getXtankMountPointBodySpace(S32 bodyIndex, XtankMountLocation mount)
+{
+   if(bodyIndex >= 0 && bodyIndex < XtankBodyCount && mount >= MOUNT_TURRET1 && mount <= MOUNT_TURRET4)
+   {
+      S32 turretIdx = (S32)mount - (S32)MOUNT_TURRET1;
+      if(turretIdx < xtankTurretInfos[bodyIndex].count)
+      {
+         const XtankTurret &turret = xtankTurretInfos[bodyIndex].turrets[turretIdx];
+         return Point(turret.x, turret.y);
+      }
+   }
+
+   const F32 yFront = (F32)Ship::CollisionRadius * 0.85f;
+   const F32 yBack  = (F32)Ship::CollisionRadius * -0.85f;
+   const F32 xSide  = (F32)Ship::CollisionRadius * 0.75f;
+   const F32 yMid   = 0;
+
+   switch(mount)
+   {
+      case MOUNT_FRONT: return Point(0, yFront);
+      case MOUNT_BACK:  return Point(0, yBack);
+      case MOUNT_LEFT:  return Point(-xSide, yMid);
+      case MOUNT_RIGHT: return Point(xSide, yMid);
+      default:          return Point(0, 0);
+   }
+}
+
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
 #ifdef _MSC_VER
@@ -337,13 +412,18 @@ F32 Ship::processMove(U32 stateIndex)
    if(mXtankBodyIndex >= 0)
    {
       bool designChanged = false;
-      S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
-      for(S32 i = 0; i < slotCount; i++)
+      for(S32 i = 0; i < XtankMaxWeapons; i++)
       {
          XtankWeapon newWeapon = (XtankWeapon)(S32)mCurrentMove.weaponSlot[i];
+         S8 newMount = mCurrentMove.weaponMount[i];
          if(newWeapon != mXtankDesign.weapons[i])
          {
             mXtankDesign.weapons[i] = newWeapon;
+            designChanged = true;
+         }
+         if(newMount != mXtankDesign.weaponMounts[i])
+         {
+            mXtankDesign.weaponMounts[i] = newMount;
             designChanged = true;
          }
       }
@@ -489,18 +569,17 @@ F32 Ship::processTankMove(U32 stateIndex)
 
    // --- Compute total vehicle weight (xtank units) ---
    S32 weaponWeight = 0;
-   S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
-   for(S32 i = 0; i < slotCount; i++)
+   for(S32 i = 0; i < XtankMaxWeapons; i++)
    {
       XtankWeapon w = mXtankDesign.weapons[i];
       if(w != XtankWeaponNone)
          weaponWeight += xtankWeaponInfos[(S32)w].weight;
    }
-   // Actual armor weight: sum of per-side armor points * weight-per-point for the selected type.
+   // Xtank-style armor weight: per-side points scaled by body size.
    S32 totalArmorPts = 0;
    for(S32 i = 0; i < 4; i++)
       totalArmorPts += (S32)mXtankDesign.armorSides[i];
-   S32 armorWeight = totalArmorPts * armor.weight;
+   S32 armorWeight = totalArmorPts * armor.weight * body.size;
 
    S32 totalWeight = body.weight + engine.weight + weaponWeight
                    + armorWeight + heatSinkStat.weight * mXtankDesign.heatSinkCount;
@@ -832,19 +911,19 @@ void Ship::processWeaponFire()
    {
       if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
       {
-         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
-
          // Determine fire delay (use shortest among active weapon slots) and
          // total energy drain (sum across all active slots).
          U32 minFireDelay  = 200;   // fallback
          U32 totalDrain    = 0;
          bool hasAnyWeapon = false;
 
-         for(S32 i = 0; i < slotCount; i++)
+         for(S32 i = 0; i < XtankMaxWeapons; i++)
          {
             XtankWeapon wt = mXtankDesign.weapons[i];
-            if((S32)wt < 0 || (S32)wt >= XtankWeaponCount)
+            XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
+            if(!isXtankWeaponMountCompatible(mXtankBodyIndex, wt, mount))
                continue;
+
             hasAnyWeapon = true;
             const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
             U32 weaponFireDelay = (U32)(wi.reload_time * 50);  // xtank frames → ms (20fps)
@@ -873,28 +952,40 @@ void Ship::processWeaponFire()
                   // Body-to-world rotation matrix (same convention as renderXtankTurrets).
                   const F32 cosBody = cos(mTankHeadingAngle - FloatHalfPi);
                   const F32 sinBody = sin(mTankHeadingAngle - FloatHalfPi);
+                  Point bodyRight(cosBody, sinBody);
+                  Point bodyForward(-sinBody, cosBody);
 
                   static const F32 BARREL_LENGTH = 12.0f;
 
-                  for(S32 i = 0; i < slotCount; i++)
+                  for(S32 i = 0; i < XtankMaxWeapons; i++)
                   {
                      XtankWeapon wt = mXtankDesign.weapons[i];
-                     if((S32)wt < 0 || (S32)wt >= XtankWeaponCount)
+                     XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
+                     if(!isXtankWeaponMountCompatible(mXtankBodyIndex, wt, mount))
                         continue;
 
-                     // Transform turret mount from body space to world space.
-                     const XtankTurret &turret = xtankTurretInfos[mXtankBodyIndex].turrets[i];
-                     const F32 mx = turret.x;
-                     const F32 my = turret.y;
+                     Point mountBody = getXtankMountPointBodySpace(mXtankBodyIndex, mount);
+                     const F32 mx = mountBody.x;
+                     const F32 my = mountBody.y;
                      Point mountWorld(
                         getActualPos().x + cosBody * mx - sinBody * my,
                         getActualPos().y + sinBody * mx + cosBody * my
                      );
 
-                     // Barrel tip: advance from mount in the aim direction.
-                     Point barrelTip = mountWorld + aimDir * BARREL_LENGTH;
+                     Point shotDir = aimDir;
+                     if(mount == MOUNT_FRONT)
+                        shotDir = bodyForward;
+                     else if(mount == MOUNT_BACK)
+                        shotDir = bodyForward * -1.0f;
+                     else if(mount == MOUNT_LEFT)
+                        shotDir = bodyRight * -1.0f;
+                     else if(mount == MOUNT_RIGHT)
+                        shotDir = bodyRight;
 
-                     GameWeapon::createXtankProjectile(wt, aimDir, barrelTip, getActualVel(), 0, this);
+                     // Barrel tip: advance from mount in the aim direction.
+                     Point barrelTip = mountWorld + shotDir * BARREL_LENGTH;
+
+                     GameWeapon::createXtankProjectile(wt, shotDir, barrelTip, getActualVel(), 0, this);
                   }
                }
 
@@ -1583,10 +1674,6 @@ void Ship::damageObject(DamageInfo *theInfo)
       if(hasArmor)
          damageAmount *= ARMOR_DAMAGE_REDUCTION_FACTOR;           // Any other damage, including asteroids
 
-      // Xtank body armor multiplier: heavy tanks absorb more damage
-      if(mXtankBodyIndex >= 0)
-         damageAmount *= xtankPhysicsInfos[mXtankBodyIndex].armor;
-
       // Xtank directional armor: reduce damage based on which hull side was hit
       if(mXtankBodyIndex >= 0 && theInfo->impulseVector.lenSquared() > 0)
       {
@@ -1900,10 +1987,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       {
          stream->write(mTankHeadingAngle);
          stream->write(mTankSpeed);
-         // Weapon design: one slot per turret
-         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
-         for(S32 i = 0; i < slotCount; i++)
+         // Weapon design: full xtank weapon-number allocation (up to 6 slots)
+         for(S32 i = 0; i < XtankMaxWeapons; i++)
             stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeaponCount);
+         for(S32 i = 0; i < XtankMaxWeapons; i++)
+            stream->writeRangedU32((U32)((S32)mXtankDesign.weaponMounts[i] + 1), 0, XtankMountCount);
          stream->writeRangedU32((U32)mXtankDesign.engineType, 0, XtankEngineCount - 1);
          stream->writeRangedU32((U32)mXtankDesign.treadType, 0, XtankTreadCount - 1);
          stream->writeRangedU32((U32)(mXtankDesign.heatSinkCount - XtankHeatSinkMin), 0, XtankHeatSinkMax - XtankHeatSinkMin);
@@ -2103,9 +2191,10 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          stream->read(&mTankHeadingAngle);
          stream->read(&mTankSpeed);
          // Weapon design
-         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
-         for(S32 i = 0; i < slotCount; i++)
+         for(S32 i = 0; i < XtankMaxWeapons; i++)
             mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, XtankWeaponCount) - 1);
+         for(S32 i = 0; i < XtankMaxWeapons; i++)
+            mXtankDesign.weaponMounts[i] = (S8)((S32)stream->readRangedU32(0, XtankMountCount) - 1);
          mXtankDesign.engineType = (XtankEngine)(S32)stream->readRangedU32(0, XtankEngineCount - 1);
          mXtankDesign.treadType = (XtankTread)(S32)stream->readRangedU32(0, XtankTreadCount - 1);
          mXtankDesign.heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + XtankHeatSinkMin);
