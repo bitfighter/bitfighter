@@ -801,7 +801,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
      int maxLines = C->maxLines;
  
      /* String buffer */
-     char output[MAX_CONSOLE_OUTPUT_LENGTH];
+     char output[MAX_CONSOLE_OUTPUT_LENGTH] = {0};
  
      /* string copy cursors */
      char *consoleCursor, *outputCursor = output;
