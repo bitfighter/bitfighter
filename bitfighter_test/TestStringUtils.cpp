@@ -259,6 +259,48 @@ TEST(StringUtilsTest, alphaNumericChecks)
 }
 
 
+TEST(StringUtilsTest, safeCctypeWrappers)
+{
+   // toLower / toUpper
+   EXPECT_EQ('a', toLower('A'));
+   EXPECT_EQ('a', toLower('a'));
+   EXPECT_EQ('A', toUpper('a'));
+   EXPECT_EQ('A', toUpper('A'));
+   EXPECT_EQ((char)0xFF, toLower((char)0xFF));
+   EXPECT_EQ((char)0xFF, toUpper((char)0xFF));
+
+   // isSpace
+   EXPECT_TRUE(isSpace(' '));
+   EXPECT_TRUE(isSpace('\n'));
+   EXPECT_FALSE(isSpace('a'));
+   EXPECT_FALSE(isSpace((char)0xFF));
+
+   // isAlpha / isDigit / isAlNum
+   EXPECT_TRUE(isAlpha('a'));
+   EXPECT_FALSE(isAlpha('1'));
+   EXPECT_TRUE(isDigit('1'));
+   EXPECT_FALSE(isDigit('a'));
+   EXPECT_TRUE(isAlNum('a'));
+   EXPECT_TRUE(isAlNum('1'));
+   EXPECT_FALSE(isAlNum(' '));
+   EXPECT_FALSE(isAlNum((char)0xFF));
+
+   // isPrint
+   EXPECT_TRUE(isPrintable('a'));
+   EXPECT_FALSE(isPrintable('\1'));
+
+   // isPunct
+   EXPECT_TRUE(isPunct('.'));
+   EXPECT_FALSE(isPunct('a'));
+
+   // isHex
+   EXPECT_TRUE(TNL::isHex('a'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_FALSE(TNL::isHex('g'));
+}
+
+
 TEST(StringUtilsTest, ctos)
 {
    EXPECT_EQ("a", ctos('a'));
@@ -409,6 +451,38 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
    EXPECT_TRUE(caseInsensitiveStringCompare("AbC", "aBc"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abcd"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abd"));
+}
+
+
+TEST(StringUtilsTest, caseInsensitiveStringCompareNonASCII)
+{
+   // Use characters with the high bit set to ensure we handle them correctly.
+   // On systems where char is signed, passing a char with the high bit set
+   // to tolower() without a cast to unsigned char is undefined behavior.
+   string s1 = "\xFF";
+   string s2 = "\xFF";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+
+   s1 = "A\x80";
+   s2 = "a\x80";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+}
+
+
+TEST(StringUtilsTest, stricmpNonASCII)
+{
+   EXPECT_EQ(0, stricmp("\xFF", "\xFF"));
+   EXPECT_EQ(0, stricmp("A\x80", "a\x80"));
+   EXPECT_NE(0, stricmp("\xFF", "\xFE"));
+}
+
+
+TEST(StringUtilsTest, strnicmpNonASCII)
+{
+   EXPECT_EQ(0, strnicmp("\xFF", "\xFF", 1));
+   EXPECT_EQ(0, strnicmp("A\x80", "a\x80", 2));
+   EXPECT_NE(0, strnicmp("\xFF", "\xFE", 1));
+   EXPECT_EQ(0, strnicmp("abc\xFF", "ABC\xFF", 3));
 }
 
 
@@ -653,10 +727,10 @@ TEST(StringUtilsTest, charTypeChecks)
    EXPECT_TRUE(isPrintable('a'));
    EXPECT_FALSE(isPrintable('\x01'));
 
-   EXPECT_TRUE(isHex('0'));
-   EXPECT_TRUE(isHex('f'));
-   EXPECT_TRUE(isHex('A'));
-   EXPECT_FALSE(isHex('g'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_TRUE(TNL::isHex('f'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_FALSE(TNL::isHex('g'));
 }
 
 

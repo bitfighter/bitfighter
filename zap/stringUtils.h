@@ -74,10 +74,6 @@ string ucase(string strToConvert);
 
 bool isPositiveInteger(const char *str);
 
-bool isAlpha(char c);
-bool isDigit(char c);
-bool isAlNum(char c);
-
 string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
 
@@ -146,8 +142,6 @@ string toString(YesNo yesNo);
 string toString(RelAbs relAbs);
 string toString(ColorEntryMode colorMode);
 
-bool isPrintable(char c);
-bool isHex(char c);
 bool isHex(const string &str);
 
 bool alphaSort(const string &a, const string &b);

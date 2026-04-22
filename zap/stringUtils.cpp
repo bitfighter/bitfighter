@@ -209,7 +209,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
         return false;
     }
     for(string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if(tolower(*c1) != tolower(*c2)) {
+        if(toLower(*c1) != toLower(*c2)) {
             return false;
         }
     }
@@ -221,7 +221,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
+      strToConvert[i] = toLower(strToConvert[i]);
    return strToConvert;
 }
 
@@ -230,7 +230,7 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 string ucase(string strToConvert)
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)toupper((unsigned char)strToConvert[i]);
+      strToConvert[i] = toUpper(strToConvert[i]);
    return strToConvert;
 }
 
@@ -426,7 +426,7 @@ Vector<string> parseString(const string &line)
       }
       else
       {
-         if(isspace((unsigned char)c))
+         if(isSpace(c))
          {
             if(hasToken)
             {
@@ -517,13 +517,13 @@ const char *findPointerOfArg(const char *message, S32 count)
    // Message needs to include everything including multiple spaces.  Message starts after second space.
    while(message[cur] != '\0' && spacecount != count)
    {
-      if(isspace((unsigned char)message[cur]) && !isspace((unsigned char)prevchar))
+      if(isSpace(message[cur]) && !isSpace(prevchar))
          spacecount++;        // Double space does not count as a seperate parameter
       prevchar = message[cur];
       cur++;
    }
 
-   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+   while(message[cur] != '\0' && isSpace(message[cur]))
       cur++;
 
    return &message[cur];
@@ -1036,34 +1036,6 @@ string toString(DisplayMode displayMode)  { return displayModeToString(displayMo
 string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
 
 
-bool isPrintable(char c)
-{
-   return isprint(static_cast<unsigned char>(c));
-}
-
-
-bool isHex(char c)
-{
-   return isxdigit(static_cast<unsigned char>(c));
-}
-
-
-bool isAlpha(char c)
-{
-   return isalpha(static_cast<unsigned char>(c));
-}
-
-bool isDigit(char c)
-{
-   return isdigit(static_cast<unsigned char>(c));
-}
-
-bool isAlNum(char c)
-{
-   return isalnum(static_cast<unsigned char>(c));
-}
-
-
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
@@ -1071,7 +1043,7 @@ bool isHex(const string &str)
       return false;
 
    for(string::size_type i = 0; i < str.length(); i++)
-      if(!isHex(str[i]))
+      if(!TNL::isHex(str[i]))
          return false;
 
    return true;
