@@ -522,13 +522,13 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 
 int stricmp(const char *str1, const char *str2)
 {
-   while(Zap::toUpper(*str1) == Zap::toUpper(*str2) && *str1)
+   while(toUpper(*str1) == toUpper(*str2) && *str1)
    {
       str1++;
       str2++;
    }
-   char c1 = Zap::toUpper(*str1);
-   char c2 = Zap::toUpper(*str2);
+   char c1 = toUpper(*str1);
+   char c2 = toUpper(*str2);
    return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
 }
 
@@ -536,8 +536,8 @@ int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
    for(unsigned int i = 0; i < len; i++)
    {
-      char c1 = Zap::toUpper(str1[i]);
-      char c2 = Zap::toUpper(str2[i]);
+      char c1 = toUpper(str1[i]);
+      char c2 = toUpper(str2[i]);
       if(c1 == c2)
          continue;
       return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);

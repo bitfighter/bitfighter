@@ -155,7 +155,7 @@ const char* TiXmlBase::SkipWhiteSpace( const char* p )
 	}
 	while ( p && *p )
 	{
-		if ( isspace( (unsigned char)*p ) || *p == '\n' || *p =='\r' )		// Still using old rules for white space.
+		if ( isspace( *p ) || *p == '\n' || *p =='\r' )		// Still using old rules for white space.
 			++p;
 		else
 			break;
@@ -203,10 +203,10 @@ const char* TiXmlBase::ReadName( const char* p, TIXML_STRING * name )
 	// hyphens, or colons. (Colons are valid ony for namespaces,
 	// but tinyxml can't tell namespaces from names.)
 	if (    p && *p 
-		 && ( isalpha( (unsigned char)*p ) || *p == '_' ) )
+		 && ( isalpha( (unsigned char) *p ) || *p == '_' ) )
 	{
 		while(		p && *p
-				&&	(		isalnum( (unsigned char)*p )
+				&&	(		isalnum( (unsigned char ) *p )
 						 || *p == '_'
 						 || *p == '-'
 						 || *p == '.'
@@ -238,7 +238,7 @@ const char* TiXmlBase::GetEntity( const char* p, char* value )
 		if ( *(p+4) == ';' )
 		{
 			// Short, one value entity.
-			if ( isalpha( (unsigned char)*(p+3) ) ) *value += ( static_cast<char>(tolower( (unsigned char)*(p+3) )) - 'a' + 10 );
+			if ( isalpha( *(p+3) ) ) *value += ( static_cast<char>(tolower( *(p+3) )) - 'a' + 10 );
 			else				     *value += ( *(p+3) - '0' );
 
 			return p+5;
@@ -246,10 +246,10 @@ const char* TiXmlBase::GetEntity( const char* p, char* value )
 		else
 		{
 			// two value entity
-			if (isalpha((unsigned char)*(p + 3))) *value += (static_cast<char>(tolower((unsigned char)*(p + 3))) - 'a' + 10) * 16;
+			if (isalpha(*(p + 3))) *value += (static_cast<char>(tolower(*(p + 3))) - 'a' + 10) * 16;
 			else				     *value += ( *(p+3) - '0' ) * 16;
 
-			if (isalpha((unsigned char)*(p + 4))) *value += (static_cast<char>(tolower((unsigned char)*(p + 4))) - 'a' + 10);
+			if (isalpha(*(p + 4))) *value += (static_cast<char>(tolower(*(p + 4))) - 'a' + 10);
 			else				     *value += ( *(p+4) - '0' );
 
 			return p+6;
@@ -284,7 +284,7 @@ bool TiXmlBase::StringEqual( const char* p,
 		return false;
 	}
 
-    if ( tolower( (unsigned char)*p ) == tolower( (unsigned char)*tag ) )
+    if ( tolower( *p ) == tolower( *tag ) )
 	{
 		const char* q = p;
 
@@ -303,7 +303,7 @@ bool TiXmlBase::StringEqual( const char* p,
 		}
 		else
 		{
-			while ( *q && *tag && tolower( (unsigned char)*q ) == tolower( (unsigned char)*tag ) )
+			while ( *q && *tag && tolower( *q ) == tolower( *tag ) )
 			{
 				++q;
 				++tag;
@@ -352,7 +352,7 @@ const char* TiXmlBase::ReadText(	const char* p,
 				whitespace = true;
 				++p;
 			}
-			else if ( isspace( (unsigned char)*p ) )
+			else if ( isspace( *p ) )
 			{
 				whitespace = true;
 				++p;
@@ -547,7 +547,7 @@ TiXmlNode* TiXmlNode::Identify( const char* p )
 		#endif
 		returnNode = new TiXmlDeclaration();
 	}
-	else if (    isalpha( (unsigned char)*(p+1) )
+	else if (    isalpha( *(p+1) )
 			  || *(p+1) == '_' )
 	{
 		#ifdef DEBUG_PARSER
@@ -1027,7 +1027,7 @@ const char* TiXmlAttribute::Parse( const char* p, TiXmlParsingData* data )
 		// its best, even without them.
 		value = "";
 		while (    p && *p										// existence
-				&& !isspace( (unsigned char)*p ) && *p != '\n' && *p != '\r'	// whitespace
+				&& !isspace( *p ) && *p != '\n' && *p != '\r'	// whitespace
 				&& *p != '/' && *p != '>' )						// tag end
 		{
 			value += *p;
@@ -1140,7 +1140,7 @@ const char* TiXmlDeclaration::Parse( const char* p, TiXmlParsingData* data )
 		else
 		{
 			// Read over whatever it is.
-			while( p && *p && *p != '>' && !isspace( (unsigned char)*p ) )
+			while( p && *p && *p != '>' && !isspace( *p ) )
 				++p;
 		}
 	}
@@ -1150,7 +1150,7 @@ const char* TiXmlDeclaration::Parse( const char* p, TiXmlParsingData* data )
 bool TiXmlText::Blank() const
 {
 	for ( unsigned i=0; i<value.length(); i++ )
-		if ( !isspace( (unsigned char)value[i] ) )
+		if ( !isspace( value[i] ) )
 			return false;
 	return true;
 }

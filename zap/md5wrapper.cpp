@@ -74,7 +74,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 std::string lcase(std::string strToConvert)
 {
    for(std::string::size_type i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = Zap::toLower(strToConvert[i]);
+      strToConvert[i] = TNL::toLower(strToConvert[i]);
    return strToConvert;
 }
 

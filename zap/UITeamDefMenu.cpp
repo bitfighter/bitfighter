@@ -305,8 +305,6 @@ void TeamDefUserInterface::onEscape()
 class Team;
 string origName;
 Color origColor;
-extern bool isPrintable(char c);
-
 void TeamDefUserInterface::onTextInput(char ascii)
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
@@ -319,7 +317,7 @@ void TeamDefUserInterface::onTextInput(char ascii)
 
    else if(mEditingColor)
    {
-      if(isHex(ascii))
+      if(TNL::isHex(ascii))
          ui->getTeam(selectedIndex)->getHexColorEditor()->addChar(ascii);
    }
 }

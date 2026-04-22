@@ -294,10 +294,10 @@ TEST(StringUtilsTest, safeCctypeWrappers)
    EXPECT_FALSE(isPunct('a'));
 
    // isHex
-   EXPECT_TRUE(isHex('a'));
-   EXPECT_TRUE(isHex('A'));
-   EXPECT_TRUE(isHex('0'));
-   EXPECT_FALSE(isHex('g'));
+   EXPECT_TRUE(TNL::isHex('a'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_FALSE(TNL::isHex('g'));
 }
 
 
@@ -727,10 +727,10 @@ TEST(StringUtilsTest, charTypeChecks)
    EXPECT_TRUE(isPrintable('a'));
    EXPECT_FALSE(isPrintable('\x01'));
 
-   EXPECT_TRUE(isHex('0'));
-   EXPECT_TRUE(isHex('f'));
-   EXPECT_TRUE(isHex('A'));
-   EXPECT_FALSE(isHex('g'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_TRUE(TNL::isHex('f'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_FALSE(TNL::isHex('g'));
 }
 
 

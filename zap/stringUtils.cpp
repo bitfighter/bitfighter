@@ -1043,7 +1043,7 @@ bool isHex(const string &str)
       return false;
 
    for(string::size_type i = 0; i < str.length(); i++)
-      if(!Zap::isHex(str[i]))
+      if(!TNL::isHex(str[i]))
          return false;
 
    return true;
