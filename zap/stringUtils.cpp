@@ -311,11 +311,9 @@ string sanitizeForJson(const char *value)
          default:
             if(isControlCharacter(*c))
             {
-               // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
-               // However, some day we might want to support this, so we'll leave the code in place.
-               //std::ostringstream oss;
-               //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
-               //result += oss.str();
+               char buf[7];
+               dSprintf(buf, sizeof(buf), "\\u%.4X", (U32)*c);
+               result += buf;
             }
             else
                result += *c;

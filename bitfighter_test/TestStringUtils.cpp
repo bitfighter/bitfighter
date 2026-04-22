@@ -521,6 +521,30 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
    EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
    EXPECT_EQ("", sanitizeForJson(NULL));
+
+   // Control characters
+   EXPECT_EQ("a\\u0001b", sanitizeForJson("a\x01""b"));
+   EXPECT_EQ("\\u001F", sanitizeForJson("\x1F"));
+
+   // Verify all control characters (1-31)
+   for(int i = 1; i <= 31; ++i)
+   {
+      char input[2] = {(char)i, 0};
+      string result = sanitizeForJson(input);
+
+      // Some control characters have special short escapes in sanitizeForJson
+      if(i == '\b')      EXPECT_EQ("\\b", result);
+      else if(i == '\f') EXPECT_EQ("\\f", result);
+      else if(i == '\n') EXPECT_EQ("\\n", result);
+      else if(i == '\r') EXPECT_EQ("\\r", result);
+      else if(i == '\t') EXPECT_EQ("\\t", result);
+      else
+      {
+         char expected[8];
+         sprintf(expected, "\\u00%.2X", i);
+         EXPECT_EQ(expected, result) << "Failed for control character " << i;
+      }
+   }
 }
 
 
