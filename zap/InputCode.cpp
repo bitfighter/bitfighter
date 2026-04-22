@@ -610,7 +610,7 @@ char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 
    char ch = unicode & 0x7F;
 
-   return isPrintable(ch) ? ch : 0;
+   return Zap::isPrintable(ch) ? ch : 0;
 }
 
 

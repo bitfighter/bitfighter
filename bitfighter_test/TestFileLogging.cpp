@@ -57,11 +57,11 @@ static bool lineContainsTimestamp(const std::string &line)
    // Look for timestamp pattern like "[2025-11-22" at the beginning
    int pos = 1;      // Where we expect the start of the date
    return (line.length() >= pos + 10 &&
-           Zap::isDigit(line[pos + 0]) && Zap::isDigit(line[pos + 1]) && Zap::isDigit(line[pos + 2]) && Zap::isDigit(line[pos + 3]) &&
+           isDigit(line[pos + 0]) && isDigit(line[pos + 1]) && isDigit(line[pos + 2]) && isDigit(line[pos + 3]) &&
            line[pos + 4] == '-' &&
-           Zap::isDigit(line[pos + 5]) && Zap::isDigit(line[pos + 6]) &&
+           isDigit(line[pos + 5]) && isDigit(line[pos + 6]) &&
            line[pos + 7] == '-' &&
-           Zap::isDigit(line[pos + 8]) && Zap::isDigit(line[pos + 9]));
+           isDigit(line[pos + 8]) && isDigit(line[pos + 9]));
 }
 
 

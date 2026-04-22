@@ -467,7 +467,7 @@ void ToggleMenuItem::handleTextInput(char ascii)
       for(S32 i = 0; i < mOptions.size(); i++)
       {
          S32 index = (i + mIndex + 1) % mOptions.size();
-         if(Zap::toLower(ascii) == Zap::toLower(mOptions[index].data()[0]))
+         if(toLower(ascii) == toLower(mOptions[index].data()[0]))
          {
             mIndex = index;
 
