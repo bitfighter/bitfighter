@@ -5,12 +5,8 @@ if(WIN32)
 add_executable(gup
 	WIN32                           # make it a GUI instead of console app
 	EXCLUDE_FROM_ALL
-	src/TinyXml/tinystr.cpp
-	src/TinyXml/tinystr.h
-	src/TinyXml/tinyxml.cpp
-	src/TinyXml/tinyxml.h
-	src/TinyXml/tinyxmlerror.cpp
-	src/TinyXml/tinyxmlparser.cpp
+	src/TinyXml2/tinyxml2.cpp
+	src/TinyXml2/tinyxml2.h
 	src/xmlTools.cpp
 	src/xmlTools.h
 	src/gup.rc
@@ -47,7 +43,7 @@ endif()
 
 include_directories(
 	${CURL_INCLUDE_DIR} 
-	src/TinyXml
+	src/TinyXml2
 )
 
 

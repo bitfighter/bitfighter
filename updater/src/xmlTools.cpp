@@ -20,87 +20,58 @@
 #include "xmlTools.h"
 
 using namespace std;
+using namespace tinyxml2;
 
 GupParameters::GupParameters(const char * xmlFileName)
 {
 	_xmlDoc.LoadFile(xmlFileName);
 
-	TiXmlNode *root = _xmlDoc.FirstChild("GUPInput");
+	XMLElement *root = _xmlDoc.FirstChildElement("GUPInput");
 	if (!root)
 		throw exception("It's not a valid GUP input xml.");
 
-	TiXmlNode *versionNode = root->FirstChildElement("Version");
+	XMLElement *versionNode = root->FirstChildElement("Version");
 	if (versionNode)
 	{
-		TiXmlNode *n = versionNode->FirstChild();
-		if (n)
-		{
-			const char *val = n->Value();
-			if (val)
-			{
-				_currentVersion = val;
-			}
-		}
+		const char *val = versionNode->GetText();
+		if (val)
+			_currentVersion = val;
 	}
 
-	TiXmlNode *paramNode = root->FirstChildElement("Param");
+	XMLElement *paramNode = root->FirstChildElement("Param");
 	if (paramNode)
 	{
-		TiXmlNode *n = paramNode->FirstChild();
-		if (n)
-		{
-			const char *val = n->Value();
-			if (val)
-			{
-				_param = val;
-			}
-		}
+		const char *val = paramNode->GetText();
+		if (val)
+			_param = val;
 	}
 	
-	TiXmlNode *infoURLNode = root->FirstChildElement("InfoUrl");
+	XMLElement *infoURLNode = root->FirstChildElement("InfoUrl");
 	if (!infoURLNode)
 		throw exception("InfoUrl node is missed.");
 
-	TiXmlNode *iu = infoURLNode->FirstChild();
-	if (!iu)
-		throw exception("InfoUrl is missed.");
-		
-	const char *iuVal = iu->Value();
+	const char *iuVal = infoURLNode->GetText();
 	if (!iuVal || !(*iuVal))
 		throw exception("InfoUrl is missed.");
 	
 	_infoUrl = iuVal;
 
-	TiXmlNode *classeNameNode = root->FirstChildElement("ClassName2Close");
+	XMLElement *classeNameNode = root->FirstChildElement("ClassName2Close");
 	if (classeNameNode)
 	{
-		TiXmlNode *n = classeNameNode->FirstChild();
-		if (n)
-		{
-			const char *val = n->Value();
-			if (val)
-			{
-				_className2Close = val;
-			}
-		}
+		const char *val = classeNameNode->GetText();
+		if (val)
+			_className2Close = val;
 	}
 
-	TiXmlNode *progNameNode = root->FirstChildElement("MessageBoxTitle");
+	XMLElement *progNameNode = root->FirstChildElement("MessageBoxTitle");
 	if (progNameNode)
 	{
-		TiXmlNode *n = progNameNode->FirstChild();
-        const char *valStr = NULL;
+		const char *valStr = progNameNode->GetText();
+		if (valStr)
+			_messageBoxTitle = valStr;
 
-		if (n)
-		{
-			valStr = n->Value();
-			if (valStr)
-			{
-				_messageBoxTitle = valStr;
-			}
-		}
-
-		valStr = (progNameNode->ToElement())->Attribute("isModal");
+		valStr = progNameNode->Attribute("isModal");
 		if (valStr)
 		{
 			if (stricmp(valStr, "yes") == 0)
@@ -111,48 +82,33 @@ GupParameters::GupParameters(const char * xmlFileName)
 				throw exception("isModal value is incorrect (only \"yes\" or \"no\" is allowed).");
 		}
 
-        int val = 0;
-		valStr = (progNameNode->ToElement())->Attribute("extraCmd", &val);
-		if (valStr)
-		{
+		int val = 0;
+		if (progNameNode->QueryIntAttribute("extraCmd", &val) == XML_SUCCESS)
 			_3rdButton_wm_cmd = val;
-		}
-		
-		valStr = (progNameNode->ToElement())->Attribute("ecWparam", &val);
-		if (valStr)
-		{
-			_3rdButton_wParam = val;
-		}
-		
-		valStr = (progNameNode->ToElement())->Attribute("ecLparam", &val);
-		if (valStr)
-		{
-			_3rdButton_lParam = val;
-		}
 
-		const char * extraCmdLabel = (progNameNode->ToElement())->Attribute("extraCmdButtonLabel");
-		if (extraCmdLabel != NULL)
-		{
+		if (progNameNode->QueryIntAttribute("ecWparam", &val) == XML_SUCCESS)
+			_3rdButton_wParam = val;
+
+		if (progNameNode->QueryIntAttribute("ecLparam", &val) == XML_SUCCESS)
+			_3rdButton_lParam = val;
+
+		const char *extraCmdLabel = progNameNode->Attribute("extraCmdButtonLabel");
+		if (extraCmdLabel)
 			_3rdButton_label = extraCmdLabel;
-		}
 	}
 
-	TiXmlNode *silentModeNode = root->FirstChildElement("SilentMode");
+	XMLElement *silentModeNode = root->FirstChildElement("SilentMode");
 	if (silentModeNode)
 	{
-		TiXmlNode *smn = silentModeNode->FirstChild();
-		if (smn)
+		const char *smnVal = silentModeNode->GetText();
+		if (smnVal && *smnVal)
 		{
-			const char *smnVal = smn->Value();
-			if (smnVal && *smnVal)
-			{
-				if (stricmp(smnVal, "yes") == 0)
-					_isSilentMode = true;
-				else if (stricmp(smnVal, "no") == 0)
-					_isSilentMode = false;
-				else
-					throw exception("SilentMode value is incorrect (only \"yes\" or \"no\" is allowed).");
-			}
+			if (stricmp(smnVal, "yes") == 0)
+				_isSilentMode = true;
+			else if (stricmp(smnVal, "no") == 0)
+				_isSilentMode = false;
+			else
+				throw exception("SilentMode value is incorrect (only \"yes\" or \"no\" is allowed).");
 		}
 	}
 
@@ -160,16 +116,12 @@ GupParameters::GupParameters(const char * xmlFileName)
 	//
 	// Get optional parameters
 	//
-	TiXmlNode *userAgentNode = root->FirstChildElement("SoftwareName");
+	XMLElement *userAgentNode = root->FirstChildElement("SoftwareName");
 	if (userAgentNode)
 	{
-		TiXmlNode *un = userAgentNode->FirstChild();
-		if (un)
-		{
-			const char *uaVal = un->Value();
-			if (uaVal)
-				_softwareName = uaVal;
-		}
+		const char *uaVal = userAgentNode->GetText();
+		if (uaVal)
+			_softwareName = uaVal;
 	}
 }
 
@@ -177,19 +129,15 @@ GupDownloadInfo::GupDownloadInfo(const char * xmlString) : _updateVersion(""), _
 {
 	_xmlDoc.Parse(xmlString);
 
-	TiXmlNode *root = _xmlDoc.FirstChild("GUP");
+	XMLElement *root = _xmlDoc.FirstChildElement("GUP");
 	if (!root)
 		throw exception("It's not a valid GUP xml.");
 
-	TiXmlNode *needUpdateNode = root->FirstChildElement("NeedToBeUpdated");
+	XMLElement *needUpdateNode = root->FirstChildElement("NeedToBeUpdated");
 	if (!needUpdateNode)
 		throw exception("NeedToBeUpdated node is missed.");
 
-	TiXmlNode *nun = needUpdateNode->FirstChild();
-	if (!nun)
-		throw exception("NeedToBeUpdated is missed.");
-		
-	const char *nunVal = nun->Value();
+	const char *nunVal = needUpdateNode->GetText();
 	if (!nunVal || !(*nunVal))
 		throw exception("NeedToBeUpdated is missed.");
 	
@@ -205,29 +153,19 @@ GupDownloadInfo::GupDownloadInfo(const char * xmlString) : _updateVersion(""), _
 		//
 		// Get mandatory parameters
 		//
-		TiXmlNode *versionNode = root->FirstChildElement("Version");
+		XMLElement *versionNode = root->FirstChildElement("Version");
 		if (versionNode)
 		{
-			TiXmlNode *n = versionNode->FirstChild();
-			if (n)
-			{
-				const char *val = n->Value();
-				if (val)
-				{
-					_updateVersion = val;
-				}
-			}
+			const char *val = versionNode->GetText();
+			if (val)
+				_updateVersion = val;
 		}
 		
-		TiXmlNode *locationNode = root->FirstChildElement("Location");
+		XMLElement *locationNode = root->FirstChildElement("Location");
 		if (!locationNode)
 			throw exception("Location node is missed.");
 
-		TiXmlNode *ln = locationNode->FirstChild();
-		if (!ln)
-			throw exception("Location is missed.");
-			
-		const char *locVal = ln->Value();
+		const char *locVal = locationNode->GetText();
 		if (!locVal || !(*locVal))
 			throw exception("Location is missed.");
 		
@@ -239,52 +177,48 @@ GupExtraOptions::GupExtraOptions(const char * xmlFileName) : _proxyServer(""), _
 {
 	_xmlDoc.LoadFile(xmlFileName);
 
-	TiXmlNode *root = _xmlDoc.FirstChild("GUPOptions");
+	XMLElement *root = _xmlDoc.FirstChildElement("GUPOptions");
 	if (!root)
 		return;
 		
-	TiXmlNode *proxyNode = root->FirstChildElement("Proxy");
+	XMLElement *proxyNode = root->FirstChildElement("Proxy");
 	if (proxyNode)
 	{
-		TiXmlNode *serverNode = proxyNode->FirstChildElement("server");
+		XMLElement *serverNode = proxyNode->FirstChildElement("server");
 		if (serverNode)
 		{
-			TiXmlNode *server = serverNode->FirstChild();
-			if (server)
-			{
-				const char *val = server->Value();
-				if (val)
-					_proxyServer = val;
-			}
+			const char *val = serverNode->GetText();
+			if (val)
+				_proxyServer = val;
 		}
 
-		TiXmlNode *portNode = proxyNode->FirstChildElement("port");
+		XMLElement *portNode = proxyNode->FirstChildElement("port");
 		if (portNode)
 		{
-			TiXmlNode *port = portNode->FirstChild();
-			if (port)
-			{
-				const char *val = port->Value();
-				if (val)
-					_port = atoi(val);
-			}
+			const char *val = portNode->GetText();
+			if (val)
+				_port = atoi(val);
 		}
 	}
 }
 
 void GupExtraOptions::writeProxyInfo(const char *fn, const char *proxySrv, long port)
 {
-	TiXmlDocument newProxySettings(fn);
-	TiXmlNode *root = newProxySettings.InsertEndChild(TiXmlElement("GUPOptions"));
-	TiXmlNode *proxy = root->InsertEndChild(TiXmlElement("Proxy"));
-	TiXmlNode *server = proxy->InsertEndChild(TiXmlElement("server"));
-	server->InsertEndChild(TiXmlText(proxySrv));
-	TiXmlNode *portNode = proxy->InsertEndChild(TiXmlElement("port"));
+	XMLDocument doc;
+	XMLElement *root = doc.NewElement("GUPOptions");
+	doc.InsertEndChild(root);
+	XMLElement *proxy = doc.NewElement("Proxy");
+	root->InsertEndChild(proxy);
+	XMLElement *server = doc.NewElement("server");
+	proxy->InsertEndChild(server);
+	server->InsertEndChild(doc.NewText(proxySrv));
+	XMLElement *portNode = doc.NewElement("port");
+	proxy->InsertEndChild(portNode);
 	char portStr[10];
 	sprintf(portStr, "%d", port);
-	portNode->InsertEndChild(TiXmlText(portStr));
+	portNode->InsertEndChild(doc.NewText(portStr));
 
-	newProxySettings.SaveFile();
+	doc.SaveFile(fn);
 }
 
 std::string GupNativeLang::getMessageString(std::string msgID)
@@ -292,19 +226,15 @@ std::string GupNativeLang::getMessageString(std::string msgID)
 	if (!_nativeLangRoot)
 		return "";
 
-	TiXmlNode *popupMessagesNode = _nativeLangRoot->FirstChildElement("PopupMessages");
+	XMLElement *popupMessagesNode = _nativeLangRoot->FirstChildElement("PopupMessages");
 	if (!popupMessagesNode)
 		return "";
 
-	TiXmlNode *node = popupMessagesNode->FirstChildElement(msgID.c_str());
+	XMLElement *node = popupMessagesNode->FirstChildElement(msgID.c_str());
 	if (!node)
 		return "";
 
-	TiXmlNode *sn = node->FirstChild();
-	if (!sn)
-		return "";
-		
-	const char *val = sn->Value();
+	const char *val = node->GetText();
 	if (!val || !(*val))
 		return "";
 	
