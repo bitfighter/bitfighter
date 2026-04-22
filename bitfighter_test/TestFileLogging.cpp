@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "tnlLog.h"
+#include "stringUtils.h"
 
 #include "gtest/gtest.h"
 #include <fstream>
@@ -56,11 +57,11 @@ static bool lineContainsTimestamp(const std::string &line)
    // Look for timestamp pattern like "[2025-11-22" at the beginning
    int pos = 1;      // Where we expect the start of the date
    return (line.length() >= pos + 10 &&
-           isdigit((unsigned char)line[pos + 0]) && isdigit((unsigned char)line[pos + 1]) && isdigit((unsigned char)line[pos + 2]) && isdigit((unsigned char)line[pos + 3]) &&
+           Zap::isDigit(line[pos + 0]) && Zap::isDigit(line[pos + 1]) && Zap::isDigit(line[pos + 2]) && Zap::isDigit(line[pos + 3]) &&
            line[pos + 4] == '-' &&
-           isdigit((unsigned char)line[pos + 5]) && isdigit((unsigned char)line[pos + 6]) &&
+           Zap::isDigit(line[pos + 5]) && Zap::isDigit(line[pos + 6]) &&
            line[pos + 7] == '-' &&
-           isdigit((unsigned char)line[pos + 8]) && isdigit((unsigned char)line[pos + 9]));
+           Zap::isDigit(line[pos + 8]) && Zap::isDigit(line[pos + 9]));
 }
 
 

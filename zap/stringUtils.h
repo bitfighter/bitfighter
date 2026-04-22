@@ -74,9 +74,17 @@ string ucase(string strToConvert);
 
 bool isPositiveInteger(const char *str);
 
-bool isAlpha(char c);
-bool isDigit(char c);
-bool isAlNum(char c);
+// Safe versions of <cctype> functions that handle signed characters correctly
+inline char toLower(char c) { return (char)tolower((unsigned char)c); }
+inline char toUpper(char c) { return (char)toupper((unsigned char)c); }
+
+inline bool isSpace(char c) { return isspace((unsigned char)c);  }
+inline bool isAlpha(char c) { return isalpha((unsigned char)c);  }
+inline bool isDigit(char c) { return isdigit((unsigned char)c);  }
+inline bool isAlNum(char c) { return isalnum((unsigned char)c);  }
+inline bool isPrintable(char c) { return isprint((unsigned char)c);  }
+inline bool isPunct(char c) { return ispunct((unsigned char)c);  }
+inline bool isHex(char c)   { return isxdigit((unsigned char)c); }
 
 string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
@@ -146,8 +154,6 @@ string toString(YesNo yesNo);
 string toString(RelAbs relAbs);
 string toString(ColorEntryMode colorMode);
 
-bool isPrintable(char c);
-bool isHex(char c);
 bool isHex(const string &str);
 
 bool alphaSort(const string &a, const string &b);

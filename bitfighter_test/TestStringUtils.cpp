@@ -259,6 +259,48 @@ TEST(StringUtilsTest, alphaNumericChecks)
 }
 
 
+TEST(StringUtilsTest, safeCctypeWrappers)
+{
+   // toLower / toUpper
+   EXPECT_EQ('a', toLower('A'));
+   EXPECT_EQ('a', toLower('a'));
+   EXPECT_EQ('A', toUpper('a'));
+   EXPECT_EQ('A', toUpper('A'));
+   EXPECT_EQ((char)0xFF, toLower((char)0xFF));
+   EXPECT_EQ((char)0xFF, toUpper((char)0xFF));
+
+   // isSpace
+   EXPECT_TRUE(isSpace(' '));
+   EXPECT_TRUE(isSpace('\n'));
+   EXPECT_FALSE(isSpace('a'));
+   EXPECT_FALSE(isSpace((char)0xFF));
+
+   // isAlpha / isDigit / isAlNum
+   EXPECT_TRUE(isAlpha('a'));
+   EXPECT_FALSE(isAlpha('1'));
+   EXPECT_TRUE(isDigit('1'));
+   EXPECT_FALSE(isDigit('a'));
+   EXPECT_TRUE(isAlNum('a'));
+   EXPECT_TRUE(isAlNum('1'));
+   EXPECT_FALSE(isAlNum(' '));
+   EXPECT_FALSE(isAlNum((char)0xFF));
+
+   // isPrint
+   EXPECT_TRUE(isPrintable('a'));
+   EXPECT_FALSE(isPrintable('\1'));
+
+   // isPunct
+   EXPECT_TRUE(isPunct('.'));
+   EXPECT_FALSE(isPunct('a'));
+
+   // isHex
+   EXPECT_TRUE(isHex('a'));
+   EXPECT_TRUE(isHex('A'));
+   EXPECT_TRUE(isHex('0'));
+   EXPECT_FALSE(isHex('g'));
+}
+
+
 TEST(StringUtilsTest, ctos)
 {
    EXPECT_EQ("a", ctos('a'));

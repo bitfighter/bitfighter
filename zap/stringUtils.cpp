@@ -209,7 +209,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
         return false;
     }
     for(string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if(tolower((unsigned char)*c1) != tolower((unsigned char)*c2)) {
+        if(Zap::toLower(*c1) != Zap::toLower(*c2)) {
             return false;
         }
     }
@@ -221,7 +221,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
+      strToConvert[i] = Zap::toLower(strToConvert[i]);
    return strToConvert;
 }
 
@@ -230,7 +230,7 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 string ucase(string strToConvert)
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)toupper((unsigned char)strToConvert[i]);
+      strToConvert[i] = Zap::toUpper(strToConvert[i]);
    return strToConvert;
 }
 
@@ -343,7 +343,7 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
    const char *src = format;
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && Zap::isDigit(src[2]))
       {
          S32 index = src[2] - '0';
          switch(src[1])
@@ -426,7 +426,7 @@ Vector<string> parseString(const string &line)
       }
       else
       {
-         if(isspace((unsigned char)c))
+         if(Zap::isSpace(c))
          {
             if(hasToken)
             {
@@ -517,13 +517,13 @@ const char *findPointerOfArg(const char *message, S32 count)
    // Message needs to include everything including multiple spaces.  Message starts after second space.
    while(message[cur] != '\0' && spacecount != count)
    {
-      if(isspace((unsigned char)message[cur]) && !isspace((unsigned char)prevchar))
+      if(Zap::isSpace(message[cur]) && !Zap::isSpace(prevchar))
          spacecount++;        // Double space does not count as a seperate parameter
       prevchar = message[cur];
       cur++;
    }
 
-   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+   while(message[cur] != '\0' && Zap::isSpace(message[cur]))
       cur++;
 
    return &message[cur];
@@ -834,7 +834,7 @@ string makeFilenameFromString(const char *levelname, bool allowLastDot)
    {
       // Prevent invalid characters in file names
       char c = levelname[i];
-      if(isAlNum(c))
+      if(Zap::isAlNum(c))
          filename[i]=c;
       else
       {
@@ -1036,34 +1036,6 @@ string toString(DisplayMode displayMode)  { return displayModeToString(displayMo
 string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
 
 
-bool isPrintable(char c)
-{
-   return isprint(static_cast<unsigned char>(c));
-}
-
-
-bool isHex(char c)
-{
-   return isxdigit(static_cast<unsigned char>(c));
-}
-
-
-bool isAlpha(char c)
-{
-   return isalpha(static_cast<unsigned char>(c));
-}
-
-bool isDigit(char c)
-{
-   return isdigit(static_cast<unsigned char>(c));
-}
-
-bool isAlNum(char c)
-{
-   return isalnum(static_cast<unsigned char>(c));
-}
-
-
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
@@ -1071,7 +1043,7 @@ bool isHex(const string &str)
       return false;
 
    for(string::size_type i = 0; i < str.length(); i++)
-      if(!isHex(str[i]))
+      if(!Zap::isHex(str[i]))
          return false;
 
    return true;
@@ -1096,9 +1068,9 @@ bool alphaNumberSort(const string &a, const string &b)
       while(start < s.length() && s[start] == '0')
          start++;
       len = 0;
-      while(start + len < s.length() && isDigit(s[start + len]))
+      while(start + len < s.length() && Zap::isDigit(s[start + len]))
          len++;
-      if (len == 0 && start > 0 && (start == s.length() || !isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
+      if (len == 0 && start > 0 && (start == s.length() || !Zap::isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
       {
           start--; // Keep one zero
           len = 1;
@@ -1131,8 +1103,8 @@ bool alphaNumberSort(const string &a, const string &b)
 
    // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
    // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
-   bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
-   bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
+   bool aStartsWithDigit = !a.empty() && Zap::isDigit(a[0]);
+   bool bStartsWithDigit = !b.empty() && Zap::isDigit(b[0]);
 
    if(aStartsWithDigit && bStartsWithDigit)
    {

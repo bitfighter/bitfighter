@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include "../zap/stringUtils.h"
 #include <stdio.h>
 #include "tnlRandom.h"
 #include "tnlLog.h"
@@ -521,21 +522,25 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 
 int stricmp(const char *str1, const char *str2)
 {
-   while(toupper((unsigned char)*str1) == toupper((unsigned char)*str2) && *str1)
+   while(Zap::toUpper(*str1) == Zap::toUpper(*str2) && *str1)
    {
       str1++;
       str2++;
    }
-   return (toupper((unsigned char)*str1) > toupper((unsigned char)*str2)) ? 1 : ((toupper((unsigned char)*str1) < toupper((unsigned char)*str2)) ? -1 : 0);
+   char c1 = Zap::toUpper(*str1);
+   char c2 = Zap::toUpper(*str2);
+   return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
 }
 
 int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
    for(unsigned int i = 0; i < len; i++)
    {
-      if(toupper((unsigned char)str1[i]) == toupper((unsigned char)str2[i]))
+      char c1 = Zap::toUpper(str1[i]);
+      char c2 = Zap::toUpper(str2[i]);
+      if(c1 == c2)
          continue;
-      return (toupper((unsigned char)str1[i]) > toupper((unsigned char)str2[i])) ? 1 : ((toupper((unsigned char)str1[i]) < toupper((unsigned char)str2[i])) ? -1 : 0);
+      return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
    }
    return 0;
 }
