@@ -1649,6 +1649,107 @@ static const char* getArmorClassName(S32 defenseValue)
 }
 
 
+// Generic component table renderer.
+// - columns: table schema (header, fixed/auto width, left/right alignment)
+// - rows: row cell strings (up to MaxTableColumns each)
+// - highlightedRowIndex / TableRow::highlighted: row highlight controls
+// - cachedColumnWidths: optional reusable width cache; pass NULL to auto-compute every call
+// Returns the y-position just below the last rendered table row.
+S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
+   const TableColumn columns[], S32 numColumns,
+   const TableRow rows[], S32 numRows, S32 highlightedRowIndex,
+   F32 alpha, S32 cachedColumnWidths[]) const
+{
+   if(!columns || !rows || numColumns <= 0 || numRows <= 0)
+      return top;
+
+   const S32 columnCount = MIN(numColumns, MaxTableColumns);
+   const S32 columnSpacing = 6;
+
+   S32 localWidths[MaxTableColumns];
+   S32 *widths = cachedColumnWidths ? cachedColumnWidths : localWidths;
+
+   bool needsWidthCompute = !cachedColumnWidths;
+   if(cachedColumnWidths)
+   {
+      for(S32 c = 0; c < columnCount; c++)
+      {
+         if(cachedColumnWidths[c] <= 0)
+         {
+            needsWidthCompute = true;
+            break;
+         }
+      }
+   }
+
+   if(needsWidthCompute)
+   {
+      for(S32 c = 0; c < columnCount; c++)
+      {
+         S32 w = columns[c].width;
+         if(w <= 0)
+         {
+            w = getStringWidth(fontSize, columns[c].header ? columns[c].header : "");
+            for(S32 r = 0; r < numRows; r++)
+            {
+               const char *cell = rows[r].cells[c] ? rows[r].cells[c] : "";
+               w = MAX(w, getStringWidth(fontSize, cell));
+            }
+         }
+         widths[c] = w;
+      }
+   }
+
+   Renderer &renderer = Renderer::get();
+   S32 y = top;
+   S32 x = left;
+
+   renderer.setColor(Color(0.5f * alpha, 0.5f * alpha, 0.5f * alpha));
+   for(S32 c = 0; c < columnCount; c++)
+   {
+      const char *header = columns[c].header ? columns[c].header : "";
+      if(columns[c].isRightAligned)
+      {
+         S32 hw = getStringWidth(fontSize, header);
+         drawString(x + widths[c] - hw, y, fontSize, header);
+      }
+      else
+         drawString(x, y, fontSize, header);
+      x += widths[c] + columnSpacing;
+   }
+   y += rowGap;
+
+   for(S32 r = 0; r < numRows; r++)
+   {
+      bool hl = rows[r].highlighted || (r == highlightedRowIndex);
+      x = left;
+      for(S32 c = 0; c < columnCount; c++)
+      {
+         if(hl)
+            renderer.setColor(Color(alpha, alpha, 0.0f));
+         else if(columns[c].isRightAligned)
+            renderer.setColor(Color(0.0f, alpha, alpha));
+         else
+            renderer.setColor(Color(0.72f * alpha, 0.72f * alpha, 0.72f * alpha));
+
+         const char *cell = rows[r].cells[c] ? rows[r].cells[c] : "";
+         if(columns[c].isRightAligned)
+         {
+            S32 cw = getStringWidth(fontSize, cell);
+            drawString(x + widths[c] - cw, y, fontSize, cell);
+         }
+         else
+            drawString(x, y, fontSize, cell);
+
+         x += widths[c] + columnSpacing;
+      }
+      y += rowGap;
+   }
+
+   return y;
+}
+
+
 // Render detailed stats for the highlighted item in a vertical column.
 // alpha: 0.0 = invisible, 1.0 = fully opaque (used during card transitions).
 void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alpha) const
@@ -1714,53 +1815,14 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
    }
    else if(mPhase == PHASE_ARMOR)
    {
-      // Table: Name | Class | Wt | Space | Cost
-      S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
-      float bodySize = body_stat[bodyIdx].size;
-
-      // Column positions: measure widest labels for alignment
-      S32 col1 = left;  // Name
-      S32 col2 = col1 + getStringWidth(STAT_SZ, "Hardened Steel") + 4;  // Class
-      S32 col3 = col2 + getStringWidth(STAT_SZ, "Standard") + 4;  // Wt
-      S32 col4 = col3 + 25;  // Space
-      S32 col5 = col4 + 25;  // Cost
-
-      // Column headers
-      r.setColor(Color(0.5f * alpha, 0.5f * alpha, 0.5f * alpha));
-      drawString(col1, y, STAT_SZ, "Name");
-      drawString(col2, y, STAT_SZ, "Class");
-      drawString(col3, y, STAT_SZ, "Wt");
-      drawString(col4, y, STAT_SZ, "Sp");
-      drawString(col5, y, STAT_SZ, "Cost");
-      y += GAP;
-
-      // One row per armor type
-      for(S32 i = 0; i < XtankArmorCount; i++)
-      {
-         bool hl = (i == mHighlightedIndex);
-         r.setColor(hl ? Colors::yellow : Colors::overlayMenuUnselectedItemColor);
-
-         const XtankArmorInfo &ai = xtankArmorInfos[i];
-
-         drawString(col1, y, STAT_SZ, ai.name);
-
-         r.setColor(hl ? Colors::yellow : Color(0.0f, alpha, alpha));
-         drawString(col2, y, STAT_SZ, getArmorClassName(ai.defense));
-
-         char buf[32];
-         dSprintf(buf, sizeof(buf), "%d", ai.weight);
-         S32 w = getStringWidth(STAT_SZ, buf);
-         drawString(col3 + 18 - w, y, STAT_SZ, buf);
-
-         dSprintf(buf, sizeof(buf), "%d", ai.space);
-         w = getStringWidth(STAT_SZ, buf);
-         drawString(col4 + 18 - w, y, STAT_SZ, buf);
-
-         dSprintf(buf, sizeof(buf), "%s", cs(comma(ai.cost)));
-         drawString(col5, y, STAT_SZ, buf);
-
-         y += GAP;
-      }
+      S32 idx = mHighlightedIndex;
+      if(idx < 0 || idx >= XtankArmorCount) idx = 0;
+      const XtankArmorInfo &ai = xtankArmorInfos[idx];
+      drawStringf(left, y, STAT_SZ, "Class: %s", getArmorClassName(ai.defense)); y += GAP;
+      drawStringf(left, y, STAT_SZ, "Defense: %d", ai.defense);                  y += GAP;
+      drawStringf(left, y, STAT_SZ, "Weight: %d", ai.weight);                    y += GAP;
+      drawStringf(left, y, STAT_SZ, "Space: %d", ai.space);                      y += GAP;
+      drawStringf(left, y, STAT_SZ, "Cost: %s", cs(comma(ai.cost)));             y += GAP;
    }
    else if(mPhase == PHASE_ARMOR_SIDES)
    {
@@ -2035,64 +2097,112 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    const S32 NAME_X    = isCenter ? (left + 30) : (left + 6);
    const S32 STATS_DIV = left + w * 54 / 100;
 
-   for(S32 i = 0; i < count; i++)
+   bool useArmorTable = isCenter && (phase == PHASE_ARMOR);
+   if(useArmorTable)
    {
-      S32 y = listTop + i * rowGap;
-      // Stop drawing if we've run out of space (items after this will be blank).
-      if(y + drawnSz > listBot)
-         break;
-
-      const char *name = (*items)[i].name;
-      if(!name) 
-         name = "";
-
-      // For specials phase, prefix with toggle state indicator
-      static char sSpecialNameBuf[XtankSpecialCount][64];
-      if(phase == PHASE_SPECIALS && i < XtankSpecialCount)
+      TableColumn columns[] =
       {
-         bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)i);
-         dSprintf(sSpecialNameBuf[i], sizeof(sSpecialNameBuf[i]), "%s %s",
-                  active ? "[X]" : "[ ]", name);
-         name = sSpecialNameBuf[i];
+         { "Key",   0, 0 },
+         { "Armor", 0, 0 },
+         { "Class", 0, 0 },
+         { "Wt",    0, 1 },
+         { "Sp",    0, 1 },
+         { "Cost",  0, 1 },
+      };
+
+      // Numeric fields are short; cost uses comma separators so it gets extra room.
+      static const S32 WEIGHT_BUF_LEN = 16;
+      static const S32 SPACE_BUF_LEN = 16;
+      static const S32 COST_BUF_LEN = 24;
+      TableRow rows[XtankArmorCount] = {};
+      char weightBuf[XtankArmorCount][WEIGHT_BUF_LEN];
+      char spaceBuf[XtankArmorCount][SPACE_BUF_LEN];
+      char costBuf[XtankArmorCount][COST_BUF_LEN];
+      for(S32 i = 0; i < XtankArmorCount; i++)
+      {
+         const XtankArmorInfo &ai = xtankArmorInfos[i];
+         dSprintf(weightBuf[i], WEIGHT_BUF_LEN, "%d", ai.weight);
+         dSprintf(spaceBuf[i], SPACE_BUF_LEN, "%d", ai.space);
+         dSprintf(costBuf[i], COST_BUF_LEN, "%s", cs(comma(ai.cost)));
+
+         rows[i].cells[0] = InputCodeManager::inputCodeToString(mArmorItems[i].key);
+         rows[i].cells[1] = ai.name;
+         rows[i].cells[2] = getArmorClassName(ai.defense);
+         rows[i].cells[3] = weightBuf[i];
+         rows[i].cells[4] = spaceBuf[i];
+         rows[i].cells[5] = costBuf[i];
+         rows[i].highlighted = false;
       }
 
-      // For armor sides phase, append point count to each side name.
-      static char sArmorSidesBuf[6][32];
-      if(phase == PHASE_ARMOR_SIDES && i < 6)
+      renderTable(left + 8, listTop, drawnSz, rowGap, columns, 6,
+                  rows, XtankArmorCount, mHighlightedIndex);
+   }
+   else
+   {
+      // "[X] " + longest special name fits comfortably in 64 chars.
+      static const S32 SPECIAL_LABEL_BUF_LEN = 64;
+      // "<side> <points> pts" stays well under 32 chars.
+      static const S32 ARMOR_SIDE_BUF_LEN = 32;
+      static const S32 ARMOR_SIDE_COUNT = 6;
+      char sSpecialNameBuf[XtankSpecialCount][SPECIAL_LABEL_BUF_LEN];
+      char sArmorSidesBuf[ARMOR_SIDE_COUNT][ARMOR_SIDE_BUF_LEN];
+      for(S32 i = 0; i < count; i++)
       {
-         dSprintf(sArmorSidesBuf[i], sizeof(sArmorSidesBuf[i]), "%-6s %d pts",
-                  name, (S32)mDesignInProgress.armorSides[i]);
-         name = sArmorSidesBuf[i];
-      }
+         S32 y = listTop + i * rowGap;
+         // Stop drawing if we've run out of space (items after this will be blank).
+         if(y + drawnSz > listBot)
+            break;
 
-      bool sel = isCenter && (i == mHighlightedIndex);
+         const char *name = (*items)[i].name;
+         if(!name)
+            name = "";
 
-      if(isCenter)
-      {
-         const Color SELECTED_COLOR = Colors::yellow;
-         if(sel)
+         // For specials phase, prefix with toggle state indicator
+         if(phase == PHASE_SPECIALS && i < XtankSpecialCount)
          {
-            // Yellow bar: vertically centered on the text with 3px padding each side
-            S32 barTop = y + drawnSz / 2 - (drawnSz / 2 + 3) + 2;
-            drawFilledRect(left + BAR_MARGIN_L, barTop, left + BAR_MARGIN_L + BAR_WIDTH, barTop + BAR_HEIGHT, SELECTED_COLOR);
+            bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)i);
+            dSprintf(sSpecialNameBuf[i], sizeof(sSpecialNameBuf[i]), "%s %s",
+                     active ? "[X]" : "[ ]", name);
+            name = sSpecialNameBuf[i];
          }
-         // Key badge
-         r.setColor(sel ? SELECTED_COLOR : Colors::gray60);
-         drawStringc(KEY_X + KEY_COL_WIDTH / 2, y + drawnSz, drawnSz, InputCodeManager::inputCodeToString((*items)[i].key));
-         // Item name
-         r.setColor(sel ? SELECTED_COLOR : Colors::overlayMenuUnselectedItemColor);
-         drawString(NAME_X, y, drawnSz, name);
-      }
-      else
-      {
-         // Background card: all gray, no key column, proportionally scaled font
-         r.setColor(Color(grayLevel, grayLevel, grayLevel));
-         drawString(NAME_X, y, drawnSz, name);
+
+         // For armor sides phase, append point count to each side name.
+         if(phase == PHASE_ARMOR_SIDES && i < ARMOR_SIDE_COUNT)
+         {
+            dSprintf(sArmorSidesBuf[i], sizeof(sArmorSidesBuf[i]), "%-6s %d pts",
+                     name, (S32)mDesignInProgress.armorSides[i]);
+            name = sArmorSidesBuf[i];
+         }
+
+         bool sel = isCenter && (i == mHighlightedIndex);
+
+         if(isCenter)
+         {
+            const Color SELECTED_COLOR = Colors::yellow;
+            if(sel)
+            {
+               // Yellow bar: vertically centered on the text with 3px padding each side
+               S32 barTop = y + drawnSz / 2 - (drawnSz / 2 + 3) + 2;
+               drawFilledRect(left + BAR_MARGIN_L, barTop, left + BAR_MARGIN_L + BAR_WIDTH, barTop + BAR_HEIGHT, SELECTED_COLOR);
+            }
+            // Key badge
+            r.setColor(sel ? SELECTED_COLOR : Colors::gray60);
+            drawStringc(KEY_X + KEY_COL_WIDTH / 2, y + drawnSz, drawnSz, InputCodeManager::inputCodeToString((*items)[i].key));
+            // Item name
+            r.setColor(sel ? SELECTED_COLOR : Colors::overlayMenuUnselectedItemColor);
+            drawString(NAME_X, y, drawnSz, name);
+         }
+         else
+         {
+            // Background card: all gray, no key column, proportionally scaled font
+            r.setColor(Color(grayLevel, grayLevel, grayLevel));
+            drawString(NAME_X, y, drawnSz, name);
+         }
       }
    }
 
    // Stats column — center card only, fades in
-   if(cf > 0.55f)
+   if(cf > 0.55f && phase != PHASE_ARMOR)
    {
       F32 statAlpha = (cf - 0.55f) / 0.45f;
       renderItemStatsColumn(STATS_DIV, right - 6, listTop, statAlpha);
