@@ -574,6 +574,27 @@ TEST(GeomUtilsTest, segmentsIntersectNearButNotCrossing)
                                   Point(6, 6), Point(10, 0), ct));
 }
 
+TEST(GeomUtilsTest, segmentsIntersectPrecisionBug)
+{
+   F32 ct;
+   F32 offset = 1e6f;
+
+   // A: (offset, offset) -> (offset + 10, offset + 10)
+   // B: (offset, offset + 10) -> (offset + 10, offset)
+   // These should intersect at (offset + 5, offset + 5)
+
+   EXPECT_TRUE(segmentsIntersect(Point(offset, offset), Point(offset + 10, offset + 10),
+                                 Point(offset, offset + 10), Point(offset + 10, offset), ct));
+   EXPECT_NEAR(0.5f, ct, 0.001f);
+
+   // Nearly parallel
+   // A: (offset, offset) -> (offset + 100, offset + 100)
+   // B: (offset, offset + 100.0001) -> (offset + 100, offset + 0.0001)
+   // These should intersect at (offset + 50, offset + 50.0001)
+   EXPECT_TRUE(segmentsIntersect(Point(offset, offset), Point(offset + 100, offset + 100),
+                                 Point(offset, offset + 100.0001f), Point(offset + 100, offset + 0.0001f), ct));
+}
+
 
 // ============================================================
 // findIntersection
@@ -586,6 +607,18 @@ TEST(GeomUtilsTest, findIntersectionCrossing)
                                 Point(0, 10), Point(10, 0), intersection));
    EXPECT_NEAR(5.0f, intersection.x, 0.001f);
    EXPECT_NEAR(5.0f, intersection.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, findIntersectionPrecisionBug)
+{
+   Point intersection;
+   F32 offset = 1e6f;
+
+   // Intersection at (offset + 5, offset + 5)
+   EXPECT_TRUE(findIntersection(Point(offset, offset), Point(offset + 10, offset + 10),
+                                Point(offset, offset + 10), Point(offset + 10, offset), intersection));
+   EXPECT_NEAR(offset + 5.0f, intersection.x, 1.0f);
+   EXPECT_NEAR(offset + 5.0f, intersection.y, 1.0f);
 }
 
 TEST(GeomUtilsTest, findIntersectionParallel)
