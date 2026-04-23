@@ -180,7 +180,7 @@ private:
    {
       const char *header;
       S32 width;        // 0 = auto-size based on content
-      S32 alignRight;   // 0 = left, 1 = right
+      S32 isRightAligned;   // 0 = left, 1 = right
    };
 
    enum { MaxTableColumns = 8 };

@@ -1708,7 +1708,7 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
    for(S32 c = 0; c < columnCount; c++)
    {
       const char *header = columns[c].header ? columns[c].header : "";
-      if(columns[c].alignRight)
+      if(columns[c].isRightAligned)
       {
          S32 hw = getStringWidth(fontSize, header);
          drawString(x + widths[c] - hw, y, fontSize, header);
@@ -1727,13 +1727,13 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
       {
          if(hl)
             renderer.setColor(Color(alpha, alpha, 0.0f));
-         else if(columns[c].alignRight)
+         else if(columns[c].isRightAligned)
             renderer.setColor(Color(0.0f, alpha, alpha));
          else
             renderer.setColor(Color(0.72f * alpha, 0.72f * alpha, 0.72f * alpha));
 
          const char *cell = rows[r].cells[c] ? rows[r].cells[c] : "";
-         if(columns[c].alignRight)
+         if(columns[c].isRightAligned)
          {
             S32 cw = getStringWidth(fontSize, cell);
             drawString(x + widths[c] - cw, y, fontSize, cell);
@@ -2110,6 +2110,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          { "Cost",  0, 1 },
       };
 
+      // Numeric fields are short; cost uses comma separators so it gets extra room.
       static const S32 WEIGHT_BUF_LEN = 16;
       static const S32 SPACE_BUF_LEN = 16;
       static const S32 COST_BUF_LEN = 24;
@@ -2138,7 +2139,9 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    }
    else
    {
+      // "[X] " + longest special name fits comfortably in 64 chars.
       static const S32 SPECIAL_LABEL_BUF_LEN = 64;
+      // "<side> <points> pts" stays well under 32 chars.
       static const S32 ARMOR_SIDE_BUF_LEN = 32;
       static const S32 ARMOR_SIDE_COUNT = 6;
       char sSpecialNameBuf[XtankSpecialCount][SPECIAL_LABEL_BUF_LEN];
