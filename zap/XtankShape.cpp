@@ -701,7 +701,7 @@ XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount] =
    suspensionType = (S8)XtankSuspensionDefault;
    bumperType     = (S8)XtankBumperDefault;
    specials       = 0;
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 6; i++)
       armorSides[i] = 0;
 }
 
@@ -717,7 +717,7 @@ void XtankDesign::initForBody(S32 bodyIdx)
          weaponMounts[i] = (S8)xtankDefaultWeapons[bodyIdx].slots[i].mount;
       }
       // Xtank-style default armor: all sides start at 0 and are set explicitly.
-      for(S32 i = 0; i < 4; i++)
+      for(S32 i = 0; i < 6; i++)
          armorSides[i] = 0;
    }
    else
@@ -727,7 +727,7 @@ void XtankDesign::initForBody(S32 bodyIdx)
          weapons[i] = XtankWeaponNone;
          weaponMounts[i] = (S8)XtankMountNone;
       }
-      for(S32 i = 0; i < 4; i++)
+      for(S32 i = 0; i < 6; i++)
          armorSides[i] = 0;
    }
    engineType    = XtankEngineDefault;

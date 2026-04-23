@@ -38,19 +38,21 @@ class UIXtankHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   // Phase constants.
-   static const S32 PHASE_BODY        = 0;
-   static const S32 PHASE_ENGINE      = 1;
-   static const S32 PHASE_TREADS      = 2;
-   static const S32 PHASE_ARMOR       = 3;
-   static const S32 PHASE_ARMOR_SIDES = 4;  // per-side armor point allocation
-   static const S32 PHASE_SUSPENSION  = 5;
-   static const S32 PHASE_BUMPERS     = 6;
-   static const S32 PHASE_SPECIALS    = 7;
-   static const S32 PHASE_HEATSINK    = 8;
-   static const S32 PHASE_WEAPONS     = 9;
-   static const S32 PHASE_WEAPON_MOUNT = 10;
-   static const S32 TOTAL_PHASES      = 10;
+   enum Phase : S32
+   {
+      PHASE_BODY = 0,
+      PHASE_ENGINE,
+      PHASE_TREADS,
+      PHASE_ARMOR,
+      PHASE_ARMOR_SIDES,  // per-side armor point allocation
+      PHASE_SUSPENSION,
+      PHASE_BUMPERS,
+      PHASE_SPECIALS,
+      PHASE_HEATSINK,
+      PHASE_WEAPONS,
+      PHASE_WEAPON_MOUNT,
+      TOTAL_PHASES,
+   };
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -73,7 +75,7 @@ private:
    Vector<OverlayMenuItem> mEngineItems;
    Vector<OverlayMenuItem> mTreadItems;
    Vector<OverlayMenuItem> mArmorItems;
-   Vector<OverlayMenuItem> mArmorSidesItems;  // 4 items: Front/Back/Left/Right
+   Vector<OverlayMenuItem> mArmorSidesItems;  // 6 items: Front/Back/Left/Right/Top/Bottom
    Vector<OverlayMenuItem> mSuspensionItems;
    Vector<OverlayMenuItem> mBumperItems;
    Vector<OverlayMenuItem> mSpecialsItems;
@@ -125,6 +127,7 @@ private:
    void buildWeaponItems();
    void buildWeaponMountItems();
    void normalizeWeaponPanels();
+   S32  countWeaponsOnMount(XtankMountLocation mount, S32 excludeSlot) const;
    void updateItemColors(Vector<OverlayMenuItem> &items);  // Highlight selected item
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
    void commitHighlightedSelection();  // Save highlighted item into design before navigating
@@ -144,6 +147,7 @@ private:
 
    // Draw the floating preview panel on the right side of the screen.
    void renderPreviewPanel() const;
+   S32 renderWeaponList(S32 left, S32 cx, S32 y, const XtankWeapon weapons[], const S8 mounts[], S32 fontSz, S32 lineGap) const;
 
    // Draw the carousel position dots + arrows inside the preview panel.
    void renderCarouselDots(S32 cx, S32 y) const;
@@ -171,6 +175,27 @@ private:
 
    // Returns the item count for the current phase (used by UP/DOWN cycling).
    S32 currentPhaseItemCount() const;
+
+   // Add these structures and declaration to UIXtankHelper.h:
+
+   // Generic table rendering structures
+   struct TableColumn
+   {
+      const char* header;
+      S32 width;          // 0 = auto-size based on content
+      S32 contentAlign;   // 0 = left, 1 = right
+   };
+
+   struct TableRow
+   {
+      const char* cells[8];  // up to 8 columns per row
+      bool highlighted;
+   };
+
+   // In the UIXtankHelper class, add this method declaration:
+   S32 renderTable(S32 left, S32 top, const TableColumn columns[], S32 numColumns,
+      const TableRow rows[], S32 numRows, S32 highlightedRowIndex) const;
+
 
 public:
    UIXtankHelper();

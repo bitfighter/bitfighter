@@ -438,7 +438,7 @@ F32 Ship::processMove(U32 stateIndex)
       U16 newSpecials      = mCurrentMove.specials;
 
       bool armorSidesChanged = false;
-      for(S32 i = 0; i < 4; i++)
+      for(S32 i = 0; i < 6; i++)
          if(mCurrentMove.armorSides[i] != mXtankDesign.armorSides[i])
             armorSidesChanged = true;
 
@@ -458,7 +458,7 @@ F32 Ship::processMove(U32 stateIndex)
          mXtankDesign.suspensionType = newSuspension;
          mXtankDesign.bumperType     = newBumper;
          mXtankDesign.specials       = newSpecials;
-         for(S32 i = 0; i < 4; i++)
+         for(S32 i = 0; i < 6; i++)
             mXtankDesign.armorSides[i] = mCurrentMove.armorSides[i];
          designChanged = true;
       }
@@ -577,7 +577,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    }
    // Xtank-style armor weight: per-side points scaled by body size.
    S32 totalArmorPts = 0;
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 6; i++)
       totalArmorPts += (S32)mXtankDesign.armorSides[i];
    S32 armorWeight = totalArmorPts * armor.weight * body.size;
 

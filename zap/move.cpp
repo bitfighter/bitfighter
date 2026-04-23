@@ -67,7 +67,7 @@ void Move::initialize()
    suspensionType = (S8)XtankSuspensionDefault;
    bumperType     = (S8)XtankBumperDefault;
    specials       = 0;
-   for(U32 i = 0; i < 4; i++)
+   for(U32 i = 0; i < 6; i++)
       armorSides[i] = 0;
 }
 
@@ -108,7 +108,7 @@ bool Move::isEqualMove(const Move *move) const
       if(move->weaponMount[i] != weaponMount[i])
          return false;
 
-   for(U32 i = 0; i < 4; i++)
+   for(U32 i = 0; i < 6; i++)
       if(move->armorSides[i] != armorSides[i])
          return false;
 
@@ -188,7 +188,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
          stream->writeInt(specials, 16);
 
          // Per-side armor points: 4 × U8 (0-255 each)
-         for(U32 i = 0; i < 4; i++)
+         for(U32 i = 0; i < 6; i++)
             stream->writeInt((U32)armorSides[i], 8);
       }
    }
@@ -245,7 +245,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
          bumperType     = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
          specials       = (U16)stream->readInt(16);
-         for(U32 i = 0; i < 4; i++)
+         for(U32 i = 0; i < 6; i++)
             armorSides[i] = (U8)stream->readInt(8);
       }
       else
@@ -261,7 +261,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          suspensionType = (S8)XtankSuspensionDefault;
          bumperType     = (S8)XtankBumperDefault;
          specials       = 0;
-         for(U32 i = 0; i < 4; i++)
+         for(U32 i = 0; i < 6; i++)
             armorSides[i] = 0;
       }
    }

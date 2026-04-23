@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright Chris Eykamp
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
@@ -61,6 +61,57 @@ static S32 getBodyArmorCapacityUnits(S32 bodyIdx, S32 armorIdx)
    return MAX(0, MIN(byWeight, bySpace));
 }
 
+
+// Returns how many additional armor units the design can still accept, accounting
+// for weight and space already consumed by all non-armor components.
+static S32 getRemainingArmorUnits(const XtankDesign &design)
+{
+   S32 bodyIdx  = MAX(0, MIN((S32)design.bodyIndex,  XtankBodyCount  - 1));
+   S32 armorIdx = MAX(0, MIN((S32)design.armorType,  XtankArmorCount - 1));
+   S32 engIdx   = MAX(0, MIN((S32)design.engineType, XtankEngineCount - 1));
+   S32 heatSinks = MAX(XtankHeatSinkMin, MIN((S32)design.heatSinkCount, XtankHeatSinkMax));
+
+   const XtankBodyInfo   &body  = body_stat[bodyIdx];
+   const XtankArmorInfo  &armor = xtankArmorInfos[armorIdx];
+   const XtankEngineInfo &eng   = xtankEngineInfos[engIdx];
+
+   // Weight used by non-armor components.
+   S32 otherWeight = body.weight + eng.weight + heatSinkStat.weight * heatSinks;
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = design.weapons[i];
+      if(w != XtankWeaponNone && (S32)w >= 0 && (S32)w < XtankWeaponCount)
+         otherWeight += xtankWeaponInfos[(S32)w].weight;
+   }
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+      if(hasSpecial(design.specials, (XtankSpecial)s))
+         otherWeight += xtankSpecialInfos[s].weight;
+
+   // Space used by non-armor components.
+   S32 otherSpace = eng.space + heatSinkStat.space * heatSinks;
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = design.weapons[i];
+      if(w != XtankWeaponNone && (S32)w >= 0 && (S32)w < XtankWeaponCount)
+         otherSpace += xtankWeaponInfos[(S32)w].space;
+   }
+   for(S32 s = 0; s < XtankSpecialCount; s++)
+      if(hasSpecial(design.specials, (XtankSpecial)s))
+         otherSpace += xtankSpecialInfos[s].space;
+
+   S32 unitWeight = armor.weight * body.size;
+   S32 unitSpace  = armor.space  * body.size;
+
+   S32 weightBudget = MAX(0, body.weightLimit - otherWeight);
+   S32 spaceBudget  = MAX(0, body.space       - otherSpace);
+
+   S32 byWeight = (unitWeight > 0) ? (weightBudget / unitWeight) : S32_MAX;
+   S32 bySpace  = (unitSpace  > 0) ? (spaceBudget  / unitSpace)  : S32_MAX;
+
+   return MAX(0, MIN(byWeight, bySpace));
+}
+
+
 // Derive movement values from original xtank stats (body_stat + engine/treads).
 static XtankDerivedStats getDerivedStats(const XtankDesign &design)
 {
@@ -91,7 +142,7 @@ static XtankDerivedStats getDerivedStats(const XtankDesign &design)
    }
 
    S32 totalArmorPts = 0;
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 6; i++)
       totalArmorPts += (S32)design.armorSides[i];
    S32 armorWeight = totalArmorPts * armor.weight * body.size;
 
@@ -307,7 +358,7 @@ void UIXtankHelper::buildBodyItems()
 
       // Speed class string (rough bands)
       const char *spdClass = (stats.maxSpeed >= 550.0f) ? "Fast" :
-                             (stats.maxSpeed >= 480.0f) ? "Med"  : "Slow";
+                             (stats.maxSpeed >= 480.0f) ? "Medium"  : "Slow";
 
       // We store per-item help text in persistent strings (one per body).
       // Use static storage so the c_str() pointers remain valid.
@@ -423,13 +474,13 @@ void UIXtankHelper::buildArmorItems()
 }
 
 
-// Build the 4-item armor-sides phase list (Front / Back / Left / Right).
+// Build the 6-item armor-sides phase list (Front / Back / Left / Right / Top / Bottom).
 // Items have no hotkeys; point values are edited live with +/- in processInputCode.
 void UIXtankHelper::buildArmorSidesItems()
 {
-   static const char *sideNames[4] = { "Front", "Back", "Left", "Right" };
+   static const char *sideNames[6] = { "Front", "Back", "Left", "Right", "Top", "Bottom" };
    mArmorSidesItems.clear();
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 6; i++)
    {
       OverlayMenuItem item;
       item.key                 = KEY_NONE;
@@ -606,6 +657,21 @@ void UIXtankHelper::buildWeaponItems()
 }
 
 
+// Returns how many weapon slots (excluding `excludeSlot`) are assigned to `mount`.
+S32 UIXtankHelper::countWeaponsOnMount(XtankMountLocation mount, S32 excludeSlot) const
+{
+   S32 count = 0;
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      if(i == excludeSlot)
+         continue;
+      if(mDesignInProgress.weapons[i] != XtankWeaponNone &&
+         (XtankMountLocation)mDesignInProgress.weaponMounts[i] == mount)
+         count++;
+   }
+   return count;
+}
+
 void UIXtankHelper::buildWeaponMountItems()
 {
    mWeaponMountItems.clear();
@@ -627,14 +693,17 @@ void UIXtankHelper::buildWeaponMountItems()
 
    for(S32 m = 0; m < XtankMountCount; m++)
    {
+      // A mount is available if fewer than 2 weapons (from other slots) already use it.
+      bool full = countWeaponsOnMount((XtankMountLocation)m, mWeaponSide) >= 2;
+
       OverlayMenuItem item;
       item.key                 = getKeyForIndex(m);
       item.button              = KEY_NONE;
-      item.showOnMenu          = true;
+      item.showOnMenu          = !full;
       item.itemIndex           = (U32)m;
       item.name                = getMountLabel((XtankMountLocation)m);
       item.itemColor           = UNSEL_COLOR;
-      item.help                = "";
+      item.help                = full ? "Mount full (2 weapons max)" : "";
       item.helpColor           = UNSEL_COLOR;
       item.buttonOverrideColor = NULL;
       mWeaponMountItems.push_back(item);
@@ -825,8 +894,17 @@ void UIXtankHelper::commitHighlightedSelection()
       if(mHighlightedIndex >= 0 && mHighlightedIndex < mBodyItems.size())
       {
          S32 bodyIdx = (S32)mBodyItems[mHighlightedIndex].itemIndex;
-         // Update body only — preserve engine, treads, weapons, and mount allocations.
          mDesignInProgress.bodyIndex = (S8)bodyIdx;
+
+         // Drop any weapons that exceed the new body's turret count, then
+         // compact surviving weapons to the front so slot indices stay valid.
+         S32 turretCount = xtankTurretInfos[bodyIdx].count;
+         for(S32 j = turretCount; j < kXtankMaxWeaponSlots; j++)
+         {
+            mDesignInProgress.weapons[j]      = XtankWeaponNone;
+            mDesignInProgress.weaponMounts[j] = (S8)XtankMountNone;
+         }
+         normalizeWeaponPanels();
       }
    }
    else if(mPhase == PHASE_ENGINE)
@@ -934,7 +1012,10 @@ void UIXtankHelper::commitHighlightedSelection()
          else
          {
             XtankMountLocation mount = (XtankMountLocation)(S32)mWeaponMountItems[mHighlightedIndex].itemIndex;
-            if(mountCompatible(bodyIdx, w, mount))
+            // Reject the mount if it already has 2 weapons from other slots.
+            if(countWeaponsOnMount(mount, mWeaponSide) >= 2)
+               mount = XtankMountNone;
+            if(mount != XtankMountNone && mountCompatible(bodyIdx, w, mount))
                mDesignInProgress.weaponMounts[mWeaponSide] = (S8)mount;
             else
                mDesignInProgress.weaponMounts[mWeaponSide] = (S8)firstValidMount(bodyIdx, w, mount);
@@ -1053,7 +1134,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       if(mPhase == PHASE_ARMOR_SIDES)
       {
          S32 side = mHighlightedIndex;
-         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] > 0)
+         if(side >= 0 && side < 6 && mDesignInProgress.armorSides[side] > 0)
             mDesignInProgress.armorSides[side]--;
          return true;
       }
@@ -1088,7 +1169,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       if(mPhase == PHASE_ARMOR_SIDES)
       {
          S32 side = mHighlightedIndex;
-         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] < 255)
+         if(side >= 0 && side < 6 && mDesignInProgress.armorSides[side] < 255)
             mDesignInProgress.armorSides[side]++;
          return true;
       }
@@ -1132,7 +1213,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       if(inputCode == KEY_EQUALS)
       {
          S32 side = mHighlightedIndex;
-         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] < 255)
+         if(side >= 0 && side < 6 && mDesignInProgress.armorSides[side] < 255)
             mDesignInProgress.armorSides[side]++;
          return true;
       }
@@ -1140,7 +1221,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       if(inputCode == KEY_MINUS)
       {
          S32 side = mHighlightedIndex;
-         if(side >= 0 && side < 4 && mDesignInProgress.armorSides[side] > 0)
+         if(side >= 0 && side < 6 && mDesignInProgress.armorSides[side] > 0)
             mDesignInProgress.armorSides[side]--;
          return true;
       }
@@ -1421,6 +1502,8 @@ void UIXtankHelper::setHighlightedIndexForPhase(S32 phase)
          mHighlightedIndex = 0;
          return;
       }
+      // Rebuild mount items so full mounts are greyed out for this specific slot.
+      buildWeaponMountItems();
 
       XtankWeapon w = mDesignInProgress.weapons[slot];
       if(w == XtankWeaponNone)
@@ -1500,11 +1583,13 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
    {
       // Show a compact "F:x B:x L:x R:x" summary.
       char buf[32];
-      dSprintf(buf, sizeof(buf), "F:%d B:%d L:%d R:%d",
+      dSprintf(buf, sizeof(buf), "F:%d B:%d L:%d R:%d T:%d Bo:%d",
                (S32)mDesignInProgress.armorSides[0],
                (S32)mDesignInProgress.armorSides[1],
                (S32)mDesignInProgress.armorSides[2],
-               (S32)mDesignInProgress.armorSides[3]);
+               (S32)mDesignInProgress.armorSides[3],
+               (S32)mDesignInProgress.armorSides[4],
+               (S32)mDesignInProgress.armorSides[5]);
       return std::string(buf);
    }
    if(phase == PHASE_SUSPENSION)
@@ -1548,6 +1633,19 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
       return std::string("#") + itos(slot + 1) + " " + getMountLabel((XtankMountLocation)mDesignInProgress.weaponMounts[slot]);
    }
    return "";
+}
+
+
+static const char* getArmorClassName(S32 defenseValue)
+{
+   switch (defenseValue)
+   {
+   case 0: return "Light";
+   case 1: return "Standard";
+   case 2: return "Heavy";
+   case 3: return "Super";
+   default: return "?";
+   }
 }
 
 
@@ -1616,32 +1714,119 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
    }
    else if(mPhase == PHASE_ARMOR)
    {
-      S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankArmorCount)
-         idx = 0;
-      const XtankArmorInfo &ai = xtankArmorInfos[idx];
-      drawStringf(left, y, STAT_SZ, "Defense: %d", ai.defense);           y += GAP;
-      drawStringf(left, y, STAT_SZ, "Wt/unit: %d", ai.weight);            y += GAP;
-      drawStringf(left, y, STAT_SZ, "Cost/unit: %s", cs(comma(ai.cost))); y += GAP;
+      // Table: Name | Class | Wt | Space | Cost
+      S32 bodyIdx = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+      float bodySize = body_stat[bodyIdx].size;
+
+      // Column positions: measure widest labels for alignment
+      S32 col1 = left;  // Name
+      S32 col2 = col1 + getStringWidth(STAT_SZ, "Hardened Steel") + 4;  // Class
+      S32 col3 = col2 + getStringWidth(STAT_SZ, "Standard") + 4;  // Wt
+      S32 col4 = col3 + 25;  // Space
+      S32 col5 = col4 + 25;  // Cost
+
+      // Column headers
+      r.setColor(Color(0.5f * alpha, 0.5f * alpha, 0.5f * alpha));
+      drawString(col1, y, STAT_SZ, "Name");
+      drawString(col2, y, STAT_SZ, "Class");
+      drawString(col3, y, STAT_SZ, "Wt");
+      drawString(col4, y, STAT_SZ, "Sp");
+      drawString(col5, y, STAT_SZ, "Cost");
+      y += GAP;
+
+      // One row per armor type
+      for(S32 i = 0; i < XtankArmorCount; i++)
+      {
+         bool hl = (i == mHighlightedIndex);
+         r.setColor(hl ? Colors::yellow : Colors::overlayMenuUnselectedItemColor);
+
+         const XtankArmorInfo &ai = xtankArmorInfos[i];
+
+         drawString(col1, y, STAT_SZ, ai.name);
+
+         r.setColor(hl ? Colors::yellow : Color(0.0f, alpha, alpha));
+         drawString(col2, y, STAT_SZ, getArmorClassName(ai.defense));
+
+         char buf[32];
+         dSprintf(buf, sizeof(buf), "%d", ai.weight);
+         S32 w = getStringWidth(STAT_SZ, buf);
+         drawString(col3 + 18 - w, y, STAT_SZ, buf);
+
+         dSprintf(buf, sizeof(buf), "%d", ai.space);
+         w = getStringWidth(STAT_SZ, buf);
+         drawString(col4 + 18 - w, y, STAT_SZ, buf);
+
+         dSprintf(buf, sizeof(buf), "%s", cs(comma(ai.cost)));
+         drawString(col5, y, STAT_SZ, buf);
+
+         y += GAP;
+      }
    }
    else if(mPhase == PHASE_ARMOR_SIDES)
    {
+      S32 armorIdx = MAX(0, MIN((S32)mDesignInProgress.armorType, XtankArmorCount - 1));
+      S32 bodyIdx  = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
+      const XtankArmorInfo &ai = xtankArmorInfos[armorIdx];
+      float bodySize = body_stat[bodyIdx].size;
+
       S32 total = 0;
-      for(S32 i = 0; i < 4; i++)
+      for(S32 i = 0; i < 6; i++)
          total += (S32)mDesignInProgress.armorSides[i];
-      drawStringf(left, y, STAT_SZ, "Total: %d pts", total); y += GAP;
+
+      S32 totalWeight = (S32)(total * ai.weight * bodySize);
+      S32 totalCost   = (S32)(total * ai.cost   * bodySize);
+      S32 remaining   = getRemainingArmorUnits(mDesignInProgress);
+
+      // Table: hint header
       r.setColor(Color(0.7f * alpha, 0.7f * alpha, 0.7f * alpha));
-      drawString (left, y, STAT_SZ, "+/- to adjust"); y += GAP;
-      r.setColor(Color(0.0f, alpha, alpha));
-      const char *sideLabels[4] = { "Front", "Back", "Left", "Right" };
-      for(S32 i = 0; i < 4; i++)
+      drawString(left, y, STAT_SZ, "+/- to adjust");  y += GAP;
+
+      // Measure the widest side label so pts/def columns line up.
+      static const char *sideLabels[6] = { "Front", "Back", "Left", "Right", "Top", "Bottom" };
+      S32 labelColW = getStringWidth(STAT_SZ, "Bottom") + 6;
+      static const S32 NUM_COL_W = 28;
+      S32 colPts = left + labelColW;
+      S32 colDef = colPts + NUM_COL_W;
+
+      // Column headings
+      r.setColor(Color(0.5f * alpha, 0.5f * alpha, 0.5f * alpha));
+      drawString(left,   y, STAT_SZ, "Side");
+      drawString(colPts, y, STAT_SZ, "Pts");
+      drawString(colDef, y, STAT_SZ, "Def");
+      y += GAP;
+
+      // One row per side
+      for(S32 i = 0; i < 6; i++)
       {
+         S32 pts = (S32)mDesignInProgress.armorSides[i];
          bool hl = (i == mHighlightedIndex);
          r.setColor(hl ? Colors::yellow : Color(0.0f, alpha, alpha));
-         drawStringf(left, y, STAT_SZ, "%s: %d", sideLabels[i],
-                     (S32)mDesignInProgress.armorSides[i]);
+
+         drawString(left, y, STAT_SZ, sideLabels[i]);
+
+         char numBuf[16];
+         dSprintf(numBuf, sizeof(numBuf), "%d", pts);
+         S32 ptsW = getStringWidth(STAT_SZ, numBuf);
+         drawString(colPts + NUM_COL_W - ptsW, y, STAT_SZ, numBuf);
+
+         if(pts > 0)
+         {
+            dSprintf(numBuf, sizeof(numBuf), "%d", pts * ai.defense);
+            S32 defW = getStringWidth(STAT_SZ, numBuf);
+            drawString(colDef + NUM_COL_W - defW, y, STAT_SZ, numBuf);
+         }
          y += GAP;
       }
+
+      // Totals at the bottom
+      y += 2;
+      r.setColor(Color(0.4f * alpha, 0.4f * alpha, 0.4f * alpha));
+      drawString(left, y, STAT_SZ, "---");  y += GAP;
+      r.setColor(Color(0.0f, alpha, alpha));
+      drawStringf(left, y, STAT_SZ, "Total:  %d pts", total);              y += GAP;
+      drawStringf(left, y, STAT_SZ, "Avail:  %d units", remaining);        y += GAP;
+      drawStringf(left, y, STAT_SZ, "Weight: %s", cs(comma(totalWeight))); y += GAP;
+      drawStringf(left, y, STAT_SZ, "Cost:   %s", cs(comma(totalCost)));   y += GAP;
    }
    else if(mPhase == PHASE_SUSPENSION)
    {
@@ -1740,7 +1925,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       "Engine",            // 1
       "Treads",            // 2
       "Armor Type",        // 3
-      "Armor Allocation",  // 4 (point allocation)
+      "Armor Allocation",  // 4
       "Suspension",        // 5
       "Bumpers",           // 6
       "Specials",          // 7
@@ -1858,7 +2043,8 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          break;
 
       const char *name = (*items)[i].name;
-      if(!name) name = "";
+      if(!name) 
+         name = "";
 
       // For specials phase, prefix with toggle state indicator
       static char sSpecialNameBuf[XtankSpecialCount][64];
@@ -1871,8 +2057,8 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       }
 
       // For armor sides phase, append point count to each side name.
-      static char sArmorSidesBuf[4][32];
-      if(phase == PHASE_ARMOR_SIDES && i < 4)
+      static char sArmorSidesBuf[6][32];
+      if(phase == PHASE_ARMOR_SIDES && i < 6)
       {
          dSprintf(sArmorSidesBuf[i], sizeof(sArmorSidesBuf[i]), "%-6s %d pts",
                   name, (S32)mDesignInProgress.armorSides[i]);
@@ -1888,8 +2074,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          {
             // Yellow bar: vertically centered on the text with 3px padding each side
             S32 barTop = y + drawnSz / 2 - (drawnSz / 2 + 3) + 2;
-            r.setColor(SELECTED_COLOR);
-            drawFilledRect(left + BAR_MARGIN_L, barTop, left + BAR_MARGIN_L + BAR_WIDTH, barTop + BAR_HEIGHT);
+            drawFilledRect(left + BAR_MARGIN_L, barTop, left + BAR_MARGIN_L + BAR_WIDTH, barTop + BAR_HEIGHT, SELECTED_COLOR);
          }
          // Key badge
          r.setColor(sel ? SELECTED_COLOR : Colors::gray60);
@@ -2199,7 +2384,7 @@ void UIXtankHelper::renderPreviewPanel() const
    // Armor cost and weight: xtank-style scaling by body size.
    S32 armorIdx = MAX(0, MIN((S32)preview.armorType, XtankArmorCount - 1));
    S32 totalArmorPoints = 0;
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 6; i++)
       totalArmorPoints += preview.armorSides[i];
    totalWeight += totalArmorPoints * xtankArmorInfos[armorIdx].weight * body_stat[bodyIdx].size;
    totalCost   += totalArmorPoints * xtankArmorInfos[armorIdx].cost * body_stat[bodyIdx].size;
@@ -2280,27 +2465,13 @@ void UIXtankHelper::renderPreviewPanel() const
    r.setColor(Colors::yellow);
    drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Cost: %s", cs(comma(totalCost))); ty += LINE_GAP + 2;
 
-   // Show weapon loadout
+   // Show weapon loadout in two columns so stats remain readable.
    r.setColor(Colors::gray45);
    drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, ty);
    ty += 6;
-   r.setColor(Colors::gray70);
-   drawCenteredString(PNL_CX, ty, STAT_SZ - 1, "Weapons");
-   ty += LINE_GAP;
-   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
-   {
-      XtankWeapon w = preview.weapons[i];
-      // Highlight whichever slot is being edited in PHASE_WEAPONS.
-      bool activeSlot = ((mPhase == PHASE_WEAPONS || mPhase == PHASE_WEAPON_MOUNT) && mWeaponSide == i);
-      XtankMountLocation mount = (XtankMountLocation)preview.weaponMounts[i];
-      const char *mountName = getMountLabel(mount);
-      r.setColor(activeSlot ? Colors::overlayMenuSelectedItemColor : Colors::cyan);
-      if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount)
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "#%d %s: --", i + 1, mountName);
-      else
-         drawCenteredStringf(PNL_CX, ty, STAT_SZ, "#%d %s: %s", i + 1, mountName, xtankWeaponInfos[(S32)w].name);
-      ty += LINE_GAP;
-   }
+
+
+   ty += renderWeaponList(PNL_LEFT, PNL_CX, ty, preview.weapons, preview.weaponMounts, STAT_SZ - 2, LINE_GAP);
 
    // Active specials count
    S32 specialCount = 0;
@@ -2323,6 +2494,52 @@ void UIXtankHelper::renderPreviewPanel() const
       drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  Tab/Shift-Tab phase");
 
    FontManager::popFontContext();
+}
+
+
+S32 UIXtankHelper::renderWeaponList(S32 left, S32 cx, S32 y, const XtankWeapon weapons[], const S8 mounts[], S32 fontSz, S32 lineGap) const
+{
+   Renderer &r = Renderer::get();
+
+   r.setColor(Colors::gray70);
+   drawCenteredString(cx, y, fontSz - 1, "Weapons");
+   y += lineGap  ;
+
+   const S32 weaponRows = (kXtankMaxWeaponSlots + 1) / 2;
+
+   // Build all label strings first and measure their widths per column,
+   // so we can compute the true block width and center it on the panel.
+   char buffers[kXtankMaxWeaponSlots][128];
+   S32  colWidth[2] = { 0, 0 };
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      XtankWeapon w = weapons[i];
+      XtankMountLocation mount = (XtankMountLocation)mounts[i];
+      const char *mountName = getMountLabel(mount);
+      if(w == XtankWeaponNone || (S32)w < 0 || (S32)w >= XtankWeaponCount)
+         dSprintf(buffers[i], sizeof(buffers[i]), "#%d %s: --", i + 1, mountName);
+      else
+         dSprintf(buffers[i], sizeof(buffers[i]), "#%d %s: %s", i + 1, mountName, xtankWeaponInfos[(S32)w].name);
+
+      S32 col = (i < weaponRows) ? 0 : 1;
+      colWidth[col] = MAX(colWidth[col], getStringWidth(fontSz, buffers[i]));
+   }
+
+   const S32 midMargin  = 14;
+   const S32 blockWidth = colWidth[0] + midMargin + colWidth[1];
+   const S32 col0X      = cx - blockWidth / 2;
+   const S32 col1X      = col0X + colWidth[0] + midMargin;
+
+   for(S32 i = 0; i < kXtankMaxWeaponSlots; i++)
+   {
+      bool activeSlot = ((mPhase == PHASE_WEAPONS || mPhase == PHASE_WEAPON_MOUNT) && mWeaponSide == i);
+      r.setColor(activeSlot ? Colors::overlayMenuSelectedItemColor : Colors::cyan);
+
+      S32 col = (i < weaponRows) ? 0 : 1;
+      S32 row = i % weaponRows;
+      drawString((col == 0) ? col0X : col1X, y + row * lineGap, fontSz, buffers[i]);
+   }
+   return (weaponRows + 1) * lineGap;
 }
 
 // Draw a row of small circles indicating the current carousel position.
@@ -2408,16 +2625,17 @@ void UIXtankHelper::renderFullBuildStats(S32 cx, S32 y, const XtankDesign &previ
 
    Renderer &r = Renderer::get();
 
-   // Section divider.
+   // Section divider
+   const S32 DIVIDER_MARGIN = 80;
    r.setColor(Colors::gray40);
    S32 divY = y - 4;
-   drawHorizLine(cx - 80, cx + 80, divY);
+   drawHorizLine(cx - DIVIDER_MARGIN, cx + DIVIDER_MARGIN, divY);
 
-   // Section label.
+   // Section label
    r.setColor(Colors::gray50);
    drawCenteredString(cx, divY - BSTAT_SZ - 2, BSTAT_SZ, "CURRENT BUILD");
 
-   // Stat lines.
+   // Stat lines
    S32 ty = y + 4;
    r.setColor(Colors::green);
    drawCenteredStringf(cx, ty, BSTAT_SZ, "Spd: %d  Rev: %d", (S32)derived.maxSpeed, (S32)derived.maxReverseSpeed);

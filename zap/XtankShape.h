@@ -468,7 +468,7 @@ namespace Zap
       S8 suspensionType;      // index into suspensionStat[]
       S8 bumperType;          // index into bumperStat[]
       U16 specials;           // bitmask of XtankSpecial bits
-      U8 armorSides[4];       // per-side armor points (front=0, back=1, left=2, right=3)
+      U8 armorSides[6];       // per-side armor points (front=0, back=1, left=2, right=3, top=4, bottom=5)
 
       XtankDesign();                 // Default constructor (bodyIndex = None)
       void initForBody(S32 bodyIdx); // Set body + reset all components to defaults
