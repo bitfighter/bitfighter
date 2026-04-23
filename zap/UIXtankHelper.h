@@ -176,25 +176,23 @@ private:
    // Returns the item count for the current phase (used by UP/DOWN cycling).
    S32 currentPhaseItemCount() const;
 
-   // Add these structures and declaration to UIXtankHelper.h:
-
-   // Generic table rendering structures
    struct TableColumn
    {
-      const char* header;
-      S32 width;          // 0 = auto-size based on content
-      S32 contentAlign;   // 0 = left, 1 = right
+      const char *header;
+      S32 width;        // 0 = auto-size based on content
+      S32 alignRight;   // 0 = left, 1 = right
    };
 
    struct TableRow
    {
       const char* cells[8];  // up to 8 columns per row
-      bool highlighted;
+      bool highlighted;       // true = force highlighted row color
    };
 
-   // In the UIXtankHelper class, add this method declaration:
-   S32 renderTable(S32 left, S32 top, const TableColumn columns[], S32 numColumns,
-      const TableRow rows[], S32 numRows, S32 highlightedRowIndex) const;
+   S32 renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
+      const TableColumn columns[], S32 numColumns,
+      const TableRow rows[], S32 numRows, S32 highlightedRowIndex,
+      F32 alpha = 1.0f, S32 cachedColumnWidths[] = NULL) const;
 
 
 public:
