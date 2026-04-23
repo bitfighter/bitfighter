@@ -2128,6 +2128,8 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    }
    else
    {
+      char sSpecialNameBuf[XtankSpecialCount][64];
+      char sArmorSidesBuf[6][32];
       for(S32 i = 0; i < count; i++)
       {
          S32 y = listTop + i * rowGap;
@@ -2140,7 +2142,6 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
             name = "";
 
          // For specials phase, prefix with toggle state indicator
-         static char sSpecialNameBuf[XtankSpecialCount][64];
          if(phase == PHASE_SPECIALS && i < XtankSpecialCount)
          {
             bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)i);
@@ -2150,7 +2151,6 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          }
 
          // For armor sides phase, append point count to each side name.
-         static char sArmorSidesBuf[6][32];
          if(phase == PHASE_ARMOR_SIDES && i < 6)
          {
             dSprintf(sArmorSidesBuf[i], sizeof(sArmorSidesBuf[i]), "%-6s %d pts",
