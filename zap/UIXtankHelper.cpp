@@ -1658,6 +1658,7 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
       return top;
 
    const S32 columnCount = MIN(numColumns, MaxTableColumns);
+   const S32 columnSpacing = 6;
 
    S32 localWidths[MaxTableColumns];
    S32 *widths = cachedColumnWidths ? cachedColumnWidths : localWidths;
@@ -1708,7 +1709,7 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
       }
       else
          drawString(x, y, fontSize, header);
-      x += widths[c] + 6;
+      x += widths[c] + columnSpacing;
    }
    y += rowGap;
 
@@ -1734,7 +1735,7 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
          else
             drawString(x, y, fontSize, cell);
 
-         x += widths[c] + 6;
+         x += widths[c] + columnSpacing;
       }
       y += rowGap;
    }
@@ -2103,10 +2104,13 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          { "Cost",  0, 1 },
       };
 
+      static const S32 WEIGHT_BUF_LEN = 16;
+      static const S32 SPACE_BUF_LEN = 16;
+      static const S32 COST_BUF_LEN = 24;
       TableRow rows[XtankArmorCount] = {};
-      char weightBuf[XtankArmorCount][16];
-      char spaceBuf[XtankArmorCount][16];
-      char costBuf[XtankArmorCount][24];
+      char weightBuf[XtankArmorCount][WEIGHT_BUF_LEN];
+      char spaceBuf[XtankArmorCount][SPACE_BUF_LEN];
+      char costBuf[XtankArmorCount][COST_BUF_LEN];
       for(S32 i = 0; i < XtankArmorCount; i++)
       {
          const XtankArmorInfo &ai = xtankArmorInfos[i];
@@ -2128,8 +2132,10 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    }
    else
    {
-      char sSpecialNameBuf[XtankSpecialCount][64];
-      char sArmorSidesBuf[6][32];
+      static const S32 SPECIAL_LABEL_BUF_LEN = 64;
+      static const S32 ARMOR_SIDE_BUF_LEN = 32;
+      char sSpecialNameBuf[XtankSpecialCount][SPECIAL_LABEL_BUF_LEN];
+      char sArmorSidesBuf[6][ARMOR_SIDE_BUF_LEN];
       for(S32 i = 0; i < count; i++)
       {
          S32 y = listTop + i * rowGap;
