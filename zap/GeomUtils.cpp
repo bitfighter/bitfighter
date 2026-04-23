@@ -399,7 +399,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
    S32 inc = format ? 1 : 2;
 
-   F32 currentCollisionTime = 100;
+   F64 currentCollisionTime = 100;
 
    for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
@@ -416,11 +416,16 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
       dv.set(v2 - v1);
 
-      F32 denom = dp.y * dv.x - dp.x * dv.y;
+      F64 dpx = dp.x; F64 dpy = dp.y;
+      F64 dvx = dv.x; F64 dvy = dv.y;
+      F64 sx  = start.x; F64 sy = start.y;
+      F64 v1x = v1.x; F64 v1y = v1.y;
+
+      F64 denom = dpy * dvx - dpx * dvy;
       if(denom != 0) // otherwise, the lines are parallel
       {
-         F32 s = ( (start.x - v1.x) * dv.y + (v1.y - start.y) * dv.x ) / denom;
-         F32 t = ( (start.x - v1.x) * dp.y + (v1.y - start.y) * dp.x ) / denom;
+         F64 s = ( (sx - v1x) * dvy + (v1y - sy) * dvx ) / denom;
+         F64 t = ( (sx - v1x) * dpy + (v1y - sy) * dpx ) / denom;
 
          if(s >= 0 && s <= 1 && t >= 0 && t <= 1 && s < currentCollisionTime)    // Found collision closer than others
          {
@@ -433,7 +438,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
    if(currentCollisionTime <= 1)    // Found intersection
    {
-      collisionTime = currentCollisionTime;
+      collisionTime = (F32)currentCollisionTime;
       return true;
    }
 
@@ -1839,22 +1844,27 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime)
 {
-    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+    F64 p1x = p1.x; F64 p1y = p1.y;
+    F64 p2x = p2.x; F64 p2y = p2.y;
+    F64 p3x = p3.x; F64 p3y = p3.y;
+    F64 p4x = p4.x; F64 p4y = p4.y;
 
-    F32 numerator1 = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
-    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+    F64 denom = (p4y - p3y) * (p2x - p1x) - (p4x - p3x) * (p2y - p1y);
+
+    F64 numerator1 = (p4x - p3x) * (p1y - p3y) - (p4y - p3y) * (p1x - p3x);
+    F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
        //if ( numerator1 == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    F32 ua = numerator1 / denom;
-    F32 ub = numerator2 / denom;
+    F64 ua = numerator1 / denom;
+    F64 ub = numerator2 / denom;
 
     if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
     {
-        collisionTime = ua;
+        collisionTime = (F32)ua;
         return true;
     }
 
@@ -1865,22 +1875,27 @@ bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const 
 
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection)
 {
-    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
-    F32 numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
+    F64 p1x = p1.x; F64 p1y = p1.y;
+    F64 p2x = p2.x; F64 p2y = p2.y;
+    F64 p3x = p3.x; F64 p3y = p3.y;
+    F64 p4x = p4.x; F64 p4y = p4.y;
 
-    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+    F64 denom = (p4y - p3y) * (p2x - p1x) - (p4x - p3x) * (p2y - p1y);
+    F64 numerator = (p4x - p3x) * (p1y - p3y) - (p4y - p3y) * (p1x - p3x);
+
+    F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
        //if ( numerator == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    F32 ua = numerator / denom;
-    F32 ub = numerator2/ denom;
+    F64 ua = numerator / denom;
+    F64 ub = numerator2/ denom;
 
     if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
     {
-      intersection.set(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
+      intersection.set(p1x + ua * (p2x - p1x), p1y + ua * (p2y - p1y));
       return true;
     }
     else
