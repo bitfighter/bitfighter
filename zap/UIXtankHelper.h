@@ -183,9 +183,11 @@ private:
       S32 alignRight;   // 0 = left, 1 = right
    };
 
+   enum { MaxTableColumns = 8 };
+
    struct TableRow
    {
-      const char* cells[8];  // up to 8 columns per row
+      const char* cells[MaxTableColumns];
       bool highlighted;       // true = force highlighted row color
    };
 

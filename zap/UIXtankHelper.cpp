@@ -1657,10 +1657,9 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
    if(!columns || !rows || numColumns <= 0 || numRows <= 0)
       return top;
 
-   const S32 kMaxColumns = 8;
-   const S32 columnCount = MIN(numColumns, kMaxColumns);
+   const S32 columnCount = MIN(numColumns, MaxTableColumns);
 
-   S32 localWidths[kMaxColumns];
+   S32 localWidths[MaxTableColumns];
    S32 *widths = cachedColumnWidths ? cachedColumnWidths : localWidths;
 
    bool needsWidthCompute = !cachedColumnWidths;
@@ -1680,8 +1679,8 @@ S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
    {
       for(S32 c = 0; c < columnCount; c++)
       {
-         S32 w = MAX(0, columns[c].width);
-         if(w == 0)
+         S32 w = columns[c].width;
+         if(w <= 0)
          {
             w = getStringWidth(fontSize, columns[c].header ? columns[c].header : "");
             for(S32 r = 0; r < numRows; r++)
@@ -2104,10 +2103,10 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          { "Cost",  0, 1 },
       };
 
-      TableRow rows[XtankArmorCount];
-      static char weightBuf[XtankArmorCount][16];
-      static char spaceBuf[XtankArmorCount][16];
-      static char costBuf[XtankArmorCount][24];
+      TableRow rows[XtankArmorCount] = {};
+      char weightBuf[XtankArmorCount][16];
+      char spaceBuf[XtankArmorCount][16];
+      char costBuf[XtankArmorCount][24];
       for(S32 i = 0; i < XtankArmorCount; i++)
       {
          const XtankArmorInfo &ai = xtankArmorInfos[i];
@@ -2121,8 +2120,6 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          rows[i].cells[3] = weightBuf[i];
          rows[i].cells[4] = spaceBuf[i];
          rows[i].cells[5] = costBuf[i];
-         rows[i].cells[6] = NULL;
-         rows[i].cells[7] = NULL;
          rows[i].highlighted = false;
       }
 
