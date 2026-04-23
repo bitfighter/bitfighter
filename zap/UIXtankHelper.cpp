@@ -1649,6 +1649,12 @@ static const char* getArmorClassName(S32 defenseValue)
 }
 
 
+// Generic component table renderer.
+// - columns: table schema (header, fixed/auto width, left/right alignment)
+// - rows: row cell strings (up to MaxTableColumns each)
+// - highlightedRowIndex / TableRow::highlighted: row highlight controls
+// - cachedColumnWidths: optional reusable width cache; pass NULL to auto-compute every call
+// Returns the y-position just below the last rendered table row.
 S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
    const TableColumn columns[], S32 numColumns,
    const TableRow rows[], S32 numRows, S32 highlightedRowIndex,
@@ -2114,9 +2120,9 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       for(S32 i = 0; i < XtankArmorCount; i++)
       {
          const XtankArmorInfo &ai = xtankArmorInfos[i];
-         dSprintf(weightBuf[i], sizeof(weightBuf[i]), "%d", ai.weight);
-         dSprintf(spaceBuf[i], sizeof(spaceBuf[i]), "%d", ai.space);
-         dSprintf(costBuf[i], sizeof(costBuf[i]), "%s", cs(comma(ai.cost)));
+         dSprintf(weightBuf[i], WEIGHT_BUF_LEN, "%d", ai.weight);
+         dSprintf(spaceBuf[i], SPACE_BUF_LEN, "%d", ai.space);
+         dSprintf(costBuf[i], COST_BUF_LEN, "%s", cs(comma(ai.cost)));
 
          rows[i].cells[0] = InputCodeManager::inputCodeToString(mArmorItems[i].key);
          rows[i].cells[1] = ai.name;
@@ -2134,8 +2140,9 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    {
       static const S32 SPECIAL_LABEL_BUF_LEN = 64;
       static const S32 ARMOR_SIDE_BUF_LEN = 32;
+      static const S32 ARMOR_SIDE_COUNT = 6;
       char sSpecialNameBuf[XtankSpecialCount][SPECIAL_LABEL_BUF_LEN];
-      char sArmorSidesBuf[6][ARMOR_SIDE_BUF_LEN];
+      char sArmorSidesBuf[ARMOR_SIDE_COUNT][ARMOR_SIDE_BUF_LEN];
       for(S32 i = 0; i < count; i++)
       {
          S32 y = listTop + i * rowGap;
@@ -2157,7 +2164,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
          }
 
          // For armor sides phase, append point count to each side name.
-         if(phase == PHASE_ARMOR_SIDES && i < 6)
+         if(phase == PHASE_ARMOR_SIDES && i < ARMOR_SIDE_COUNT)
          {
             dSprintf(sArmorSidesBuf[i], sizeof(sArmorSidesBuf[i]), "%-6s %d pts",
                      name, (S32)mDesignInProgress.armorSides[i]);
