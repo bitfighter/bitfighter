@@ -75,6 +75,127 @@ public:
 };
 
 
+class EngineInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 colCount = 7;
+   TableColumn columns[colCount] =
+   {
+      { "Key",    0, 0 },
+      { "Engine", 0, 0 },
+      { "Spd%",   0, 1 },
+      { "Acc%",   0, 1 },
+      { "Pwr",    0, 1 },
+      { "Wt",     0, 1 },
+      { "Cost",   0, 1 },
+   };
+   TableRow rows[XtankEngineCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankEngineCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
+class TreadInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 colCount = 4;
+   TableColumn columns[colCount] =
+   {
+      { "Key",   0, 0 },
+      { "Tread", 0, 0 },
+      { "Frict", 0, 1 },
+      { "Cost",  0, 1 },
+   };
+   TableRow rows[XtankTreadCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankTreadCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
+class SuspensionInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 colCount = 4;
+   TableColumn columns[colCount] =
+   {
+      { "Key",        0, 0 },
+      { "Suspension", 0, 0 },
+      { "Hdlg",       0, 1 },
+      { "Cost",       0, 1 },
+   };
+   TableRow rows[XtankSuspensionCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankSuspensionCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
+class BumperInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 colCount = 4;
+   TableColumn columns[colCount] =
+   {
+      { "Key",    0, 0 },
+      { "Bumper", 0, 0 },
+      { "Elast",  0, 1 },
+      { "Cost",   0, 1 },
+   };
+   TableRow rows[XtankBumperCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankBumperCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
+// WeaponInfo: row 0 = "None", rows 1..XtankWeaponCount = actual weapons.
+class WeaponInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 rowCount = XtankWeaponCount + 1;
+   static const S32 colCount = 5;
+   TableColumn columns[colCount] =
+   {
+      { "Key",    0, 0 },
+      { "Weapon", 0, 0 },
+      { "Dly",    0, 1 },
+      { "Wt",     0, 1 },
+      { "Cost",   0, 1 },
+   };
+   TableRow rows[rowCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return rowCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
 
 // Vehicle design helper menu: lets the player choose an xtank body and assign
 // engines, treads, heat sinks, armor distribution, and weapons to each turret
@@ -114,7 +235,12 @@ private:
       TOTAL_PHASES,
    };
 
-   ArmorInfo mArmorInfo;
+   ArmorInfo      mArmorInfo;
+   EngineInfo     mEngineInfo;
+   TreadInfo      mTreadInfo;
+   SuspensionInfo mSuspensionInfo;
+   BumperInfo     mBumperInfo;
+   WeaponInfo     mWeaponInfo;
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
