@@ -2795,7 +2795,7 @@ void EngineInfo::fillRows()
    for(S32 i = 0; i < XtankEngineCount; i++)
    {
       const XtankEngineInfo &ei = xtankEngineInfos[i];
-      dSprintf(spdBuf[i],  BUF_LEN,      "%+d", (S32)((ei.speedMult - 1.0f) * 100.0f + 0.5f));
+      dSprintf(spdBuf[i],  BUF_LEN,      "%+d", (S32)((ei.speedMult - 1.0f) * 100.0f + 0.5f));  // +0.5f rounds to nearest int
       dSprintf(accBuf[i],  BUF_LEN,      "%+d", (S32)((ei.accelMult - 1.0f) * 100.0f + 0.5f));
       dSprintf(pwrBuf[i],  BUF_LEN,      "%d",  ei.power);
       dSprintf(wtBuf[i],   BUF_LEN,      "%d",  ei.weight);
@@ -2839,18 +2839,18 @@ void SuspensionInfo::fillRows()
 {
    static const S32 BUF_LEN = 16;
    static const S32 COST_BUF_LEN = 24;
-   static char hdlgBuf[XtankSuspensionCount][BUF_LEN];
+   static char handlingBuf[XtankSuspensionCount][BUF_LEN];
    static char costBuf[XtankSuspensionCount][COST_BUF_LEN];
 
    for(S32 i = 0; i < XtankSuspensionCount; i++)
    {
       const SuspensionStat &si = suspensionStat[i];
-      dSprintf(hdlgBuf[i], BUF_LEN,      "%+d", (S32)si.friction);
-      dSprintf(costBuf[i], COST_BUF_LEN, "%s",  cs(comma(si.cost)));
+      dSprintf(handlingBuf[i], BUF_LEN,      "%+d", (S32)si.friction);
+      dSprintf(costBuf[i],     COST_BUF_LEN, "%s",  cs(comma(si.cost)));
 
       rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
       rows[i].cells[1] = si.name;
-      rows[i].cells[2] = hdlgBuf[i];
+      rows[i].cells[2] = handlingBuf[i];
       rows[i].cells[3] = costBuf[i];
       rows[i].highlighted = false;
    }
