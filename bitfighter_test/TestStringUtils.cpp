@@ -83,7 +83,16 @@ TEST(StringUtilsTest, chopComment)
    EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
    EXPECT_EQ("This is a comment", chopComment("This is a comment"));
    EXPECT_EQ("",                  chopComment("#"));
+}
 
+
+TEST(StringUtilsTest, chopCommentWithQuotes)
+{
+   EXPECT_EQ("\"quoted # hashtag\"", chopComment("\"quoted # hashtag\""));
+   EXPECT_EQ("\"quoted # hashtag\" ", chopComment("\"quoted # hashtag\" #comment"));
+   EXPECT_EQ("\"\"", chopComment("\"\"#\"\"")); // "" is an empty quoted string, then # starts a comment
+   EXPECT_EQ("\"escaped \"\" quote\" ", chopComment("\"escaped \"\" quote\" #comment"));
+   EXPECT_EQ("mixed \"#\" and ", chopComment("mixed \"#\" and #comment"));
 }
 
 
