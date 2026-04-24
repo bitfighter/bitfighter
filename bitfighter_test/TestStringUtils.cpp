@@ -84,6 +84,10 @@ TEST(StringUtilsTest, chopComment)
    EXPECT_EQ("This is a comment", chopComment("This is a comment"));
    EXPECT_EQ("",                  chopComment("#"));
 
+   // Bug: '#' inside quotes should not be treated as a comment
+   EXPECT_EQ("LevelName \"My #1 Level\" ", chopComment("LevelName \"My #1 Level\" # comment"));
+   EXPECT_EQ("LevelName \"My #1 Level\"",  chopComment("LevelName \"My #1 Level\""));
+   EXPECT_EQ("LevelName \"\"\"#\"\"\"",    chopComment("LevelName \"\"\"#\"\"\""));
 }
 
 
