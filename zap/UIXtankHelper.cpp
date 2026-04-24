@@ -339,7 +339,12 @@ UIXtankHelper::UIXtankHelper()
    mWeaponMountButtonsWidth      = 0;
    mWeaponMountItemsDisplayWidth = 0;
 
-   mArmorInfo = ArmorInfo();
+   mArmorInfo      = ArmorInfo();
+   mEngineInfo     = EngineInfo();
+   mTreadInfo      = TreadInfo();
+   mSuspensionInfo = SuspensionInfo();
+   mBumperInfo     = BumperInfo();
+   mWeaponInfo     = WeaponInfo();
 }
 
 
@@ -2062,10 +2067,26 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    const S32 NAME_X    = isCenter ? (left + 30) : (left + 6);
    const S32 STATS_DIV = left + w * 54 / 100;
 
-   bool useArmorTable = isCenter && (phase == PHASE_ARMOR);
-   if(useArmorTable)
+   // On the center card, use a ComponentInfo table renderer for phases that have one.
+   // Background cards always fall through to the generic item-list renderer.
+   ComponentInfo *tableInfo = nullptr;
+   if(isCenter)
    {
-      mArmorInfo.render(left + 8, listTop, drawnSz, rowGap, mHighlightedIndex);
+      switch(phase)
+      {
+         case PHASE_ARMOR:      tableInfo = &mArmorInfo;      break;
+         case PHASE_ENGINE:     tableInfo = &mEngineInfo;     break;
+         case PHASE_TREADS:     tableInfo = &mTreadInfo;      break;
+         case PHASE_SUSPENSION: tableInfo = &mSuspensionInfo; break;
+         case PHASE_BUMPERS:    tableInfo = &mBumperInfo;     break;
+         case PHASE_WEAPONS:    tableInfo = &mWeaponInfo;     break;
+         default: break;
+      }
+   }
+
+   if(tableInfo)
+   {
+      tableInfo->render(left + 8, listTop, drawnSz, rowGap, mHighlightedIndex);
    }
    else
    {
@@ -2130,8 +2151,8 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       }
    }
 
-   // Stats column — center card only, fades in
-   if(cf > 0.55f && phase != PHASE_ARMOR)
+   // Stats column — center card only, fades in; suppressed when a table fills the card.
+   if(cf > 0.55f && !tableInfo)
    {
       F32 statAlpha = (cf - 0.55f) / 0.45f;
       renderItemStatsColumn(STATS_DIV, right - 6, listTop, statAlpha);
@@ -2758,7 +2779,137 @@ void ArmorInfo::fillRows()
       rows[i].cells[5] = costBuf[i];
       rows[i].highlighted = false;
    }
+}
 
+
+void EngineInfo::fillRows()
+{
+   static const S32 BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+   static char spdBuf[XtankEngineCount][BUF_LEN];
+   static char accBuf[XtankEngineCount][BUF_LEN];
+   static char pwrBuf[XtankEngineCount][BUF_LEN];
+   static char wtBuf[XtankEngineCount][BUF_LEN];
+   static char costBuf[XtankEngineCount][COST_BUF_LEN];
+
+   for(S32 i = 0; i < XtankEngineCount; i++)
+   {
+      const XtankEngineInfo &ei = xtankEngineInfos[i];
+      dSprintf(spdBuf[i],  BUF_LEN,      "%+d", (S32)((ei.speedMult - 1.0f) * 100.0f + 0.5f));  // +0.5f rounds to nearest int
+      dSprintf(accBuf[i],  BUF_LEN,      "%+d", (S32)((ei.accelMult - 1.0f) * 100.0f + 0.5f));
+      dSprintf(pwrBuf[i],  BUF_LEN,      "%d",  ei.power);
+      dSprintf(wtBuf[i],   BUF_LEN,      "%d",  ei.weight);
+      dSprintf(costBuf[i], COST_BUF_LEN, "%s",  cs(comma(ei.cost)));
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i].cells[1] = ei.name;
+      rows[i].cells[2] = spdBuf[i];
+      rows[i].cells[3] = accBuf[i];
+      rows[i].cells[4] = pwrBuf[i];
+      rows[i].cells[5] = wtBuf[i];
+      rows[i].cells[6] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+}
+
+
+void TreadInfo::fillRows()
+{
+   static const S32 BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+   static char frictBuf[XtankTreadCount][BUF_LEN];
+   static char costBuf[XtankTreadCount][COST_BUF_LEN];
+
+   for(S32 i = 0; i < XtankTreadCount; i++)
+   {
+      const XtankTreadInfo &ti = xtankTreadInfos[i];
+      dSprintf(frictBuf[i], BUF_LEN,      "%.2f", ti.friction);
+      dSprintf(costBuf[i],  COST_BUF_LEN, "%s",   cs(comma(ti.cost)));
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i].cells[1] = ti.name;
+      rows[i].cells[2] = frictBuf[i];
+      rows[i].cells[3] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+}
+
+
+void SuspensionInfo::fillRows()
+{
+   static const S32 BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+   static char handlingBuf[XtankSuspensionCount][BUF_LEN];
+   static char costBuf[XtankSuspensionCount][COST_BUF_LEN];
+
+   for(S32 i = 0; i < XtankSuspensionCount; i++)
+   {
+      const SuspensionStat &si = suspensionStat[i];
+      dSprintf(handlingBuf[i], BUF_LEN,      "%+d", (S32)si.friction);
+      dSprintf(costBuf[i],     COST_BUF_LEN, "%s",  cs(comma(si.cost)));
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i].cells[1] = si.name;
+      rows[i].cells[2] = handlingBuf[i];
+      rows[i].cells[3] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+}
+
+
+void BumperInfo::fillRows()
+{
+   static const S32 BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+   static char elastBuf[XtankBumperCount][BUF_LEN];
+   static char costBuf[XtankBumperCount][COST_BUF_LEN];
+
+   for(S32 i = 0; i < XtankBumperCount; i++)
+   {
+      const BumperStat &bi = bumperStat[i];
+      dSprintf(elastBuf[i], BUF_LEN,      "%.2f", bi.elasticity);
+      dSprintf(costBuf[i],  COST_BUF_LEN, "%s",   cs(comma(bi.cost)));
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i].cells[1] = bi.name;
+      rows[i].cells[2] = elastBuf[i];
+      rows[i].cells[3] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+}
+
+
+// Row 0 = "None" (empty slot), rows 1..XtankWeaponCount = weapon entries.
+void WeaponInfo::fillRows()
+{
+   static const S32 BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+   static char dlyBuf[XtankWeaponCount][BUF_LEN];
+   static char wtBuf[XtankWeaponCount][BUF_LEN];
+   static char costBuf[XtankWeaponCount][COST_BUF_LEN];
+
+   // Row 0: "None" placeholder
+   rows[0].cells[0] = InputCodeManager::inputCodeToString(KEY_0);
+   rows[0].cells[1] = "None";
+   rows[0].cells[2] = "--";
+   rows[0].cells[3] = "--";
+   rows[0].cells[4] = "--";
+   rows[0].highlighted = false;
+
+   for(S32 i = 0; i < XtankWeaponCount; i++)
+   {
+      const XtankWeaponInfo &wi = xtankWeaponInfos[i];
+      dSprintf(dlyBuf[i],  BUF_LEN,      "%d",  (S32)xtankFireDelayMs(wi));
+      dSprintf(wtBuf[i],   BUF_LEN,      "%d",  wi.weight);
+      dSprintf(costBuf[i], COST_BUF_LEN, "%s",  cs(comma(wi.cost)));
+
+      rows[i + 1].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i + 1].cells[1] = wi.name;
+      rows[i + 1].cells[2] = dlyBuf[i];
+      rows[i + 1].cells[3] = wtBuf[i];
+      rows[i + 1].cells[4] = costBuf[i];
+      rows[i + 1].highlighted = false;
+   }
 }
 
 } /* namespace Zap */
