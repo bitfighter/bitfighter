@@ -16,6 +16,66 @@ namespace Zap
 {
 
 
+struct TableRow
+{
+   static const S32 MaxTableColumns = 8;
+   const char* cells[MaxTableColumns];
+   bool highlighted;       // true = force highlighted row color
+};
+
+
+struct TableColumn
+{
+   const char* header;
+   S32 width;           // 0 = auto-size based on content
+   S32 isRightAligned;   // 0 = left, 1 = right
+};
+
+
+class ComponentInfo
+{
+private:
+   bool mComputed = false;
+   void computeColWidths(S32 fontSize);
+   S32 mColWidths[TableRow::MaxTableColumns];
+   virtual void fillRows() = 0;
+
+public:
+   virtual S32 getColCount() const = 0;
+   virtual S32 getRowCount() const = 0;
+   virtual TableColumn* getColumns() = 0;
+   virtual TableRow* getRows() = 0;
+
+   S32 render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow);
+};
+
+
+class ArmorInfo : public ComponentInfo
+{
+private:
+   void fillRows() override;
+
+public:
+   static const S32 colCount = 6;
+   TableColumn columns[colCount] =
+   {
+      { "Key",   0, 0 },
+      { "Armor", 0, 0 },
+      { "Class", 0, 0 },
+      { "Wt",    0, 1 },
+      { "Sp",    0, 1 },
+      { "Cost",  0, 1 },
+   };
+   TableRow rows[XtankArmorCount];
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankArmorCount; }
+   TableColumn* getColumns() override { return columns; }
+   TableRow* getRows() override { return rows; }
+};
+
+
+
 // Vehicle design helper menu: lets the player choose an xtank body and assign
 // engines, treads, heat sinks, armor distribution, and weapons to each turret
 // slot. Supports
@@ -53,6 +113,8 @@ private:
       PHASE_WEAPON_MOUNT,
       TOTAL_PHASES,
    };
+
+   ArmorInfo mArmorInfo;
 
    // Holds the design being built during the selection process.
    XtankDesign mDesignInProgress;
@@ -162,7 +224,7 @@ private:
 
    // Draw a single card at the given screen rect.
    // centerFraction: 0.0=fully adjacent/background, 1.0=fully center/active
-   void renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 centerFraction, S32 weaponSideOverride = -1) const;
+   void renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 centerFraction, S32 weaponSideOverride = -1);
 
    // Draw detailed stats for the highlighted item (right column of center card).
    void renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alpha = 1.0f) const;
@@ -175,26 +237,6 @@ private:
 
    // Returns the item count for the current phase (used by UP/DOWN cycling).
    S32 currentPhaseItemCount() const;
-
-   struct TableColumn
-   {
-      const char *header;
-      S32 width;        // 0 = auto-size based on content
-      S32 isRightAligned;   // 0 = left, 1 = right
-   };
-
-   enum { MaxTableColumns = 8 };
-
-   struct TableRow
-   {
-      const char* cells[MaxTableColumns];
-      bool highlighted;       // true = force highlighted row color
-   };
-
-   S32 renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
-      const TableColumn columns[], S32 numColumns,
-      const TableRow rows[], S32 numRows, S32 highlightedRowIndex,
-      F32 alpha = 1.0f, S32 cachedColumnWidths[] = NULL) const;
 
 
 public:

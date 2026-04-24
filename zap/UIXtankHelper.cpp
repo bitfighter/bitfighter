@@ -28,8 +28,16 @@
 namespace Zap
 {
 
+
+
 // For clarity and consistency with other helpers
 #define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
+
+const Color TABLE_HEADER_COLOR = Colors::gray50;
+const Color SELECTED_COLOR = Colors::yellow;
+const Color UNSELECTED_ITEM_COLOR_NAME = Colors::overlayMenuUnselectedItemColor;
+const Color UNSELECTED_ITEM_COLOR_DATA = Colors::overlayMenuHelpColor;
+
 
 static const S32 kXtankMaxWeaponSlots = XtankMaxWeapons;
 
@@ -330,6 +338,8 @@ UIXtankHelper::UIXtankHelper()
    mWeaponItemsDisplayWidth = 0;
    mWeaponMountButtonsWidth      = 0;
    mWeaponMountItemsDisplayWidth = 0;
+
+   mArmorInfo = ArmorInfo();
 }
 
 
@@ -1379,8 +1389,6 @@ void UIXtankHelper::navigateForward()
 }
 
 
-// Move to the previous phase, restoring the highlighted index from the
-// existing design so the player sees their previous choice pre-selected.
 void UIXtankHelper::navigateBackward()
 {
    // Start transition animation
@@ -1402,7 +1410,6 @@ void UIXtankHelper::navigateBackward()
 }
 
 
-// Returns the display width for the helper panel at the given phase.
 S32 UIXtankHelper::widthForPhase(S32 phase) const
 {
    if(phase == PHASE_BODY)        return getTotalDisplayWidth(mBodyButtonsWidth,        mBodyItemsDisplayWidth);
@@ -1638,116 +1645,75 @@ std::string UIXtankHelper::getSelectedLabelForPhase(S32 phase) const
 
 static const char* getArmorClassName(S32 defenseValue)
 {
-   switch (defenseValue)
+   switch(defenseValue)
    {
-   case 0: return "Light";
-   case 1: return "Standard";
-   case 2: return "Heavy";
-   case 3: return "Super";
-   default: return "?";
+      case 0: return "Light";
+      case 1: return "Standard";
+      case 2: return "Heavy";
+      case 3: return "Super";
+      default: return "?";
    }
 }
 
 
-// Generic component table renderer.
-// - columns: table schema (header, fixed/auto width, left/right alignment)
-// - rows: row cell strings (up to MaxTableColumns each)
-// - highlightedRowIndex / TableRow::highlighted: row highlight controls
-// - cachedColumnWidths: optional reusable width cache; pass NULL to auto-compute every call
+// Generic component table renderer for components in the vehicle designer.
 // Returns the y-position just below the last rendered table row.
-S32 UIXtankHelper::renderTable(S32 left, S32 top, S32 fontSize, S32 rowGap,
-   const TableColumn columns[], S32 numColumns,
-   const TableRow rows[], S32 numRows, S32 highlightedRowIndex,
-   F32 alpha, S32 cachedColumnWidths[]) const
+S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow)
 {
-   if(!columns || !rows || numColumns <= 0 || numRows <= 0)
-      return top;
+   const S32 columnCount = MIN(getColCount(), TableRow::MaxTableColumns);
+   const S32 columnSpacing = 6;     // Gap between columns
 
-   const S32 columnCount = MIN(numColumns, MaxTableColumns);
-   const S32 columnSpacing = 6;
-
-   S32 localWidths[MaxTableColumns];
-   S32 *widths = cachedColumnWidths ? cachedColumnWidths : localWidths;
-
-   bool needsWidthCompute = !cachedColumnWidths;
-   if(cachedColumnWidths)
-   {
-      for(S32 c = 0; c < columnCount; c++)
-      {
-         if(cachedColumnWidths[c] <= 0)
-         {
-            needsWidthCompute = true;
-            break;
-         }
-      }
-   }
-
-   if(needsWidthCompute)
-   {
-      for(S32 c = 0; c < columnCount; c++)
-      {
-         S32 w = columns[c].width;
-         if(w <= 0)
-         {
-            w = getStringWidth(fontSize, columns[c].header ? columns[c].header : "");
-            for(S32 r = 0; r < numRows; r++)
-            {
-               const char *cell = rows[r].cells[c] ? rows[r].cells[c] : "";
-               w = MAX(w, getStringWidth(fontSize, cell));
-            }
-         }
-         widths[c] = w;
-      }
-   }
+   computeColWidths(fontSize); 
 
    Renderer &renderer = Renderer::get();
    S32 y = top;
    S32 x = left;
 
-   renderer.setColor(Color(0.5f * alpha, 0.5f * alpha, 0.5f * alpha));
+   renderer.setColor(TABLE_HEADER_COLOR);
    for(S32 c = 0; c < columnCount; c++)
    {
-      const char *header = columns[c].header ? columns[c].header : "";
-      if(columns[c].isRightAligned)
+      const char *header = getColumns()[c].header ? getColumns()[c].header : "";
+      if(getColumns()[c].isRightAligned)
       {
          S32 hw = getStringWidth(fontSize, header);
-         drawString(x + widths[c] - hw, y, fontSize, header);
+         drawString(x + mColWidths[c] - hw, y, fontSize, header);
       }
       else
          drawString(x, y, fontSize, header);
-      x += widths[c] + columnSpacing;
+      x += mColWidths[c] + columnSpacing;
    }
    y += rowGap;
 
-   for(S32 r = 0; r < numRows; r++)
+   for(S32 r = 0; r < getRowCount(); r++)
    {
-      bool hl = rows[r].highlighted || (r == highlightedRowIndex);
+      bool hl = (r == highlightedRow);
       x = left;
       for(S32 c = 0; c < columnCount; c++)
       {
          if(hl)
-            renderer.setColor(Color(alpha, alpha, 0.0f));
-         else if(columns[c].isRightAligned)
-            renderer.setColor(Color(0.0f, alpha, alpha));
-         else
-            renderer.setColor(Color(0.72f * alpha, 0.72f * alpha, 0.72f * alpha));
+            renderer.setColor(SELECTED_COLOR);
+         else if(c == 1)      // First non-key column, usually item name
+            renderer.setColor(UNSELECTED_ITEM_COLOR_NAME);
+         else                 
+            renderer.setColor(UNSELECTED_ITEM_COLOR_DATA);
 
-         const char *cell = rows[r].cells[c] ? rows[r].cells[c] : "";
-         if(columns[c].isRightAligned)
+         const char *cell = getRows()[r].cells[c] ? getRows()[r].cells[c] : "";
+         if(getColumns()[c].isRightAligned)
          {
             S32 cw = getStringWidth(fontSize, cell);
-            drawString(x + widths[c] - cw, y, fontSize, cell);
+            drawString(x + mColWidths[c] - cw, y, fontSize, cell);
          }
          else
             drawString(x, y, fontSize, cell);
 
-         x += widths[c] + columnSpacing;
+         x += mColWidths[c] + columnSpacing;
       }
       y += rowGap;
    }
 
    return y;
 }
+
 
 
 // Render detailed stats for the highlighted item in a vertical column.
@@ -1829,7 +1795,7 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
       S32 armorIdx = MAX(0, MIN((S32)mDesignInProgress.armorType, XtankArmorCount - 1));
       S32 bodyIdx  = MAX(0, MIN((S32)mDesignInProgress.bodyIndex, XtankBodyCount - 1));
       const XtankArmorInfo &ai = xtankArmorInfos[armorIdx];
-      float bodySize = body_stat[bodyIdx].size;
+      S32 bodySize = body_stat[bodyIdx].size;
 
       S32 total = 0;
       for(S32 i = 0; i < 6; i++)
@@ -1970,7 +1936,7 @@ void UIXtankHelper::renderItemStatsColumn(S32 left, S32 right, S32 yTop, F32 alp
 
 // Render one card.
 // centerFraction: 0.0 = fully background (adjacent), 1.0 = fully foreground (center).
-void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 cf, S32 weaponSideOverride) const
+void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase, F32 cf, S32 weaponSideOverride)
 {
    static const S32 CORNER    = 10;
    static const S32 ITEM_SZ   = 13;   // fixed item font size, same on ALL cards
@@ -2075,13 +2041,12 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
       drawHorizLine(left + 8, right - 8, listTop - 3);
    }
 
-   const S32 avail   = listBot - listTop;
+   const S32 avail = listBot - listTop;
 
    // Center card: fixed CTR_ROW_GAP so all menus look the same.
    // Background card: scale the gap proportionally to its available height.
 
-   const S32 rowGap  = isCenter ? CTR_ROW_GAP
-                                : MAX(8, CTR_ROW_GAP * avail / MAX(CTR_LIST_AVAIL, 1));
+   const S32 rowGap  = isCenter ? CTR_ROW_GAP : MAX(8, CTR_ROW_GAP * avail / MAX(CTR_LIST_AVAIL, 1));
    // Font size scales with rowGap but is capped at ITEM_SZ.
    const S32 drawnSz = MIN(ITEM_SZ, MAX(7, rowGap - 3));
 
@@ -2100,42 +2065,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
    bool useArmorTable = isCenter && (phase == PHASE_ARMOR);
    if(useArmorTable)
    {
-      TableColumn columns[] =
-      {
-         { "Key",   0, 0 },
-         { "Armor", 0, 0 },
-         { "Class", 0, 0 },
-         { "Wt",    0, 1 },
-         { "Sp",    0, 1 },
-         { "Cost",  0, 1 },
-      };
-
-      // Numeric fields are short; cost uses comma separators so it gets extra room.
-      static const S32 WEIGHT_BUF_LEN = 16;
-      static const S32 SPACE_BUF_LEN = 16;
-      static const S32 COST_BUF_LEN = 24;
-      TableRow rows[XtankArmorCount] = {};
-      char weightBuf[XtankArmorCount][WEIGHT_BUF_LEN];
-      char spaceBuf[XtankArmorCount][SPACE_BUF_LEN];
-      char costBuf[XtankArmorCount][COST_BUF_LEN];
-      for(S32 i = 0; i < XtankArmorCount; i++)
-      {
-         const XtankArmorInfo &ai = xtankArmorInfos[i];
-         dSprintf(weightBuf[i], WEIGHT_BUF_LEN, "%d", ai.weight);
-         dSprintf(spaceBuf[i], SPACE_BUF_LEN, "%d", ai.space);
-         dSprintf(costBuf[i], COST_BUF_LEN, "%s", cs(comma(ai.cost)));
-
-         rows[i].cells[0] = InputCodeManager::inputCodeToString(mArmorItems[i].key);
-         rows[i].cells[1] = ai.name;
-         rows[i].cells[2] = getArmorClassName(ai.defense);
-         rows[i].cells[3] = weightBuf[i];
-         rows[i].cells[4] = spaceBuf[i];
-         rows[i].cells[5] = costBuf[i];
-         rows[i].highlighted = false;
-      }
-
-      renderTable(left + 8, listTop, drawnSz, rowGap, columns, 6,
-                  rows, XtankArmorCount, mHighlightedIndex);
+      mArmorInfo.render(left + 8, listTop, drawnSz, rowGap, mHighlightedIndex);
    }
    else
    {
@@ -2178,7 +2108,6 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, S32 phase,
 
          if(isCenter)
          {
-            const Color SELECTED_COLOR = Colors::yellow;
             if(sel)
             {
                // Yellow bar: vertically centered on the text with 3px padding each side
@@ -2758,7 +2687,79 @@ void UIXtankHelper::renderFullBuildStats(S32 cx, S32 y, const XtankDesign &previ
       drawCenteredString(cx, ty, BSTAT_SZ, "Fire rate: base");
 }
 
+//
+//ComponentInfo::ComponentInfo()
+//{
+//   rows = {}
+//}
 
-#undef UNSEL_COLOR
+
+static const InputCode hotKeys[] =
+{
+   KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7,
+   KEY_8, KEY_9, KEY_0, KEY_A, KEY_B, KEY_C, KEY_D,
+   KEY_E, KEY_F, KEY_G, KEY_H,
+   KEY_I, KEY_J, KEY_K, KEY_L, KEY_M, KEY_N,
+   KEY_O, KEY_P, KEY_Q, KEY_R, KEY_S, KEY_T,
+   KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z
+};
+
+
+// Lazy initializer
+void ComponentInfo::computeColWidths(S32 fontSize)
+{
+   if(mComputed)
+      return;
+
+
+   fillRows();
+
+   for(S32 c = 0; c < getColCount(); c++)
+   {
+      S32 w = getColumns()[c].width;
+      if (w <= 0)
+      {
+         w = getStringWidth(fontSize, getColumns()[c].header ? getColumns()[c].header : "");
+         for (S32 r = 0; r < getRowCount(); r++)
+         {
+            const char* cell = getRows()[r].cells[c] ? getRows()[r].cells[c] : "";
+            w = MAX(w, getStringWidth(fontSize, cell));
+         }
+      }
+      mColWidths[c] = w;
+   }
+   mComputed = true;
+}
+
+
+void ArmorInfo::fillRows() 
+{ 
+   // Numeric fields are short; cost uses comma separators so it gets extra room.
+   static const S32 WEIGHT_BUF_LEN = 16;
+   static const S32 SPACE_BUF_LEN = 16;
+   static const S32 COST_BUF_LEN = 24;
+
+   static char weightBuf[XtankArmorCount][WEIGHT_BUF_LEN];
+   static char spaceBuf[XtankArmorCount][SPACE_BUF_LEN];
+   static char costBuf[XtankArmorCount][COST_BUF_LEN];
+
+   for (S32 i = 0; i < XtankArmorCount; i++)
+   {
+      const XtankArmorInfo& ai = xtankArmorInfos[i];
+      dSprintf(weightBuf[i], WEIGHT_BUF_LEN, "%d", ai.weight);
+      dSprintf(spaceBuf[i], SPACE_BUF_LEN, "%d", ai.space);
+      dSprintf(costBuf[i], COST_BUF_LEN, "%s", cs(comma(ai.cost)));
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(hotKeys[i]);
+      rows[i].cells[1] = ai.name;
+      rows[i].cells[2] = getArmorClassName(ai.defense);
+      rows[i].cells[3] = weightBuf[i];
+      rows[i].cells[4] = spaceBuf[i];
+      rows[i].cells[5] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+
+}
 
 } /* namespace Zap */
+#undef UNSEL_COLOR
