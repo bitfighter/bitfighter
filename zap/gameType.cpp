@@ -68,6 +68,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
    mGameOver = false;
+   mWasTied = false;
    mWinningScore = winningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
@@ -1056,10 +1057,13 @@ void GameType::onGameOver()
          {
             ClientInfo *clientInfo = mGame->getClientInfo(i);
 
-            tied = (clientInfo->getScore() == winningClient->getScore());     // TODO: I think this logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
-
-            if(!tied && clientInfo->getScore() > winningClient->getScore())
+            if(clientInfo->getScore() == winningClient->getScore())
+               tied = true;
+            else if(clientInfo->getScore() > winningClient->getScore())
+            {
                winningClient = clientInfo;
+               tied = false;
+            }
          }
 
          if(!tied)
@@ -1072,6 +1076,8 @@ void GameType::onGameOver()
 
    static StringTableEntry tieMessage("The game ended in a tie.");
    static StringTableEntry winMessage("%e0%e1 wins the game!");
+
+   mWasTied = tied;
 
    if(tied)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
