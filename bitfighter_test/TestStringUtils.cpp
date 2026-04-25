@@ -83,7 +83,14 @@ TEST(StringUtilsTest, chopComment)
    EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
    EXPECT_EQ("This is a comment", chopComment("This is a comment"));
    EXPECT_EQ("",                  chopComment("#"));
+}
 
+
+TEST(StringUtilsTest, chopCommentWithQuotes)
+{
+   EXPECT_EQ("\"#not_a_comment\" ", chopComment("\"#not_a_comment\" #comment"));
+   EXPECT_EQ("No comment here \"#\"", chopComment("No comment here \"#\""));
+   EXPECT_EQ("\"A \"\"#\"\" B\" ", chopComment("\"A \"\"#\"\" B\" #comment"));
 }
 
 

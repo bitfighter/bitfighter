@@ -886,16 +886,38 @@ string replaceString(const char *in, const char *find, const char *replace)
 }
 
 
-// Strip comments from passed lines.  Comments are denoted with a "#".
+// Strip comments from passed lines.  Comments are denoted with a "#", but '#'
+// characters inside double-quoted strings are ignored. Supports escaped
+// quotes using "".
 string chopComment(const string &line)
 {
-   string copy = line;
-   string::size_type pos = copy.find('#');
+   bool inQuotes = false;
 
-   if(pos == string::npos)    // # not found
-      return line;
+   for(size_t i = 0; i < line.length(); ++i)
+   {
+      char c = line[i];
 
-   return copy.erase(copy.find('#'), string::npos);
+      if(inQuotes)
+      {
+         if(c == '"')
+         {
+            // Check for escaped quote ""
+            if(i + 1 < line.length() && line[i + 1] == '"')
+               i++;
+            else
+               inQuotes = false;
+         }
+      }
+      else
+      {
+         if(c == '"')
+            inQuotes = true;
+         else if(c == '#')
+            return line.substr(0, i);
+      }
+   }
+
+   return line;
 }
 
 
