@@ -91,6 +91,11 @@ TEST(StringUtilsTest, chopCommentWithQuotes)
    EXPECT_EQ("\"#not_a_comment\" ", chopComment("\"#not_a_comment\" #comment"));
    EXPECT_EQ("No comment here \"#\"", chopComment("No comment here \"#\""));
    EXPECT_EQ("\"A \"\"#\"\" B\" ", chopComment("\"A \"\"#\"\" B\" #comment"));
+   EXPECT_EQ("\"quoted # hashtag\"", chopComment("\"quoted # hashtag\""));
+   EXPECT_EQ("\"quoted # hashtag\" ", chopComment("\"quoted # hashtag\" #comment"));
+   EXPECT_EQ("\"\"", chopComment("\"\"#\"\"")); // "" is an empty quoted string, then # starts a comment
+   EXPECT_EQ("\"escaped \"\" quote\" ", chopComment("\"escaped \"\" quote\" #comment"));
+   EXPECT_EQ("mixed \"#\" and ", chopComment("mixed \"#\" and #comment"));
 }
 
 
