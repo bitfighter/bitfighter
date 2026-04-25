@@ -903,25 +903,17 @@ string chopComment(const string &line)
          {
             // Check for escaped quote ""
             if(i + 1 < line.length() && line[i + 1] == '"')
-            {
                i++;
-            }
             else
-            {
                inQuotes = false;
-            }
          }
       }
       else
       {
          if(c == '"')
-         {
             inQuotes = true;
-         }
          else if(c == '#')
-         {
             return line.substr(0, i);
-         }
       }
    }
 
