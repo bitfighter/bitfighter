@@ -1,7 +1,0 @@
-#!/bin/bash
-# usage: dmg-convert <uncompressed-dmg> <save-as>
-
-udmg="${1}"
-saveas="${2}"
-
-hdiutil convert "${udmg}" -format UDZO -o "${saveas}"

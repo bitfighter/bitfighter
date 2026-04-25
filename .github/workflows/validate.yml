@@ -13,7 +13,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
       - name: Build project
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake ..
           make
