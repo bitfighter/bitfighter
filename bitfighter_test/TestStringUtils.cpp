@@ -811,6 +811,15 @@ TEST(StringUtilsTest, sorting)
 }
 
 
+TEST(StringUtilsTest, alphaNumberSortMiddle)
+{
+   EXPECT_TRUE(alphaNumberSort("file2.txt", "file10.txt"));
+   EXPECT_FALSE(alphaNumberSort("file10.txt", "file2.txt"));
+   EXPECT_TRUE(alphaNumberSort("a1b", "a01b"));  // if numeric values are same, tie-break?
+                                                 // Actually current implementation might differ on leading zeros
+}
+
+
 // Verify sort order of strings with numeric prefixes and varying alpha suffixes.
 // Sort order: by numeric prefix first, then alphabetically within ties.
 // "1BBB" "2AAA" "12AAA" "12BBB" "9BBB" "1ZZZ" -> "1BBB" "1ZZZ" "2AAA" "9BBB" "12AAA" "12BBB"

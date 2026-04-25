@@ -1077,72 +1077,76 @@ bool alphaSort(const string &a, const string &b)
 
 
 // Sort with numbers coming before letters, but if the strings are just numbers, will sort numerically
+// Performs a "natural sort", so that "file2.txt" comes before "file10.txt"
 bool alphaNumberSort(const string &a, const string &b)
 {
-   bool aIsNum = isPositiveInteger(a.c_str());
-   bool bIsNum = isPositiveInteger(b.c_str());
+   const char *s1 = a.c_str();
+   const char *s2 = b.c_str();
 
-   // Helper to find the numeric part of a string, skipping leading zeros
-   auto getNumericPart = [](const string &s, size_t &start, size_t &len) {
-      start = 0;
-      while(start < s.length() && s[start] == '0')
-         start++;
-      len = 0;
-      while(start + len < s.length() && isDigit(s[start + len]))
-         len++;
-      if (len == 0 && start > 0 && (start == s.length() || !isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
-      {
-          start--; // Keep one zero
-          len = 1;
-      }
-   };
-
-   if(aIsNum && bIsNum)
+   while(*s1 && *s2)
    {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
+      if(isDigit(*s1) && isDigit(*s2))
       {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
+         // Skip leading zeros
+         const char *start1 = s1;
+         while(*s1 == '0') s1++;
+         const char *start2 = s2;
+         while(*s2 == '0') s2++;
 
-      return alphaSort(a, b);
+         // Find end of numeric parts
+         const char *end1 = s1;
+         while(isDigit(*end1)) end1++;
+         const char *end2 = s2;
+         while(isDigit(*end2)) end2++;
+
+         size_t len1 = end1 - s1;
+         size_t len2 = end2 - s2;
+
+         if(len1 != len2)
+            return len1 < len2;
+
+         // Same number of digits (excluding leading zeros), compare them
+         while(s1 < end1)
+         {
+            if(*s1 != *s2)
+               return *s1 < *s2;
+            s1++;
+            s2++;
+         }
+
+         // Numeric values are identical. Tie-break using the number of leading zeros.
+         // Most natural sorts consider "1" < "01" < "001", so fewer zeros come first.
+         const char *realEnd1 = start1;
+         while(isDigit(*realEnd1)) realEnd1++;
+         const char *realEnd2 = start2;
+         while(isDigit(*realEnd2)) realEnd2++;
+
+         size_t fullLen1 = realEnd1 - start1;
+         size_t fullLen2 = realEnd2 - start2;
+
+         if(fullLen1 != fullLen2)
+            return fullLen1 < fullLen2;
+
+         // Truly identical numeric segments, continue to next part of string
+         s1 = realEnd1;
+         s2 = realEnd2;
+      }
+      else
+      {
+         // Compare non-numeric characters case-insensitively
+         char c1 = (char)toLower(*s1);
+         char c2 = (char)toLower(*s2);
+
+         if(c1 != c2)
+            return (unsigned char)c1 < (unsigned char)c2;
+
+         s1++;
+         s2++;
+      }
    }
 
-   if(aIsNum)
-      return true;
-
-   if(bIsNum)
-      return false;
-
-   // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
-   // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
-   bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
-   bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
-
-   if(aStartsWithDigit && bStartsWithDigit)
-   {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
-      {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
-   }
-
-   return alphaSort(a, b);
+   // If we've reached the end of one or both strings, the shorter one comes first.
+   return *s1 == 0 && *s2 != 0;
 }
 
 };
