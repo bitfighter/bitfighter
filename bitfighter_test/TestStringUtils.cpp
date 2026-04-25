@@ -78,11 +78,22 @@ TEST(StringUtilsTest, listToString)
 
 TEST(StringUtilsTest, chopComment)
 {
-   EXPECT_EQ("This is a ",        chopComment("This is a #comment"));
-   EXPECT_EQ("",                  chopComment("# This is a comment"));
-   EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
-   EXPECT_EQ("This is a comment", chopComment("This is a comment"));
-   EXPECT_EQ("",                  chopComment("#"));
+   EXPECT_EQ("This is a ",                  chopComment("This is a #comment"));
+   EXPECT_EQ("",                            chopComment("# This is a comment"));
+   EXPECT_EQ("This is a comment",           chopComment("This is a comment#"));
+   EXPECT_EQ("This is a comment",           chopComment("This is a comment"));
+   EXPECT_EQ("",                            chopComment("#"));
+   EXPECT_EQ("LevelName \"My #1 Level\" ",  chopComment("LevelName \"My #1 Level\" # comment"));
+   EXPECT_EQ("LevelName \"My #1 Level\"",   chopComment("LevelName \"My #1 Level\""));
+   EXPECT_EQ("LevelName \"\"\"#\"\"\"",     chopComment("LevelName \"\"\"#\"\"\""));
+   EXPECT_EQ("No hash here",                chopComment("No hash here"));
+   EXPECT_EQ("Quotes \"but no hash\"",      chopComment("Quotes \"but no hash\""));
+   EXPECT_EQ("\"#HashAtStart\"",            chopComment("\"#HashAtStart\""));
+   EXPECT_EQ("\"HashAtEnd#\"",              chopComment("\"HashAtEnd#\""));
+   EXPECT_EQ("Mix \"#1\" and \"#2\"",       chopComment("Mix \"#1\" and \"#2\""));
+   EXPECT_EQ("Mix \"#1\" and \"#2\" ",      chopComment("Mix \"#1\" and \"#2\" # then comment"));
+   EXPECT_EQ("\"\"\"#\"\"\" \"\"\"#\"\"\"", chopComment("\"\"\"#\"\"\" \"\"\"#\"\"\""));
+   EXPECT_EQ("Escaped \"\"quote\"\" ",      chopComment("Escaped \"\"quote\"\" # comment"));
 }
 
 
