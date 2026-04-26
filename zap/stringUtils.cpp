@@ -1077,72 +1077,75 @@ bool alphaSort(const string &a, const string &b)
 
 
 // Sort with numbers coming before letters, but if the strings are just numbers, will sort numerically
+// Performs a natural sort, where numbers in strings are compared numerically (e.g. "abc2" < "abc10")
 bool alphaNumberSort(const string &a, const string &b)
 {
-   bool aIsNum = isPositiveInteger(a.c_str());
-   bool bIsNum = isPositiveInteger(b.c_str());
+   size_t ia = 0, ib = 0;
+   size_t size_a = a.size();
+   size_t size_b = b.size();
 
-   // Helper to find the numeric part of a string, skipping leading zeros
-   auto getNumericPart = [](const string &s, size_t &start, size_t &len) {
-      start = 0;
-      while(start < s.length() && s[start] == '0')
-         start++;
-      len = 0;
-      while(start + len < s.length() && isDigit(s[start + len]))
-         len++;
-      if (len == 0 && start > 0 && (start == s.length() || !isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
-      {
-          start--; // Keep one zero
-          len = 1;
-      }
-   };
-
-   if(aIsNum && bIsNum)
+   while(ia < size_a && ib < size_b)
    {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
+      if(isDigit(a[ia]) && isDigit(b[ib]))
       {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
+         // Compare numeric segments
+         size_t start_a = ia;
+         while(ia < size_a && a[ia] == '0')
+            ia++;
+         size_t end_a = ia;
+         while(end_a < size_a && isDigit(a[end_a]))
+            end_a++;
 
-      return alphaSort(a, b);
+         size_t start_b = ib;
+         while(ib < size_b && b[ib] == '0')
+            ib++;
+         size_t end_b = ib;
+         while(end_b < size_b && isDigit(b[end_b]))
+            end_b++;
+
+         size_t len_a = end_a - ia;
+         size_t len_b = end_b - ib;
+
+         // Compare numerically (longer string of digits means larger number, after skipping leading zeros)
+         if(len_a != len_b)
+            return len_a < len_b;
+
+         // Same number of digits, compare them one by one
+         for(size_t i = 0; i < len_a; i++)
+         {
+            if(a[ia + i] != b[ib + i])
+               return a[ia + i] < b[ib + i];
+         }
+
+         // Same numerical value, tie-break by number of leading zeros
+         size_t zeros_a = ia - start_a;
+         size_t zeros_b = ib - start_b;
+         if(zeros_a != zeros_b)
+            return zeros_a < zeros_b; // Fewer zeros before more zeros (e.g. "1" < "01")
+
+         // Completely identical numeric segment, move to next segment
+         ia = end_a;
+         ib = end_b;
+      }
+      else
+      {
+         // Compare non-numeric segments
+         char ca = toLower(a[ia]);
+         char cb = toLower(b[ib]);
+
+         if(ca != cb)
+            return ca < cb;
+
+         ia++;
+         ib++;
+      }
    }
 
-   if(aIsNum)
-      return true;
+   // If one string is a prefix of another, the shorter one comes first
+   if(ia == size_a && ib == size_b)
+      return false; // Equal
 
-   if(bIsNum)
-      return false;
-
-   // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
-   // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
-   bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
-   bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
-
-   if(aStartsWithDigit && bStartsWithDigit)
-   {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
-      {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
-   }
-
-   return alphaSort(a, b);
+   return size_a < size_b;
 }
 
 };
