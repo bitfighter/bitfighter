@@ -253,6 +253,16 @@ TEST(StringUtilsTest, replaceStringEmptyFrom)
 }
 
 
+TEST(StringUtilsTest, replaceStringNullChecks)
+{
+   // NULL input string should return empty string and not crash
+   EXPECT_EQ("", replaceString((const char *)NULL, "find", "replace"));
+
+   // NULL replacement string should treat it as an empty replacement
+   EXPECT_EQ("f", replaceString("foo", "o", (const char *)NULL));
+}
+
+
 TEST(StringUtilsTest, lcase_ucase)
 {
    EXPECT_EQ("abc", lcase("ABC"));

@@ -55,6 +55,7 @@ string ftos(F32 f);
 F64 stof(const string &s);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
+string replaceString(const char *in, const char *find, const char *replace);
 string stripExtension(string filename);
 
 string listToString(const Vector<string> &words, const string &seperator);
