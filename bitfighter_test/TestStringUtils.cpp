@@ -852,6 +852,17 @@ TEST(StringUtilsTest, sortingLargeNumbers)
    // Mixed strings with large numbers
    EXPECT_TRUE(alphaNumberSort("2abc", "2147483648abc"));
    EXPECT_FALSE(alphaNumberSort("2147483648abc", "2abc"));
+
+   // Natural sort for embedded numbers
+   EXPECT_TRUE(alphaNumberSort("abc2", "abc10"));
+   EXPECT_TRUE(alphaNumberSort("abc1", "abc2"));
+   EXPECT_TRUE(alphaNumberSort("a1b2", "a1b10"));
+   EXPECT_TRUE(alphaNumberSort("123a456", "123a457"));
+
+   // Leading zeros
+   EXPECT_TRUE(alphaNumberSort("1", "01"));
+   EXPECT_TRUE(alphaNumberSort("01", "001"));
+   EXPECT_TRUE(alphaNumberSort("abc1", "abc01"));
 }
 
 
