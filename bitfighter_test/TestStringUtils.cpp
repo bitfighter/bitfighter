@@ -766,6 +766,9 @@ TEST(StringUtilsTest, writeLevelString)
    EXPECT_EQ("\"String with space\"", writeLevelString("String with space"));
    EXPECT_EQ("\"String with #\"", writeLevelString("String with #"));
    EXPECT_EQ("\"String with \"\"quotes\"\"\"", writeLevelString("String with \"quotes\""));
+
+   // Test NULL safety
+   EXPECT_EQ("", writeLevelString(NULL));
 }
 
 
@@ -863,6 +866,18 @@ TEST(StringUtilsTest, sortingLargeNumbers)
    EXPECT_TRUE(alphaNumberSort("1", "01"));
    EXPECT_TRUE(alphaNumberSort("01", "001"));
    EXPECT_TRUE(alphaNumberSort("abc1", "abc01"));
+}
+
+
+TEST(StringUtilsTest, alphaNumberSortNonASCII)
+{
+   // Verify that characters with the high bit set are sorted after standard ASCII
+   // On systems with signed char, \x80 is negative, but it should sort after \x7F
+   EXPECT_TRUE(alphaNumberSort("\x7F", "\x80"));
+   EXPECT_FALSE(alphaNumberSort("\x80", "\x7F"));
+
+   EXPECT_TRUE(alphaNumberSort("a", "\x80"));
+   EXPECT_TRUE(alphaNumberSort("\x80", "\xFF"));
 }
 
 

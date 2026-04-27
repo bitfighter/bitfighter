@@ -923,6 +923,9 @@ string chopComment(const string &line)
 
 string writeLevelString(const char *in)
 {
+   if(!in)
+      return "";
+
    int c=0;
    while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && in[c] != ' ')
       c++;
@@ -1130,8 +1133,8 @@ bool alphaNumberSort(const string &a, const string &b)
       else
       {
          // Compare non-numeric segments
-         char ca = toLower(a[ia]);
-         char cb = toLower(b[ib]);
+         unsigned char ca = toLower(a[ia]);
+         unsigned char cb = toLower(b[ib]);
 
          if(ca != cb)
             return ca < cb;
