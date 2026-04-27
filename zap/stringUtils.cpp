@@ -923,9 +923,13 @@ string chopComment(const string &line)
 
 string writeLevelString(const char *in)
 {
-   int c=0;
-   while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && in[c] != ' ')
+   if(!in)
+      return "";
+
+   int c = 0;
+   while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && !isSpace(in[c]))
       c++;
+
    if(in[c] == 0 && c != 0)
       return string(in);  // string does not need to be changed if not zero length and there is no space or any of: # "
 

@@ -766,6 +766,13 @@ TEST(StringUtilsTest, writeLevelString)
    EXPECT_EQ("\"String with space\"", writeLevelString("String with space"));
    EXPECT_EQ("\"String with #\"", writeLevelString("String with #"));
    EXPECT_EQ("\"String with \"\"quotes\"\"\"", writeLevelString("String with \"quotes\""));
+
+   // Bug: these should be quoted
+   EXPECT_EQ("\"String with\ttab\"", writeLevelString("String with\ttab"));
+   EXPECT_EQ("\"String with\nnewline\"", writeLevelString("String with\nnewline"));
+
+   // Bug: should not crash
+   EXPECT_EQ("", writeLevelString(NULL));
 }
 
 
