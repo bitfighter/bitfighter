@@ -866,6 +866,17 @@ TEST(StringUtilsTest, sortingLargeNumbers)
 }
 
 
+TEST(StringUtilsTest, alphaNumberSortNonASCII)
+{
+   // 'a' is 0x61, '\xFF' is 0xFF.
+   // Unsigned: 0x61 < 0xFF (true)
+   // Signed: 97 < -1 (false)
+   EXPECT_TRUE(alphaNumberSort("a", "\xFF"));
+   EXPECT_TRUE(alphaNumberSort("A", "\xFF"));
+   EXPECT_FALSE(alphaNumberSort("\xFF", "a"));
+}
+
+
 TEST(StringUtilsTest, formatMessage)
 {
    Vector<StringTableEntry> e;
