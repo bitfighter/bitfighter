@@ -1134,7 +1134,7 @@ bool alphaNumberSort(const string &a, const string &b)
          char cb = toLower(b[ib]);
 
          if(ca != cb)
-            return ca < cb;
+            return (unsigned char)ca < (unsigned char)cb;
 
          ia++;
          ib++;
