@@ -509,6 +509,24 @@ TEST(StringUtilsTest, strnicmpNonASCII)
 }
 
 
+TEST(StringUtilsTest, stricmpOrderingNonASCII)
+{
+   // 'a' is 0x61, '\xFF' is 0xFF.
+   // Unsigned: 0x61 < 0xFF (stricmp should return negative)
+   // Signed: 97 > -1 (stricmp would incorrectly return positive)
+   EXPECT_LT(stricmp("a", "\xFF"), 0);
+   EXPECT_GT(stricmp("\xFF", "a"), 0);
+}
+
+
+TEST(StringUtilsTest, strnicmpOverRead)
+{
+   // strnicmp should stop at null terminator even if len is larger
+   EXPECT_EQ(0, strnicmp("abc", "abc", 10));
+   EXPECT_LT(strnicmp("abc", "abd", 10), 0);
+}
+
+
 TEST(StringUtilsTest, countCharInString)
 {
    EXPECT_EQ(3, countCharInString("banana", 'a'));

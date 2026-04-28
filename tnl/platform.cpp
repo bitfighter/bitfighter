@@ -527,8 +527,8 @@ int stricmp(const char *str1, const char *str2)
       str1++;
       str2++;
    }
-   char c1 = toUpper(*str1);
-   char c2 = toUpper(*str2);
+   unsigned char c1 = (unsigned char)toUpper(*str1);
+   unsigned char c2 = (unsigned char)toUpper(*str2);
    return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
 }
 
@@ -536,11 +536,12 @@ int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
    for(unsigned int i = 0; i < len; i++)
    {
-      char c1 = toUpper(str1[i]);
-      char c2 = toUpper(str2[i]);
-      if(c1 == c2)
-         continue;
-      return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
+      unsigned char c1 = (unsigned char)toUpper(str1[i]);
+      unsigned char c2 = (unsigned char)toUpper(str2[i]);
+      if(c1 != c2)
+         return (c1 > c2) ? 1 : -1;
+      if(!c1)
+         break;
    }
    return 0;
 }
