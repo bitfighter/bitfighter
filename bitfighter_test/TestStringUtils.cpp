@@ -497,6 +497,12 @@ TEST(StringUtilsTest, stricmpNonASCII)
    EXPECT_EQ(0, stricmp("\xFF", "\xFF"));
    EXPECT_EQ(0, stricmp("A\x80", "a\x80"));
    EXPECT_NE(0, stricmp("\xFF", "\xFE"));
+
+   // Bug reproduction: ASCII should come before non-ASCII (high-bit set)
+   // 'a' is 97, '\xFF' is 255 (unsigned) or -1 (signed)
+   // We want stricmp("a", "\xFF") < 0
+   EXPECT_LT(stricmp("a", "\xFF"), 0);
+   EXPECT_GT(stricmp("\xFF", "a"), 0);
 }
 
 
@@ -506,6 +512,14 @@ TEST(StringUtilsTest, strnicmpNonASCII)
    EXPECT_EQ(0, strnicmp("A\x80", "a\x80", 2));
    EXPECT_NE(0, strnicmp("\xFF", "\xFE", 1));
    EXPECT_EQ(0, strnicmp("abc\xFF", "ABC\xFF", 3));
+}
+
+
+TEST(StringUtilsTest, strnicmpOverRead)
+{
+   // These should not crash or over-read
+   EXPECT_EQ(0, strnicmp("abc", "abc", 10));
+   EXPECT_NE(0, strnicmp("abc", "abd", 10));
 }
 
 
@@ -796,6 +810,10 @@ TEST(StringUtilsTest, sorting)
    EXPECT_TRUE(alphaSort("a", "B"));
    EXPECT_TRUE(alphaSort("A", "B"));
    EXPECT_FALSE(alphaSort("b", "a"));
+
+   // Bug reproduction: alphaSort should sort ASCII before non-ASCII
+   EXPECT_TRUE(alphaSort("a", "\xFF"));
+   EXPECT_FALSE(alphaSort("\xFF", "a"));
 
    EXPECT_TRUE(alphaNumberSort("2", "10"));
    EXPECT_TRUE(alphaNumberSort("10", "a"));
