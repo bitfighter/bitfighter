@@ -253,6 +253,18 @@ TEST(StringUtilsTest, replaceStringEmptyFrom)
 }
 
 
+TEST(StringUtilsTest, replaceStringNullInput)
+{
+    EXPECT_EQ("", replaceString((const char*)NULL, "a", "b"));
+}
+
+
+TEST(StringUtilsTest, replaceStringNullReplace)
+{
+    EXPECT_EQ("foo", replaceString("foo", "a", (const char*)NULL));
+}
+
+
 TEST(StringUtilsTest, lcase_ucase)
 {
    EXPECT_EQ("abc", lcase("ABC"));

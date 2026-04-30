@@ -863,8 +863,14 @@ string ctos(char c)
 
 string replaceString(const char *in, const char *find, const char *replace)
 {
+   if(!in)
+      return "";
+
    if(!find || find[0] == 0)
       return in;
+
+   if(!replace)
+      replace = "";
 
    string out;
    size_t n = 0;

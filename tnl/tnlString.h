@@ -110,8 +110,18 @@ public:
    }
    StringPtr &operator=(const char *string)
    {
-      decRef();
-      alloc(string);
+      if (string && mString && string >= mString->mStringData && string <= mString->mStringData + strlen(mString->mStringData))
+      {
+         const char *copy = strdup(string);
+         decRef();
+         alloc(copy);
+         free((void *)copy);
+      }
+      else
+      {
+         decRef();
+         alloc(string);
+      }
       return *this;
    }
    operator const char *() const
