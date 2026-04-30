@@ -143,7 +143,7 @@ string ftos(F32 f, S32 digits)
       digits = 30;
 
    char outString[100];
-   dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
+   dSprintf(outString, sizeof(outString), (string("%.") + itos(digits) + "f").c_str(), f);
 
    return stripZeros(outString);
 }
@@ -863,8 +863,14 @@ string ctos(char c)
 
 string replaceString(const char *in, const char *find, const char *replace)
 {
+   if(!in)
+      return "";
+
    if(!find || find[0] == 0)
       return in;
+
+   if(!replace)
+      replace = "";
 
    string out;
    size_t n = 0;
