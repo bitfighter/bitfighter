@@ -538,13 +538,10 @@ int strnicmp(const char *str1, const char *str2, unsigned int len)
    {
       unsigned char c1 = (unsigned char)toUpper(str1[i]);
       unsigned char c2 = (unsigned char)toUpper(str2[i]);
-      if(c1 == c2)
-      {
-         if(!c1)
-            break;
-         continue;
-      }
-      return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
+      if(c1 != c2)
+         return (c1 > c2) ? 1 : -1;
+      if(!c1)
+         break;
    }
    return 0;
 }
