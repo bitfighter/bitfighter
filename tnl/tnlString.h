@@ -27,6 +27,12 @@
 #ifndef _TNL_STRING_H_
 #define _TNL_STRING_H_
 
+#include "tnlTypes.h"
+#include "tnlAssert.h"
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
