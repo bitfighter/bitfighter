@@ -54,6 +54,7 @@ TEST(TnlStringTest, StringPtrConstructors)
    TNL::StringPtr sNull;
    TNL::StringPtr s4(sNull);
    EXPECT_STREQ("", s4.getString());
+}
 
 
 TEST(TnlStringTest, DefaultConstructor)
