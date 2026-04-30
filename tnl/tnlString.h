@@ -27,9 +27,21 @@
 #ifndef _TNL_STRING_H_
 #define _TNL_STRING_H_
 
+#include "tnlTypes.h"
+#include "tnlAssert.h"
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
+
+#include "tnlTypes.h"
+#include "tnlAssert.h"
+#include <string>
+#include <string.h>
+#include <stdlib.h>
 
 namespace TNL
 {
@@ -45,6 +57,11 @@ class StringPtr
    StringData *mString;
    void alloc(const char *string)
    {
+      if(!string)
+      {
+         mString = NULL;
+         return;
+      }
       mString = (StringData *) malloc(sizeof(StringData) + strlen(string));
       TNLAssert(mString != nullptr, "Memory allocation failed");
       if (mString == nullptr) {
@@ -83,9 +100,12 @@ public:
    }
    StringPtr &operator=(const StringPtr &ref)
    {
+      if(this == &ref)
+         return *this;
       decRef();
       mString = ref.mString;
-      mString->mRefCount++;
+      if(mString)
+         mString->mRefCount++;
       return *this;
    }
    StringPtr &operator=(const char *string)
