@@ -110,8 +110,21 @@ public:
    }
    StringPtr &operator=(const char *string)
    {
-      decRef();
-      alloc(string);
+      // Check if 'string' points into our own internal data buffer (aliasing).
+      // If it does, we must make a temporary copy before calling decRef(),
+      // which might free the memory 'string' is pointing to.
+      if (string && mString && string >= mString->mStringData && string <= mString->mStringData + strlen(mString->mStringData))
+      {
+         const char *copy = strdup(string);   // Create a safe temporary copy
+         decRef();                            // Safe to release our buffer now
+         alloc(copy);                         // Allocate new buffer from the copy
+         free((void *)copy);                  // Clean up the temporary copy
+      }
+      else
+      {
+         decRef();
+         alloc(string);
+      }
       return *this;
    }
    operator const char *() const
