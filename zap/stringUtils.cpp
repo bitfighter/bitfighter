@@ -561,15 +561,13 @@ void s_fprintf(FILE *stream, const char *format, ...)
     va_list args;
     va_start(args, format);
 
-    char buffer[2048];
-    vsnprintf(buffer, sizeof(buffer), format, args);
-
-    va_end(args);
-
-    if(fprintf(stream, "%s", buffer) < 0)     // Uh-oh...
+    if(vfprintf(stream, format, args) < 0)     // Uh-oh...
     {
+       va_end(args);
        throw(SaveException("Error writing to file"));
     }
+
+    va_end(args);
 }
 
 
@@ -985,7 +983,9 @@ const string readFile(const string &path)
 
    // Remove the UTF-8 BOM if it exists
    // These are the first three bytes:  EF BB BF
-   trim_left_in_place(result, "\357\273\277");
+   static const string bom = "\xEF\xBB\xBF";
+   if (result.compare(0, bom.length(), bom) == 0)
+      result.erase(0, bom.length());
 
    return result;
 }
