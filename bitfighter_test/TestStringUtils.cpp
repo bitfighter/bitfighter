@@ -225,6 +225,9 @@ TEST(StringUtilsTest, ftosBugReproduction)
    // Negative digits value
    // itos(-1) is "-1", format string becomes "%2.-1f"
    EXPECT_EQ("1.23456", ftos(1.23456f, -1));
+
+   // Bug: ftos(1.0f, 0) incorrectly returns " 1" instead of "1"
+   EXPECT_EQ("1", ftos(1.0f, 0));
 }
 
 
@@ -250,6 +253,16 @@ TEST(StringUtilsTest, replaceStringEmptyFrom)
    // These should return the original string and not hang
    EXPECT_EQ("test", replaceString("test", "", "replacement"));
    EXPECT_EQ("test", replaceString((const char *)"test", "", "replacement"));
+}
+
+
+TEST(StringUtilsTest, replaceStringNULL)
+{
+   // Bug: replaceString(NULL, ...) crashes
+   EXPECT_EQ("", replaceString((const char *)NULL, "find", "replace"));
+   // Bug: replaceString(..., ..., NULL) crashes
+   // If replace is NULL, it's treated as an empty string, so "a" -> ""
+   EXPECT_EQ("", replaceString("a", "a", (const char *)NULL));
 }
 
 
