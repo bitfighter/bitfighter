@@ -989,7 +989,7 @@ TEST(StringUtilsTest, formatMessage)
 
 TEST(StringUtilsTest, s_fprintf)
 {
-   string testFile = "test_fprintf.txt";
+   std::string testFile = "test_fprintf.txt";
    FILE *f = fopen(testFile.c_str(), "w");
    ASSERT_TRUE(f != NULL);
 
@@ -1000,5 +1000,38 @@ TEST(StringUtilsTest, s_fprintf)
    remove(testFile.c_str());
 }
 
+TEST(StringUtilsTest, readFileBOMBug)
+{
+   std::string testFile = "test_bom_bug.txt";
+   // \xBB is 187 decimal, or \273 octal. It is part of the UTF-8 BOM (\xEF\xBB\xBF).
+   std::string content = "\xBB" "Some content";
+   ASSERT_TRUE(writeFile(testFile, content));
+
+   // Current implementation uses trim_left_in_place(result, "\357\273\277");
+   // which will remove the leading \xBB even if it's not the full BOM.
+   std::string readContent = readFile(testFile);
+   EXPECT_EQ(content, readContent);
+
+   remove(testFile.c_str());
+}
+
+TEST(StringUtilsTest, s_fprintfTruncationBug)
+{
+   std::string testFile = "test_fprintf_truncation.txt";
+   FILE *f = fopen(testFile.c_str(), "w");
+   ASSERT_TRUE(f != NULL);
+
+   // Create a string longer than 2048 characters
+   std::string longString(2500, 'a');
+   s_fprintf(f, "%s", longString.c_str());
+   fclose(f);
+
+   std::string readContent = readFile(testFile);
+   // Current implementation has a 2048 byte buffer
+   EXPECT_EQ(longString.length(), readContent.length());
+   EXPECT_EQ(longString, readContent);
+
+   remove(testFile.c_str());
+}
 
 };
