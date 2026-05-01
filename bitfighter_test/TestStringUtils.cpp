@@ -263,6 +263,9 @@ TEST(StringUtilsTest, replaceStringNULL)
    // Bug: replaceString(..., ..., NULL) crashes
    // If replace is NULL, it's treated as an empty string, so "a" -> ""
    EXPECT_EQ("", replaceString("a", "a", (const char *)NULL));
+}
+
+
 TEST(StringUtilsTest, replaceStringNullInput)
 {
     EXPECT_EQ("", replaceString((const char*)NULL, "a", "b"));
