@@ -117,6 +117,20 @@ TEST(TnlStringTest, NullCStringAssignment)
    EXPECT_STREQ("", s.getString());
 }
 
+TEST(TnlStringTest, StringPtrSelfAssignmentFromBuffer)
+{
+    TNL::StringPtr s("hello");
+    const char* ptr = s.getString();
+    s = ptr;
+    EXPECT_STREQ("hello", s.getString());
+
+    // Test with substring
+    s = "hello world";
+    ptr = s.getString() + 6;
+    s = ptr;
+    EXPECT_STREQ("world", s.getString());
+}
+
 TEST(TnlStringTest, StdStringConstructor)
 {
    std::string std_s = "hello";
