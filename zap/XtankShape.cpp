@@ -993,7 +993,7 @@ void XtankDesign::setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mou
 }
 
 
-S32 XtankDesign::slotsInUse()
+S32 XtankDesign::slotsInUse() const
 {
    S32 slots = 0;
    for(S32 i = 0; i < WEAPON_SLOTS; i++)

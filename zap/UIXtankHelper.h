@@ -328,6 +328,13 @@ public:
 };
 
 
+struct LabelWidth
+{
+   const char *label;
+   S32 width;
+};
+
+
 class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -431,9 +438,14 @@ class UIXtankHelper : public HelperMenu
       S32 widthForPhase(Phase phase) const;
 
 
-      // Draw custom floating-card selector UI (active center card + adjacent cards).
-      // transitionFraction: 0.0 = no transition, 1.0 = fully transitioned (for animation)
+      // Draw the tab bar along the bottom and the single active panel above it.
       void renderFloatingMenus();
+
+      // Draw the bottom tab strip.
+      void renderTabBar(F32 t);
+
+      // Returns the tab label for a given phase.
+      LabelWidth getTabLabel(Phase phase) const;
 
       // Draw a single panel
       // centerFraction: 0.0=fully adjacent/background, 1.0=fully center/active
@@ -473,9 +485,9 @@ class UIXtankHelper : public HelperMenu
       // Fills phaseAtSlot[] and weaponSlotAtSlot[] for `size` display slots centered on
       // the current phase/weapon-slot, using a linear clamped virtual sequence.
       // Exposed as public/static so it can be tested without a live UIXtankHelper instance.
-      static void computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot,
-         S32 slotsInUse, Phase phaseAtSlot[],
-         S32 weaponSlotAtSlot[], S32 size);
+      //static void computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot,
+      //   S32 slotsInUse, Phase phaseAtSlot[],
+      //   S32 weaponSlotAtSlot[], S32 size);
 
 };
 

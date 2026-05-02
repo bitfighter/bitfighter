@@ -19,6 +19,8 @@
 #include "XtankShape.h"
 
 #include "stringUtils.h"
+#include "ScissorsManager.h"
+
 
 #include <cmath>
 #include <array>
@@ -47,6 +49,7 @@ struct XtankDerivedStats
    F32 maxAccel;
    F32 maxTurnRate;
 };
+
 
 //// Returns max total armor units a bare hull can carry for the specified armor type,
 //// limited by both weight limit and space limit (xtank-style size scaling).
@@ -1089,7 +1092,7 @@ void UIXtankHelper::navigateBackward(bool changePhase)
 
 void UIXtankHelper::navigate()
 {
-   mTransitionTimer.reset(250);	   // 250ms transition
+   mTransitionTimer.reset(0);	   // 250ms transition
 
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
@@ -1370,7 +1373,6 @@ void UIXtankHelper::renderSpecialsStats(S32 left, S32 y, F32 alpha) const
 }
 
 
-
 // Render one panel.
 // centerFraction: 0.0 = fully background (adjacent), 1.0 = fully foreground (center).
 void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phase, F32 cf)
@@ -1411,7 +1413,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
    bool isCenter = (cf > 0.5f);
 
    Renderer &r = Renderer::get();
-   drawFilledFancyBox(left, top, right, bot, CORNER, Colors::black, bgAlpha, border);
+   drawFilledFancyBox(left, top, right, bot, CORNER, Colors::black, 1, border);
 
    const S32 cx = (left + right) / 2;
    const S32 w = right - left;
@@ -1437,13 +1439,11 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
 
    S32 contentTop = top + 34;	 // y-coord of the top of the card content, below the title and the border line
 
-   const Vector<OverlayMenuItem> *items = getItemsForPhase(phase);
-
    // Special case:
    if(phase == Phase::HEATSINK)
       renderHeatSinkPanel(contentTop, left, alpha, STATS_DIV);
    else
-      renderItemTable(items, contentTop, left, isCenter, phase, mHighlightedIndex, grayLevel);
+      renderItemTable(getItemsForPhase(phase), contentTop, left, isCenter, phase, mHighlightedIndex, grayLevel);
 
 
    // Stats column — center card only, fades in; suppressed when a table fills the card.
@@ -1650,42 +1650,139 @@ void UIXtankHelper::renderWeaponPanelTitle(S32 titlex, S32 titley, S32 right, S3
 }
 
 
+// -----------------------------------------------------------------------
+// Tab bar + single-active-panel renderer
+//
+// Layout (canvas 800x600):
+//   TAB_BOT  = 595  (5px gap from canvas bottom)
+//   TAB_TOP  = TAB_BOT - TAB_H   (tab strip height)
+//   PANEL_BOT = TAB_TOP - 6      (gap between panel and tab strip)
+//   PANEL_TOP = 75               (top of panel)
+//
+// Animation: when a transition is in progress the incoming panel slides
+// upward from PANEL_BOT to PANEL_TOP over the 250ms timer.  `t` is the
+// smoothstepped fraction (0 = start, 1 = complete).
+// -----------------------------------------------------------------------
+
+// Tab font size matches the existing panel title size.
+static const S32 TAB_FONT_SZ  = 16;
+static const S32 TAB_PAD_X    = 10;   // horizontal padding inside each tab
+static const S32 TAB_PAD_Y    = 5;    // vertical padding inside each tab
+static const S32 TAB_GAP      = 4;    // gap between adjacent tabs
+static const S32 TAB_H        = TAB_FONT_SZ + 2 * TAB_PAD_Y;
+static const S32 TAB_BOT      = 595;
+static const S32 TAB_TOP      = TAB_BOT - TAB_H;
+static const S32 PANEL_LEFT   = 30;
+static const S32 PANEL_RIGHT  = 660;
+static const S32 PANEL_BOT    = TAB_TOP - 6;
+static const S32 PANEL_TOP    = 75;
+
+
+// Cache for lazy initialization of slightly expensive width calculations
+static S32 tabWidths[PhaseCount] = {};
+
+
+// Returns "Weapon N" for weapon slots, otherwise the phase title.
+// buf must be at least bufLen bytes.  Returns buf (or a static string).
+LabelWidth UIXtankHelper::getTabLabel(Phase phase) const
+{
+   static const char *sPhaseTitles[] =
+   {
+      "Body",          // 0
+      "Engine",        // 1
+      "Treads",        // 2
+      "Armor Type",    // 3
+      "Armor Alloc.",  // 4
+      "Suspension",    // 5
+      "Bumpers",       // 6
+      "Specials",      // 7
+      "Heat Sinks",    // 8
+      "Weapons",       // 9
+   };
+
+   // Lazily initialize the width of the widest Weapon <N> label
+   if(tabWidths[0] == 0)
+   {
+      for(S32 i = 0; i < PhaseCount; i++)
+         tabWidths[i] = getStringWidth(TAB_FONT_SZ, sPhaseTitles[i]);
+
+	  for(S32 i = 0; i < WEAPON_SLOTS; i++)
+      {
+         S32 w = getStringWidthf(TAB_FONT_SZ, "Weapon %d", i + 1);
+         if(w > tabWidths[(S32)Phase::WEAPONS])
+            tabWidths[(S32)Phase::WEAPONS] = w;
+      }
+   }
+
+   S32 width = getStringWidth(TAB_FONT_SZ, sPhaseTitles[(S32)phase]);
+
+   if(mPhase == Phase::WEAPONS && phase == Phase::WEAPONS)
+   {
+      static char buf[16];
+      dSprintf(buf, sizeof(buf), "Weapon %d", mWeaponSlot + 1);
+      return LabelWidth{buf, width};
+   }
+
+   return LabelWidth{sPhaseTitles[(S32)phase], width};
+}
+
+
+static S32 totalRowWidth = 0;      // Cached value, lazily initialized below
+
+
+void UIXtankHelper::renderTabBar(F32 t)
+{
+   Renderer &r = Renderer::get();
+   FontManager::pushFontContext(HelperMenuContext);
+
+
+   if(totalRowWidth == 0)
+   {
+      // --- Measure all tab widths ---
+      S32 tabWidths[PhaseCount];
+
+      for(S32 i = 0; i < PhaseCount; i++)
+         totalRowWidth += getTabLabel((Phase)i).width + 2 * TAB_PAD_X;
+
+      totalRowWidth += (PhaseCount - 1) * TAB_GAP;
+   }
+
+
+   // --- Draw tabs ---
+   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+
+   static const Color TAB_INACTIVE = Colors::gray40;
+
+   S32 x1 = (canvasWidth - totalRowWidth) / 2;     // Left edge of first tab
+   for(S32 i = 0; i < PhaseCount; i++)
+   {
+      LabelWidth lw = getTabLabel((Phase)i);
+      S32 tabWidth = lw.width + 2 * TAB_PAD_X;
+
+      S32 x2 = x1 + tabWidth;
+
+      if(i == (S32)mPhase)
+      {
+         drawFilledRect(x1, TAB_TOP, x2, TAB_BOT + 1, Colors::black, SELECTED_COLOR);
+         r.setColor(SELECTED_COLOR);
+      }
+      else
+      {
+         drawFilledRect(x1, TAB_TOP, x2, TAB_BOT, Colors::black, TAB_INACTIVE);
+         r.setColor(TAB_INACTIVE);
+      }
+
+      drawCenteredString(x1 + tabWidth / 2, TAB_TOP + TAB_PAD_Y - 2, TAB_FONT_SZ, lw.label);
+
+      x1 = x2 + TAB_GAP;
+   }
+
+   FontManager::popFontContext();
+}
+
+
 void UIXtankHelper::renderFloatingMenus()
 {
-   // -------------------------------------------------------------------------
-   // Slot geometry table.  5 slots: L2(off) L1(adj) C(center) R1(adj) R2(off).
-   // "tuck" factor: adjacent cards start a few pixels lower and smaller,
-   // giving the impression they are physically behind the center card.
-   //
-   //   Slot  cx    half_w  top   bot   centerFraction
-   //   L2    -80     55    180   520   0.0   (off-screen, invisible)
-   //   L1     90     80    155   545   0.0   (tucked behind left edge of center)
-   //   C     375    190    100   595   1.0   (full foreground)
-   //   R1    660     80    155   545   0.0   (tucked behind right edge of center)
-   //   R2    910     55    180   520   0.0   (off-screen, invisible)
-   //
-   // centerFraction also animates: 0 when in adjacent/off slot, 1 when in center.
-   // -------------------------------------------------------------------------
-   struct SlotGeom
-   {
-      S32 cx;
-      S32 half_w;
-      S32 top;
-      S32 bot;
-      F32 cf;    // centerFraction for this slot
-   };
-
-   static const SlotGeom SLOTS[5] =
-   {
-      { -80,  55,  180, 520,  0.0f },  // 0 = L2  off-screen
-      {  90,  80,  155, 545,  0.0f },  // 1 = L1  adjacent left  (tucked)
-      { 375, 190,  100, 595,  1.0f },  // 2 = C   center
-      { 660,  80,  155, 545,  0.0f },  // 3 = R1  adjacent right (tucked)
-      { 910,  55,  180, 520,  0.0f },  // 4 = R2  off-screen
-   };
-
-   const S32 totalPhases = (S32)Phase::COUNT;
-
    // Smoothstepped elapsed fraction: 0 at start of transition, 1 at end.
    F32 t = 0.0f;
    if(mTransitionTimer.getCurrent() > 0)
@@ -1694,60 +1791,27 @@ void UIXtankHelper::renderFloatingMenus()
       t = e * e * (3.0f - 2.0f * e);
    }
 
+   // Animate the panel top: slides up from PANEL_BOT to PANEL_TOP as t goes 0→1.
+   S32 animTop = (mTransitionTimer.getCurrent() > 0)
+      ? PANEL_BOT - (S32)((PANEL_BOT - PANEL_TOP) * t)
+      : PANEL_TOP;
 
-   static const S32 CARDS_TO_DISPLAY = 5;
-
-   Phase phaseAtSlot[CARDS_TO_DISPLAY];
-   S32 weaponSlotAtSlot[CARDS_TO_DISPLAY];
-
-   computeCarouselSlots(mPhase, mWeaponSlot, mDesignInProgress.slotsInUse(), phaseAtSlot, weaponSlotAtSlot, CARDS_TO_DISPLAY);
-
-
-   struct CardAnim { Phase phase; S32 weaponSide; S32 fromSlot; S32 toSlot; };
-   CardAnim cards[CARDS_TO_DISPLAY];
-
-   if(mTransitionTimer.getCurrent() > 0)
+   // Clip panel rendering to the animated region so content doesn't bleed below the tab bar.
    {
-      if(mTransitioningForward)
-         for(S32 i = 0; i < CARDS_TO_DISPLAY; i++)
-            cards[i] = { phaseAtSlot[i], weaponSlotAtSlot[i], MIN(i + 1, CARDS_TO_DISPLAY - 1), i };
-      else
-         for(S32 i = 0; i < CARDS_TO_DISPLAY; i++)
-            cards[i] = { phaseAtSlot[i], weaponSlotAtSlot[i], MAX(i - 1, 0), i };
-   }
-   else
-      for(S32 i = 0; i < CARDS_TO_DISPLAY; i++)
-         cards[i] = { phaseAtSlot[i], weaponSlotAtSlot[i], i, i };
+      static ScissorsManager scissorsManager;
+      DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+      scissorsManager.enable(true, displayMode,
+         F32(PANEL_LEFT), F32(animTop - 1),
+         F32(PANEL_RIGHT - PANEL_LEFT), F32(PANEL_BOT - animTop + 1));
 
-   FontManager::pushFontContext(HelperMenuContext);
+      FontManager::pushFontContext(HelperMenuContext);
+      renderCard(PANEL_LEFT, animTop, PANEL_RIGHT, PANEL_BOT, mPhase, 1.0f);
+      FontManager::popFontContext();
 
-
-   // Draw back-to-front so center card is always on top
-   static const S32 drawOrder[CARDS_TO_DISPLAY] = { 0, 4, 1, 3, 2 };
-
-   for(S32 drawIndex = 0; drawIndex < CARDS_TO_DISPLAY; drawIndex++)
-   {
-      S32 currentDrawIndex = drawOrder[drawIndex];
-
-      const CardAnim &ca = cards[currentDrawIndex];
-      const SlotGeom &s0 = SLOTS[ca.fromSlot];	   // Drawing coordinates
-      const SlotGeom &s1 = SLOTS[ca.toSlot];
-
-      // t is transition time, so these coordinates change every iteration until animation is complete
-      S32 cx = s0.cx + (S32)((s1.cx - s0.cx) * t);
-      S32 half_w = s0.half_w + (S32)((s1.half_w - s0.half_w) * t);
-      S32 top = s0.top + (S32)((s1.top - s0.top) * t) - 80;
-      S32 bot = s0.bot + (S32)((s1.bot - s0.bot) * t) - 80;
-      F32 cf = s0.cf + (s1.cf - s0.cf) * t;
-
-      // Skip fully invisible cards
-      if(cf < 0.02f && half_w < 70) continue;
-      if(cx + half_w < 0 || cx - half_w > 800) continue;
-
-      renderCard(cx - half_w, top, cx + half_w, bot, ca.phase, cf);
+      scissorsManager.disable();
    }
 
-   FontManager::popFontContext();
+   renderTabBar(t);
 }
 
 
@@ -1760,44 +1824,44 @@ void UIXtankHelper::renderFloatingMenus()
 // Display slot 2 = center (current), 1 = one back, 0 = two back,
 // slot 3 = one ahead, 4 = two ahead.  Clamped so we never show a
 // position before BODY or past the last weapon slot.
-void UIXtankHelper::computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot, S32 slotsInUse,
-                                         Phase phaseAtSlot[], S32 weaponSlotAtSlot[], // <== Populate these arrays
-                                         S32 cardsToFill)
-{
-   // Number of actual panels considering that there may be multiple weapons panels, 
-   // +1 for the extra blank panel at the end, unless that causes us to exceed WEAPON_SLOTS
-   S32 totalPanels = (S32)Phase::WEAPONS + MIN(slotsInUse + 1, WEAPON_SLOTS);	  
-
-   // Virtual position of the currently active panel in the list of totalPanels
-   S32 currentPanelIndex = (currentPhase == Phase::WEAPONS) ? (S32)Phase::WEAPONS + currentWeaponSlot : (S32)currentPhase;
-
-   for(S32 i = 0; i < cardsToFill; i++)
-   {
-      S32 desiredPanel = currentPanelIndex + (i - 2);	 // Panel we'd want if panels were unbounded
-      S32 panel = CLAMP(desiredPanel, 0, totalPanels);
-
-      if(panel < (S32)Phase::WEAPONS)
-      {
-         if(desiredPanel < 0)
-            phaseAtSlot[i] = Phase::NONE;	// <== Phase::NONE means this slot is blank (used for padding when we don't have enough panels to fill all slots)
-         else
-         {
-            phaseAtSlot[i] = (Phase)panel;	// <== This is the phase of panel i where the midpoint of cards is the current panel
-            weaponSlotAtSlot[i] = -1;		// <== If the phase is Phase::WEAPONS, this is the weapons slot associated with that panel
-         }
-      }
-      else
-      {
-         if(desiredPanel > panel)
-            phaseAtSlot[i] = Phase::NONE;
-         else
-         {
-            phaseAtSlot[i] = Phase::WEAPONS;
-            weaponSlotAtSlot[i] = panel - (S32)Phase::WEAPONS;
-         }
-      }
-   }
-}
+//void UIXtankHelper::computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot, S32 slotsInUse,
+//                                         Phase phaseAtSlot[], S32 weaponSlotAtSlot[], // <== Populate these arrays
+//                                         S32 cardsToFill)
+//{
+//   // Number of actual panels considering that there may be multiple weapons panels, 
+//   // +1 for the extra blank panel at the end, unless that causes us to exceed WEAPON_SLOTS
+//   S32 totalPanels = (S32)Phase::WEAPONS + MIN(slotsInUse + 1, WEAPON_SLOTS);	  
+//
+//   // Virtual position of the currently active panel in the list of totalPanels
+//   S32 currentPanelIndex = (currentPhase == Phase::WEAPONS) ? (S32)Phase::WEAPONS + currentWeaponSlot : (S32)currentPhase;
+//
+//   for(S32 i = 0; i < cardsToFill; i++)
+//   {
+//      S32 desiredPanel = currentPanelIndex + (i - 2);	 // Panel we'd want if panels were unbounded
+//      S32 panel = CLAMP(desiredPanel, 0, totalPanels);
+//
+//      if(panel < (S32)Phase::WEAPONS)
+//      {
+//         if(desiredPanel < 0)
+//            phaseAtSlot[i] = Phase::NONE;	// <== Phase::NONE means this slot is blank (used for padding when we don't have enough panels to fill all slots)
+//         else
+//         {
+//            phaseAtSlot[i] = (Phase)panel;	// <== This is the phase of panel i where the midpoint of cards is the current panel
+//            weaponSlotAtSlot[i] = -1;		// <== If the phase is Phase::WEAPONS, this is the weapons slot associated with that panel
+//         }
+//      }
+//      else
+//      {
+//         if(desiredPanel > panel)
+//            phaseAtSlot[i] = Phase::NONE;
+//         else
+//         {
+//            phaseAtSlot[i] = Phase::WEAPONS;
+//            weaponSlotAtSlot[i] = panel - (S32)Phase::WEAPONS;
+//         }
+//      }
+//   }
+//}
 
 
 void UIXtankHelper::applyDesign()

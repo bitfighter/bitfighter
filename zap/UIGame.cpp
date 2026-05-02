@@ -527,12 +527,14 @@ void GameUserInterface::render()
    mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
    mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
 
-   mHelperManager.render();
 
    GameType *gameType = getGame()->getGameType();
 
+   // This includes things like the game timer
    if(gameType)
       gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+
+   mHelperManager.render();
 
    renderLevelInfo();
 

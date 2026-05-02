@@ -546,7 +546,7 @@ class XtankDesign
 
       void selected(Phase phase, S32 index, S32 slot);
       void setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mountPoint);
-      S32 slotsInUse();
+      S32 slotsInUse() const;
 
       S32 heatDissipation() const;
 };
