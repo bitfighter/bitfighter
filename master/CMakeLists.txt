@@ -44,7 +44,7 @@ endif()
 set(MASTER_DEPS tnl)
 # Add tomcypt if not already found on system
 if(NOT TOMCRYPT_FOUND)
-	list(APPEND MASTER_DEPS tomcrypt)
+	list(APPEND MASTER_DEPS libtomcrypt)
 endif()
 
 set(MASTER_LIBS 
