@@ -30,14 +30,38 @@
 
 #include "ShipShape.h"     // for ShipShapeInfo
 #include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon) and ProjectileStyle
+#include "move.h"
+
+#include <array>
 
 namespace Zap
 {
 
-#define MAX_ACCEL 2.5   // The amount a vehicle can accelerate under perfect conditions
-#define MAX_WEAPONS 6   // Number of weapons allowed on any one tank
+//using std::array;
 
-   static const S32 XtankMaxWeapons = MAX_WEAPONS;
+static const S32 WEAPON_SLOTS = 6;	   // Max number of weapons a vehicle can carry
+
+
+// These really don't belong here; they are part of the vehicle designer, which is in UIXtankHelper at the moment.
+enum class Phase
+{
+   BODY = 0,
+   ENGINE,
+   TREADS,
+   ARMOR,
+   ARMOR_SIDES,
+   SUSPENSION,
+   BUMPERS,
+   SPECIALS,
+   HEATSINK,
+   WEAPONS,
+   COUNT,
+   NONE = -1,
+};
+constexpr S32 PhaseCount = (S32)Phase::COUNT;
+
+#define MAX_ACCEL 2.5   // The amount a vehicle can accelerate under perfect conditions
+
 
    // Names of each xtank body, kept in the same order as the enum below.
    // Used for on-screen display when the player cycles bodies.
@@ -45,7 +69,7 @@ namespace Zap
 
    // Enum of all 14 xtank vehicle bodies (in the order they appear in xtank's
    // objects.c).  XtankBodyNone represents "show the normal BF ship".
-   enum XtankBody
+   enum class XtankBody
    {
       Lightcycle = 0,
       Trike,
@@ -61,11 +85,15 @@ namespace Zap
       Disk,
       Malice,
       Panzy,
-      XtankBodyCount,    // total number of xtank bodies
-      XtankBodyNone = -1 // sentinel: use the regular BF ship shape
+      COUNT,     
+      BITFIGHTER_SHIP = -1,
+      NONE = -2, 
+      DEFAULT = Lightcycle
    };
+   constexpr S32 VehicleBodyCount = (S32)XtankBody::COUNT;
 
-   struct XtankBodyInfo
+
+   struct XtankBodyInfo2
    {
       const char *name; // Display name
       S32 size;
@@ -80,20 +108,20 @@ namespace Zap
 
    // Array of ShipShapeInfo descriptors for every xtank body.  Each entry is
    // compatible with the existing renderShip() rendering path.
-   extern ShipShapeInfo xtankBodyInfos[XtankBodyCount];
+   extern ShipShapeInfo xtankBodyInfos[VehicleBodyCount];
 
    // Pre-computed bounding-circle radius for each xtank body (maximum distance
    // from origin to any hull vertex).  Used for collision detection so the
    // hitbox reflects the actual hull size rather than the BF default.
-   extern F32 xtankBodyCollisionRadius[XtankBodyCount];
+   extern F32 xtankBodyCollisionRadius[VehicleBodyCount];
 
    // Y coordinate (in body space, +Y = forward/nose) of the foremost hull vertex.
    // Used by the vehicle overlay renderer to position the nose chevron and to
    // distribute heat-sink / engine indicators along the hull.
-   extern F32 xtankBodyNoseY[XtankBodyCount];
+   extern F32 xtankBodyNoseY[VehicleBodyCount];
 
    // Y coordinate of the rearmost hull vertex (always negative or small positive).
-   extern F32 xtankBodyRearY[XtankBodyCount];
+   extern F32 xtankBodyRearY[VehicleBodyCount];
 
    // ---------------------------------------------------------------------------
    // Turret data for xtank vehicles.
@@ -117,11 +145,11 @@ namespace Zap
    };
 
    // One entry per XtankBody value.
-   extern XtankBodyTurrets xtankTurretInfos[XtankBodyCount];
+   extern XtankBodyTurrets xtankTurretInfos[VehicleBodyCount];
 
    // Original xtank body data (objects.c/body-defs.h style fields).
    // Movement is derived from this table plus selected engine/treads.
-   extern XtankBodyInfo body_stat[];
+   extern XtankBodyInfo2 xTankBodyStats[];
 
    // ---------------------------------------------------------------------------
    // Xtank weapon catalogue.
@@ -132,10 +160,10 @@ namespace Zap
    // ---------------------------------------------------------------------------
 
    // Enum of all xtank weapons (native from xtank game).
-   // XtankWeaponNone represents "this turret slot carries no weapon".
-   enum XtankWeapon
+   // XtankWeapon::NONE represents "this turret slot carries no weapon".
+   enum class XtankWeapon
    {
-      LIGHT_MACHINE_GUN,
+      LIGHT_MACHINE_GUN = 0,
       MACHINE_GUN,
       HEAVY_MACHINE_GUN,
       LIGHT_AUTOCANNON,
@@ -160,9 +188,24 @@ namespace Zap
       TACTICAL_NUKE,
       ANTI_RADIATION,
       DISC_SHOOTER,
-      XtankWeaponCount,    // total number of xtank weapons
-      XtankWeaponNone = -1 // sentinel: slot carries no weapon
+      COUNT,    
+      NONE = -1 // Slot carries no weapon
    };
+   constexpr S32 XtankWeaponCount = (S32)XtankWeapon::COUNT;
+
+   enum class VehicleSides
+   {
+      SIDE_FRONT = 0,
+      SIDE_BACK,
+      SIDE_LEFT,
+      SIDE_RIGHT,
+      SIDE_TOP,
+      SIDE_BOTTOM,
+      COUNT  // 6
+   };
+   constexpr S32 VehicleSidesCount = (S32)VehicleSides::COUNT;
+   static const char *sideNames[] = { "Front", "Back", "Left", "Right", "Top", "Bottom" };
+
 
    struct HeatSinkStat
    {
@@ -206,7 +249,7 @@ namespace Zap
       S32 refill_time;       // Ammo refill time
       S32 safety;            // Safety distance
       S32 height;            // Projectile height
-      S32 mount;             // Where weapon can be mounted (bitflags)
+      S32 legalMounts;       // Where weapon can be mounted (bitflags)
       U64 other_flgs;        // Misc. flags
       U64 creat_flgs;        // Bullet creation flags
       U64 disp_flgs;         // Display flags
@@ -218,7 +261,7 @@ namespace Zap
    };
 
    // One entry per XtankWeapon value.
-   extern XtankWeaponInfo xtankWeaponInfos[XtankWeaponCount];
+   extern XtankWeaponInfo xtankWeaponInfos[];
 
    // Helper functions to compute BF-compatible values from native xtank fields.
    // Xtank runs at 20fps, so 1 frame = 50ms.
@@ -242,7 +285,7 @@ namespace Zap
    // acceleration.  A heavier engine gives more power but adds bulk.
    // ---------------------------------------------------------------------------
 
-   enum XtankEngine
+   enum class XtankEngine
    {
       Small_Electric,
       Medium_Electric,
@@ -260,11 +303,12 @@ namespace Zap
       Fission,
       Breeder_Fission,
       Fusion,
-      XtankEngineCount,
-      XtankEngineDefault = Super_Combustion
+      COUNT,
+      DEFAULT = Super_Combustion
    };
+   constexpr S32 XtankEngineCount = (S32)XtankEngine::COUNT;
 
-   enum XtankArmor
+   enum class XtankArmor
    {
       Steel,
       Kevlar,
@@ -275,9 +319,10 @@ namespace Zap
       Compound_Steel,
       Titanium,
       Tungsten,
-      XtankArmorCount,
-      XtankArmorDefault = Steel
+      COUNT,
+      DEFAULT = Steel
    };
+   constexpr S32 XtankArmorCount = (S32)XtankArmor::COUNT;
 
    // Per-engine gameplay multipliers applied on top of the body's base physics.
    struct XtankEngineInfo
@@ -285,7 +330,6 @@ namespace Zap
       const char *name;
       F32 speedMult; // Multiplier on maxSpeed and maxReverseSpeed
       F32 accelMult; // Multiplier on acceleration
-
       S32 power;
       S32 weight;
       S32 space;
@@ -311,27 +355,17 @@ namespace Zap
    // Rubber treads give nimble steering; heavy treads grip harder but turn slower.
    // ---------------------------------------------------------------------------
 
-   enum XtankTread      // united
+   enum class XtankTread      
    {
-      TREAD_SMOOTH = 0,
-      TREAD_NORMAL,
-      TREAD_CHAINED,
-      TREAD_SPIKED,
-      TREAD_HOVER,
-      XtankTreadCount,
-      XtankTreadDefault = TREAD_NORMAL
+      SMOOTH = 0,
+      NORMAL,
+      CHAINED,
+      SPIKED,
+      HOVER,
+      COUNT,
+      DEFAULT = NORMAL
    };
-
-   //enum XtankTread
-   //{
-   //   // AI values
-   //   Rubber = 0, // Light, nimble; faster turning, slightly less grip
-   //   Metal = 1,  // Balanced standard
-   //   Heavy = 2,  // Slow to turn, but high grip / rapid deceleration
-
-   //   XtankTreadCount,
-   //   XtankTreadDefault = Metal
-   //};
+   constexpr S32 XtankTreadCount = (S32)XtankTread::COUNT;
 
    // Names for on-screen display, one per XtankTread.
    extern const char *xtankTreadNames[];
@@ -351,14 +385,31 @@ namespace Zap
    extern XtankArmorInfo xtankArmorInfos[];
    extern HeatSinkStat heatSinkStat;
 
-   // Suspension: 4 options (Light, Normal, Heavy, Active)
-   static const S32 XtankSuspensionCount   = 4;
-   static const S32 XtankSuspensionDefault = 1;  // Normal
+   enum class XtankSuspension
+   {
+      LIGHT = 0,
+      NORMAL,
+      HEAVY,
+      ACTIVE,
+      COUNT,
+      DEFAULT = NORMAL
+   };
+   constexpr S32 XtankSuspensionCount = (S32)XtankSuspension::COUNT;
+
    extern SuspensionStat suspensionStat[];
 
+   enum class XtankBumper
+   {
+      NONE = 0,
+      NORMAL,
+      RUBBER,
+      RETRO,
+      COUNT,
+      DEFAULT = NONE
+   };
+   constexpr S32 XtankBumperCount = (S32)XtankBumper::COUNT;
+
    // Bumpers: 4 options (None, Normal, Rubber, Retro)
-   static const S32 XtankBumperCount   = 4;
-   static const S32 XtankBumperDefault = 0;  // None
    extern BumperStat bumperStat[];
 
    // ---------------------------------------------------------------------------
@@ -366,35 +417,30 @@ namespace Zap
    // More heat sinks allow the weapons to cycle faster.
    // ---------------------------------------------------------------------------
 
-   static const S32 XtankHeatSinkMin = 1;
-   static const S32 XtankHeatSinkMax = 6;
-   static const S32 XtankHeatSinkDefault = 1;
+   static const S32 MIN_HEATSINKS = 0;
+   static const S32 MAX_HEAT_SINKS = 99;
 
-   // Returns the fire-delay multiplier for a given heat-sink count.
-   // 1 sink → 1.00x, each additional sink reduces delay by 8%.
-   // 6 sinks → 0.60x (40% faster cycling).
-   inline F32 xtankHeatSinkFireDelayMult(S32 count)
-   {
-      return 1.0f - (count - 1) * 0.08f;
-   }
+   static const S32 XtankHeatSinkDefault = 0;
 
    // ---------------------------------------------------------------------------
    // Vehicle design: per-player xtank configuration (body + weapon loadout).
    // ---------------------------------------------------------------------------
 
-   enum XtankMountLocation
+   enum class XtankMountLocation
    {
-      MOUNT_TURRET1 = 0,
-      MOUNT_TURRET2,
-      MOUNT_TURRET3,
-      MOUNT_TURRET4,
-      MOUNT_FRONT,
-      MOUNT_BACK,
-      MOUNT_LEFT,
-      MOUNT_RIGHT,
-      XtankMountCount,
-      XtankMountNone = -1,
+      TURRET1 = 0,
+      TURRET2,
+      TURRET3,
+      TURRET4,
+      FRONT,
+      BACK,
+      LEFT,
+      RIGHT,
+      COUNT,
+      LAST = COUNT - 1,
+      NONE = -1,
    };
+   constexpr S32 XtankMountLocationCount = (S32)XtankMountLocation::COUNT;
 
    struct XtankWeaponAssignment
    {
@@ -405,11 +451,11 @@ namespace Zap
    // Default weapon assignments for each body.
    struct XtankBodyDefaultWeapons
    {
-      XtankWeaponAssignment slots[XtankMaxWeapons];
+      XtankWeaponAssignment slots[WEAPON_SLOTS];
    };
 
    // One entry per XtankBody value.
-   extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBodyCount];
+   extern XtankBodyDefaultWeapons xtankDefaultWeapons[VehicleBodyCount];
 
    // ---------------------------------------------------------------------------
    // Xtank special equipment: player-selectable extras that provide gameplay bonuses.
@@ -456,23 +502,55 @@ namespace Zap
    // The player's active vehicle configuration.  Stored in Ship and communicated
    // via Move (bodyIndex, weaponSlot[], weaponMount[], engineType, treadType,
    // heatSinkCount, specials).
-   struct XtankDesign
-   {
-      S8 bodyIndex;           // XtankBody, -1 = normal BF ship
-      XtankWeapon weapons[XtankMaxWeapons];      // active weapon per weapon number slot (0..5)
-      S8 weaponMounts[XtankMaxWeapons];          // XtankMountLocation per weapon slot
-      XtankEngine engineType; // selected engine
-      XtankTread treadType;   // selected tread type
-      S8 heatSinkCount;       // number of heat sinks (1-6)
-      XtankArmor armorType;
-      S8 suspensionType;      // index into suspensionStat[]
-      S8 bumperType;          // index into bumperStat[]
-      U16 specials;           // bitmask of XtankSpecial bits
-      U8 armorSides[6];       // per-side armor points (front=0, back=1, left=2, right=3, top=4, bottom=5)
 
+const S32 MAX_ARMOR_PER_SIDE = 999;    // Effetively unlimited
+
+class XtankDesign
+{
+   public:
       XtankDesign();                 // Default constructor (bodyIndex = None)
-      void initForBody(S32 bodyIdx); // Set body + reset all components to defaults
-   };
+      XtankDesign(const Move &move);
+
+      bool same(const XtankDesign &other) const;
+
+      XtankBody body;           // XtankBody, -1 = normal BF ship
+      array<XtankWeapon, WEAPON_SLOTS> weapons;    // active weapon per weapon number slot (0..5)
+      array<XtankMountLocation, WEAPON_SLOTS> weaponMounts;    // Where weapons are mounted
+      array<XtankMountLocation, WEAPON_SLOTS> preferredMounts; // Where players might prefer weapon to be mounted
+      XtankEngine engine; // selected engine
+      XtankTread tread;   // selected tread type
+      S32 heatSinks;       // number of heat sinks
+      XtankArmor armor;
+      XtankSuspension suspension;  // index into suspensionStat[]
+      XtankBumper bumper;          // index into bumperStat[]
+      U32 specials;           // bitmask of XtankSpecial bits
+      array<S32, VehicleSidesCount> armorSides;  // per-side armor points (front=0, back=1, left=2, right=3, top=4, bottom=5)
+
+      void init(); // Set body + reset all components to defaults
+      const char *getArmorName() const;      // Name of currently selected 
+      S32 getBodySize() const;
+      bool isXtankVehicle() const;
+
+
+      void reduceArmor(VehicleSides side, S32 amount = 1);
+      void increaseArmor(VehicleSides side, S32 amount = 1);
+
+      void nextArmor();
+      void previousArmor();
+
+      void nextMount(S32 slot);
+      void previousMount(S32 slot);
+
+      static bool isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMountLocation mount);
+      static XtankMountLocation firstValidMount(XtankBody body, XtankWeapon weapon, XtankMountLocation preferred);
+
+      void selected(Phase phase, S32 index, S32 slot);
+      void setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mountPoint);
+      S32 slotsInUse();
+
+      S32 heatDissipation() const;
+};
+
 
 /* Other options */
 #define F_OUTP 0x0F /* mask.  lower 4 bits specify which levels of */
@@ -527,6 +605,8 @@ namespace Zap
 #define M_LEFT (1 << 2)
 #define M_RIGHT (1 << 3)
 #define M_TURRET (1 << 4)
+
+
 #define M_SIDES M_FRONT | M_BACK | M_LEFT | M_RIGHT
 #define M_LR M_LEFT | M_RIGHT
 #define M_ALL M_SIDES | M_TURRET

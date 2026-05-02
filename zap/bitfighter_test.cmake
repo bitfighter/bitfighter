@@ -38,6 +38,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShipControlState.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStatistics.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
@@ -45,6 +46,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSync.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankCarouselSlots.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )
 

@@ -16,6 +16,8 @@
 #include <stdio.h>         // For vsnprintf
 
 
+using namespace std;
+
 namespace Zap {
 
 static char buffer[2048];     // Reusable buffer

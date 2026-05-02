@@ -20,18 +20,18 @@ using namespace Zap;
 
 namespace Zap { namespace UI {
 
-static const char *getMountLabel(S8 mount)
+static const char *getMountLabel(XtankMountLocation mount)
 {
-   switch((XtankMountLocation)mount)
+   switch(mount)
    {
-      case MOUNT_TURRET1: return "T1";
-      case MOUNT_TURRET2: return "T2";
-      case MOUNT_TURRET3: return "T3";
-      case MOUNT_TURRET4: return "T4";
-      case MOUNT_FRONT:   return "F";
-      case MOUNT_BACK:    return "B";
-      case MOUNT_LEFT:    return "L";
-      case MOUNT_RIGHT:   return "R";
+      case XtankMountLocation::TURRET1: return "T1";
+      case XtankMountLocation::TURRET2: return "T2";
+      case XtankMountLocation::TURRET3: return "T3";
+      case XtankMountLocation::TURRET4: return "T4";
+      case XtankMountLocation::FRONT:   return "F";
+      case XtankMountLocation::BACK:    return "B";
+      case XtankMountLocation::LEFT:    return "L";
+      case XtankMountLocation::RIGHT:   return "R";
       default:            return "-";
    }
 }
@@ -165,12 +165,12 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
    Renderer& r = Renderer::get();
 
    // Xtank mode: show body name + engine + treads + heat sinks + per-slot weapon names.
-   if(xtankDesign.bodyIndex >= 0)
+   if(!xtankDesign.isXtankVehicle())
    {
       FontManager::pushFontContext(LoadoutIndicatorContext);
 
       S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
-      S32 bodyIdx = (S32)xtankDesign.bodyIndex;
+      S32 bodyIdx = (S32)xtankDesign.body;
 
       // Body name box
       r.setColor(*INDICATOR_INACTIVE_COLOR);
@@ -181,17 +181,17 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
 
       // Engine
       r.setColor(*INDICATOR_INACTIVE_COLOR);
-      width = renderComponentIndicator(xPos, top, xtankEngineInfos[(S32)xtankDesign.engineType].name);
+      width = renderComponentIndicator(xPos, top, xtankEngineInfos[(S32)xtankDesign.engine].name);
       xPos += width + IndicatorHorizPadding;
 
       // Treads
       r.setColor(*INDICATOR_INACTIVE_COLOR);
-      width = renderComponentIndicator(xPos, top, xtankTreadInfos[(S32)xtankDesign.treadType].name);
+      width = renderComponentIndicator(xPos, top, xtankTreadInfos[(S32)xtankDesign.tread].name);
       xPos += width + IndicatorHorizPadding;
 
       // Heat sinks ("HSx N")
       char hsBuf[16];
-      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)xtankDesign.heatSinkCount);
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)xtankDesign.heatSinks);
       r.setColor(*INDICATOR_INACTIVE_COLOR);
       width = renderComponentIndicator(xPos, top, hsBuf);
       xPos += width + IndicatorHorizPadding;
@@ -199,11 +199,11 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
       xPos += GapBetweenTheGroups;
 
       // One box per xtank weapon-number slot
-      for(S32 i = 0; i < XtankMaxWeapons; i++)
+      for(S32 i = 0; i < WEAPON_SLOTS; i++)
       {
          XtankWeapon wt = xtankDesign.weapons[i];
          char weapBuf[96];
-         if((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
+         if(wt != XtankWeapon::NONE)
             dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountLabel(xtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
          else
             dSprintf(weapBuf, sizeof(weapBuf), "#%d --", i + 1);
@@ -260,30 +260,30 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
 S32 LoadoutIndicator::getWidth() const
 {
    // Xtank mode: body name + engine + treads + heat sinks + weapons
-   if(mXtankDesign.bodyIndex >= 0)
+   if(!mXtankDesign.isXtankVehicle())
    {
-      S32 bodyIdx = (S32)mXtankDesign.bodyIndex;
+      S32 bodyIdx = (S32)mXtankDesign.body;
       S32 width = getComponentIndicatorWidth(xtankBodyNames[bodyIdx]) + IndicatorHorizPadding;
       width += GapBetweenTheGroups;
-      width += getComponentIndicatorWidth(xtankEngineInfos[(S32)mXtankDesign.engineType].name) + IndicatorHorizPadding;
-      width += getComponentIndicatorWidth(xtankTreadInfos[(S32)mXtankDesign.treadType].name)   + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(xtankEngineInfos[(S32)mXtankDesign.engine].name) + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(xtankTreadInfos[(S32)mXtankDesign.tread].name) + IndicatorHorizPadding;
 
       char hsBuf[16];
-      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)mXtankDesign.heatSinkCount);
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)mXtankDesign.heatSinks);
       width += getComponentIndicatorWidth(hsBuf) + IndicatorHorizPadding;
 
       width += GapBetweenTheGroups;
-      for(S32 i = 0; i < XtankMaxWeapons; i++)
+      for(S32 i = 0; i < WEAPON_SLOTS; i++)
       {
          XtankWeapon wt = mXtankDesign.weapons[i];
          char weapBuf[96];
-         if((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
+         if(wt != XtankWeapon::NONE)
             dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountLabel(mXtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
          else
             dSprintf(weapBuf, sizeof(weapBuf), "#%d --", i + 1);
          width += getComponentIndicatorWidth(weapBuf) + IndicatorHorizPadding;
       }
-      if(XtankMaxWeapons > 0)
+      if(WEAPON_SLOTS > 0)
          width -= IndicatorHorizPadding;
       return width;
    }

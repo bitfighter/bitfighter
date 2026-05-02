@@ -25,11 +25,15 @@
 //------------------------------------------------------------------------------
 
 #include "XtankShape.h"
+#include "UIXtankHelper.h"
+#include "MathUtils.h"
+
+using std::array;
 
 namespace Zap
 {
 
-const char *xtankBodyNames[XtankBodyCount] =
+const char *xtankBodyNames[] =
 {
    "Lightcycle",
    "Trike",
@@ -78,7 +82,7 @@ XtankArmorInfo xtankArmorInfos[] =
 //   Trike 11  Lightcycle 15  Hexo/Spider/Malice 17  Tornado 18
 //   Tiger 19  Psycho/Marauder 21  Delta ~21  Disk ~17  Medusa/Rhino 27  Panzy 31
 // ---------------------------------------------------------------------------
-ShipShapeInfo xtankBodyInfos[XtankBodyCount] =
+ShipShapeInfo xtankBodyInfos[] =
 {
    // -------------------------------------------------------------------------
    // XtankBody::Lightcycle  (max extent: 15)
@@ -445,7 +449,7 @@ XtankBodyTurrets xtankTurretInfos[] =
 
 
 // Original xtank
-XtankBodyInfo body_stat[] =
+XtankBodyInfo2 xTankBodyStats[] =
 {
    /* type     size weight wghtlim space  drag hndl trts cost */
    {"Lightcycle", 2,   200, 800,     600,  .10f, 8, 0,  3000 },
@@ -507,12 +511,12 @@ XtankEngineInfo xtankEngineInfos[] =
 
 XtankTreadInfo xtankTreadInfos[] =
 {
-//    name          friction  cost
-   { "Smooth",       0.70f,  100 },
-   { "Normal",       0.80f,  200 },
-   { "Chained",      0.90f,  400 },
-   { "Spiked",       1.00f, 1000 },
-   { "Hover",        0.20f,  500 },
+   //    name          friction  cost
+      { "Smooth",       0.70f,  100 },
+      { "Normal",       0.80f,  200 },
+      { "Chained",      0.90f,  400 },
+      { "Spiked",       1.00f, 1000 },
+      { "Hover",        0.20f,  500 },
 };
 
 
@@ -619,32 +623,32 @@ XtankWeaponInfo xtankWeaponInfos[] =
 // Default weapon loadout for each xtank vehicle body.
 //
 // The first xtankTurretInfos[bodyIdx].count entries are valid; extras are
-// XtankWeaponNone.
+// XtankWeapon::NONE.
 // ---------------------------------------------------------------------------
 
 XtankBodyDefaultWeapons xtankDefaultWeapons[] =
 {
-   { { { XtankWeapon::MACHINE_GUN,        MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Lightcycle
-   { { { XtankWeapon::LIGHT_MACHINE_GUN,  MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Trike
-   { { { XtankWeapon::ACID_SPRAYER,       MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Hexo
-   { { { XtankWeapon::FLAME_THROWER,      MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Spider
-   { { { XtankWeapon::PULSE_LASER,        MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Psycho
-   { { { XtankWeapon::AUTOCANNON,         MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Tornado
-   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Marauder
-   { { { XtankWeapon::MACHINE_GUN,        MOUNT_TURRET1 }, { XtankWeapon::MACHINE_GUN, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Tiger
-   { { { XtankWeapon::BLAST_CANNON,       MOUNT_TURRET1 }, { XtankWeapon::BLAST_CANNON, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Rhino
-   { { { XtankWeapon::HEAT_SEEKER,        MOUNT_TURRET1 }, { XtankWeapon::HEAT_SEEKER, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Medusa
-   { { { XtankWeapon::PULSE_LASER,        MOUNT_TURRET1 }, { XtankWeapon::PULSE_LASER, MOUNT_TURRET2 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Delta
-   { { { XtankWeapon::FLAME_THROWER,      MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Disk
-   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, MOUNT_TURRET1 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Malice
-   { { { XtankWeapon::HEAVY_AUTOCANNON,   MOUNT_TURRET1 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET2 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET3 }, { XtankWeapon::HEAVY_AUTOCANNON, MOUNT_TURRET4 }, { XtankWeaponNone, XtankMountNone }, { XtankWeaponNone, XtankMountNone } } },  // Panzy
+   { { { XtankWeapon::MACHINE_GUN,        XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Lightcycle
+   { { { XtankWeapon::LIGHT_MACHINE_GUN,  XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Trike
+   { { { XtankWeapon::ACID_SPRAYER,       XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Hexo
+   { { { XtankWeapon::FLAME_THROWER,      XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Spider
+   { { { XtankWeapon::PULSE_LASER,        XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Psycho
+   { { { XtankWeapon::AUTOCANNON,         XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Tornado
+   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Marauder
+   { { { XtankWeapon::MACHINE_GUN,        XtankMountLocation::TURRET1 }, { XtankWeapon::MACHINE_GUN, XtankMountLocation::TURRET2 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Tiger
+   { { { XtankWeapon::BLAST_CANNON,       XtankMountLocation::TURRET1 }, { XtankWeapon::BLAST_CANNON, XtankMountLocation::TURRET2 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Rhino
+   { { { XtankWeapon::HEAT_SEEKER,        XtankMountLocation::TURRET1 }, { XtankWeapon::HEAT_SEEKER, XtankMountLocation::TURRET2 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Medusa
+   { { { XtankWeapon::PULSE_LASER,        XtankMountLocation::TURRET1 }, { XtankWeapon::PULSE_LASER, XtankMountLocation::TURRET2 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Delta
+   { { { XtankWeapon::FLAME_THROWER,      XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Disk
+   { { { XtankWeapon::LIGHT_RKT_LAUNCHER, XtankMountLocation::TURRET1 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Malice
+   { { { XtankWeapon::HEAVY_AUTOCANNON,   XtankMountLocation::TURRET1 }, { XtankWeapon::HEAVY_AUTOCANNON, XtankMountLocation::TURRET2 }, { XtankWeapon::HEAVY_AUTOCANNON, XtankMountLocation::TURRET3 }, { XtankWeapon::HEAVY_AUTOCANNON, XtankMountLocation::TURRET4 }, { XtankWeapon::NONE, XtankMountLocation::NONE }, { XtankWeapon::NONE, XtankMountLocation::NONE } } },  // Panzy
 };
 
 
 // ---------------------------------------------------------------------------
 // Heatsink info
 // ---------------------------------------------------------------------------
-HeatSinkStat heatSinkStat = {500, 1000, 500}; // weight, space, cost
+HeatSinkStat heatSinkStat = { 500, 1000, 500 }; // weight, space, cost
 
 SuspensionStat suspensionStat[] =
 {
@@ -686,57 +690,337 @@ XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount] =
    { "RDF",           "Radio direction-finding",             50,    2,  1000 },
 };
 
-    XtankDesign::XtankDesign()
+
+XtankDesign::XtankDesign()    // Constructor
 {
-   bodyIndex = (S8)XtankBodyNone;
-   for(S32 i = 0; i < XtankMaxWeapons; i++)
+   init();
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+      preferredMounts[i] = XtankMountLocation::TURRET1;
+}
+
+
+void XtankDesign::init()
+{
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
    {
-      weapons[i] = XtankWeaponNone;
-      weaponMounts[i] = (S8)XtankMountNone;
+      weapons[i] = XtankWeapon::NONE;
+      weaponMounts[i] = XtankMountLocation::NONE;
    }
-   engineType     = XtankEngineDefault;
-   treadType      = XtankTreadDefault;
-   heatSinkCount  = (S8)XtankHeatSinkDefault;
-   armorType      = XtankArmorDefault;
-   suspensionType = (S8)XtankSuspensionDefault;
-   bumperType     = (S8)XtankBumperDefault;
-   specials       = 0;
-   for(S32 i = 0; i < 6; i++)
+   // Xtank-style default armor: all sides start at 0 and are set explicitly.
+   for(S32 i = 0; i < VehicleSidesCount; i++)
       armorSides[i] = 0;
+
+   body = XtankBody::DEFAULT;
+   engine = XtankEngine::DEFAULT;
+   tread = XtankTread::DEFAULT;
+   heatSinks = XtankHeatSinkDefault;
+   armor = XtankArmor::DEFAULT;
+   suspension = XtankSuspension::DEFAULT;
+   bumper = XtankBumper::DEFAULT;
+   specials = 0;
 }
 
 
-void XtankDesign::initForBody(S32 bodyIdx)
+XtankDesign::XtankDesign(const Move &move)
 {
-   bodyIndex = (S8)bodyIdx;
-   if(bodyIdx >= 0 && bodyIdx < XtankBodyCount)
+   body = (XtankBody)move.bodyIndex;
+   engine = (XtankEngine)move.engineType;
+   tread = (XtankTread)move.treadType;
+   armor = (XtankArmor)move.armorType;
+   suspension = (XtankSuspension)move.suspensionType;
+   bumper = (XtankBumper)move.bumperType;
+   heatSinks = move.heatSinkCount;
+   specials = move.specials;
+
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+      armorSides[i] = move.armorSides[i];
+
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
    {
-      for(S32 i = 0; i < XtankMaxWeapons; i++)
-      {
-         weapons[i] = xtankDefaultWeapons[bodyIdx].slots[i].weapon;
-         weaponMounts[i] = (S8)xtankDefaultWeapons[bodyIdx].slots[i].mount;
-      }
-      // Xtank-style default armor: all sides start at 0 and are set explicitly.
-      for(S32 i = 0; i < 6; i++)
-         armorSides[i] = 0;
+      weapons[i] = (XtankWeapon)move.weaponSlot[i];
+      weaponMounts[i] = (XtankMountLocation)move.weaponMount[i];
+      preferredMounts[i] = (XtankMountLocation)move.weaponMount[i];
    }
-   else
-   {
-      for(S32 i = 0; i < XtankMaxWeapons; i++)
-      {
-         weapons[i] = XtankWeaponNone;
-         weaponMounts[i] = (S8)XtankMountNone;
-      }
-      for(S32 i = 0; i < 6; i++)
-         armorSides[i] = 0;
-   }
-   engineType    = XtankEngineDefault;
-   treadType     = XtankTreadDefault;
-   heatSinkCount = (S8)XtankHeatSinkDefault;
-   armorType     = XtankArmorDefault;
-   suspensionType = (S8)XtankSuspensionDefault;
-   bumperType     = (S8)XtankBumperDefault;
-   specials       = 0;
 }
+
+bool XtankDesign::same(const XtankDesign &other) const
+{
+   if(engine != other.engine || tread != other.tread || armor != other.armor ||
+      suspension != other.suspension || bumper != other.bumper || heatSinks != other.heatSinks ||
+      specials != other.specials)
+      return false;
+
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+   {
+      if(armorSides[i] != other.armorSides[i])
+         return false;
+   }
+
+   // Unordered pairwise comparison: same set of (weapon, mount) pairs regardless of slot order.
+   using WMPair = std::pair<XtankWeapon, XtankMountLocation>;
+   WMPair mine[WEAPON_SLOTS], theirs[WEAPON_SLOTS];
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      mine[i] = { weapons[i],       weaponMounts[i] };
+      theirs[i] = { other.weapons[i], other.weaponMounts[i] };
+   }
+   std::sort(mine, mine + WEAPON_SLOTS);
+   std::sort(theirs, theirs + WEAPON_SLOTS);
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+      if(mine[i] != theirs[i])
+         return false;
+
+   return true;
+}
+
+
+// Name of currently selected armor
+const char *XtankDesign::getArmorName() const
+{
+   return xtankArmorInfos[(S32)armor].name;
+}
+
+
+// Size of currently selected body
+S32 XtankDesign::getBodySize() const
+{
+   return xTankBodyStats[(S32)body].size;
+}
+
+
+bool XtankDesign::isXtankVehicle() const
+{
+   return body != XtankBody::BITFIGHTER_SHIP && body != XtankBody::NONE;
+}
+
+
+void XtankDesign::reduceArmor(VehicleSides side, S32 amount)
+{
+   S32 sideIndex = (S32)side;
+   if(armorSides[sideIndex] - amount >= 0)
+      armorSides[sideIndex] -= amount;
+   else
+      armorSides[sideIndex] = 0;
+}
+
+
+void XtankDesign::increaseArmor(VehicleSides side, S32 amount)
+{
+   S32 sideIndex = (S32)side;
+   if(armorSides[sideIndex] + amount <= MAX_ARMOR_PER_SIDE)
+      armorSides[sideIndex] += amount;
+   else
+      armorSides[sideIndex] = MAX_ARMOR_PER_SIDE;
+}
+
+
+void XtankDesign::nextArmor()
+{
+   S32 nextArmor = (S32)armor + 1;
+   if(nextArmor == (S32)XtankArmorCount)
+      nextArmor = 0;
+
+   armor = (XtankArmor)nextArmor;
+}
+
+
+void XtankDesign::previousArmor()
+{
+   S32 prevArmor = (S32)armor - 1;
+   if(prevArmor < 0)
+      prevArmor = (S32)XtankArmorCount - 1;
+
+   armor = (XtankArmor)prevArmor;
+}
+
+
+void XtankDesign::nextMount(S32 slot)
+{
+   XtankWeapon w = weapons[slot];
+
+   XtankMountLocation mount = weaponMounts[slot];
+   do {
+      mount = nextEnum(mount);
+   } while(!isMountCompatible(body, w, mount));
+
+   weaponMounts[(S32)slot] = mount;
+   preferredMounts[(S32)slot] = mount;
+}
+
+
+void XtankDesign::previousMount(S32 slot)
+{
+   XtankWeapon w = weapons[slot];
+
+   XtankMountLocation mount = weaponMounts[slot];
+   do {
+      mount = prevEnum(mount);
+   } while(!isMountCompatible(body, w, mount));
+
+   weaponMounts[(S32)slot] = mount;
+   preferredMounts[(S32)slot] = mount;
+}
+
+
+// Does this body support the specified mountpoint?
+static bool bodySupportsMount(XtankBody body, XtankMountLocation mount)
+{
+   // Unknown body
+   if(body == XtankBody::BITFIGHTER_SHIP || body == XtankBody::NONE)
+      return false;
+
+   // Turret mounted weapon -- legal if vehicle has enough turrets
+   if(mount >= XtankMountLocation::TURRET1 && mount <= XtankMountLocation::TURRET4)
+   {
+      S32 turretRequested = (S32)mount - (S32)XtankMountLocation::TURRET1;
+      return turretRequested < xtankTurretInfos[(S32)body].count;
+   }
+
+   // Otherwise it's ok
+   return true;
+}
+
+
+// This converts a mount location into a flag, which we can then use to compare with the bitmap
+// of legal mountpoints for a particular weapon.  Not all weapons can go in all locations.
+static S32 getXtankMountBit(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+   case XtankMountLocation::TURRET1:
+   case XtankMountLocation::TURRET2:
+   case XtankMountLocation::TURRET3:
+   case XtankMountLocation::TURRET4: return M_TURRET;
+
+   case XtankMountLocation::FRONT:   return M_FRONT;
+   case XtankMountLocation::BACK:    return M_BACK;
+   case XtankMountLocation::LEFT:    return M_LEFT;
+   case XtankMountLocation::RIGHT:   return M_RIGHT;
+   default:            return 0;
+   }
+}
+
+
+// Is the weapon legally allowed at this mountpoint?
+static bool weaponAllowedAtMount(XtankWeapon weapon, XtankMountLocation mount)
+{
+   return (xtankWeaponInfos[(S32)weapon].legalMounts & getXtankMountBit(mount)) != 0;
+}
+
+
+bool XtankDesign::isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMountLocation mount)
+{
+   // Does this body have the specified mountpoint?
+   if(!bodySupportsMount(body, mount))
+      return false;
+
+   // Check if the weapon can be legally mounted to the requested location
+   return weaponAllowedAtMount(weapon, mount);
+}
+
+
+XtankMountLocation XtankDesign::firstValidMount(XtankBody body, XtankWeapon weapon, XtankMountLocation preferred)
+{
+   if(isMountCompatible(body, weapon, preferred))
+      return preferred;
+
+   for(S32 m = 0; m < (S32)XtankMountLocation::COUNT; m++)
+   {
+      XtankMountLocation mount = (XtankMountLocation)m;
+      if(isMountCompatible(body, weapon, mount))
+         return mount;
+   }
+
+   return XtankMountLocation::NONE;
+}
+
+
+// Slot is ignored except when assigning weapons
+void XtankDesign::selected(Phase phase, S32 index, S32 slot)
+{
+   switch(phase)
+   {
+      case Phase::BODY:
+         body = (XtankBody)index;
+         break;
+      case Phase::ENGINE:
+         engine = (XtankEngine)index;
+         break;
+      case Phase::TREADS:
+         tread = (XtankTread)index;
+         break;
+      case Phase::ARMOR:
+         armor = (XtankArmor)index;
+         break;
+      case Phase::ARMOR_SIDES:
+         // Do nothing here
+         break;
+      case Phase::SUSPENSION:
+         suspension = (XtankSuspension)index;
+         break;
+      case Phase::BUMPERS:
+         bumper = (XtankBumper)index;
+         break;
+      case Phase::SPECIALS:
+         specials = index;
+         break;
+      case Phase::HEATSINK:
+         heatSinks = index;
+         break;
+      case Phase::WEAPONS:
+         if(index == 0)
+            weapons[slot] = XtankWeapon::NONE;
+         else
+         {
+            weapons[slot] = (XtankWeapon)(index - 1);    // Compensate for None at top of list
+
+            // Need a mountpoint?
+            if(weaponMounts[slot] == XtankMountLocation::NONE)
+               weaponMounts[slot] = firstValidMount(body, weapons[slot], preferredMounts[slot]);
+         }
+
+         break;
+      default:
+         TNLAssert(false, "Unhandled vehicle designer phase!");
+   }
+}
+
+
+void XtankDesign::setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mountPoint)
+{
+   weapons[slot] = weapon;
+   weaponMounts[slot] = mountPoint;
+}
+
+
+S32 XtankDesign::slotsInUse()
+{
+   S32 slots = 0;
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+      if(weapons[i] != XtankWeapon::NONE)
+         slots += 1;
+
+   return slots;
+}
+
+
+// Returns the fire-delay multiplier for a given heat-sink count.
+// 1 sink → 1.00x, each additional sink reduces delay by 8%.
+// 6 sinks → 0.60x (40% faster cycling).
+// Needs to be verified against original design!!
+
+// Heat sink effect in original game:
+// Heat sinks reduce your vehicle’s heat, which indirectly lets you shoot more before hitting the heat cap.
+//
+// In update.c:
+//
+// every 5 frames, the vehicle’s heat is reduced by:
+// v->vdesc->heat_sinks + 1 (default case)
+// So each heat sink gives you + 1 heat dissipation per 5 frames, on top of a base 1.
+S32 XtankDesign::heatDissipation() const
+{
+   return heatSinks * 3;
+}
+
 
 } /* namespace Zap */

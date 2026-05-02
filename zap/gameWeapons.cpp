@@ -113,7 +113,7 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
 void GameWeapon::createXtankProjectile(XtankWeapon weapon, const Point &dir,
       const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter)
 {
-   if((S32)weapon < 0 || (S32)weapon >= XtankWeaponCount)
+   if(weapon == XtankWeapon::NONE)
       return;
 
    const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];

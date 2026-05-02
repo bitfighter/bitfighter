@@ -191,7 +191,7 @@ public:
 
    // Xtank body index and tank physics state.  Present in all builds because
    // the server must run tank driving physics when an xtank body is active.
-   S32 mXtankBodyIndex;       // -1 (XtankBodyNone) = normal BF ship; >=0 = xtank body
+   XtankBody mXtankBody; // -1 (XtankBodyNone) = normal BF ship; >=0 = xtank body
    F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
    F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
    XtankDesign mXtankDesign;  // Per-player vehicle configuration (body + per-slot weapons)
@@ -281,13 +281,20 @@ public:
 #endif
 
    // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
-   S32 getXtankBodyIndex() const { return mXtankBodyIndex; }
+   XtankBody getXtankBody() const { return mXtankBody; }
 
    // Returns the current tank hull heading angle (radians).  Only meaningful when getXtankBodyIndex() >= 0.
    F32 getTankHeadingAngle() const { return mTankHeadingAngle; }
 
    // Returns the current tank speed along the hull heading direction.  Only meaningful when getXtankBodyIndex() >= 0.
    F32 getTankSpeed() const { return mTankSpeed; }
+
+   // Setters used by tests only
+   void setTankHeadingAngle(F32 angle) { mTankHeadingAngle = angle; }
+   void setTankSpeed(F32 speed)        { mTankSpeed = speed; }
+   bool getCooldownNeeded() const      { return mCooldownNeeded; }
+   void setCooldownNeeded(bool val)    { mCooldownNeeded = val; }
+   void setXtankBodyForTest(XtankBody body) { mXtankBody = body; }
 
    // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
    // Also resets tank physics heading to current aim angle.
@@ -337,6 +344,10 @@ public:
    bool isOnObject(BfObject *object, U32 stateIndex = ActualState);         // Return whether or not ship is sitting on a particular object
 
    virtual Ship *clone() const;
+
+   bool isBitfighterShip() const;
+   bool isXtankVehicle() const;
+
 
    TNL_DECLARE_CLASS(Ship);
 

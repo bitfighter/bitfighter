@@ -1178,26 +1178,26 @@ void GameUserInterface::xtankDesignUpdated(const XtankDesign &design)
 void GameUserInterface::applyXtankDesign(const XtankDesign &design)
 {
    // Update the move so the server learns about the new design.
-   mCurrentMove.bodyIndex    = design.bodyIndex;
-   mCurrentMove.engineType   = (S8)design.engineType;
-   mCurrentMove.treadType    = (S8)design.treadType;
-   mCurrentMove.heatSinkCount = design.heatSinkCount;
-   mCurrentMove.armorType     = (S8)design.armorType;
-   mCurrentMove.suspensionType = design.suspensionType;
-   mCurrentMove.bumperType     = design.bumperType;
+   mCurrentMove.bodyIndex    = (S8)design.body;
+   mCurrentMove.engineType   = (S8)design.engine;
+   mCurrentMove.treadType    = (S8)design.tread;
+   mCurrentMove.heatSinkCount = design.heatSinks;
+   mCurrentMove.armorType     = (S8)design.armor;
+   mCurrentMove.suspensionType = (S8)design.suspension;
+   mCurrentMove.bumperType     = (S8)design.bumper;
    mCurrentMove.specials       = design.specials;
    for(S32 i = 0; i < 6; i++)
       mCurrentMove.armorSides[i] = design.armorSides[i];
    for(S32 i = 0; i < MaxXtankWeaponSlots; i++)
       mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
    for(S32 i = 0; i < MaxXtankWeaponSlots; i++)
-      mCurrentMove.weaponMount[i] = design.weaponMounts[i];
+      mCurrentMove.weaponMount[i] = (S8)design.weaponMounts[i];
 
    // Update the local ship immediately (client-side prediction).
    Ship *ship = getGame()->getLocalPlayerShip();
    if(ship)
    {
-      ship->mXtankBodyIndex = design.bodyIndex;
+      ship->mXtankBody = design.body;
       ship->mXtankDesign    = design;
    }
 
@@ -1462,21 +1462,20 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    // Ctrl+Alt+Shift+X toggles between the Lightcycle xtank body and the regular ship.
    // Pressing once enters Lightcycle mode (modules are suppressed); pressing again returns
    // to the normal Bitfighter ship (modules re-enabled).
-   else if(inputCode == KEY_X &&
-           InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
+   else if(inputCode == KEY_X && InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
    {
       Ship *ship = getGame()->getLocalPlayerShip();
       if(ship)
       {
          ship->cycleXtankBody();
-         S32 bodyIdx = ship->getXtankBodyIndex();
-         const char *bodyName = (bodyIdx >= 0) ? xtankBodyNames[bodyIdx] : "Bitfighter Ship";
+         XtankBody body = ship->getXtankBody();
+         const char *bodyName = (body == XtankBody::BITFIGHTER_SHIP) ? "Bitfighter Ship" : xtankBodyNames[(S32)body];
          getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
 
          // Propagate the new body choice to the server via the Move struct.
          // mCurrentMove.bodyIndex is delta-compressed, so it will be sent
          // in the next packet and every packet thereafter until it changes.
-         mCurrentMove.bodyIndex = (S8)bodyIdx;
+         mCurrentMove.bodyIndex = (S8)body;
       }
    }
 
@@ -1619,10 +1618,10 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          {
             // In xtank mode, open the vehicle design menu; otherwise the standard loadout menu.
             Ship *localShip = getGame()->getLocalPlayerShip();
-            if(localShip && localShip->getXtankBodyIndex() >= 0)
-               activateHelper(HelperMenu::XtankHelperType);
-            else
+            if(localShip && localShip->getXtankBody() == XtankBody::BITFIGHTER_SHIP)
                activateHelper(HelperMenu::LoadoutHelperType);
+            else
+               activateHelper(HelperMenu::XtankHelperType);
          }
          else if(checkInputCode(BINDING_DROPITEM, inputCode))
             dropItem();

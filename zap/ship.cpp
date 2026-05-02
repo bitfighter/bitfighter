@@ -13,6 +13,7 @@
 #include "speedZone.h"
 #include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIManager.h"
@@ -35,59 +36,53 @@
 namespace Zap
 {
 
+
 static S32 getXtankMountBit(XtankMountLocation mount)
 {
    switch(mount)
    {
-      case MOUNT_TURRET1:
-      case MOUNT_TURRET2:
-      case MOUNT_TURRET3:
-      case MOUNT_TURRET4: return M_TURRET;
-      case MOUNT_FRONT:   return M_FRONT;
-      case MOUNT_BACK:    return M_BACK;
-      case MOUNT_LEFT:    return M_LEFT;
-      case MOUNT_RIGHT:   return M_RIGHT;
+      case XtankMountLocation::TURRET1:
+      case XtankMountLocation::TURRET2:
+      case XtankMountLocation::TURRET3:
+      case XtankMountLocation::TURRET4: return M_TURRET;
+      case XtankMountLocation::FRONT:   return M_FRONT;
+      case XtankMountLocation::BACK:    return M_BACK;
+      case XtankMountLocation::LEFT:    return M_LEFT;
+      case XtankMountLocation::RIGHT:   return M_RIGHT;
       default:            return 0;
    }
 }
 
 
-static bool isXtankBodyMountAvailable(S32 bodyIndex, XtankMountLocation mount)
+static bool isXtankBodyMountAvailable(XtankBody bodyIndex, XtankMountLocation mount)
 {
-   if(bodyIndex < 0 || bodyIndex >= XtankBodyCount)
-      return false;
-
-   if(mount >= MOUNT_TURRET1 && mount <= MOUNT_TURRET4)
+   if(mount >= XtankMountLocation::TURRET1 && mount <= XtankMountLocation::TURRET4)
    {
-      S32 turretIdx = (S32)mount - (S32)MOUNT_TURRET1;
-      return turretIdx < xtankTurretInfos[bodyIndex].count;
+      S32 turretIdx = (S32)mount - (S32)XtankMountLocation::TURRET1;
+      return turretIdx < xtankTurretInfos[(S32)bodyIndex].count;
    }
 
-   return mount == MOUNT_FRONT || mount == MOUNT_BACK || mount == MOUNT_LEFT || mount == MOUNT_RIGHT;
+   return mount == XtankMountLocation::FRONT || mount == XtankMountLocation::BACK || mount == XtankMountLocation::LEFT || mount == XtankMountLocation::RIGHT;
 }
 
 
-static bool isXtankWeaponMountCompatible(S32 bodyIndex, XtankWeapon weapon, XtankMountLocation mount)
+static bool isXtankWeaponMountCompatible(XtankBody bodyIndex, XtankWeapon weapon, XtankMountLocation mount)
 {
-   if((S32)weapon < 0 || (S32)weapon >= XtankWeaponCount)
-      return false;
-
-   if(mount < 0 || mount >= XtankMountCount)
-      return false;
-
    if(!isXtankBodyMountAvailable(bodyIndex, mount))
       return false;
 
    const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
-   return (wi.mount & getXtankMountBit(mount)) != 0;
+   return (wi.legalMounts & getXtankMountBit(mount)) != 0;
 }
 
 
-static Point getXtankMountPointBodySpace(S32 bodyIndex, XtankMountLocation mount)
+static Point getXtankMountPointBodySpace(XtankBody body, XtankMountLocation mount)
 {
-   if(bodyIndex >= 0 && bodyIndex < XtankBodyCount && mount >= MOUNT_TURRET1 && mount <= MOUNT_TURRET4)
+   if(body != XtankBody::BITFIGHTER_SHIP && 
+      mount >= XtankMountLocation::TURRET1 && mount <= XtankMountLocation::TURRET4)
    {
-      S32 turretIdx = (S32)mount - (S32)MOUNT_TURRET1;
+      S32 bodyIndex = (S32)body;
+      S32 turretIdx = (S32)mount - (S32)XtankMountLocation::TURRET1;
       if(turretIdx < xtankTurretInfos[bodyIndex].count)
       {
          const XtankTurret &turret = xtankTurretInfos[bodyIndex].turrets[turretIdx];
@@ -96,17 +91,17 @@ static Point getXtankMountPointBodySpace(S32 bodyIndex, XtankMountLocation mount
    }
 
    const F32 yFront = (F32)Ship::CollisionRadius * 0.85f;
-   const F32 yBack  = (F32)Ship::CollisionRadius * -0.85f;
-   const F32 xSide  = (F32)Ship::CollisionRadius * 0.75f;
-   const F32 yMid   = 0;
+   const F32 yBack = (F32)Ship::CollisionRadius * -0.85f;
+   const F32 xSide = (F32)Ship::CollisionRadius * 0.75f;
+   const F32 yMid = 0;
 
    switch(mount)
    {
-      case MOUNT_FRONT: return Point(0, yFront);
-      case MOUNT_BACK:  return Point(0, yBack);
-      case MOUNT_LEFT:  return Point(-xSide, yMid);
-      case MOUNT_RIGHT: return Point(xSide, yMid);
-      default:          return Point(0, 0);
+   case XtankMountLocation::FRONT: return Point(0, yFront);
+   case XtankMountLocation::BACK:  return Point(0, yBack);
+   case XtankMountLocation::LEFT:  return Point(-xSide, yMid);
+   case XtankMountLocation::RIGHT: return Point(xSide, yMid);
+   default:          return Point(0, 0);
    }
 }
 
@@ -128,7 +123,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 
 
 // Combined Lua / C++ default constructor -- this is used by Lua and by TNL, so we need to programatically separate the two
-Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
+Ship::Ship(lua_State *L) : MoveObject(Point(0, 0), (F32)CollisionRadius)
 {
    if(L)
    {
@@ -136,7 +131,7 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
       return;
    }
 
-   initialize(NULL, TEAM_NEUTRAL, Point(0,0), false);
+   initialize(NULL, TEAM_NEUTRAL, Point(0, 0), false);
 }
 
 
@@ -206,10 +201,10 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 #endif
 
    // Tank physics state — present in all builds (server runs tank physics)
-   mXtankBodyIndex  = XtankBodyNone;
+   mXtankBody = XtankBody::BITFIGHTER_SHIP;
    mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
-   mTankSpeed        = 0;
-   mXtankDesign      = XtankDesign();
+   mTankSpeed = 0;
+   mXtankDesign = XtankDesign();
 
    mLoadout.setLoadout(DefaultLoadout);
 
@@ -230,39 +225,39 @@ Ship *Ship::clone() const
 // Compare a client copy of a ship to the server copy and see if they are "equal"
 bool Ship::isServerCopyOf(const Ship &clientShip) const
 {
-    if(mLoadout != clientShip.mLoadout)
-       return false;
+   if(mLoadout != clientShip.mLoadout)
+      return false;
 
-    if(mHealth != clientShip.mHealth || mEnergy != clientShip.mEnergy || getTeam() != clientShip.getTeam())
-       return false;
+   if(mHealth != clientShip.mHealth || mEnergy != clientShip.mEnergy || getTeam() != clientShip.getTeam())
+      return false;
 
-    // Server sends renderPos/vel, client stores those in actualPos/vel
-    if(getRenderPos() != clientShip.getActualPos() || getRenderVel() != clientShip.getRenderVel())
-       return false;
+   // Server sends renderPos/vel, client stores those in actualPos/vel
+   if(getRenderPos() != clientShip.getActualPos() || getRenderVel() != clientShip.getRenderVel())
+      return false;
 
-    if(!mCurrentMove.isEqualMove(&clientShip.mCurrentMove))
-       return false;
+   if(!mCurrentMove.isEqualMove(&clientShip.mCurrentMove))
+      return false;
 
-    if(mMountedItems.size() != clientShip.mMountedItems.size())
-       return false;
+   if(mMountedItems.size() != clientShip.mMountedItems.size())
+      return false;
 
-    for(S32 i = 0; i < mMountedItems.size(); i++)
-       if(mMountedItems[i]->getObjectTypeNumber() != clientShip.mMountedItems[i]->getObjectTypeNumber())
-          return false;
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i]->getObjectTypeNumber() != clientShip.mMountedItems[i]->getObjectTypeNumber())
+         return false;
 
-    // Compare xtank state so we can catch heading/speed sync failures in tests
-    if(mXtankBodyIndex != clientShip.mXtankBodyIndex)
-       return false;
+   // Compare xtank state so we can catch heading/speed sync failures in tests
+   if(mXtankBody != clientShip.mXtankBody)
+      return false;
 
-    if(mXtankBodyIndex >= 0)
-    {
-       if(fabsf(mTankHeadingAngle - clientShip.mTankHeadingAngle) > 0.01f)
-          return false;
-       if(fabsf(mTankSpeed - clientShip.mTankSpeed) > 1.0f)
-          return false;
-    }
+   if(isXtankVehicle())
+   {
+      if(fabsf(mTankHeadingAngle - clientShip.mTankHeadingAngle) > 0.01f)
+         return false;
+      if(fabsf(mTankSpeed - clientShip.mTankSpeed) > 1.0f)
+         return false;
+   }
 
-    return true;
+   return true;
 }
 
 
@@ -274,7 +269,7 @@ void Ship::initialize(const Point &pos)
    if(getGame())
       mSendSpawnEffectTimer.reset();
 
-   setPosVelAng(pos, Point(0,0), 0);
+   setPosVelAng(pos, Point(0, 0), 0);
 
    updateExtentInDatabase();
 
@@ -286,7 +281,7 @@ void Ship::initialize(const Point &pos)
       mTrail[i].reset();
 #endif
 
-   mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
+   mEnergy = (S32)((F32)EnergyMax * .80);     // Start off with 80% energy
 
    mCooldownNeeded = false;
 
@@ -325,8 +320,8 @@ ClientInfo *Ship::getClientInfo() const
 }
 
 
-bool Ship::canAddToEditor()          { return false;  }      // No ships in the editor
-const char *Ship::getOnScreenName()  { return "Ship"; }
+bool Ship::canAddToEditor() { return false; }      // No ships in the editor
+const char *Ship::getOnScreenName() { return "Ship"; }
 
 
 void Ship::setEngineeredTeleporter(Teleporter *teleporter)
@@ -377,45 +372,44 @@ void Ship::setActualPos(const Point &p, bool warp)
 F32 Ship::processMove(U32 stateIndex)
 {
    static const F32 NORMAL_ACCEL_FACT = 1.0f;
-   static const F32 ARMOR_ACCEL_FACT  = 0.35f;
+   static const F32 ARMOR_ACCEL_FACT = 0.35f;
 
    static const F32 NORMAL_SPEED_FACT = 1.0f;
-   static const F32 ARMOR_SPEED_FACT  = 1.0f;
+   static const F32 ARMOR_SPEED_FACT = 1.0f;
 
    mLastProcessStateAngle = getAngle(stateIndex);
    setAngle(stateIndex, mCurrentMove.angle);
 
    // Sync xtank body index from the move.  When the body changes, initialise
    // the tank physics state so the new body starts from a clean heading/speed.
-   S32 newBodyIndex = (S32)mCurrentMove.bodyIndex;
-   if(newBodyIndex != mXtankBodyIndex)
+   S8 newBodyIndex = mCurrentMove.bodyIndex;
+   if(mCurrentMove.bodyIndex != (S8)mXtankBody)
    {
-      bool wasXtankMode = (mXtankBodyIndex >= 0);
-      mXtankBodyIndex = newBodyIndex;
+      bool wasXtankMode = isXtankVehicle();
+      mXtankBody = (XtankBody)newBodyIndex;
 
-      if(mXtankBodyIndex >= 0 && !wasXtankMode)
+      if(isXtankVehicle() && !wasXtankMode)
       {
          // Just switched into tank mode: set heading from current aim angle, start from rest
          mTankHeadingAngle = getAngle(stateIndex);
-         mTankSpeed        = 0;
+         mTankSpeed = 0;
          setVel(stateIndex, Point(0, 0));             // Zero velocity so xtank physics starts clean
-         mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons for this body
+         mXtankDesign.init();  // New, clean design
       }
-      else if(mXtankBodyIndex < 0)
-      {
-         mXtankDesign = XtankDesign();  // Reset design when leaving xtank mode
-      }
+      else if(isBitfighterShip())
+         mXtankDesign.body = XtankBody::BITFIGHTER_SHIP;  // Reset design when leaving xtank mode
+
       setMaskBits(XtankBodyMask);
    }
 
    // Sync weapon slots from the move when in xtank mode.
-   if(mXtankBodyIndex >= 0)
+   if(mXtankBody != XtankBody::BITFIGHTER_SHIP)
    {
       bool designChanged = false;
-      for(S32 i = 0; i < XtankMaxWeapons; i++)
+      for(S32 i = 0; i < WEAPON_SLOTS; i++)
       {
          XtankWeapon newWeapon = (XtankWeapon)(S32)mCurrentMove.weaponSlot[i];
-         S8 newMount = mCurrentMove.weaponMount[i];
+         XtankMountLocation newMount = (XtankMountLocation)(S32)mCurrentMove.weaponMount[i];
          if(newWeapon != mXtankDesign.weapons[i])
          {
             mXtankDesign.weapons[i] = newWeapon;
@@ -429,46 +423,17 @@ F32 Ship::processMove(U32 stateIndex)
       }
 
       // Sync engine/tread/heat sink/armor/suspension/bumper/specials settings from the move.
-      XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
-      XtankTread newTread  = (XtankTread)(S32)mCurrentMove.treadType;
-      XtankArmor newArmor  = (XtankArmor)(S32)mCurrentMove.armorType;
-      S8 newSuspension     = mCurrentMove.suspensionType;
-      S8 newBumper         = mCurrentMove.bumperType;
-      S8 newHS             = mCurrentMove.heatSinkCount;
-      U16 newSpecials      = mCurrentMove.specials;
+      XtankDesign incomingDesign(mCurrentMove);
 
-      bool armorSidesChanged = false;
-      for(S32 i = 0; i < 6; i++)
-         if(mCurrentMove.armorSides[i] != mXtankDesign.armorSides[i])
-            armorSidesChanged = true;
-
-      if(newEngine != mXtankDesign.engineType ||
-         newTread  != mXtankDesign.treadType  ||
-         newHS     != mXtankDesign.heatSinkCount ||
-         newArmor  != mXtankDesign.armorType ||
-         newSuspension != mXtankDesign.suspensionType ||
-         newBumper != mXtankDesign.bumperType ||
-         newSpecials != mXtankDesign.specials ||
-         armorSidesChanged)
+      if(!incomingDesign.same(mXtankDesign))
       {
-         mXtankDesign.engineType    = newEngine;
-         mXtankDesign.treadType     = newTread;
-         mXtankDesign.heatSinkCount = newHS;
-         mXtankDesign.armorType     = newArmor;
-         mXtankDesign.suspensionType = newSuspension;
-         mXtankDesign.bumperType     = newBumper;
-         mXtankDesign.specials       = newSpecials;
-         for(S32 i = 0; i < 6; i++)
-            mXtankDesign.armorSides[i] = mCurrentMove.armorSides[i];
-         designChanged = true;
-      }
-
-      if(designChanged)
          setMaskBits(XtankBodyMask);
+         mXtankDesign = incomingDesign;
+      }
    }
 
    // Route to the appropriate physics model
-   if(mXtankBodyIndex >= 0)
+   if(mXtankBody != XtankBody::BITFIGHTER_SHIP)
       return processTankMove(stateIndex);
 
    // -----------------------------------------------------------------------
@@ -476,14 +441,14 @@ F32 Ship::processMove(U32 stateIndex)
    // -----------------------------------------------------------------------
 
    // Nothing to do when ship is not moving, Continue to check for SpeedZones
-   if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
+   if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0, 0))
    {
       if(!checkForSpeedzones(stateIndex))
          return 0;
    }
 
    F32 maxVel = (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
-                (hasModule(ModuleArmor) ? ARMOR_SPEED_FACT : NORMAL_SPEED_FACT);
+      (hasModule(ModuleArmor) ? ARMOR_SPEED_FACT : NORMAL_SPEED_FACT);
 
    F32 time = mCurrentMove.time * 0.001f;
 
@@ -498,20 +463,20 @@ F32 Ship::processMove(U32 stateIndex)
    // If you are going too fast (i.e. > MAX_CONTROLLABLE_SPEED), you cannot move, and will automatically
    // "hit the brakes" by requesting a speed of 0
    if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
-      requestVel.set(0,0);
+      requestVel.set(0, 0);
 
    // Limit requestVel to maxVel (but can be lower)
    if(requestVel.lenSquared() > sq(maxVel))
       requestVel.normalize(maxVel);
 
    // a  = requested vel - current vel
-   accel = requestVel    - getVel(stateIndex);
+   accel = requestVel - getVel(stateIndex);
 
    // Increase acceleration when turbo-boost is active, reduce it when armor is present
    F32 maxAccel = Acceleration * time *                                                // Standard accel, modified by:
-                  (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostAccelFact : 1) * // Boost
-                  (hasModule(ModuleArmor) ? ARMOR_ACCEL_FACT : NORMAL_ACCEL_FACT) *    // Armor
-                  getGame()->getShipAccelModificationFactor(this);                     // Slip zones
+      (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostAccelFact : 1) * // Boost
+      (hasModule(ModuleArmor) ? ARMOR_ACCEL_FACT : NORMAL_ACCEL_FACT) *    // Armor
+      getGame()->getShipAccelModificationFactor(this);                     // Slip zones
 
    // If you are requesting a lower accel than the max, you get it instantly... else you are limited to max
    if(accel.lenSquared() <= sq(maxAccel))
@@ -552,16 +517,16 @@ F32 Ship::processMove(U32 stateIndex)
 // The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
 F32 Ship::processTankMove(U32 stateIndex)
 {
-   const S32 engineIdx = MAX(0, MIN((S32)mXtankDesign.engineType, XtankEngineCount - 1));
-   const S32 treadIdx = MAX(0, MIN((S32)mXtankDesign.treadType, XtankTreadCount - 1));
-   const S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
-   const S32 suspensionIdx = MAX(0, MIN((S32)mXtankDesign.suspensionType, XtankSuspensionCount - 1));
+   const S32 engineIdx = MAX(0, MIN((S32)mXtankDesign.engine, XtankEngineCount - 1));
+   const S32 treadIdx = MAX(0, MIN((S32)mXtankDesign.tread, XtankTreadCount - 1));
+   const S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armor, XtankArmorCount - 1));
+   const S32 suspensionIdx = MAX(0, MIN((S32)mXtankDesign.suspension, XtankSuspensionCount - 1));
 
-   const XtankBodyInfo   &body   = body_stat[mXtankBodyIndex];
+   const XtankBodyInfo2 &body = xTankBodyStats[(S32)mXtankBody];
    const XtankEngineInfo &engine = xtankEngineInfos[engineIdx];
-   const XtankTreadInfo  &tread  = xtankTreadInfos[treadIdx];
-   const XtankArmorInfo  &armor  = xtankArmorInfos[armorIdx];
-   const SuspensionStat  &suspensionInfo = suspensionStat[suspensionIdx];
+   const XtankTreadInfo &tread = xtankTreadInfos[treadIdx];
+   const XtankArmorInfo &armor = xtankArmorInfos[armorIdx];
+   const SuspensionStat &suspensionInfo = suspensionStat[suspensionIdx];
 
    F32 dt = mCurrentMove.time * 0.001f;
    if(dt <= 0)
@@ -569,10 +534,10 @@ F32 Ship::processTankMove(U32 stateIndex)
 
    // --- Compute total vehicle weight (xtank units) ---
    S32 weaponWeight = 0;
-   for(S32 i = 0; i < XtankMaxWeapons; i++)
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
    {
       XtankWeapon w = mXtankDesign.weapons[i];
-      if(w != XtankWeaponNone)
+      if(w != XtankWeapon::NONE)
          weaponWeight += xtankWeaponInfos[(S32)w].weight;
    }
    // Xtank-style armor weight: per-side points scaled by body size.
@@ -582,14 +547,14 @@ F32 Ship::processTankMove(U32 stateIndex)
    S32 armorWeight = totalArmorPts * armor.weight * body.size;
 
    S32 totalWeight = body.weight + engine.weight + weaponWeight
-                   + armorWeight + heatSinkStat.weight * mXtankDesign.heatSinkCount;
+      + armorWeight + heatSinkStat.weight * mXtankDesign.heatSinks;
    if(totalWeight < 1) totalWeight = 1;
 
    // --- Xtank derived physics (per-frame units, from vdesign.c compute_vdesc) ---
-   F32 power     = (F32)engine.power;
-   F32 drag      = body.drag;
+   F32 power = (F32)engine.power;
+   F32 drag = body.drag;
    F32 treadFric = tread.friction;
-   bool isHover  = (mXtankDesign.treadType == TREAD_HOVER);
+   bool isHover = (mXtankDesign.tread == XtankTread::HOVER);
 
    // max_speed = cbrt(power / drag) / friction   [xtank units/frame]
    F32 xt_max_speed = powf(power / drag, 1.0f / 3.0f) / treadFric;
@@ -612,7 +577,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    static const F32 TURN_SCALE = 3.5f;  // target rad/s for handling/8 = 1.0
    // suspensionInfo.friction is expected to stay in a small range [-1.0, 2.0].
    TNLAssert(suspensionInfo.friction >= -1.0f && suspensionInfo.friction <= 2.0f,
-             "Unexpected suspension handling modifier");
+      "Unexpected suspension handling modifier");
    static const F32 MIN_EFFECTIVE_HANDLING = 1.0f;
    // body.handling values are currently 3..8; this lower bound keeps turn math stable
    // even if future data pushes handling lower.
@@ -623,16 +588,16 @@ F32 Ship::processTankMove(U32 stateIndex)
    // --- Convert xtank per-frame units to BF per-second units ---
    // Xtank runs at ~20 fps.  BF_SCALE maps xtank distance to BF distance.
    static const F32 XTANK_FPS = 20.0f;
-   static const F32 BF_SCALE  = 1.5f;
+   static const F32 BF_SCALE = 1.5f;
 
-   F32 maxSpeed    = xt_max_speed   * XTANK_FPS * BF_SCALE;                     // BF units/sec
-   F32 engineAcc   = xt_engine_acc  * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
-   F32 treadAcc    = xt_tread_acc   * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
-   F32 maxTurnRate = xt_max_turn    * TURN_SCALE;                                // radians/sec
+   F32 maxSpeed = xt_max_speed * XTANK_FPS * BF_SCALE;                     // BF units/sec
+   F32 engineAcc = xt_engine_acc * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
+   F32 treadAcc = xt_tread_acc * XTANK_FPS * XTANK_FPS * BF_SCALE;         // BF units/sec^2
+   F32 maxTurnRate = xt_max_turn * TURN_SCALE;                                // radians/sec
 
    // --- Input mapping ---
    F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
-   F32 steer    =  mCurrentMove.x;   // +1 = clockwise, -1 = counter-clockwise
+   F32 steer = mCurrentMove.x;   // +1 = clockwise, -1 = counter-clockwise
 
    // --- Get current velocity ---
    Point vel = getVel(stateIndex);
@@ -655,7 +620,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    mTankHeadingAngle += steer * maxTurnRate * dt;
 
    // Keep heading in [-pi, pi]
-   while(mTankHeadingAngle >  FloatPi)  mTankHeadingAngle -= Float2Pi;
+   while(mTankHeadingAngle > FloatPi)  mTankHeadingAngle -= Float2Pi;
    while(mTankHeadingAngle < -FloatPi)  mTankHeadingAngle += Float2Pi;
 
    F32 heading = mTankHeadingAngle;
@@ -675,8 +640,8 @@ F32 Ship::processTankMove(U32 stateIndex)
 
    // --- Decompose velocity into roll (along heading) and slide (perpendicular) ---
    F32 headingDiff = moveAngle - heading;
-   F32 rollSpeed   = cosf(headingDiff) * speed;   // forward component (BF units/sec)
-   F32 slideSpeed  = sinf(headingDiff) * speed;   // sideways component (BF units/sec)
+   F32 rollSpeed = cosf(headingDiff) * speed;   // forward component (BF units/sec)
+   F32 slideSpeed = sinf(headingDiff) * speed;   // sideways component (BF units/sec)
 
    // --- Dynamic friction reduction when already sliding ---
    // In xtank (safety=FALSE), when the vehicle is sliding sideways, dynamic
@@ -687,7 +652,7 @@ F32 Ship::processTankMove(U32 stateIndex)
 
    // --- Velocity-change limits for this timestep ---
    F32 tractionDV = traction * dt;   // max dv from traction this step
-   F32 engineDV   = engineAcc * dt;  // max dv from engine this step
+   F32 engineDV = engineAcc * dt;  // max dv from engine this step
 
    // --- Desired forward speed ---
    // Reverse is capped at 40% of forward max (xtank has no reverse; this gives
@@ -695,7 +660,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    F32 maxForward = maxSpeed;
    F32 maxReverse = maxSpeed * 0.4f;
    F32 desiredSpeed = (throttle >= 0) ? throttle * maxForward
-                                      : throttle * maxReverse;
+      : throttle * maxReverse;
 
    // How much the driver wants to change forward speed
    F32 desiredDV = desiredSpeed - rollSpeed;
@@ -728,13 +693,13 @@ F32 Ship::processTankMove(U32 stateIndex)
       if(scale < 1.0f)
       {
          // Traction sufficient to stop completely this step
-         rollDV  = -rollSpeed;
+         rollDV = -rollSpeed;
          slideDV = -slideSpeed;
       }
       else
       {
          // Decelerate proportionally (preserving drift direction)
-         rollDV  = -rollSpeed  / scale;
+         rollDV = -rollSpeed / scale;
          slideDV = -slideSpeed / scale;
       }
 
@@ -751,7 +716,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    if(totalDV > tractionDV)
    {
       F32 scale = tractionDV / totalDV;
-      rollDV  *= scale;
+      rollDV *= scale;
       slideDV *= scale;
    }
 
@@ -760,7 +725,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    F32 ch = cosf(heading);
    F32 sh = sinf(heading);
    F32 cp = -sh;   // cos(heading + pi/2)
-   F32 sp =  ch;   // sin(heading + pi/2)
+   F32 sp = ch;   // sin(heading + pi/2)
 
    vel.x += ch * rollDV + cp * slideDV;
    vel.y += sh * rollDV + sp * slideDV;
@@ -812,7 +777,7 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = zone->getCollisionPoly();
 
-      if( polyPoints->size() != 0 && polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()) )
+      if(polyPoints->size() != 0 && polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()))
          return zone;
    }
    return NULL;
@@ -907,21 +872,21 @@ void Ship::processWeaponFire()
    // -----------------------------------------------------------------
    // Xtank multi-turret weapon firing
    // -----------------------------------------------------------------
-   if(mXtankBodyIndex >= 0)
+   if(isXtankVehicle())
    {
       if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
       {
          // Determine fire delay (use shortest among active weapon slots) and
          // total energy drain (sum across all active slots).
-         U32 minFireDelay  = 200;   // fallback
-         U32 totalDrain    = 0;
+         U32 minFireDelay = 200;   // fallback
+         U32 totalDrain = 0;
          bool hasAnyWeapon = false;
 
-         for(S32 i = 0; i < XtankMaxWeapons; i++)
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
          {
             XtankWeapon wt = mXtankDesign.weapons[i];
             XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
-            if(!isXtankWeaponMountCompatible(mXtankBodyIndex, wt, mount))
+            if(!isXtankWeaponMountCompatible(mXtankBody, wt, mount))
                continue;
 
             hasAnyWeapon = true;
@@ -932,8 +897,9 @@ void Ship::processWeaponFire()
          }
 
          // Apply heat sink multiplier: more heat sinks → shorter fire delay.
+         // WRONG.  See heatSinkFireDelayModifier for an explanation of how we should do this.
          {
-            F32 hsMult = xtankHeatSinkFireDelayMult((S32)mXtankDesign.heatSinkCount);
+            F32 hsMult = mXtankDesign.heatDissipation();
             minFireDelay = (U32)((F32)minFireDelay * hsMult);
             if(minFireDelay < 1) minFireDelay = 1;
          }
@@ -957,14 +923,14 @@ void Ship::processWeaponFire()
 
                   static const F32 BARREL_LENGTH = 12.0f;
 
-                  for(S32 i = 0; i < XtankMaxWeapons; i++)
+                  for(S32 i = 0; i < WEAPON_SLOTS; i++)
                   {
                      XtankWeapon wt = mXtankDesign.weapons[i];
                      XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
-                     if(!isXtankWeaponMountCompatible(mXtankBodyIndex, wt, mount))
+                     if(!isXtankWeaponMountCompatible(mXtankBody, wt, mount))
                         continue;
 
-                     Point mountBody = getXtankMountPointBodySpace(mXtankBodyIndex, mount);
+                     Point mountBody = getXtankMountPointBodySpace(mXtankBody, mount);
                      const F32 mx = mountBody.x;
                      const F32 my = mountBody.y;
                      Point mountWorld(
@@ -973,13 +939,13 @@ void Ship::processWeaponFire()
                      );
 
                      Point shotDir = aimDir;
-                     if(mount == MOUNT_FRONT)
+                     if(mount == XtankMountLocation::FRONT)
                         shotDir = bodyForward;
-                     else if(mount == MOUNT_BACK)
+                     else if(mount == XtankMountLocation::BACK)
                         shotDir = bodyForward * -1.0f;
-                     else if(mount == MOUNT_LEFT)
+                     else if(mount == XtankMountLocation::LEFT)
                         shotDir = bodyRight * -1.0f;
-                     else if(mount == MOUNT_RIGHT)
+                     else if(mount == XtankMountLocation::RIGHT)
                         shotDir = bodyRight;
 
                      // Barrel tip: advance from mount in the aim direction.
@@ -1100,7 +1066,7 @@ void Ship::idle(IdleCallPath path)
       processMove(RenderState);
 
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos() ||
-         (mXtankBodyIndex >= 0 && (mCurrentMove.x != 0 || mTankSpeed != 0)))
+         (isXtankVehicle() && (mCurrentMove.x != 0 || mCurrentMove.y != 0 || mTankSpeed != 0)))
          setMaskBits(PositionMask);
 
       mSendSpawnEffectTimer.update(mCurrentMove.time);
@@ -1112,7 +1078,7 @@ void Ship::idle(IdleCallPath path)
 
       // Apply impulse vector and reset it
       setActualVel(getActualVel() + mImpulseVector);
-      mImpulseVector.set(0,0);
+      mImpulseVector.set(0, 0);
 
       // For all other cases, advance the actual state of the object with the current move.
       // Dist is the distance the ship moved this tick.
@@ -1122,7 +1088,7 @@ void Ship::idle(IdleCallPath path)
          getClientInfo()->getStatistics()->accumulateDistance(dist);
 
       if(path == ServerProcessingUpdatesFromClient ||
-         path == ClientIdlingLocalShip             ||
+         path == ClientIdlingLocalShip ||
          path == ClientReplayingPendingMoves)
       {
          // For different optimizer settings and different platforms the floating point calculations may come out slightly
@@ -1151,8 +1117,8 @@ void Ship::idle(IdleCallPath path)
       {
          // Update the render state on the server to match the actual updated state, and mark the object as having changed
          // Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
-         if (getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel() ||
-             (mXtankBodyIndex >= 0 && (mCurrentMove.x != 0 || mCurrentMove.y != 0)))
+         if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel() ||
+            (isXtankVehicle() && (mCurrentMove.x != 0 || mCurrentMove.y != 0 || mTankSpeed != 0)))
             setMaskBits(PositionMask);
 
          copyMoveState(ActualState, RenderState);
@@ -1162,7 +1128,7 @@ void Ship::idle(IdleCallPath path)
 
    if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip ||
       path == ClientIdlingNotLocalShip ||
-      (path == ServerIdleMainLoop && !controllingClientIsValid()) )  // Level might have "Ship"
+      (path == ServerIdleMainLoop && !controllingClientIsValid()))  // Level might have "Ship"
    {
       mSensorEquipZoomTimer.update(mCurrentMove.time);
       mCloakTimer.update(mCurrentMove.time);
@@ -1198,7 +1164,7 @@ void Ship::idle(IdleCallPath path)
 #ifndef ZAP_DEDICATED
       || (path == ClientIdlingNotLocalShip && ((ClientGame *)getGame())->getConnectionToServer()->mPackUnpackShipEnergyMeter)
 #endif
-       )
+      )
    {
       // Handle Recharge timer
 
@@ -1269,7 +1235,7 @@ void Ship::findRepairTargets()
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      BfObject *item = static_cast<BfObject*>(foundObjects[i]);
+      BfObject *item = static_cast<BfObject *>(foundObjects[i]);
 
       // Don't repair dead or fully healed objects...
       if(item->isDestroyed() || item->getHealth() >= 1)
@@ -1289,8 +1255,8 @@ void Ship::findRepairTargets()
          itemRadius = Teleporter::TELEPORTER_RADIUS;
       else
       {
-         TNLAssert(dynamic_cast<Item*>(item), "Expected to find an item!");
-         itemRadius = static_cast<Item*>(item)->getRadius();
+         TNLAssert(dynamic_cast<Item *>(item), "Expected to find an item!");
+         itemRadius = static_cast<Item *>(item)->getRadius();
       }
 
       // Only repair items within a circle around the ship since we did an object search with a rectangle
@@ -1340,7 +1306,7 @@ void Ship::processModules()
 
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      wasModulePrimaryActive[i]   = mLoadout.isModulePrimaryActive(ShipModule(i));
+      wasModulePrimaryActive[i] = mLoadout.isModulePrimaryActive(ShipModule(i));
       wasModuleSecondaryActive[i] = mLoadout.isModuleSecondaryActive(ShipModule(i));
    }
 
@@ -1356,7 +1322,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so, unless modules are disabled,
       // we need to cooldown, or we are in xtank (tank) mode where modules are suppressed.
-      if(!mCooldownNeeded && mXtankBodyIndex < 0 &&
+      if(isBitfighterShip() && !mCooldownNeeded && 
          (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
       {
          if(mCurrentMove.modulePrimary[i])
@@ -1423,7 +1389,7 @@ void Ship::processModules()
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)))
       {
-         const ModuleInfo *moduleInfo = ModuleInfo::getModuleInfo((ShipModule) i);
+         const ModuleInfo *moduleInfo = ModuleInfo::getModuleInfo((ShipModule)i);
          S32 energyUsed = moduleInfo->getPrimaryEnergyDrain() * timeInMilliSeconds;
          mEnergy -= energyUsed;
 
@@ -1437,8 +1403,8 @@ void Ship::processModules()
 
          // Sensor module needs to place a spybug
          if(i == ModuleSensor &&
-               mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
-               mEnergy > moduleInfo->getPrimaryPerUseCost())     // Have enough energy
+            mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
+            mEnergy > moduleInfo->getPrimaryPerUseCost())     // Have enough energy
          {
 
             if(isClient())
@@ -1469,7 +1435,7 @@ void Ship::processModules()
                mImpulseVector = getActualVel();
 
                // Change to Pulse speed based on current energy
-               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (PulseMaxVelocity - PulseMinVelocity)) + PulseMinVelocity);
+               mImpulseVector.normalize((((F32)mEnergy / (F32)EnergyMax) * (PulseMaxVelocity - PulseMinVelocity)) + PulseMinVelocity);
 
                mEnergy = 0;
             }
@@ -1496,7 +1462,7 @@ void Ship::processModules()
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
    // Do logic triggered when module primary component state changes
-   for(S32 i = 0; i < ModuleCount;i++)
+   for(S32 i = 0; i < ModuleCount; i++)
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)) != wasModulePrimaryActive[i])
       {
@@ -1508,7 +1474,7 @@ void Ship::processModules()
    }
 
    // Do logic triggered when module secondary component state changes
-   for(U32 i = 0; i < ModuleCount;i++)
+   for(U32 i = 0; i < ModuleCount; i++)
    {
       if(mLoadout.isModuleSecondaryActive(ShipModule(i)) != wasModuleSecondaryActive[i])
       {
@@ -1547,7 +1513,7 @@ void Ship::deploySpybug()
 
    Point direction = getAimVector();
    GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
-                                       getActualVel(), 0, CollisionRadius - 2, this);
+      getActualVel(), 0, CollisionRadius - 2, this);
 
    if(getClientInfo())
       getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
@@ -1675,7 +1641,7 @@ void Ship::damageObject(DamageInfo *theInfo)
          damageAmount *= ARMOR_DAMAGE_REDUCTION_FACTOR;           // Any other damage, including asteroids
 
       // Xtank directional armor: reduce damage based on which hull side was hit
-      if(mXtankBodyIndex >= 0 && theInfo->impulseVector.lenSquared() > 0)
+      if(isXtankVehicle() && theInfo->impulseVector.lenSquared() > 0)
       {
          // Determine which side of the ship was hit.
          // impulseVector points FROM projectile TO ship (direction of impact).
@@ -1700,7 +1666,7 @@ void Ship::damageObject(DamageInfo *theInfo)
          U8 points = mXtankDesign.armorSides[hitSide];
          if(points > 0)
          {
-            S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armorType, XtankArmorCount - 1));
+            S32 armorIdx = MAX(0, MIN((S32)mXtankDesign.armor, XtankArmorCount - 1));
             S32 defense = xtankArmorInfos[armorIdx].defense;
             // Each armor point absorbs 'defense' hundredths of damage; capped at 80%.
             F32 absorption = MIN(0.80f, (F32)(points * defense) / 100.0f);
@@ -1890,9 +1856,9 @@ void Ship::writeControlState(BitStream *stream)
 
    // Tank physics state: send body index, hull heading and current speed so
    // the client can correct its prediction without jitter.
-   if(stream->writeFlag(mXtankBodyIndex >= 0))
+   if(stream->writeFlag(isXtankVehicle()))
    {
-      stream->writeRangedU32((U32)mXtankBodyIndex, 0, XtankBodyCount - 1);
+      stream->writeRangedU32((U32)mXtankBody, 0, VehicleBodyCount - 1);
       stream->write(mTankHeadingAngle);
       stream->write(mTankSpeed);
    }
@@ -1921,13 +1887,13 @@ void Ship::readControlState(BitStream *stream)
    // Tank physics state
    if(stream->readFlag())
    {
-      mXtankBodyIndex   = (S32)stream->readRangedU32(0, XtankBodyCount - 1);
+      mXtankBody = (XtankBody)(S32)stream->readRangedU32(0, (U32)(VehicleBodyCount - 1));
       stream->read(&mTankHeadingAngle);
       stream->read(&mTankSpeed);
    }
    else
    {
-      mXtankBodyIndex = XtankBodyNone;
+      mXtankBody = XtankBody::BITFIGHTER_SHIP;
    }
 }
 
@@ -1943,7 +1909,7 @@ void Ship::setMove(const Move &move)
 // Any changes here need to be reflected in Ship::unpackUpdate
 U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   GameConnection *gameConnection = (GameConnection *) connection;
+   GameConnection *gameConnection = (GameConnection *)connection;
 
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
@@ -1982,22 +1948,22 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // and apply the correct physics model for other players' ships.
    if(stream->writeFlag(updateMask & (XtankBodyMask | InitialMask)))
    {
-      stream->writeRangedU32((U32)(mXtankBodyIndex + 1), 0, XtankBodyCount);
-      if(mXtankBodyIndex >= 0)
+      stream->writeRangedU32((U32)((S32)mXtankBody + 1), 0, (U32)VehicleBodyCount);
+      if(isXtankVehicle())
       {
          stream->write(mTankHeadingAngle);
          stream->write(mTankSpeed);
          // Weapon design: full xtank weapon-number allocation (up to 6 slots)
-         for(S32 i = 0; i < XtankMaxWeapons; i++)
-            stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeaponCount);
-         for(S32 i = 0; i < XtankMaxWeapons; i++)
-            stream->writeRangedU32((U32)((S32)mXtankDesign.weaponMounts[i] + 1), 0, XtankMountCount);
-         stream->writeRangedU32((U32)mXtankDesign.engineType, 0, XtankEngineCount - 1);
-         stream->writeRangedU32((U32)mXtankDesign.treadType, 0, XtankTreadCount - 1);
-         stream->writeRangedU32((U32)(mXtankDesign.heatSinkCount - XtankHeatSinkMin), 0, XtankHeatSinkMax - XtankHeatSinkMin);
-         stream->writeRangedU32((U32)mXtankDesign.armorType, 0, XtankArmorCount - 1);
-         stream->writeRangedU32((U32)mXtankDesign.suspensionType, 0, XtankSuspensionCount - 1);
-         stream->writeRangedU32((U32)mXtankDesign.bumperType, 0, XtankBumperCount - 1);
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
+            stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, (U32)XtankWeapon::COUNT);
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
+            stream->writeRangedU32((U32)((S32)mXtankDesign.weaponMounts[i] + 1), 0, (U32)XtankMountLocation::COUNT);
+         stream->writeRangedU32((U32)mXtankDesign.engine, 0, XtankEngineCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.tread, 0, XtankTreadCount - 1);
+         stream->writeRangedU32((U32)(mXtankDesign.heatSinks), 0, MAX_HEAT_SINKS);
+         stream->writeRangedU32((U32)mXtankDesign.armor, 0, XtankArmorCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.suspension, 0, XtankSuspensionCount - 1);
+         stream->writeRangedU32((U32)mXtankDesign.bumper, 0, XtankBumperCount - 1);
          stream->writeInt((U32)mXtankDesign.specials, 16);
       }
    }
@@ -2045,7 +2011,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
          // For xtank vehicles also send the hull heading angle and speed so observer clients
          // stay in sync during steering and coasting (these are NOT recoverable from pos/vel alone).
-         if(mXtankBodyIndex >= 0)
+         if(isXtankVehicle())
          {
             stream->write(mTankHeadingAngle);
             stream->write(mTankSpeed);
@@ -2100,7 +2066,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool shipwarped = false;         // True when position changes a lot -- ship will be warped to new location
 
    bool wasInitialUpdate = false;
-   bool playSpawnEffect  = false;
+   bool playSpawnEffect = false;
 
    TNLAssert(isClient(), "We are expecting a ClientGame here!");
 
@@ -2143,7 +2109,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
             hadSensorThen = true;
 
          // Update loadout
-         mLoadout.setModule(i, (ShipModule) stream->readEnum(ModuleCount));
+         mLoadout.setModule(i, (ShipModule)stream->readEnum(ModuleCount));
 
          // Check new loadout for sensor
          if(mLoadout.getModule(i) == ModuleSensor)
@@ -2158,7 +2124,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mSensorEquipZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
-         mLoadout.setWeapon(i, (WeaponType) stream->readEnum(WeaponCount));
+         mLoadout.setWeapon(i, (WeaponType)stream->readEnum(WeaponCount));
 
       // Notify the user interface (via the ClientGame object) about some things that may have changed.
       // Note that during testing, we might not have a game object, so we'll need to check for NULL here.
@@ -2185,24 +2151,27 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // Xtank body index (XtankBodyMask | InitialMask)
    if(stream->readFlag())
    {
-      mXtankBodyIndex = (S32)stream->readRangedU32(0, XtankBodyCount) - 1;
-      if(mXtankBodyIndex >= 0)
+      mXtankBody = (XtankBody)(stream->readRangedU32(0, (U32)VehicleBodyCount) - 1);
+      if(isXtankVehicle())    // i.e. not the Bitfighter ship
       {
          stream->read(&mTankHeadingAngle);
          stream->read(&mTankSpeed);
+
          // Weapon design
-         for(S32 i = 0; i < XtankMaxWeapons; i++)
-            mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, XtankWeaponCount) - 1);
-         for(S32 i = 0; i < XtankMaxWeapons; i++)
-            mXtankDesign.weaponMounts[i] = (S8)((S32)stream->readRangedU32(0, XtankMountCount) - 1);
-         mXtankDesign.engineType = (XtankEngine)(S32)stream->readRangedU32(0, XtankEngineCount - 1);
-         mXtankDesign.treadType = (XtankTread)(S32)stream->readRangedU32(0, XtankTreadCount - 1);
-         mXtankDesign.heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + XtankHeatSinkMin);
-         mXtankDesign.armorType = (XtankArmor)(S32)stream->readRangedU32(0, XtankArmorCount - 1);
-         mXtankDesign.suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
-         mXtankDesign.bumperType = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
+            mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, (U32)XtankWeapon::COUNT) - 1);
+
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
+            mXtankDesign.weaponMounts[i] = (XtankMountLocation)((S32)stream->readRangedU32(0, (U32)XtankMountLocation::COUNT) - 1);
+
+         mXtankDesign.engine = (XtankEngine)(S32)stream->readRangedU32(0, XtankEngineCount - 1);
+         mXtankDesign.tread = (XtankTread)(S32)stream->readRangedU32(0, XtankTreadCount - 1);
+         mXtankDesign.heatSinks = (S8)(stream->readRangedU32(0, MAX_HEAT_SINKS));
+         mXtankDesign.armor = (XtankArmor)(S32)stream->readRangedU32(0, XtankArmorCount - 1);
+         mXtankDesign.suspension = (XtankSuspension)(S32)stream->readRangedU32(0, XtankSuspensionCount - 1);
+         mXtankDesign.bumper = (XtankBumper)(S32)stream->readRangedU32(0, XtankBumperCount - 1);
          mXtankDesign.specials = (U16)stream->readInt(16);
-         mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
+         mXtankDesign.body = (XtankBody)mXtankBody;
       }
       else
       {
@@ -2264,7 +2233,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // UpdateMask
    {
       Point p;
-      ((GameConnection *) connection)->readCompressedPoint(p, stream);
+      ((GameConnection *)connection)->readCompressedPoint(p, stream);
       Parent::setActualPos(p);
 
       readCompressedVelocity(p, BoostMaxVelocity + 1, stream);
@@ -2273,7 +2242,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       // For xtank vehicles, also read the hull heading angle and speed that were
       // packed alongside the position.  mXtankBodyIndex is already current because
       // the XtankBodyMask block is processed earlier in this same unpackUpdate call.
-      if(mXtankBodyIndex >= 0)
+      if(isXtankVehicle())
       {
          stream->read(&mTankHeadingAngle);
          stream->read(&mTankSpeed);
@@ -2312,9 +2281,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    setActualAngle(mCurrentMove.angle);
 
 
-   if(positionChanged && !isRobot() )
+   if(positionChanged && !isRobot())
    {
-      mCurrentMove.time = (U32) connection->getOneWayTime();
+      mCurrentMove.time = (U32)connection->getOneWayTime();
       processMove(ActualState);
    }
 
@@ -2599,7 +2568,7 @@ void Ship::killAndScore(DamageInfo *theInfo)
 
    // Fire ShipKilled event
    EventManager::get()->fireEvent(EventManager::ShipKilledEvent,
-         this, theInfo->damagingObject, shooter);
+      this, theInfo->damagingObject, shooter);
 
    kill();
 }
@@ -2677,8 +2646,9 @@ void Ship::emitExplosion()
 // otherwise the standard BF shape determined by mShapeType is returned.
 const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 {
-   if(mXtankBodyIndex >= 0)
-      return &xtankBodyInfos[mXtankBodyIndex];
+   if(isXtankVehicle())
+      return &xtankBodyInfos[(S32)mXtankBody];
+
    return &ShipShape::shipShapeInfos[mShapeType];
 }
 #endif
@@ -2690,19 +2660,18 @@ const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 // UIGame.cpp after calling this function).
 void Ship::cycleXtankBody()
 {
-   if(mXtankBodyIndex == XtankBodyNone)
+   if(mXtankBody == XtankBody::BITFIGHTER_SHIP)
    {
-      // Switch to Lightcycle body
-      mXtankBodyIndex = XtankBody::Lightcycle;
-      mTankHeadingAngle = getAngle(ActualState);
-      mTankSpeed        = 0;
-      mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons
+      // Switch to xTank vehicle
+      mXtankDesign = XtankDesign();
+      mXtankBody = mXtankDesign.body;
+      //mXtankDesign.initForBody(mXtankBody);  // Load default weapons
    }
    else
    {
       // Return to regular ship
-      mXtankBodyIndex = XtankBodyNone;
       mXtankDesign = XtankDesign();  // Reset when returning to BF ship
+      mXtankBody = XtankBody::BITFIGHTER_SHIP;
    }
 }
 
@@ -2713,8 +2682,8 @@ void Ship::cycleXtankBody()
 bool Ship::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
    point = getPos(stateIndex);
-   if(mXtankBodyIndex >= 0 && mXtankBodyIndex < XtankBodyCount)
-      radius = xtankBodyCollisionRadius[mXtankBodyIndex];
+   if(isXtankVehicle())
+      radius = xtankBodyCollisionRadius[(S32)mXtankBody];
    else
       radius = (F32)CollisionRadius;
    return true;
@@ -2739,12 +2708,12 @@ void Ship::emitMovementSparks()
    shipDirs.resize(cornerCount);
 
    for(S32 i = 0; i < cornerCount; i++)
-      corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
+      corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i * 2 + 1]);
 
    // For xtank vehicles the hull rotates by mTankHeadingAngle; aim angle drives
    // only the turret.  Using the aim angle here would make the wake trail fan
    // out in the wrong direction when the turret points sideways.
-   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mTankHeadingAngle : getRenderAngle();
+   const F32 bodyAngle = isXtankVehicle() ? mTankHeadingAngle : getRenderAngle();
 
    F32 th = FloatHalfPi - bodyAngle;
 
@@ -2842,7 +2811,7 @@ void Ship::emitMovementSparks()
    // Particle exhaust
    // -------------------------------------------------------------------------
 
-   if(mXtankBodyIndex >= 0)
+   if(isXtankVehicle())
    {
       // Xtank tank exhaust: emit from the rear of the hull, directed backward.
       // Characteristics vary by engine type:
@@ -2864,7 +2833,7 @@ void Ship::emitMovementSparks()
       // heading unit vector; exhaust exits the REAR (opposite to heading when
       // moving forward, but keep it consistent: always from the geometric rear)
       const Point headingDir(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
-      const F32   exhaustDist = xtankBodyCollisionRadius[mXtankBodyIndex] * ExhaustDistRatio;
+      const F32   exhaustDist = xtankBodyCollisionRadius[(S32)mXtankBody] * ExhaustDistRatio;
       // When moving forward the rear is behind (−heading); reversing → front
       const F32   rearSign  = (speed >= 0.0f) ? -1.0f : 1.0f;
       const Point exhaustPos = getRenderPos() + headingDir * (exhaustDist * rearSign);
@@ -2877,7 +2846,7 @@ void Ship::emitMovementSparks()
       S32         maxTTL;
       UI::SparkType sType;
 
-      switch(mXtankDesign.engineType)
+      switch(mXtankDesign.engine)
       {
          case XtankEngine::Small_Electric:
          case XtankEngine::Small_Combustion:
@@ -3045,7 +3014,7 @@ void Ship::renderLayer(S32 layerIndex)
    // physics heading) while the aim angle controls the turret(s).  For the
    // standard BF ship body and aim angle are the same.
    const F32 aimAngle  = angle;
-   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mTankHeadingAngle : angle;
+   const F32 bodyAngle = isXtankVehicle() ? mTankHeadingAngle : angle;
 
    F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, bodyAngle);
 
@@ -3057,15 +3026,13 @@ void Ship::renderLayer(S32 layerIndex)
 
    // Draw xtank turrets on top of the hull, pointing at the aim direction.
    // Only layer 1 is the visible pass; layer -1 is the cloaking shadow pass.
-   if(mXtankBodyIndex >= 0 && layerIndex == 1)
+   if(isXtankVehicle() && layerIndex == 1)
    {
       renderXtankTurrets(getRenderPos(), bodyAngle, aimAngle, alpha,
-                         xtankTurretInfos[mXtankBodyIndex], color, warpInScale);
+                         xtankTurretInfos[(S32)mXtankBody], color, warpInScale);
 
       // Draw heat-sink and engine-type bling overlaid on the hull.
-      renderXtankVehicleOverlay(getRenderPos(), bodyAngle, alpha,
-                                mXtankBodyIndex, (S32)mXtankDesign.heatSinkCount,
-                                mXtankDesign.engineType, warpInScale);
+      renderXtankVehicleOverlay(getRenderPos(), bodyAngle, alpha, mXtankBody, mXtankDesign.heatSinks, mXtankDesign.engine, warpInScale);
    }
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow
@@ -3585,6 +3552,18 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
    // If we made it here without throwing an exception, then we have a loadout
    // with proper number of weapons/modules!
    return loadout;
+}
+
+
+bool Ship::isBitfighterShip() const
+{
+   return mXtankBody == XtankBody::BITFIGHTER_SHIP;
+}
+
+
+bool Ship::isXtankVehicle() const
+{
+   return mXtankBody != XtankBody::BITFIGHTER_SHIP;
 }
 
 

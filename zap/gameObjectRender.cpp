@@ -1112,18 +1112,17 @@ void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha
 // vehicle centre in world space; bodyAngle is the hull heading (same as used
 // in renderShip / renderXtankTurrets).
 void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
-                                S32 bodyIdx, S32 heatSinkCount,
-                                XtankEngine engineType,
-                                F32 warpInScale)
+                                XtankBody body, S32 heatSinkCount,
+                                XtankEngine engineType, F32 warpInScale)
 {
    Renderer& r = Renderer::get();
 
-   if(alpha <= 0 || bodyIdx < 0 || bodyIdx >= XtankBodyCount)
+   if(alpha <= 0 || body == XtankBody::BITFIGHTER_SHIP)
       return;
 
-   const F32 noseY  = xtankBodyNoseY[bodyIdx];
-   const F32 rearY  = xtankBodyRearY[bodyIdx];
-   const F32 sideX  = xtankBodyCollisionRadius[bodyIdx] * 0.60f;  // right-side x
+   const F32 noseY  = xtankBodyNoseY[(S32)body];
+   const F32 rearY  = xtankBodyRearY[(S32)body];
+   const F32 sideX  = xtankBodyCollisionRadius[(S32)body] * 0.60f;  // right-side x
 
    r.pushMatrix();
    r.translate(pos);

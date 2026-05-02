@@ -5,7 +5,7 @@
 
 #include "move.h"
 #include "Point.h"
-#include "XtankShape.h"   // For XtankBodyCount
+#include "XtankShape.h"   // For VehicleBodyCount
 
 #include "stringUtils.h"
 #include "MathUtils.h"     // For radiansToUnit() def
@@ -20,228 +20,228 @@
 namespace Zap
 {
 
-// Constructor
-Move::Move()
-{
-   initialize();
-}
-
-
-Move::Move(F32 x, F32 y, F32 angle)
-{
-   initialize();
-   set(x, y, angle);
-}
-
-// Destructor
-Move::~Move()
-{
-   // Do nothing
-}
-
-
-void Move::initialize()
-{
-   fire = false;
-   time = 32;
-   x = 0;
-   y = 0;
-   angle = 0;
-   bodyIndex = -1;   // -1 = normal BF ship (XtankBodyNone)
-
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   // Constructor
+   Move::Move()
    {
-      modulePrimary[i]   = false;
-      moduleSecondary[i] = false;
+      initialize();
    }
 
-   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-      weaponSlot[i] = -1;   // -1 = XtankWeaponNone
-   for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-      weaponMount[i] = -1;
 
-   engineType    = (S8)XtankEngineDefault;
-   treadType     = (S8)XtankTreadDefault;
-   heatSinkCount = (S8)XtankHeatSinkDefault;
-   armorType     = (S8)XtankArmorDefault;
-   suspensionType = (S8)XtankSuspensionDefault;
-   bumperType     = (S8)XtankBumperDefault;
-   specials       = 0;
-   for(U32 i = 0; i < 6; i++)
-      armorSides[i] = 0;
-}
-
-
-void Move::set(F32 x, F32 y, F32 angle)
-{
-   // writeFloat() only handles values from 0-1
-   TNLAssert(x >= -1 && x <= 1, "x must be between -1 and 1!");
-   TNLAssert(y >= -1 && y <= 1, "y must be between -1 and 1!");
-
-   this->x = x;
-   this->y = y;
-   this->angle = angle;
-}
-
-
-bool Move::isAnyModActive() const
-{
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
-      if(modulePrimary[i] || moduleSecondary[i])
-         return true;
-
-   return false;
-}
-
-
-bool Move::isEqualMove(const Move *move) const
-{
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
-      if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
-         return false;
-
-   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-      if(move->weaponSlot[i] != weaponSlot[i])
-         return false;
-
-   for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-      if(move->weaponMount[i] != weaponMount[i])
-         return false;
-
-   for(U32 i = 0; i < 6; i++)
-      if(move->armorSides[i] != armorSides[i])
-         return false;
-
-   return move->x == x &&
-          move->y == y &&
-          move->angle == angle &&
-           move->fire == fire &&
-           move->bodyIndex == bodyIndex &&
-           move->engineType == engineType &&
-           move->treadType == treadType &&
-           move->heatSinkCount == heatSinkCount &&
-           move->armorType == armorType &&
-           move->suspensionType == suspensionType &&
-           move->bumperType == bumperType &&
-           move->specials == specials;
-}
-
-
-static const U8 MoveTimeBits = 16;
-static const U8 AngleBits = 12;
-static const U8 XYBits = 5;
-
-void Move::pack(BitStream *stream, Move *prev, bool packTime)
-{
-   if(!stream->writeFlag(prev && isEqualMove(prev)))
+   Move::Move(F32 x, F32 y, F32 angle)
    {
-      stream->writeFloat(fabs(x), XYBits);
-      stream->writeFlag(x < 0);
-      stream->writeFloat(fabs(y), XYBits);
-      stream->writeFlag(y < 0);
+      initialize();
+      set(x, y, angle);
+   }
 
-      // This needs to be signed, otherwise, the ship can't face up!
-      // The writeAngle here will be between -2048 and 2048 because the 'angle' is
-      // always between -tau/2 and tau/2 due to the output of the various atan2() calls we make
-      S32 writeAngle = (S32) floor(radiansToUnit(angle) * (1 << AngleBits) + 0.5f);     // floor(angle / 2pi * 4096 + .5)
+   // Destructor
+   Move::~Move()
+   {
+      // Do nothing
+   }
 
-      stream->writeSignedInt(writeAngle, AngleBits);
-      stream->writeFlag(fire);
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
+   void Move::initialize()
+   {
+      fire = false;
+      time = 32;
+      x = 0;
+      y = 0;
+      angle = 0;
+      bodyIndex = -1;   // -1 = normal BF ship (XtankBodyNone)
+
+      for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       {
-         stream->writeFlag(modulePrimary[i]);
-         stream->writeFlag(moduleSecondary[i]);
+         modulePrimary[i] = false;
+         moduleSecondary[i] = false;
       }
 
-      // Body index: -1 (BF ship) through XtankBodyCount-1; stored as 0..XtankBodyCount
-      stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBodyCount);
+      for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+         weaponSlot[i] = -1;   // -1 = XtankWeapon::None
+      for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+         weaponMount[i] = -1;
 
-      // Weapon slots + mount assignments: only present when an xtank body is active.
-      // Each slot value -1..XtankWeaponCount-1 is stored as 0..XtankWeaponCount.
-      if(bodyIndex >= 0)
+      engineType = (S8)XtankEngine::DEFAULT;
+      treadType = (S8)XtankTread::DEFAULT;
+      heatSinkCount = (S8)XtankHeatSinkDefault;
+      armorType = (S8)XtankArmor::DEFAULT;
+      suspensionType = (S8)XtankSuspension::DEFAULT;
+      bumperType = (S8)XtankBumper::DEFAULT;
+      specials = 0;
+      for(U32 i = 0; i < 6; i++)
+         armorSides[i] = 0;
+   }
+
+
+   void Move::set(F32 x, F32 y, F32 angle)
+   {
+      // writeFloat() only handles values from 0-1
+      TNLAssert(x >= -1 && x <= 1, "x must be between -1 and 1!");
+      TNLAssert(y >= -1 && y <= 1, "y must be between -1 and 1!");
+
+      this->x = x;
+      this->y = y;
+      this->angle = angle;
+   }
+
+
+   bool Move::isAnyModActive() const
+   {
+      for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+         if(modulePrimary[i] || moduleSecondary[i])
+            return true;
+
+      return false;
+   }
+
+
+   bool Move::isEqualMove(const Move *move) const
+   {
+      for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+         if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
+            return false;
+
+      for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+         if(move->weaponSlot[i] != weaponSlot[i])
+            return false;
+
+      for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+         if(move->weaponMount[i] != weaponMount[i])
+            return false;
+
+      for(U32 i = 0; i < 6; i++)
+         if(move->armorSides[i] != armorSides[i])
+            return false;
+
+      return move->x == x &&
+         move->y == y &&
+         move->angle == angle &&
+         move->fire == fire &&
+         move->bodyIndex == bodyIndex &&
+         move->engineType == engineType &&
+         move->treadType == treadType &&
+         move->heatSinkCount == heatSinkCount &&
+         move->armorType == armorType &&
+         move->suspensionType == suspensionType &&
+         move->bumperType == bumperType &&
+         move->specials == specials;
+   }
+
+
+   static const U8 MoveTimeBits = 16;
+   static const U8 AngleBits = 12;
+   static const U8 XYBits = 5;
+
+   void Move::pack(BitStream *stream, Move *prev, bool packTime)
+   {
+      if(!stream->writeFlag(prev && isEqualMove(prev)))
       {
-         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-            stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeaponCount);
-         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-            stream->writeRangedU32((U32)(weaponMount[i] + 1), 0, XtankMountCount);
+         stream->writeFloat(fabs(x), XYBits);
+         stream->writeFlag(x < 0);
+         stream->writeFloat(fabs(y), XYBits);
+         stream->writeFlag(y < 0);
 
-         // Engine type: 0..XtankEngineCount-1
-         stream->writeRangedU32((U32)engineType, 0, XtankEngineCount - 1);
+         // This needs to be signed, otherwise, the ship can't face up!
+         // The writeAngle here will be between -2048 and 2048 because the 'angle' is
+         // always between -tau/2 and tau/2 due to the output of the various atan2() calls we make
+         S32 writeAngle = (S32)floor(radiansToUnit(angle) * (1 << AngleBits) + 0.5f);     // floor(angle / 2pi * 4096 + .5)
 
-         // Tread type: 0..XtankTreadCount-1
-         stream->writeRangedU32((U32)treadType, 0, XtankTreadCount - 1);
+         stream->writeSignedInt(writeAngle, AngleBits);
+         stream->writeFlag(fire);
 
-         // Heat sink count: 1..6, stored as 0..5
-         stream->writeRangedU32((U32)(heatSinkCount - 1), 0, XtankHeatSinkMax - XtankHeatSinkMin);
+         for(S32 i = 0; i < ShipModuleCount; i++)
+         {
+            stream->writeFlag(modulePrimary[i]);
+            stream->writeFlag(moduleSecondary[i]);
+         }
 
-         // Armor type: 0..XtankArmorCount-1
-         stream->writeRangedU32((U32)armorType, 0, XtankArmorCount - 1);
+         // Body index: -1 (BF ship) through VehicleBodyCount - 1; stored as 0..VehicleBodyCount
+         stream->writeRangedU32((U32)(bodyIndex + 1), 0, VehicleBodyCount);
 
-         // Suspension type: 0..XtankSuspensionCount-1
-         stream->writeRangedU32((U32)suspensionType, 0, XtankSuspensionCount - 1);
+         // Weapon slots + mount assignments: only present when an xtank body is active.
+         // Each slot value -1..XtankWeapon::COUNT - 1 is stored as 0..XtankWeapon::COUNT . 
+         if(bodyIndex >= 0)
+         {
+            for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+               stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, (U32)XtankWeapon::COUNT);
+            for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+               stream->writeRangedU32((U32)(weaponMount[i] + 1), 0, (U32)XtankMountLocation::COUNT);
 
-         // Bumper type: 0..XtankBumperCount-1
-         stream->writeRangedU32((U32)bumperType, 0, XtankBumperCount - 1);
+            // Engine type: 0..XtankEngineCount-1
+            stream->writeRangedU32((U32)engineType, 0, XtankEngineCount - 1);
 
-         // Specials bitmask: 0..4095 (12 bits used)
-         stream->writeInt(specials, 16);
+            // Tread type: 0..XtankTreadCount-1
+            stream->writeRangedU32((U32)treadType, 0, XtankTreadCount - 1);
 
-         // Per-side armor points: 4 × U8 (0-255 each)
-         for(U32 i = 0; i < 6; i++)
-            stream->writeInt((U32)armorSides[i], 8);
+            // Heat sink count: straight up non-negative number
+            stream->writeRangedU32((U32)heatSinkCount, 0, MAX_HEAT_SINKS);
+
+            // Armor type: 0..XtankArmorCount-1
+            stream->writeRangedU32((U32)armorType, 0, XtankArmorCount - 1);
+
+            // Suspension type: 0..XtankSuspensionCount-1
+            stream->writeRangedU32((U32)suspensionType, 0, XtankSuspensionCount - 1);
+
+            // Bumper type: 0..XtankBumperCount-1
+            stream->writeRangedU32((U32)bumperType, 0, XtankBumperCount - 1);
+
+            // Specials bitmask: 0..4095 (12 bits used)
+            stream->writeInt(specials, 16);
+
+            // Per-side armor points: 4 × U8 (0-255 each)
+            for(U32 i = 0; i < 6; i++)
+               stream->writeInt((U32)armorSides[i], 8);
+         }
+      }
+      if(packTime)
+      {
+         if(time >= U32(MaxMoveTime))
+         {
+            stream->writeRangedU32(127, 0, MaxMoveTime);
+            stream->writeInt(time - MaxMoveTime, MoveTimeBits);   // More bits, but sent less frequently
+         }
+         else
+            stream->writeRangedU32(time, 0, MaxMoveTime);
       }
    }
-   if(packTime)
+
+
+   void Move::unpack(BitStream *stream, bool unpackTime)
    {
-      if(time >= U32(MaxMoveTime))
+      if(!stream->readFlag())
       {
-         stream->writeRangedU32(127, 0, MaxMoveTime);
-         stream->writeInt(time - MaxMoveTime, MoveTimeBits);   // More bits, but sent less frequently
-      }
-      else
-         stream->writeRangedU32(time, 0, MaxMoveTime);
-   }
-}
+         x = stream->readFloat(XYBits);
+         if(stream->readFlag())
+            x = -x;
 
+         y = stream->readFloat(XYBits);
+         if(stream->readFlag())
+            y = -y;
 
-void Move::unpack(BitStream *stream, bool unpackTime)
-{
-   if(!stream->readFlag())
-   {
-      x = stream->readFloat(XYBits);
-      if(stream->readFlag())
-         x = -x;
+         // angle must output between -tau/2 and tau/2
+         angle = unitToRadians(stream->readSignedInt(AngleBits) / F32(1 << AngleBits));
+         fire = stream->readFlag();
 
-      y = stream->readFloat(XYBits);
-      if(stream->readFlag())
-         y = -y;
+         for(S32 i = 0; i < ShipModuleCount; i++)
+         {
+            modulePrimary[i] = stream->readFlag();
+            moduleSecondary[i] = stream->readFlag();
+         }
 
-      // angle must output between -tau/2 and tau/2
-      angle = unitToRadians(stream->readSignedInt(AngleBits) / F32(1 << AngleBits));
-      fire = stream->readFlag();
+         // Body index: stored as 0..VehicleBodyCount, representing -1..VehicleBodyCount-1
+         bodyIndex = (S8)(stream->readRangedU32(0, VehicleBodyCount) - 1);
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
-      {
-         modulePrimary[i] = stream->readFlag();
-         moduleSecondary[i] = stream->readFlag();
-      }
+         // Weapon slots + mount assignments: present only when an xtank body is active.
+         if(bodyIndex >= 0)
+         {
+            for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+               weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeaponCount) - 1);
+            for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
+               weaponMount[i] = (S8)(stream->readRangedU32(0, XtankMountLocationCount) - 1);
 
-      // Body index: stored as 0..XtankBodyCount, representing -1..XtankBodyCount-1
-      bodyIndex = (S8)(stream->readRangedU32(0, XtankBodyCount) - 1);
-
-      // Weapon slots + mount assignments: present only when an xtank body is active.
-      if(bodyIndex >= 0)
-      {
-         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-            weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeaponCount) - 1);
-         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-            weaponMount[i] = (S8)(stream->readRangedU32(0, XtankMountCount) - 1);
-
-         engineType    = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
-         treadType     = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
-         heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + 1);
-         armorType     = (S8)stream->readRangedU32(0, XtankArmorCount - 1);
+            engineType = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
+            treadType = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
+            heatSinkCount = (S8)(stream->readRangedU32(0, MAX_HEAT_SINKS));
+            armorType = (S8)stream->readRangedU32(0, XtankArmorCount - 1);
          suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
          bumperType     = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
          specials       = (U16)stream->readInt(16);
@@ -254,12 +254,12 @@ void Move::unpack(BitStream *stream, bool unpackTime)
             weaponSlot[i] = -1;
          for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
             weaponMount[i] = -1;
-         engineType    = (S8)XtankEngineDefault;
-         treadType     = (S8)XtankTreadDefault;
+         engineType    = (S8)XtankEngine::DEFAULT;
+         treadType     = (S8)XtankTread::DEFAULT;
          heatSinkCount = (S8)XtankHeatSinkDefault;
-         armorType     = (S8)XtankArmorDefault;
-         suspensionType = (S8)XtankSuspensionDefault;
-         bumperType     = (S8)XtankBumperDefault;
+         armorType     = (S8)XtankArmor::DEFAULT;
+         suspensionType = (S8)XtankSuspension::DEFAULT;
+         bumperType     = (S8)XtankBumper::DEFAULT;
          specials       = 0;
          for(U32 i = 0; i < 6; i++)
             armorSides[i] = 0;

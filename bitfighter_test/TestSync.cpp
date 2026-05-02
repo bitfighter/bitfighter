@@ -65,12 +65,12 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    // We use ActualState here because that is what the server normally advances.
    serverShip.processMove(ActualState);
 
-   ASSERT_EQ(0, serverShip.getXtankBodyIndex()) << "serverShip should be in xtank mode after processMove";
+   ASSERT_EQ((XtankBody)0, serverShip.getXtankBody()) << "serverShip should be in xtank mode after processMove";
 
    // Transmit the full initial update (InitialMask covers XtankBodyMask).
    packUnpack(serverShip, clientShip);
 
-   ASSERT_EQ(0, clientShip.getXtankBodyIndex()) << "clientShip should be in xtank mode after initial pack/unpack";
+   ASSERT_EQ((XtankBody)0, clientShip.getXtankBody()) << "clientShip should be in xtank mode after initial pack/unpack";
 
    // ---------- Steering phase ----------
    // Apply a steering move on the server so that mTankHeadingAngle changes.
@@ -93,8 +93,11 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    // Pack only PositionMask (what the server sends to observer clients every
    // frame the ship is moving/steering) and verify the observer receives
    // the updated heading angle and speed.
+   // The observer must first receive a full initial update so it enters xtank
+   // mode and can then decode the xtank fields in subsequent PositionMask packets.
    Ship observerShip;
-   packUnpack(serverShip, observerShip, MoveObject::PositionMask);
+   packUnpack(serverShip, observerShip);               // Initial full update (primes xtank mode)
+   packUnpack(serverShip, observerShip, MoveObject::PositionMask);  // Position-only update
 
    EXPECT_NEAR(serverHeading, observerShip.getTankHeadingAngle(), 0.001f)
       << "Observer should receive updated tank heading angle via PositionMask";
@@ -212,7 +215,7 @@ TEST(SyncTest, TankHeadingPropagatesAcrossTwoClients)
    // Confirm client 2 sees the xtank body.
    Ship *c2ObservedShip = findShipForPlayer(client2, p1Name);
    ASSERT_TRUE(c2ObservedShip != NULL) << "Player 1 ghost not found on client 2";
-   EXPECT_EQ(0, c2ObservedShip->getXtankBodyIndex())
+   EXPECT_EQ(XtankBody::Lightcycle, c2ObservedShip->getXtankBody())
       << "Client 2 should see player 1 in xtank mode (body 0)";
 
    // --- Steer the tank to change heading ---
