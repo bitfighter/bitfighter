@@ -44,18 +44,18 @@ endif()
 set(MASTER_DEPS tnl)
 # Add tomcypt if not already found on system
 if(NOT TOMCRYPT_FOUND)
-	list(APPEND MASTER_DEPS tomcrypt)
+	list(APPEND MASTER_DEPS libtomcrypt)
 endif()
 
-set(MASTER_LIBS 
+set(MASTER_LIBS
 	tnl
-	tomcrypt 
+	tomcrypt
 	${SQLITE3_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT} 
+	${CMAKE_THREAD_LIBS_INIT}
 	${MASTER_EXTRA_LIBS}
 )
 
-set(MASTER_INCLUDES 
+set(MASTER_INCLUDES
 	${TOMCRYPT_INCLUDE_DIR}
 	${BOOST_INCLUDE_DIR}
 	${CMAKE_SOURCE_DIR}/tnl
