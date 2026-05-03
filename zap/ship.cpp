@@ -37,23 +37,6 @@ namespace Zap
 {
 
 
-static S32 getXtankMountBit(XtankMountLocation mount)
-{
-   switch(mount)
-   {
-      case XtankMountLocation::TURRET1:
-      case XtankMountLocation::TURRET2:
-      case XtankMountLocation::TURRET3:
-      case XtankMountLocation::TURRET4: return M_TURRET;
-      case XtankMountLocation::FRONT:   return M_FRONT;
-      case XtankMountLocation::BACK:    return M_BACK;
-      case XtankMountLocation::LEFT:    return M_LEFT;
-      case XtankMountLocation::RIGHT:   return M_RIGHT;
-      default:            return 0;
-   }
-}
-
-
 static bool isXtankBodyMountAvailable(XtankBody bodyIndex, XtankMountLocation mount)
 {
    if(mount >= XtankMountLocation::TURRET1 && mount <= XtankMountLocation::TURRET4)
@@ -884,16 +867,19 @@ void Ship::processWeaponFire()
 
          for(S32 i = 0; i < WEAPON_SLOTS; i++)
          {
-            XtankWeapon wt = mXtankDesign.weapons[i];
-            XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
-            if(!isXtankWeaponMountCompatible(mXtankBody, wt, mount))
+            XtankWeapon weapon = mXtankDesign.weapons[i];
+            if(weapon == XtankWeapon::NONE)
                continue;
 
-            hasAnyWeapon = true;
-            const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
+            XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
+
+            const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
             U32 weaponFireDelay = (U32)(wi.reload_time * 50);  // xtank frames → ms (20fps)
-            if(weaponFireDelay < minFireDelay) minFireDelay = weaponFireDelay;
+            if(weaponFireDelay < minFireDelay) 
+               minFireDelay = weaponFireDelay;
             totalDrain += (U32)wi.heat;  // Use heat as energy cost
+
+            hasAnyWeapon = true;
          }
 
          // Apply heat sink multiplier: more heat sinks → shorter fire delay.
@@ -901,7 +887,8 @@ void Ship::processWeaponFire()
          {
             F32 hsMult = mXtankDesign.heatDissipation();
             minFireDelay = (U32)((F32)minFireDelay * hsMult);
-            if(minFireDelay < 1) minFireDelay = 1;
+            if(minFireDelay < 1) 
+               minFireDelay = 1;
          }
 
          if(hasAnyWeapon)
@@ -925,10 +912,11 @@ void Ship::processWeaponFire()
 
                   for(S32 i = 0; i < WEAPON_SLOTS; i++)
                   {
-                     XtankWeapon wt = mXtankDesign.weapons[i];
-                     XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
-                     if(!isXtankWeaponMountCompatible(mXtankBody, wt, mount))
+                     XtankWeapon weapon = mXtankDesign.weapons[i];
+                     if(weapon == XtankWeapon::NONE)
                         continue;
+
+                     XtankMountLocation mount = (XtankMountLocation)mXtankDesign.weaponMounts[i];
 
                      Point mountBody = getXtankMountPointBodySpace(mXtankBody, mount);
                      const F32 mx = mountBody.x;
@@ -951,7 +939,7 @@ void Ship::processWeaponFire()
                      // Barrel tip: advance from mount in the aim direction.
                      Point barrelTip = mountWorld + shotDir * BARREL_LENGTH;
 
-                     GameWeapon::createXtankProjectile(wt, shotDir, barrelTip, getActualVel(), 0, this);
+                     GameWeapon::createXtankProjectile(weapon, shotDir, barrelTip, getActualVel(), 0, this);
                   }
                }
 

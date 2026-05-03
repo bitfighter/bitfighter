@@ -862,6 +862,25 @@ void XtankDesign::previousMount(S32 slot)
 }
 
 
+// This converts a mount location into a flag, which we can then use to compare with the bitmap
+// of legal mountpoints for a particular weapon.  Not all weapons can go in all locations.
+static S32 getXtankMountBit(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+   case XtankMountLocation::TURRET1:
+   case XtankMountLocation::TURRET2:
+   case XtankMountLocation::TURRET3:
+   case XtankMountLocation::TURRET4: return M_TURRET;
+   case XtankMountLocation::FRONT:   return M_FRONT;
+   case XtankMountLocation::BACK:    return M_BACK;
+   case XtankMountLocation::LEFT:    return M_LEFT;
+   case XtankMountLocation::RIGHT:   return M_RIGHT;
+   default:            return 0;
+   }
+}
+
+
 // Does this body support the specified mountpoint?
 static bool bodySupportsMount(XtankBody body, XtankMountLocation mount)
 {
@@ -878,26 +897,6 @@ static bool bodySupportsMount(XtankBody body, XtankMountLocation mount)
 
    // Otherwise it's ok
    return true;
-}
-
-
-// This converts a mount location into a flag, which we can then use to compare with the bitmap
-// of legal mountpoints for a particular weapon.  Not all weapons can go in all locations.
-static S32 getXtankMountBit(XtankMountLocation mount)
-{
-   switch(mount)
-   {
-   case XtankMountLocation::TURRET1:
-   case XtankMountLocation::TURRET2:
-   case XtankMountLocation::TURRET3:
-   case XtankMountLocation::TURRET4: return M_TURRET;
-
-   case XtankMountLocation::FRONT:   return M_FRONT;
-   case XtankMountLocation::BACK:    return M_BACK;
-   case XtankMountLocation::LEFT:    return M_LEFT;
-   case XtankMountLocation::RIGHT:   return M_RIGHT;
-   default:            return 0;
-   }
 }
 
 

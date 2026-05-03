@@ -503,6 +503,10 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
    // via Move (bodyIndex, weaponSlot[], weaponMount[], engineType, treadType,
    // heatSinkCount, specials).
 
+
+S32 getXtankMountBit(XtankMountLocation mount);
+
+
 const S32 MAX_ARMOR_PER_SIDE = 999;    // Effetively unlimited
 
 class XtankDesign
@@ -560,7 +564,7 @@ class XtankDesign
 
 #define F_CHO (1 << 4) /* the bullet can hurt owner after first 10 frames of it's life */
 
-/* Creation options */
+/* Weapon creation options */
 // Probably delete these
 #define F_CR3 (1 << 0)  /* create 3 in a fan (oil slicks) */
 #define F_MAP (1 << 1)  /* bullet is fired by clicking on map window */
