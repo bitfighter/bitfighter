@@ -68,7 +68,11 @@ protected:
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
+   // We use U8 (1 byte) instead of S32 (4 bytes) to ensure that sizeof(bool)
+   // matches the size of each element in the vector. This is necessary because
+   // Vector::address() returns a T* (bool*), and pointer arithmetic on bool*
+   // expects elements to be 1 byte apart.
+   std::vector<U8> innerVector;
 };
 
 
