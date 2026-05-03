@@ -10,7 +10,7 @@ GOTO End
 :MissingParams
 
 echo Usage: twoplayers ^<LeftPlayerName^> ^<RightPlayerName^>
-echo. 
+echo.
 echo This is a Windows batch file that shows how you might start two game windows,
 echo arranged neatly on the screen (these are sized for my 1920px-width display),
 echo with each player using their own joystick.  Note that to provide any keyboard
@@ -25,4 +25,3 @@ echo two players to play the game at once using a single computer with two
 echo joysticks attached.
 
 :End
-

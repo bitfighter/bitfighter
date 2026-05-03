@@ -63,12 +63,13 @@ protected:
    std::vector<T> innerVector;
 };
 
-// Avoid std::vector<bool>, over 10 times slower on 8 bit per byte, and need to get address of bool arrays
+// Avoid std::vector<bool>, because it is typically bit-packed, which prevents getting the address of elements.
+// Using std::vector<U8> ensures each element is at least one byte and has a unique address.
 
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
+   std::vector<U8> innerVector;
 };
 
 
@@ -129,8 +130,8 @@ public:
    // for (S32 i = 0; i < rows.size(); i++)
    //    doSomething(rows[i]);
 
-   // Note: for Vector<bool>, innerVector is std::vector<S32>, so these iterators
-   // yield S32 values -- same existing quirk as operator[] which casts (T&).
+   // Note: for Vector<bool>, innerVector is std::vector<U8>, so these iterators
+   // yield U8 values -- same existing quirk as operator[] which casts (T&).
    auto begin()       -> decltype(this->innerVector.begin())  { return this->innerVector.begin(); }
    auto end()         -> decltype(this->innerVector.end())    { return this->innerVector.end(); }
    auto begin() const -> decltype(this->innerVector.cbegin()) { return this->innerVector.cbegin(); }
