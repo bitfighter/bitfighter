@@ -68,7 +68,7 @@ protected:
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
+   std::vector<U8> innerVector;  // Use U8 (1 byte) to match sizeof(bool)
 };
 
 
@@ -129,8 +129,8 @@ public:
    // for (S32 i = 0; i < rows.size(); i++)
    //    doSomething(rows[i]);
 
-   // Note: for Vector<bool>, innerVector is std::vector<S32>, so these iterators
-   // yield S32 values -- same existing quirk as operator[] which casts (T&).
+   // Note: for Vector<bool>, innerVector is std::vector<U8>, so these iterators
+   // yield U8 values -- same existing quirk as operator[] which casts (T&).
    auto begin()       -> decltype(this->innerVector.begin())  { return this->innerVector.begin(); }
    auto end()         -> decltype(this->innerVector.end())    { return this->innerVector.end(); }
    auto begin() const -> decltype(this->innerVector.cbegin()) { return this->innerVector.cbegin(); }
@@ -179,7 +179,7 @@ template<class T> inline std::vector<T>& Vector<T>::getStlVector()
 
 template<class T> inline T* Vector<T>::address()
 {
-   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
+   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(T) must equal internal storage size");
    if (this->innerVector.begin() == this->innerVector.end())
       return NULL;
 
@@ -188,7 +188,7 @@ template<class T> inline T* Vector<T>::address()
 
 template<class T> const inline T* Vector<T>::address() const
 {
-   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
+   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(T) must equal internal storage size");
    if (this->innerVector.begin() == this->innerVector.end())
       return NULL;
 

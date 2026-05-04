@@ -37,12 +37,6 @@
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
-#include "tnlTypes.h"
-#include "tnlAssert.h"
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-
 namespace TNL
 {
 
