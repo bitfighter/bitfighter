@@ -91,6 +91,9 @@ static inline F64 isLeft(const Point &p1, const Point &p2, const Point &p )
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
 bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &point)
 {
+   if(vertexCount == 0)
+      return false;
+
    S32 counter = 0;    // Winding number counter
 
    // loop through all edges of the polygon
@@ -225,9 +228,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 
       // Cross-product sign test — zero means point is exactly on that edge,
       // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+      F64 d1 = (F64(point.x) - p1.x) * (F64(p0.y) - p1.y) - (F64(p0.x) - p1.x) * (F64(point.y) - p1.y);
+      F64 d2 = (F64(point.x) - p2.x) * (F64(p1.y) - p2.y) - (F64(p1.x) - p2.x) * (F64(point.y) - p2.y);
+      F64 d3 = (F64(point.x) - p0.x) * (F64(p2.y) - p0.y) - (F64(p2.x) - p0.x) * (F64(point.y) - p0.y);
 
       bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
       bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -293,6 +296,9 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
+   if(inNumVertices == 0)
+      return false;
+
    // Check if the center is inside the polygon  ==> now works for all polys
    if(polygonContainsPoint(inVertices, inNumVertices, inCenter))
    {
@@ -346,6 +352,9 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
+   if(points.empty())
+      return false;
+
    const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
 
@@ -365,6 +374,9 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
+   if(p1.empty() || p2.empty())
+      return false;
+
    F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
 
@@ -393,6 +405,9 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
                                       F32 &collisionTime, Point &normal)
 {
+   if(vertexCount == 0)
+      return false;
+
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;
    Point dp = end - start;
@@ -705,6 +720,9 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
 static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
+   if(inNumVertices == 0)
+      return false;
+
    // Loop through edges
    F32 upper_bound = 1.0f;
    bool collision = false;
