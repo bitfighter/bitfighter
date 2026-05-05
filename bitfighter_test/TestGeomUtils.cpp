@@ -2041,8 +2041,29 @@ TEST(GeomUtilsTest, EmptyGeometrySafetyTests)
    F32 outFraction;
    EXPECT_FALSE(PolygonSweptCircleIntersect(NULL, 0, Point(0, 0), Point(1, 1), 5.0f, outPoint, outFraction));
 
+   // triangulatedFillContains
+   EXPECT_FALSE(triangulatedFillContains(NULL, Point(0, 0)));
+
+   // isConvex
+   EXPECT_TRUE(isConvex(NULL));
+
+   // zonesTouch
+   EXPECT_FALSE(zonesTouch(NULL, &poly, 1.0f, outPoint, normal));
+   EXPECT_FALSE(zonesTouch(&poly, NULL, 1.0f, outPoint, normal));
+   EXPECT_FALSE(zonesTouch(NULL, NULL, 1.0f, outPoint, normal));
+
    // area
    EXPECT_FLOAT_EQ(0.0f, area(empty));
+
+   // mean2d
+   Point m = mean2d(empty);
+   EXPECT_FLOAT_EQ(0.0f, m.x);
+   EXPECT_FLOAT_EQ(0.0f, m.y);
+
+   // offsetPolygon
+   Vector<Point> outPoly;
+   offsetPolygon(NULL, outPoly, 1.0f, ClipperLib::jtMiter);
+   EXPECT_TRUE(outPoly.empty());
 
    // cornersToEdges
    Vector<Point> edges;

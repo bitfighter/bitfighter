@@ -220,6 +220,9 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 // Only used in editor.
 bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point)
 {
+   if(!triangles)
+      return false;
+
    for (S32 i = 0; i + 2 < triangles->size(); i += 3)
    {
       const Point& p0 = (*triangles)[i];
@@ -248,6 +251,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 // No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
 bool isConvex(const Vector<Point> *verts)
 {
+   if(!verts)
+      return true;
+
    int n = verts->size();
    if(n < 3)
       return true;
@@ -684,6 +690,9 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 
 bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
 {
+   if(!zone1 || !zone2)
+      return false;
+
    // Check for unlikely but fatal situation: Not enough vertices
    if(zone1->size() < 3 || zone2->size() < 3)
       return false;
@@ -1505,6 +1514,9 @@ static void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vec
 void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
       JoinType joinType)
 {
+   if(!inputPoly)
+      return;
+
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
@@ -1722,6 +1734,8 @@ Point mean2d(const Vector<Point> &polyPoints)
 //   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
 
    S32 size = polyPoints.size();
+   if(size == 0)
+      return Point(0,0);
 
    F32 x = 0;
    F32 y = 0;
