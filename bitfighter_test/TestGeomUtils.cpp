@@ -2040,6 +2040,19 @@ TEST(GeomUtilsTest, EmptyGeometrySafetyTests)
    // PolygonSweptCircleIntersect (calls polygonCircleIntersect and SweptCircleEdgeVertexIntersect)
    F32 outFraction;
    EXPECT_FALSE(PolygonSweptCircleIntersect(NULL, 0, Point(0, 0), Point(1, 1), 5.0f, outPoint, outFraction));
+
+   // area
+   EXPECT_FLOAT_EQ(0.0f, area(empty));
+
+   // cornersToEdges
+   Vector<Point> edges;
+   cornersToEdges(empty, edges);
+   EXPECT_TRUE(edges.empty());
+
+   // barrierLineToSegmentData
+   Vector<Vector<Point> > outData;
+   barrierLineToSegmentData(empty, outData);
+   EXPECT_TRUE(outData.empty());
 }
 
 }; // namespace Zap

@@ -801,6 +801,8 @@ static const float EPSILON=0.0000000001f;
 F32 area(const Vector<Point> &contour)
 {
   int n = contour.size();
+  if(n < 3)
+     return 0.0f;
 
   F64 A = 0.0;
 
@@ -1951,6 +1953,9 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
    edges.clear();
 
+   if(corners.empty())
+      return;
+
    S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
    {
@@ -2179,6 +2184,9 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 // Convert a barrier line into segmented chunks with data about possible mitering
 void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
 {
+   if(inputLine.empty())
+      return;
+
    // Create barriers from line segments, with some pre- and post-
    // information to help with mitering
    //
