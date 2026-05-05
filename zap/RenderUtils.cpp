@@ -93,6 +93,13 @@ void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 }
 
 
+// Also fixed
+void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const string &string)
+{
+   doDrawAngleString(x, y, size, angle, string.c_str());
+}
+
+
 // Broken!
 void drawString(S32 x, S32 y, S32 size, const char *string)
 {
@@ -114,6 +121,18 @@ void drawString(F32 x, F32 y, F32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
    drawAngleString(x, y, size, 0, string);
+}
+
+
+void drawWrappedString(S32 x, S32 y, S32 size, S32 width, S32 gap, const char *string)
+{
+   auto wrapped = wrapString(string, width, size);
+
+   for(S32 i = 0; i < wrapped.size(); i++)
+   {
+      drawAngleString(x, y, size, 0, wrapped[i]);
+      y += gap;
+   }
 }
 
 
@@ -744,7 +763,39 @@ void renderRightArrow(const Point &center, S32 size)
 }
 
 
-// Given a string, break it up such that no part is wider than width.  
+// Draw a checkbox (square outline, optionally with a checkmark) in the current color.
+// x, y is the top-left corner; the box is sized to approximately one em square for the
+// given font size.
+void renderCheckbox(S32 x, S32 y, S32 fontSize, bool checked)
+{
+   F32 s = fontSize * CEHECKBOX_SCALING_FACTOR;
+   F32 fx = (F32)x;
+   F32 fy = (F32)y + 2;
+
+   // Box outline
+   F32 box[] = { fx,     fy,     fx + s, fy,
+                 fx + s, fy,     fx + s, fy + s,
+                 fx + s, fy + s, fx,     fy + s,
+                 fx,     fy + s, fx,     fy };
+
+   Renderer &r = Renderer::get();
+   r.renderVertexArray(box, ARRAYSIZE(box) / 2, RenderType::Lines);
+
+   if(checked)
+   {
+      // Checkmark: short left stroke from bottom-left area up to mid-height,
+      // then long right stroke up to top-right area.
+      F32 pad = s * 0.15f;
+      F32 midX = fx + s * 0.35f;
+      F32 midY = fy + s - pad;
+      F32 vertices[] = { fx + pad, fy + s * 0.55f,   midX,     midY,
+                         midX,     midY,              fx + s - pad, fy + pad };
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
+   }
+}
+
+
+// Given a string, break it up such that no part is wider than width.
 void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines)
 {
    FontManager::pushFontContext(context);

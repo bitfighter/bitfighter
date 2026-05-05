@@ -9,6 +9,7 @@
 #include "helperMenu.h"
 #include "XtankShape.h"    // for XtankDesign, XtankBody, XtankWeapon
 #include "tnlVector.h"
+#include "Timer.h"
 #include <string>
 
 
@@ -46,26 +47,29 @@ struct TableColumn
 class ComponentInfo
 {
 private:
-   bool mComputed = false;
-   void computeColWidths(S32 fontSize);
+   mutable bool mComputed = false;
+   void computeColWidths(S32 fontSize) const;
 
-   S32 mColHeaderWidths[TableRow::MaxTableColumns];
-   S32 mColDataWidths[TableRow::MaxTableColumns];
-   S32 mColTotalWidths[TableRow::MaxTableColumns];
+   mutable S32 mColHeaderWidths[TableRow::MaxTableColumns];
+   mutable S32 mColDataWidths[TableRow::MaxTableColumns];
+   mutable S32 mColTotalWidths[TableRow::MaxTableColumns];
 
-   virtual void fillRows() = 0;
+   virtual void fillRows() const = 0;
 
 
 protected:
    static const S32 COL_LEN = 24;
+   const S32 maxHeaderLines;
+
+   explicit ComponentInfo(S32 maxHeaderLines) : maxHeaderLines(maxHeaderLines) {  /* Do nothing */ }
 
 public:
    virtual S32 getColCount() const = 0;
    virtual S32 getRowCount() const = 0;
-   virtual TableColumn *getColumns() = 0;
-   virtual TableRow *getRows() = 0;
+   virtual const TableColumn *getColumns() const = 0;
+   virtual const TableRow *getRows() const = 0;
 
-   S32 render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow);
+   S32 render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const XtankDesign &design) const;
 };
 
 
@@ -87,215 +91,216 @@ constexpr E prevEnum(E e) {
 }
 
 
+// Compute the tallest header (multiline support) for table.
+constexpr S32 computeTallestHeader(const TableColumn *cols, S32 columnCount)
+{
+   S32 maxHeaderLines = 1;
+   for(S32 c = 0; c < columnCount; c++)
+   {
+      const char *hdr = cols[c].header ? cols[c].header : "";
+      S32 lines = 1;
+
+      // Scan for \n chars
+      for(const char *p = hdr; *p; p++)
+         if(*p == '\n')
+            lines++;
+
+      if(lines > maxHeaderLines)
+         maxHeaderLines = lines;
+   }
+
+   return maxHeaderLines;
+}
+
+
 class BodyInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 9;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",           ALIGN_LEFT,   ALIGN_CENTER, 0 },
-      { "Body",          ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Weight",        ALIGN_CENTER, ALIGN_RIGHT,  6 },
-      { "Weight\nLimit", ALIGN_CENTER, ALIGN_RIGHT,  6 },
-      { "Avail.\nSpace", ALIGN_CENTER, ALIGN_RIGHT,  6 },
-      { "Drag",          ALIGN_CENTER, ALIGN_RIGHT,  0 },
-      { "Handl-\ning",   ALIGN_CENTER, ALIGN_CENTER, 0 },
-      { "Turrets",       ALIGN_CENTER, ALIGN_CENTER, 0 },
-      { "Cost",          ALIGN_CENTER, ALIGN_RIGHT,  4 },
-   };
-   TableRow rows[VehicleBodyCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[VehicleBodyCount];
+
+   BodyInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return VehicleBodyCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class ArmorInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 6;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",    ALIGN_LEFT,   ALIGN_CENTER, 0 },
-      { "Armor",  ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Class",  ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Weight", ALIGN_CENTER, ALIGN_CENTER, 0 },
-      { "Space",  ALIGN_CENTER, ALIGN_CENTER, 0 },
-      { "Cost",   ALIGN_CENTER, ALIGN_RIGHT,  5 },
-   };
-   TableRow rows[XtankArmorCount];
-   S32 getColCount() const override { return colCount; }
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankArmorCount];
 
+   ArmorInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
+
+   S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return XtankArmorCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class EngineInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 8;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",         ALIGN_LEFT,   ALIGN_CENTER, 0 },
-      { "Engine",      ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Power",       ALIGN_CENTER, ALIGN_RIGHT,  10 },
-      { "Weight",      ALIGN_CENTER, ALIGN_RIGHT,  8 },
-      { "Space",       ALIGN_CENTER, ALIGN_RIGHT,  8 },
-      { "Fuel\nCost",  ALIGN_CENTER, ALIGN_CENTER, 0 },
-      { "Fuel\nCap.",  ALIGN_CENTER, ALIGN_RIGHT,  8 },
-      { "Cost",        ALIGN_CENTER, ALIGN_RIGHT,  8 },
-   };
-   TableRow rows[XtankEngineCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankEngineCount];
+
+   EngineInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return XtankEngineCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class TreadInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 4;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",      ALIGN_LEFT,   ALIGN_CENTER, 0 },
-      { "Tread",    ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Friction", ALIGN_CENTER, ALIGN_RIGHT,  0 },
-      { "Cost",     ALIGN_CENTER, ALIGN_RIGHT,  6 },
-   };
-   TableRow rows[XtankTreadCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankTreadCount];
+
+   TreadInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return XtankTreadCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class SuspensionInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 4;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",        ALIGN_LEFT,   ALIGN_CENTER, 0 },
-      { "Suspension", ALIGN_LEFT,   ALIGN_LEFT,   0 },
-      { "Handling",   ALIGN_CENTER, ALIGN_CENTER, 3 },
-      { "Cost",       ALIGN_CENTER, ALIGN_RIGHT,  6 },
-   };
-   TableRow rows[XtankSuspensionCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankSuspensionCount];
+
+   SuspensionInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return XtankSuspensionCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class BumperInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 4;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",    ALIGN_LEFT, ALIGN_CENTER,  0 },
-      { "Bumper", ALIGN_LEFT, ALIGN_LEFT,    0 },
-      { "Bounce", ALIGN_CENTER, ALIGN_RIGHT, 2 },
-      { "Cost",   ALIGN_RIGHT, ALIGN_RIGHT,  2 },
-   };
-   TableRow rows[XtankBumperCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankBumperCount];
+
+   BumperInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return XtankBumperCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class HeatSinkInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 4;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Heat\nSinks",   ALIGN_LEFT, ALIGN_CENTER,  0 },
-      { "Firing\nBonus", ALIGN_CENTER, ALIGN_RIGHT, 6 },
-      { "Weight",        ALIGN_CENTER, ALIGN_RIGHT, 6 },
-      { "Cost",          ALIGN_CENTER, ALIGN_RIGHT, 6 },
-   };
-   TableRow rows[1];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[1];
+
+   HeatSinkInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return 1; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
+};
+
+
+class SpecialInfo : public ComponentInfo
+{
+private:
+   void fillRows() const override;
+
+public:
+   static const S32 colCount = 6;
+   COL_NUM_ASSERT;
+
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[XtankSpecialCount];
+
+   SpecialInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
+
+   S32 getColCount() const override { return colCount; }
+   S32 getRowCount() const override { return XtankSpecialCount; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
 class ArmorAllocationInfo : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 colCount = 3;
    COL_NUM_ASSERT;
 
-      TableColumn columns[colCount] =
-   {
-      { "Key",   ALIGN_LEFT, ALIGN_CENTER,   0 },
-      { "Side",  ALIGN_LEFT, ALIGN_LEFT,     0 },
-      { "Units", ALIGN_CENTER, ALIGN_CENTER, 0 },
-   };
-   TableRow rows[VehicleSidesCount];
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[VehicleSidesCount];
+
+   ArmorAllocationInfo() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return VehicleSidesCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 
-   void updateArmorAllocationMenuItems(XtankArmor armorType, const S32 *armor);
+   void updateArmorAllocationMenuItems(XtankArmor armorType, const S32 *armor) const;
 };
 
 
@@ -303,28 +308,22 @@ public:
 class WeaponInfo2 : public ComponentInfo
 {
 private:
-   void fillRows() override;
+   void fillRows() const override;
 
 public:
    static const S32 rowCount = (S32)XtankWeapon::COUNT + 1;
    static const S32 colCount = 5;
    COL_NUM_ASSERT;
 
+   static const TableColumn columns[colCount];
+   mutable TableRow rows[rowCount];
 
-   TableColumn columns[colCount] =
-   {
-      { "Key",    ALIGN_LEFT, ALIGN_CENTER,  0 },
-      { "Weapon", ALIGN_LEFT, ALIGN_LEFT,    0 },
-      { "Delay",  ALIGN_CENTER, ALIGN_RIGHT, 6 },
-      { "Weight", ALIGN_CENTER, ALIGN_RIGHT, 10 },
-      { "Cost",   ALIGN_RIGHT, ALIGN_RIGHT,  0 },
-   };
-   TableRow rows[rowCount];
+   WeaponInfo2() : ComponentInfo(computeTallestHeader(columns, colCount)) {}
 
    S32 getColCount() const override { return colCount; }
    S32 getRowCount() const override { return rowCount; }
-   TableColumn *getColumns() override { return columns; }
-   TableRow *getRows() override { return rows; }
+   const TableColumn *getColumns() const override { return columns; }
+   const TableRow *getRows() const override { return rows; }
 };
 
 
@@ -335,7 +334,7 @@ struct LabelWidth
 };
 
 
-class UIXtankHelper : public HelperMenu
+class UIXtankHelper : public HelperMenu 
 {
    typedef HelperMenu Parent;
 
@@ -348,25 +347,20 @@ class UIXtankHelper : public HelperMenu
       BumperInfo          mBumperInfo;
       HeatSinkInfo        mHeatSinkInfo;
       WeaponInfo2         mWeaponInfo;
+      SpecialInfo         mSpecialsInfo;
       ArmorAllocationInfo mArmorAllocationInfo;
 
-      // Holds the design being built during the selection process.
       XtankDesign mDesignInProgress;
-
-      // Snapshot of the design when the helper was opened — restored on ESC.
       XtankDesign mOriginalDesign;
-
-      // Current phase (see phase constants above).
       Phase mPhase;
 
-	  S32 mWeaponSlot;  // Currently active weapon slot in weapon assignment phase
+      S32 mWeaponSlot;
 
-      // Pre-built overlay item arrays — rebuilt in onActivated().
       Vector<OverlayMenuItem> mBodyItems;
       Vector<OverlayMenuItem> mEngineItems;
       Vector<OverlayMenuItem> mTreadItems;
       Vector<OverlayMenuItem> mArmorItems;
-      Vector<OverlayMenuItem> mArmorSidesItems;  // 6 items: Front/Back/Left/Right/Top/Bottom
+      Vector<OverlayMenuItem> mArmorSidesItems;
       Vector<OverlayMenuItem> mSuspensionItems;
       Vector<OverlayMenuItem> mBumperItems;
       Vector<OverlayMenuItem> mSpecialsItems;
@@ -399,10 +393,14 @@ class UIXtankHelper : public HelperMenu
       // item list.  Wraps within the valid range.  Cycled by UP/DOWN arrow keys.
       S32 mHighlightedIndex;
 
-      // Carousel transition animation state.
-      Timer mTransitionTimer;     // Tracks transition progress (0-1)
-      Phase mTransitionFromPhase;   // Previous phase before transition (-1 = no transition)
-      bool mTransitioningForward;    // true = forward, false = backward
+      // Panel-swap transition: scroll the new content up from the bottom.
+      Timer mTransitionTimer;
+      Phase mFromPhase;     // Phase being scrolled out
+      S32 mFromPanelTop;    // panelBotForPhase(mFromPhase) captured at transition start
+      S32 mToPanelTop;      // panelBotForPhase(mPhase) captured at transition start
+      Phase mTransitionFromPhase;
+      bool mTransitioningForward;
+
 
       void buildBodyItems();
       void buildEngineItems();
@@ -437,12 +435,16 @@ class UIXtankHelper : public HelperMenu
       // Returns the menu-panel display width for a given phase.
       S32 widthForPhase(Phase phase) const;
 
+      // Returns the bottom y-coordinate of the panel for a given phase,
+      // sized to exactly contain the content (items + help text).
+      S32 panelBotForPhase(Phase phase) const;
+
 
       // Draw the tab bar along the bottom and the single active panel above it.
       void renderFloatingMenus();
 
       // Draw the bottom tab strip.
-      void renderTabBar(F32 t);
+      void renderTabBar();
 
       // Returns the tab label for a given phase.
       LabelWidth getTabLabel(Phase phase) const;
@@ -450,8 +452,10 @@ class UIXtankHelper : public HelperMenu
       // Draw a single panel
       // centerFraction: 0.0=fully adjacent/background, 1.0=fully center/active
       void renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phase, F32 centerFraction);
-      void renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel);
-      void renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX);
+      S32 renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel);
+      S32 renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX);
+
+      void renderHelpText(S32 x, S32 y) const;
 
 
       // Draw the title of the Weapons panel
@@ -468,6 +472,8 @@ class UIXtankHelper : public HelperMenu
 
       void renderArmorStats(S32 left, S32 y, S32 fontSize, F32 alpha) const;
       void renderSpecialsStats(S32 left, S32 y, F32 alpha) const;
+      const char *getSpecialsHelpString(S32 specialIndex) const;
+
 
    public:
       UIXtankHelper();
@@ -511,3 +517,6 @@ class VehiclePreviewRenderer
 
 } /* namespace Zap */
 #endif /* _UI_XTANK_HELPER_H_ */
+
+
+

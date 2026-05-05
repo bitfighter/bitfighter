@@ -74,6 +74,9 @@ void renderDownArrow(const Point &center, S32 size);
 void renderLeftArrow(const Point &center, S32 size);
 void renderRightArrow(const Point &center, S32 size);
 
+const F32 CEHECKBOX_SCALING_FACTOR = 0.9f;
+void renderCheckbox(S32 x, S32 y, S32 fontSize, bool checked);
+
 
 // Draw string at given location (normal and formatted versions)
 // Note it is important that x be S32 because for longer strings, they are occasionally drawn starting off-screen
@@ -83,6 +86,9 @@ void drawString(F32 x, F32 y, S32 size, const char *string);
 void drawString(S32 x, S32 y, S32 size, const char *string);
 //void drawString(S32 x, S32 y, F32 size, const char *string);
 //void drawString(const Point &left, S32 size, const char *string);
+
+void drawWrappedString(S32 x, S32 y, S32 size, S32 width, S32 gap, const char *string);
+
 
 void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);
@@ -110,6 +116,7 @@ S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
 // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
 void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const string &string);
 void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
 // Center text between two points

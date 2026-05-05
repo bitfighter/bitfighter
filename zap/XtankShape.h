@@ -489,15 +489,6 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
 
    extern XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount];
 
-   inline bool hasSpecial(U16 specials, XtankSpecial s)
-   {
-      return (specials & (U16)(1u << (U32)s)) != 0;
-   }
-
-   inline U16 toggleSpecial(U16 specials, XtankSpecial s)
-   {
-      return specials ^ (U16)(1u << (U32)s);
-   }
 
    // The player's active vehicle configuration.  Stored in Ship and communicated
    // via Move (bodyIndex, weaponSlot[], weaponMount[], engineType, treadType,
@@ -553,6 +544,22 @@ class XtankDesign
       S32 slotsInUse() const;
 
       S32 heatDissipation() const;
+
+      inline bool hasSpecial(S32 s) const
+      {
+         return (specials & (U16)(1u << (U32)s)) != 0;      // Return true if the sth bit of specials is set
+      }
+
+
+      inline void toggleSpecial(S32 s)
+      {
+         specials = specials ^ (U16)(1u << (U32)s);             // Toggle the sth bit of specials
+      }
+
+
+      S32 getSpecialsSpace() const;
+      S32 getSpecialsWeight() const;
+      S32 getSpecialsCost() const;
 };
 
 

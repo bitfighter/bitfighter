@@ -15,11 +15,11 @@
 #include "gameObjectRender.h"
 #include "RenderUtils.h"
 #include "Renderer.h"
+#include "ScissorsManager.h"
 #include "ship.h"
 #include "XtankShape.h"
 
 #include "stringUtils.h"
-#include "ScissorsManager.h"
 
 
 #include <cmath>
@@ -41,6 +41,8 @@ const Color TABLE_HEADER_COLOR = Colors::gray50;
 const Color SELECTED_COLOR = Colors::yellow;
 const Color UNSELECTED_ITEM_COLOR_NAME = Colors::overlayMenuUnselectedItemColor;
 const Color UNSELECTED_ITEM_COLOR_DATA = Colors::overlayMenuHelpColor;
+static const char *CHECKBOX = "CHECKBOX";
+
 
 struct XtankDerivedStats
 {
@@ -108,7 +110,7 @@ static XtankDerivedStats getDerivedStats(const XtankDesign &design)
 
    S32 specialsWeight = 0;
    for(S32 s = 0; s < XtankSpecialCount; s++)
-      if(hasSpecial(design.specials, (XtankSpecial)s))
+      if(design.hasSpecial(s))
          specialsWeight += xtankSpecialInfos[s].weight;
 
    S32 totalWeight = body.weight + engine.weight + weaponWeight + armorWeight +
@@ -239,12 +241,7 @@ UIXtankHelper::UIXtankHelper()
    mWeaponButtonsWidth = 0;
    mWeaponItemsDisplayWidth = 0;
 
-   mArmorInfo = ArmorInfo();
-   mEngineInfo = EngineInfo();
-   mTreadInfo = TreadInfo();
-   mSuspensionInfo = SuspensionInfo();
-   mBumperInfo = BumperInfo();
-   mWeaponInfo = WeaponInfo2();
+
 }
 
 
@@ -649,8 +646,12 @@ void UIXtankHelper::updateItemColors(Vector<OverlayMenuItem> &items)
 void UIXtankHelper::onActivated()
 {
    mPhase = Phase(0);	  // Start with body selection
+   mFromPhase = Phase(0);
 
    mHighlightedIndex = 0;
+   mTransitionTimer.clear();
+   mFromPanelTop = 0;
+   mToPanelTop   = 0;
    //mWeaponSide = XtankMountLocation::NONE;
 
    // Pre-populate the design from the ship's current state.
@@ -727,7 +728,7 @@ void UIXtankHelper::render()
    else if(mPhase == Phase::ARMOR_SIDES) updateItemColors(mArmorSidesItems);
    else if(mPhase == Phase::SUSPENSION)updateItemColors(mSuspensionItems);
    else if(mPhase == Phase::BUMPERS)   updateItemColors(mBumperItems);
-   else if(mPhase == Phase::SPECIALS) { /* active state handled in renderCard */ }
+   else if(mPhase == Phase::SPECIALS)  updateItemColors(mSpecialsItems);
    else if(mPhase == Phase::HEATSINK)  updateItemColors(mHeatSinkItems);
    else if(mPhase == Phase::WEAPONS)   updateItemColors(mWeaponItems);
    else if(mPhase == Phase::NONE) { /* Do nothing */ }
@@ -740,9 +741,8 @@ void UIXtankHelper::render()
 
 void UIXtankHelper::idle(U32 delta)
 {
+   mTransitionTimer.update(delta);
    Parent::idle(delta);
-   if(mTransitionTimer.getCurrent() > 0)
-      mTransitionTimer.update(delta);
 }
 
 
@@ -767,13 +767,13 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    // ENTER: commit current selection and finalize the design.
    if(inputCode == KEY_ENTER)
    {
-      if(mPhase == Phase::SPECIALS)
-      {
-         // ENTER toggles the highlighted special
-         if(mHighlightedIndex >= 0 && mHighlightedIndex < XtankSpecialCount)
-            mDesignInProgress.specials = toggleSpecial(mDesignInProgress.specials, (XtankSpecial)mHighlightedIndex);
-         return true;
-      }
+      //if(mPhase == Phase::SPECIALS)
+      //{
+      //   // ENTER toggles the highlighted special
+      //   if(mHighlightedIndex >= 0 && mHighlightedIndex < XtankSpecialCount)
+      //      mDesignInProgress.specials = toggleSpecial(mDesignInProgress.specials, (XtankSpecial)mHighlightedIndex);
+      //   return true;
+      //}
       applyDesign();
       return true;
    }
@@ -1001,10 +1001,16 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       {
          if(inputCode == mSpecialsItems[s].key)
          {
-            mDesignInProgress.specials = toggleSpecial(mDesignInProgress.specials, (XtankSpecial)s);
+            mDesignInProgress.toggleSpecial(s);
             mHighlightedIndex = s;
             return true;
          }
+      }
+
+      if(inputCode == KEY_SPACE)
+      {
+         mDesignInProgress.toggleSpecial(mHighlightedIndex);
+         return true;
       }
    }
    else if(mPhase == Phase::HEATSINK)
@@ -1061,13 +1067,13 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
 // Show next panel
 void UIXtankHelper::navigateForward(bool changePhase)
 {
-   mTransitionFromPhase = mPhase;   // Start transition animation
-   mTransitioningForward = true;
+   Phase prevPhase = mPhase;
+   mFromPhase = mPhase;
    if(changePhase)
       mPhase = nextEnum(mPhase);
 
    // When entering weapon phases from non-weapon phases, reset to slot 0.
-   if(mPhase == Phase::WEAPONS && mTransitionFromPhase != Phase::WEAPONS)
+   if(mPhase == Phase::WEAPONS && prevPhase != Phase::WEAPONS)
       mWeaponSlot = 0;
 
    navigate();
@@ -1077,13 +1083,13 @@ void UIXtankHelper::navigateForward(bool changePhase)
 // Show previous panel
 void UIXtankHelper::navigateBackward(bool changePhase)
 {
-   mTransitionFromPhase = mPhase;   // Start transition animation
-   mTransitioningForward = false;
+   Phase prevPhase = mPhase;
+   mFromPhase = mPhase;
    if(changePhase)
       mPhase = prevEnum(mPhase);
 
    // When entering weapon phases from non-weapon phases, start at first empty slot
-   if(mPhase == Phase::WEAPONS && mTransitionFromPhase != Phase::WEAPONS)
+   if(mPhase == Phase::WEAPONS && prevPhase != Phase::WEAPONS)
       mWeaponSlot = MIN(mDesignInProgress.slotsInUse(), WEAPON_SLOTS - 1);
 
    navigate();
@@ -1092,11 +1098,13 @@ void UIXtankHelper::navigateBackward(bool changePhase)
 
 void UIXtankHelper::navigate()
 {
-   mTransitionTimer.reset(0);	   // 250ms transition
-
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
-   resetScrollTimer();
+
+   mFromPanelTop = mTransitionTimer.getCurrent() > 0 ? mToPanelTop : panelBotForPhase(mFromPhase);
+   mToPanelTop   = panelBotForPhase(mPhase);
+   mTransitionTimer.reset(150);
+
    mHighlightedIndex = getHighlightedIndexForPhase();
 }
 
@@ -1144,7 +1152,7 @@ S32 UIXtankHelper::getHighlightedIndexForPhase() const
       // Position cursor on the first active special, or 0 if none active.
       //return 0;
       for(S32 i = 0; i < XtankSpecialCount; i++)
-         if(hasSpecial(mDesignInProgress.specials, (XtankSpecial)i))
+         if(mDesignInProgress.hasSpecial(i))
             return i;
 
       return 0;
@@ -1167,16 +1175,16 @@ const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(Phase phase) cons
 {
    switch(phase)
    {
-   case Phase::BODY:        return &mBodyItems;
-   case Phase::ENGINE:      return &mEngineItems;
-   case Phase::TREADS:      return &mTreadItems;
-   case Phase::ARMOR:       return &mArmorItems;
-   case Phase::ARMOR_SIDES: return &mArmorSidesItems;
-   case Phase::SUSPENSION:  return &mSuspensionItems;
-   case Phase::BUMPERS:     return &mBumperItems;
-   case Phase::SPECIALS:    return &mSpecialsItems;
-   case Phase::HEATSINK:    return nullptr;
-   case Phase::WEAPONS:     return &mWeaponItems;
+      case Phase::BODY:        return &mBodyItems;
+      case Phase::ENGINE:      return &mEngineItems;
+      case Phase::TREADS:      return &mTreadItems;
+      case Phase::ARMOR:       return &mArmorItems;
+      case Phase::ARMOR_SIDES: return &mArmorSidesItems;
+      case Phase::SUSPENSION:  return &mSuspensionItems;
+      case Phase::BUMPERS:     return &mBumperItems;
+      case Phase::SPECIALS:    return &mSpecialsItems;
+      case Phase::HEATSINK:    return nullptr;
+      case Phase::WEAPONS:     return &mWeaponItems;
    }
 
    TNLAssert(false, "Unknown phase");
@@ -1184,9 +1192,16 @@ const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(Phase phase) cons
 }
 
 
+// Size including trailing padding
+static S32 getCheckBoxColSize(S32 fontSize)
+{
+   return S32((F32)fontSize * CEHECKBOX_SCALING_FACTOR * 1.60f);
+}
+
+
 // Generic component table renderer for components in the vehicle designer.
 // Returns the y-position just below the last rendered table row.
-S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow)
+S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const XtankDesign &design) const
 {
    const S32 columnCount = getColCount();
    const S32 columnSpacing = 6;
@@ -1200,54 +1215,49 @@ S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highl
    renderer.setColor(TABLE_HEADER_COLOR);
 
    // Compute the tallest header (multiline support) for bottom-justification.
-   S32 maxHeaderLines = 1;
-   for(S32 c = 0; c < columnCount; c++)
-   {
-      const char *hdr = getColumns()[c].header ? getColumns()[c].header : "";
-      S32 lines = 1;
-
-      // Scan for \n chars
-      for(const char *p = hdr; *p; p++)
-         if(*p == '\n')
-            lines++;
-
-      if(lines > maxHeaderLines)
-         maxHeaderLines = lines;
-   }
+   //S32 maxHeaderLines = maxHeaderLines;
 
    for(S32 c = 0; c < columnCount; c++)
    {
       TableColumn col = getColumns()[c];
       const char *hdr = col.header ? col.header : "";
 
-      S32 thisLines = 1;
-      for(const char *p = hdr; *p; p++)
-         if(*p == '\n') thisLines++;
-
-      // Bottom-justify: start so the last line aligns with maxHeaderLines.
-      S32 lineY = y + (maxHeaderLines - thisLines) * (fontSize + 2);
-      const char *seg = hdr;
-      while(true)
+      if(!strcmp(hdr, CHECKBOX))
+         x += getCheckBoxColSize(fontSize);
+      else
       {
-         const char *nl = strchr(seg, '\n');
-         S32 segLen = nl ? (S32)(nl - seg) : (S32)strlen(seg);
-         char segBuf[64];
-         segLen = MIN(segLen, (S32)sizeof(segBuf) - 1);
-         strncpy(segBuf, seg, segLen);
-         segBuf[segLen] = '\0';
+         S32 thisLines = 1;
+         for(const char *p = hdr; *p; p++)
+            if(*p == '\n') thisLines++;
 
-         if(col.headerAlignment == ALIGN_RIGHT)
-            drawStringr(x + mColTotalWidths[c] + col.headerNudge, lineY, fontSize, segBuf);
-         else if(col.headerAlignment == ALIGN_CENTER)
-            drawStringc(x + mColTotalWidths[c] / 2 + col.headerNudge, lineY + fontSize, fontSize, segBuf);
-         else
-            drawString(x + col.headerNudge, lineY, fontSize, segBuf);
+         // Bottom-justify: start so the last line aligns with maxHeaderLines.
+         S32 lineY = y + (maxHeaderLines - thisLines) * (fontSize + 2);
+         const char *seg = hdr;
+         while(true)
+         {
+            const char *nl = strchr(seg, '\n');
+            S32 segLen = nl ? (S32)(nl - seg) : (S32)strlen(seg);
 
-         lineY += fontSize + 2;
-         if(!nl) break;
-         seg = nl + 1;
+            char segBuf[64];
+            segLen = MIN(segLen, (S32)sizeof(segBuf) - 1);
+            strncpy(segBuf, seg, segLen);
+            segBuf[segLen] = '\0';
+
+            if(col.headerAlignment == ALIGN_RIGHT)
+               drawStringr(x + mColTotalWidths[c] + col.headerNudge, lineY, fontSize, segBuf);
+            else if(col.headerAlignment == ALIGN_CENTER)
+               drawStringc(x + mColTotalWidths[c] / 2 + col.headerNudge, lineY + fontSize, fontSize, segBuf);
+            else
+               drawString(x + col.headerNudge, lineY, fontSize, segBuf);
+
+            lineY += fontSize + 2;
+            if(!nl)
+               break;
+
+            seg = nl + 1;
+         }
+         x += mColTotalWidths[c] + columnSpacing;
       }
-      x += mColTotalWidths[c] + columnSpacing;
    }
    y += rowGap + (maxHeaderLines - 1) * (fontSize + 2);
 
@@ -1264,26 +1274,36 @@ S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highl
             renderer.setColor(UNSELECTED_ITEM_COLOR_DATA);
 
          const char *value = getRows()[r].cells[c] ? getRows()[r].cells[c] : "";
-         ColAlignmemt align = getColumns()[c].dataAlignment;
-         //if(!strcmp(value, "--"))
-            //align = ALIGN_RIGHT;
 
-         if(align == ALIGN_RIGHT)
+         // Special handling for checkboxes; only applies to specials.  Need to figure out whether box is checked or not.
+         if(!strcmp(value, CHECKBOX))
          {
-            S32 adj = MAX((mColHeaderWidths[c] - mColDataWidths[c]) / 2, 0);
-            drawStringr(x + mColTotalWidths[c] - adj, y, fontSize, value);
+            // Doing this here like this feels very dirty, but it works because we only use checkboxes for specials
+            bool checked = design.hasSpecial(r);      
+            renderCheckbox(x, y, fontSize, checked);
+            x += getCheckBoxColSize(fontSize);
          }
-         else if(align == ALIGN_CENTER)
-            drawStringc(x + mColTotalWidths[c] / 2, y + fontSize, fontSize, value);
          else
-            drawString(x, y, fontSize, value);
+         {
+            ColAlignmemt align = getColumns()[c].dataAlignment;
 
-         x += mColTotalWidths[c] + columnSpacing;
+            if(align == ALIGN_RIGHT)
+            {
+               S32 adj = MAX((mColHeaderWidths[c] - mColDataWidths[c]) / 2, 0);
+               drawStringr(x + mColTotalWidths[c] - adj, y, fontSize, value);
+            }
+            else if(align == ALIGN_CENTER)
+               drawStringc(x + mColTotalWidths[c] / 2, y + fontSize, fontSize, value);
+            else
+               drawString(x, y, fontSize, value);
+
+            x += mColTotalWidths[c] + columnSpacing;
+         }
       }
       y += rowGap;
    }
 
-   return y;
+   return y - top;
 }
 
 
@@ -1337,7 +1357,7 @@ void UIXtankHelper::renderArmorStats(S32 x, S32 y, S32 size, F32 alpha) const
    Color col1 = Color(0, alpha, alpha);
    Color col2 = Color(alpha, alpha, alpha);
 
-   drawTwoColors(x, y, size, col1, "Total Armor:", col2, total == 1 ? "%s / unit" : "%s / units", cs(itos(total)));   y += GAP;
+   drawTwoColors(x, y, size, col1, "Total Armor:", col2, total == 1 ? "%s / unit" : "%s units", cs(itos(total)));   y += GAP;
    drawTwoColors(x, y, size, col1, "Type:", col2, "%s", mDesignInProgress.getArmorName());                            y += GAP;
    drawTwoColors(x, y, size, col1, "Weight:", col2, "%s / unit", cs(itos(ai.weight)));                                y += GAP;
    drawTwoColors(x, y, size, col1, "Space:", col2, "%s / unit", cs(itos(ai.space)));                                  y += GAP;
@@ -1348,8 +1368,42 @@ void UIXtankHelper::renderArmorStats(S32 x, S32 y, S32 size, F32 alpha) const
    y += size;
 
    drawTwoColors(x, y, size, col1, "Total Armor Weight:", col2, totalWeight);       y += GAP;
-   drawTwoColors(x, y, size, col1, "Space:", col2, totalSpace);                     y += GAP;
-   drawTwoColors(x, y, size, col1, "Cost:", col2, totalCost);					    y += GAP;
+   drawTwoColors(x, y, size, col1, "Total Space:", col2, totalSpace);                     y += GAP;
+   drawTwoColors(x, y, size, col1, "Total Cost:", col2, totalCost);					    y += GAP;
+}
+
+
+const char *UIXtankHelper::getSpecialsHelpString(S32 specialIndex) const
+{
+   switch((XtankSpecial)specialIndex)
+   {
+      case SPECIAL_CONSOLE:         // "Chat commands"                     
+         return "Enables the vehicle’s on-board console display, including chat commands";
+      case SPECIAL_MAPPER:          // "Show full map"                     
+         return "Provides updated map display";
+      case SPECIAL_RADAR:           // "Detect hidden enemies"             
+         return "Show hidden vehicles within range on map";
+      case SPECIAL_REPAIR:          // "Auto-repair hull (+0.5%/s)"        
+         return "Repairs armor over time while the vehicle is stopped; consumes fuel";
+      case SPECIAL_RAMPLATE:        // "Bonus collision damage"            
+         return "Provides extra ram protection to front armor; increases weight";
+      case SPECIAL_HUD:             // "Heads-up display upgrades"         
+         return "Enables the heads-up display, showing status and heading data";
+      case SPECIAL_STEALTH:         // "Reduce radar cross-section"        
+         return "Lowers the vehicle’s radar cross section after a delay; works when radar and weapons are off";
+      case SPECIAL_NAVIGATION:      // "Route-planning aid"                
+         return "Improves reverse driving control";
+      case SPECIAL_NEW_RADAR:       // "Enhanced radar suite"              
+         return "More detailed  radar mode, distinguishes friend from foe";
+      case SPECIAL_TACLINK:         // "Share allied telemetry"            
+         return "Share data with allies; adds tactical tracking, persists radar/map information, and draws movement/trace info";
+      case SPECIAL_CAMO:            // "Visual camouflage"                 
+         return "Hides vehicle when stopped and not firing";
+      case SPECIAL_RDF:             // "Radio direction-finding"           
+         return "Draws directional trace lines on the map showing detected enemy movement";
+
+      default: return "";
+   }
 }
 
 
@@ -1361,15 +1415,18 @@ void UIXtankHelper::renderSpecialsStats(S32 left, S32 y, F32 alpha) const
 
    if(idx < 0 || idx >= XtankSpecialCount) idx = 0;
    const XtankSpecialInfo &si = xtankSpecialInfos[idx];
-   bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)idx);
+   bool active = mDesignInProgress.hasSpecial(idx);
 
-   r.setColor(active ? Colors::green : Colors::overlayMenuUnselectedItemColor);
-   drawString(left, y, STAT_SZ, active ? "ACTIVE" : "inactive");    y += GAP;
+   Color col1 = Color(0, alpha, alpha);
+   Color col2 = Color(alpha, alpha, alpha);
 
    r.setColor(Color(0.0f, alpha, alpha));
-   drawStringf(left, y, STAT_SZ, "Space:  %d", si.space);           y += GAP;
-   drawStringf(left, y, STAT_SZ, "Weight: %d", si.weight);          y += GAP;
-   drawStringf(left, y, STAT_SZ, "Cost:   %s", cs(comma(si.cost))); y += GAP;
+   drawTwoColors(left, y, STAT_SZ, col1, "Specials Weight:", col2, mDesignInProgress.getSpecialsWeight());  y += GAP;
+   drawTwoColors(left, y, STAT_SZ, col1, "Specials Space:",  col2, mDesignInProgress.getSpecialsSpace());   y += GAP;
+   drawTwoColors(left, y, STAT_SZ, col1, "Specials Cost:",   col2, mDesignInProgress.getSpecialsCost());    y += GAP;
+
+   y += GAP;
+   drawWrappedString(left, y, STAT_SZ, 250, GAP, getSpecialsHelpString(idx));  y += GAP;
 }
 
 
@@ -1413,7 +1470,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
    bool isCenter = (cf > 0.5f);
 
    Renderer &r = Renderer::get();
-   drawFilledFancyBox(left, top, right, bot, CORNER, Colors::black, 1, border);
+   drawFilledFancyBox(left, top, right, bot, CORNER, Colors::black, 1, Colors::red35);
 
    const S32 cx = (left + right) / 2;
    const S32 w = right - left;
@@ -1438,12 +1495,15 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
    drawHorizLine(left + titleUnderlineMargin, right - titleUnderlineMargin, divY);	// Border line
 
    S32 contentTop = top + 34;	 // y-coord of the top of the card content, below the title and the border line
+   S32 y = contentTop;
 
    // Special case:
    if(phase == Phase::HEATSINK)
-      renderHeatSinkPanel(contentTop, left, alpha, STATS_DIV);
+      y += renderHeatSinkPanel(contentTop, left, alpha, STATS_DIV - 150);
    else
-      renderItemTable(getItemsForPhase(phase), contentTop, left, isCenter, phase, mHighlightedIndex, grayLevel);
+      y += renderItemTable(getItemsForPhase(phase), contentTop, left, isCenter, phase, mHighlightedIndex, grayLevel);
+
+   renderHelpText(left, y + 10);
 
 
    // Stats column — center card only, fades in; suppressed when a table fills the card.
@@ -1463,16 +1523,87 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
    if(isCenter)
    {
       r.setColor(Colors::gray60);
-      if(phase == Phase::ARMOR_SIDES)
-         drawCenteredString(cx, bot - 14, 10, "Up/Dn=side  +/-=adjust  Tab=next  Esc=cancel");
-      else
-         drawCenteredString(cx, bot - 14, 10, "Tab  Enter=confirm  Esc=cancel");
+      drawCenteredString(cx, bot - 20, 12, "[TAB] Continue  |  [ENTER] Confirm  |  [ESC] Cancel");
    }
 }
 
 
+void UIXtankHelper::renderHelpText(S32 x, S32 y) const
+{
+   const S32 HELP_SIZE = 12;
+   const S32 gap = 15;
+
+
+   const char **helpTexts;
+   S32 itemCount;
+
+   if(mPhase == Phase::BODY || mPhase == Phase::ENGINE || mPhase == Phase::TREADS ||
+      mPhase == Phase::ARMOR || mPhase == Phase::SUSPENSION || mPhase == Phase::BUMPERS)
+   {
+      const char *helpTexts1[] = {
+         "[UP] / [DOWN] to select an item",
+         //"[TAB] to continue",
+         //"[Enter] / [Esc] to Accept or Cancel design"
+      };
+
+      helpTexts = helpTexts1;
+      itemCount = ARRAYSIZE(helpTexts1);
+   }
+   else if(mPhase == Phase::ARMOR_SIDES)
+   {
+      const char *helpTexts2[] = {
+         "[UP] / [DOWN] to select a side",
+         "[LEFT] / [RIGHT] to change amount  ",
+         "Hold [SHIFT] to change faster",
+         "[CTRL] [UP] / [DOWN] to change armor type",
+      };
+
+      helpTexts = helpTexts2;
+      itemCount = ARRAYSIZE(helpTexts2);
+   }
+   else if(mPhase == Phase::HEATSINK)
+   {
+      const char *helpTexts3[] = {
+         "[UP] / [DOWN] to change number of heat sinks",
+         "Hold [SHIFT] to change faster",
+      };
+
+      helpTexts = helpTexts3;
+      itemCount = ARRAYSIZE(helpTexts3);
+
+   }
+   else if(mPhase == Phase::SPECIALS)
+   {
+      const char *helpTexts4[] = {
+         "[UP] / [DOWN] to select Special",
+         "[SPACE] to toggle",
+      };
+
+      helpTexts = helpTexts4;
+      itemCount = ARRAYSIZE(helpTexts4);
+   }
+   else if(mPhase == Phase::WEAPONS)
+   {
+      return;
+   }
+   else
+      return;
+
+   Renderer &r = Renderer::get();
+
+   r.setColor(Colors::gray60);
+
+   for(S32 i = 0; i < itemCount; i++)
+   {
+      drawString(x + 15, y, HELP_SIZE, helpTexts[i]);
+      y += gap;
+   }
+   
+}
+
+
 // Special heatsink panel
-void UIXtankHelper::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX)
+S32 UIXtankHelper::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX)
 {
    Renderer &r = Renderer::get();
 
@@ -1495,17 +1626,25 @@ void UIXtankHelper::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwo
    Color col1 = Color(0, alpha, alpha);
    Color col2 = Color(alpha, alpha, alpha);
 
-   drawTwoColors(x, y, STAT_SZ, col1, "Heat Dissipation:", col2, modifier);                  y += GAP;
-   drawTwoColors(x, y, STAT_SZ, col1, "Weight:",           col2, heatSinkStat.weight * n);   y += GAP;
-   drawTwoColors(x, y, STAT_SZ, col1, "Cost:",             col2, heatSinkStat.cost * n);     y += GAP;
+   drawTwoColors(x, y, STAT_SZ, col1, "Cooling:", col2, modifier);                  y += GAP;
+   drawTwoColors(x, y, STAT_SZ, col1, "Weight:",  col2, heatSinkStat.weight * n);   y += GAP;
+   drawTwoColors(x, y, STAT_SZ, col1, "Space:",   col2, heatSinkStat.space * n);    y += GAP;
+   drawTwoColors(x, y, STAT_SZ, col1, "Cost:",    col2, heatSinkStat.cost * n);     y += GAP;
+
+   return y - top;
 }
 
 
 // Draw a table of items
-void UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel)
+S32 UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel)
 {
    if(!items || items->size() == 0)
-      return;
+      return 0;
+
+   if(phase == Phase::SPECIALS)
+   {
+      int xxx = 0;
+   }
 
    static const S32 CTR_ROW_GAP = 16;
 
@@ -1536,10 +1675,9 @@ void UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 to
    ComponentInfo *tableInfo = getCurrentComponentInfo(isActive);
 
    if(tableInfo)
-      tableInfo->render(left + 8, top, drawnSz, rowGap, highlightedIndex);
+      return tableInfo->render(left + 8, top, drawnSz, rowGap, highlightedIndex, mDesignInProgress);
    else
    {
-      // "[X] " + longest special name fits comfortably in 64 chars.
       static const S32 SPECIAL_LABEL_BUF_LEN = 64;
       static const S32 ARMOR_SIDE_COUNT = 6;
       char sSpecialNameBuf[XtankSpecialCount][SPECIAL_LABEL_BUF_LEN];
@@ -1556,12 +1694,11 @@ void UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 to
          // For specials phase, prefix with toggle state indicator
          if(phase == Phase::SPECIALS && i < XtankSpecialCount)
          {
-            bool active = hasSpecial(mDesignInProgress.specials, (XtankSpecial)i);
-            dSprintf(sSpecialNameBuf[i], sizeof(sSpecialNameBuf[i]), "%s %s",
-               active ? "[X]" : "[ ]", name);
+            dSprintf(sSpecialNameBuf[i], sizeof(sSpecialNameBuf[i]), "%s", name);
             name = sSpecialNameBuf[i];
          }
 
+         bool active = mDesignInProgress.hasSpecial(i);
          bool sel = isActive && (i == mHighlightedIndex);
 
          if(isActive)
@@ -1575,18 +1712,23 @@ void UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 to
             // Key badge
             r.setColor(sel ? SELECTED_COLOR : Colors::gray60);
             drawStringc(KEY_X + KEY_COL_WIDTH / 2, y + drawnSz, drawnSz, InputCodeManager::inputCodeToString((*items)[i].key));
+
             // Item name
+            renderCheckbox(NAME_X, y, drawnSz, active);
             r.setColor(sel ? SELECTED_COLOR : Colors::overlayMenuUnselectedItemColor);
-            drawString(NAME_X, y, drawnSz, name);
+            drawString(NAME_X + 15, y, drawnSz, name);
          }
          else
          {
+            // NOT USED
             // Background card: all gray, no key column, proportionally scaled font
             r.setColor(Color(grayLevel, grayLevel, grayLevel));
-            drawString(NAME_X, y, drawnSz, name);
+            renderCheckbox(NAME_X, y, drawnSz, false);
+            drawString(NAME_X + 15, y, drawnSz, name);
          }
       }
    }
+   return count * rowGap;
 }
 
 
@@ -1605,6 +1747,7 @@ ComponentInfo *UIXtankHelper::getCurrentComponentInfo(bool isCenter)
          case Phase::SUSPENSION:  return &mSuspensionInfo;
          case Phase::BUMPERS:     return &mBumperInfo;
          case Phase::WEAPONS:     return &mWeaponInfo;
+         case Phase::SPECIALS:    return &mSpecialsInfo;
          //case Phase::HEATSINK:    return &mHeatSinkInfo;
          case Phase::ARMOR_SIDES: return &mArmorAllocationInfo;
       }
@@ -1654,14 +1797,11 @@ void UIXtankHelper::renderWeaponPanelTitle(S32 titlex, S32 titley, S32 right, S3
 // Tab bar + single-active-panel renderer
 //
 // Layout (canvas 800x600):
-//   TAB_BOT  = 595  (5px gap from canvas bottom)
-//   TAB_TOP  = TAB_BOT - TAB_H   (tab strip height)
-//   PANEL_BOT = TAB_TOP - 6      (gap between panel and tab strip)
-//   PANEL_TOP = 75               (top of panel)
-//
-// Animation: when a transition is in progress the incoming panel slides
-// upward from PANEL_BOT to PANEL_TOP over the 250ms timer.  `t` is the
-// smoothstepped fraction (0 = start, 1 = complete).
+//   TAB_BOT   = 595             (5px gap from canvas bottom)
+//   TAB_TOP   = TAB_BOT - TAB_H (tab strip height)
+//   PANEL_BOT = TAB_TOP - 6    (gap between panel and tab strip)
+//   Panel top is computed per-phase via panelBotForPhase() so each panel
+//   is only as tall as its content requires.
 // -----------------------------------------------------------------------
 
 // Tab font size matches the existing panel title size.
@@ -1675,7 +1815,6 @@ static const S32 TAB_TOP      = TAB_BOT - TAB_H;
 static const S32 PANEL_LEFT   = 30;
 static const S32 PANEL_RIGHT  = 660;
 static const S32 PANEL_BOT    = TAB_TOP - 6;
-static const S32 PANEL_TOP    = 75;
 
 
 // Cache for lazy initialization of slightly expensive width calculations
@@ -1730,7 +1869,7 @@ LabelWidth UIXtankHelper::getTabLabel(Phase phase) const
 static S32 totalRowWidth = 0;      // Cached value, lazily initialized below
 
 
-void UIXtankHelper::renderTabBar(F32 t)
+void UIXtankHelper::renderTabBar()
 {
    Renderer &r = Renderer::get();
    FontManager::pushFontContext(HelperMenuContext);
@@ -1781,37 +1920,114 @@ void UIXtankHelper::renderTabBar(F32 t)
 }
 
 
+// Returns the required panel height (in pixels) for the given phase,
+// sized to fit title + content rows + help text + nav hint.
+// The panel is bottom-anchored at PANEL_BOT; its top = PANEL_BOT - height.
+S32 UIXtankHelper::panelBotForPhase(Phase phase) const
+{
+   static const S32 ROW_GAP      = 16;   // matches renderItemTable / ComponentInfo::render
+   static const S32 ITEM_SZ      = 13;
+   static const S32 HELP_SZ      = 12;
+   static const S32 HELP_GAP     = 15;
+   static const S32 CONTENT_TOP  = 34;   // title (16) + padding (8) + divider (4) + gap (6)
+   static const S32 NAV_HINT     = 24;   // space for navigation hint at the bottom
+   static const S32 BOT_MARGIN   = 10;
+
+   // ---- Content (item table) height ----
+   S32 tableHeight = 0;
+
+   switch(phase)
+   {
+   case Phase::BODY:
+      // 9-col table; headers "Weight\nLimit" and "Avail.\nSpace" are 2 lines → maxHeaderLines=2
+      tableHeight = ROW_GAP + (ITEM_SZ + 2) + VehicleBodyCount * ROW_GAP;
+      break;
+   case Phase::ENGINE:
+      // 8-col table; headers "Fuel\nCost" and "Fuel\nCap." are 2 lines
+      tableHeight = ROW_GAP + (ITEM_SZ + 2) + XtankEngineCount * ROW_GAP;
+      break;
+   case Phase::TREADS:
+      tableHeight = ROW_GAP + XtankTreadCount * ROW_GAP;
+      break;
+   case Phase::ARMOR:
+      tableHeight = ROW_GAP + XtankArmorCount * ROW_GAP;
+      break;
+   case Phase::ARMOR_SIDES:
+      tableHeight = ROW_GAP + VehicleSidesCount * ROW_GAP;
+      break;
+   case Phase::SUSPENSION:
+      tableHeight = ROW_GAP + XtankSuspensionCount * ROW_GAP;
+      break;
+   case Phase::BUMPERS:
+      tableHeight = ROW_GAP + XtankBumperCount * ROW_GAP;
+      break;
+   case Phase::SPECIALS:
+      tableHeight = XtankSpecialCount * ROW_GAP;
+      break;
+   case Phase::HEATSINK:
+      // renderHeatSinkPanel renders 3 stat lines at GAP (STAT_SZ+5 = 17) each, plus the header row
+      tableHeight = ROW_GAP + 3 * (STAT_SZ + 5);
+      break;
+   case Phase::WEAPONS:
+      // WeaponInfo2::rowCount = XtankWeaponCount + 1 (for "None" row); single-line headers
+      tableHeight = ROW_GAP + WeaponInfo2::rowCount * ROW_GAP;
+      break;
+   default:
+      tableHeight = 0;
+      break;
+   }
+
+   // ---- Help text height ----   TODO: Should be calculated from actual help
+   S32 helpLines = 0;
+   if(phase == Phase::BODY || phase == Phase::ENGINE || phase == Phase::TREADS ||
+      phase == Phase::ARMOR || phase == Phase::SUSPENSION || phase == Phase::BUMPERS)
+      helpLines = 3;
+   else if(phase == Phase::ARMOR_SIDES)
+      helpLines = 6;
+   else if(phase == Phase::HEATSINK)
+      helpLines = 4;
+   else if(phase == Phase::SPECIALS)
+      helpLines = 2;
+   // WEAPONS: renderHelpText returns immediately, 0 help lines
+
+   S32 helpHeight = (helpLines > 0) ? (10 + helpLines * HELP_GAP) : 0;
+
+   S32 totalContent = CONTENT_TOP + tableHeight + helpHeight + NAV_HINT + BOT_MARGIN;
+   return PANEL_BOT - totalContent;   // top y of the panel
+}
+
+
 void UIXtankHelper::renderFloatingMenus()
 {
-   // Smoothstepped elapsed fraction: 0 at start of transition, 1 at end.
-   F32 t = 0.0f;
-   if(mTransitionTimer.getCurrent() > 0)
-   {
-      F32 e = 1.0f - mTransitionTimer.getFraction();
-      t = e * e * (3.0f - 2.0f * e);
-   }
+   FontManager::pushFontContext(HelperMenuContext);
 
-   // Animate the panel top: slides up from PANEL_BOT to PANEL_TOP as t goes 0→1.
-   S32 animTop = (mTransitionTimer.getCurrent() > 0)
-      ? PANEL_BOT - (S32)((PANEL_BOT - PANEL_TOP) * t)
-      : PANEL_TOP;
+   const bool animating = mTransitionTimer.getCurrent() > 0;
 
-   // Clip panel rendering to the animated region so content doesn't bleed below the tab bar.
+   // Interpolate the panel top linearly from old height to new height.
+   F32 frac = animating ? mTransitionTimer.getFraction() : 0.0f;   // 1.0 = just started, 0.0 = done
+   S32 panelTop = animating ? S32(mFromPanelTop * frac + mToPanelTop * (1.0f - frac)) : panelBotForPhase(mPhase);
+
+   if(animating)
    {
-      static ScissorsManager scissorsManager;
+      // Clip to the animated panel bounds so content doesn't spill outside.
+      static ScissorsManager scissors;
       DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
-      scissorsManager.enable(true, displayMode,
-         F32(PANEL_LEFT), F32(animTop - 1),
-         F32(PANEL_RIGHT - PANEL_LEFT), F32(PANEL_BOT - animTop + 1));
+      scissors.enable(true, displayMode,
+                      PANEL_LEFT - 1, panelTop - 2,
+                      PANEL_RIGHT - PANEL_LEFT + 2, PANEL_BOT - panelTop + 2);
 
-      FontManager::pushFontContext(HelperMenuContext);
-      renderCard(PANEL_LEFT, animTop, PANEL_RIGHT, PANEL_BOT, mPhase, 1.0f);
-      FontManager::popFontContext();
+      renderCard(PANEL_LEFT, panelTop, PANEL_RIGHT, PANEL_BOT, mPhase, 1.0f);
 
-      scissorsManager.disable();
+      scissors.disable();
+   }
+   else
+   {
+      renderCard(PANEL_LEFT, panelTop, PANEL_RIGHT, PANEL_BOT, mPhase, 1.0f);
    }
 
-   renderTabBar(t);
+   FontManager::popFontContext();
+
+   renderTabBar();
 }
 
 
@@ -1888,6 +2104,10 @@ S32 UIXtankHelper::currentPhaseItemCount()
 {
    if(mPhase == Phase::ARMOR_SIDES)
       return VehicleSidesCount;
+
+   if(mPhase == Phase::SPECIALS)
+      return XtankSpecial::XtankSpecialCount;
+
    ComponentInfo *componentInfo = getCurrentComponentInfo(true);
    if(componentInfo)
       return componentInfo->getRowCount();
@@ -1896,83 +2116,13 @@ S32 UIXtankHelper::currentPhaseItemCount()
 }
 
 
-// Draw a row of small circles indicating the current carousel position.
-//// Since phase navigation wraps, both arrows are always active.
-//void UIXtankHelper::renderCarouselDots(S32 cx, S32 y) const
-//{
-//   S32 totalPhases = Phase::COUNT;
-//
-//   static const F32 DOT_R      = 4.0f;
-//   static const F32 DOT_R_SM   = 3.0f;
-//   static const F32 DOT_STEP   = 14.0f;
-//   static const S32 ARROW_GAP  = 12;
-//   static const S32 ARROW_SZ   = 11;
-//
-//   // Centre the dots row at cx.
-//   F32 rowWidth   = F32(totalPhases - 1) * DOT_STEP;
-//   F32 dotsLeft   = F32(cx) - rowWidth * 0.5f;
-//
-//   Renderer &r = Renderer::get();
-//   static const S32 SEG = 12;  // polygon segments for each circle
-//
-//   for(S32 i = 0; i < totalPhases; i++)
-//   {
-//      F32 dx  = dotsLeft + F32(i) * DOT_STEP;
-//      F32 rad = (i == mPhase) ? DOT_R : DOT_R_SM;
-//      bool filled = (i == mPhase);
-//
-//      if(i == mPhase)
-//         r.setColor(Colors::white);
-//      else if(i < mPhase)
-//         r.setColor(Colors::gray67);
-//      else
-//         r.setColor(Colors::gray40);
-//
-//      if(filled)
-//      {
-//         F32 verts[2 + (SEG + 1) * 2];
-//         verts[0] = dx;
-//         verts[1] = F32(y);
-//         for(S32 s = 0; s <= SEG; s++)
-//         {
-//            F32 a = FloatPi * 2.0f * F32(s % SEG) / F32(SEG);
-//            verts[2 + s * 2]     = dx + rad * cosf(a);
-//            verts[2 + s * 2 + 1] = F32(y) + rad * sinf(a);
-//         }
-//         r.renderVertexArray(verts, 2 + SEG, RenderType::TriangleFan);
-//      }
-//      else
-//      {
-//         F32 verts[SEG * 2];
-//         for(S32 s = 0; s < SEG; s++)
-//         {
-//            F32 a = FloatPi * 2.0f * F32(s) / F32(SEG);
-//            verts[s * 2]     = dx + rad * cosf(a);
-//            verts[s * 2 + 1] = F32(y) + rad * sinf(a);
-//         }
-//         r.renderVertexArray(verts, SEG, RenderType::LineLoop);
-//      }
-//   }
-//
-//   // Wrap navigation is always available both directions.
-//   S32 arrowY = y - ARROW_SZ / 2;
-//   S32 leftArrowX = S32(dotsLeft) - ARROW_GAP - ARROW_SZ;
-//   r.setColor(Colors::gray67);
-//   drawCenteredString(leftArrowX, arrowY, ARROW_SZ, "<");
-//
-//   S32 rightArrowX = S32(dotsLeft + rowWidth) + ARROW_GAP;
-//   r.setColor(Colors::gray67);
-//   drawCenteredString(rightArrowX, arrowY, ARROW_SZ, ">");
-//}
-
-
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 
 // Lazy initializer
-void ComponentInfo::computeColWidths(S32 fontSize)
+void ComponentInfo::computeColWidths(S32 fontSize) const
 {
    if(mComputed)
       return;
@@ -2025,7 +2175,17 @@ static const char *getArmorClassName(S32 defenseValue)
 }
 
 
-void ArmorInfo::fillRows()
+const TableColumn ArmorInfo::columns[ArmorInfo::colCount] =
+{
+   { "Key",    ALIGN_LEFT,   ALIGN_CENTER, 0 },
+   { "Armor",  ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Class",  ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Weight", ALIGN_CENTER, ALIGN_CENTER, 0 },
+   { "Space",  ALIGN_CENTER, ALIGN_CENTER, 0 },
+   { "Cost",   ALIGN_CENTER, ALIGN_RIGHT,  5 },
+};
+
+void ArmorInfo::fillRows() const
 {
    static char weightBuf[XtankArmorCount][COL_LEN];
    static char spaceBuf[XtankArmorCount][COL_LEN];
@@ -2049,7 +2209,20 @@ void ArmorInfo::fillRows()
 }
 
 
-void BodyInfo::fillRows()
+const TableColumn BodyInfo::columns[BodyInfo::colCount] =
+{
+   { "Key",           ALIGN_LEFT,   ALIGN_CENTER, 0 },
+   { "Body",          ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Weight",        ALIGN_CENTER, ALIGN_RIGHT,  6 },
+   { "Weight\nLimit", ALIGN_CENTER, ALIGN_RIGHT,  6 },
+   { "Avail.\nSpace", ALIGN_CENTER, ALIGN_RIGHT,  6 },
+   { "Drag",          ALIGN_CENTER, ALIGN_RIGHT,  0 },
+   { "Handl-\ning",   ALIGN_CENTER, ALIGN_CENTER, 0 },
+   { "Turrets",       ALIGN_CENTER, ALIGN_CENTER, 0 },
+   { "Cost",          ALIGN_CENTER, ALIGN_RIGHT,  4 },
+};
+
+void BodyInfo::fillRows() const
 {
    static char weightBuf[VehicleBodyCount][COL_LEN];
    static char weightLimitBuf[VehicleBodyCount][COL_LEN];
@@ -2084,10 +2257,20 @@ void BodyInfo::fillRows()
 }
 
 
-void EngineInfo::fillRows()
+const TableColumn EngineInfo::columns[EngineInfo::colCount] =
 {
-   //static char spdBuf[XtankEngineCount][COL_LEN];
-   //static char accBuf[XtankEngineCount][COL_LEN];
+   { "Key",        ALIGN_LEFT,   ALIGN_CENTER, 0 },
+   { "Engine",     ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Power",      ALIGN_CENTER, ALIGN_RIGHT,  10 },
+   { "Weight",     ALIGN_CENTER, ALIGN_RIGHT,  8 },
+   { "Space",      ALIGN_CENTER, ALIGN_RIGHT,  8 },
+   { "Fuel\nCost", ALIGN_CENTER, ALIGN_CENTER, 0 },
+   { "Fuel\nCap.", ALIGN_CENTER, ALIGN_RIGHT,  8 },
+   { "Cost",       ALIGN_CENTER, ALIGN_RIGHT,  8 },
+};
+
+void EngineInfo::fillRows() const
+{
    static char pwrBuf[XtankEngineCount][COL_LEN];
    static char wtBuf[XtankEngineCount][COL_LEN];
    static char spaceBuf[XtankEngineCount][COL_LEN];
@@ -2099,8 +2282,6 @@ void EngineInfo::fillRows()
    for(S32 i = 0; i < XtankEngineCount; i++)
    {
       const XtankEngineInfo &ei = xtankEngineInfos[i];
-      //dSprintf(spdBuf[i], COL_LEN, "%.2f", (S32)((ei.speedMult - 1.0f) * 100.0f + 0.5f));  // +0.5f rounds to nearest int
-      //dSprintf(accBuf[i], COL_LEN, "%.2f", (S32)((ei.accelMult - 1.0f) * 100.0f + 0.5f));
       dSprintf(pwrBuf[i], COL_LEN, "%s", cs(comma(ei.power)));
       dSprintf(wtBuf[i], COL_LEN, "%s", cs(comma(ei.weight)));
       dSprintf(spaceBuf[i], COL_LEN, "%s", cs(comma(ei.space)));
@@ -2110,8 +2291,6 @@ void EngineInfo::fillRows()
 
       rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
       rows[i].cells[1] = ei.name;
-      //rows[i].cells[2] = spdBuf[i];
-      //rows[i].cells[3] = accBuf[i];
       rows[i].cells[2] = pwrBuf[i];
       rows[i].cells[3] = wtBuf[i];
       rows[i].cells[4] = spaceBuf[i];
@@ -2123,7 +2302,15 @@ void EngineInfo::fillRows()
 }
 
 
-void TreadInfo::fillRows()
+const TableColumn TreadInfo::columns[TreadInfo::colCount] =
+{
+   { "Key",      ALIGN_LEFT,   ALIGN_CENTER, 0 },
+   { "Tread",    ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Friction", ALIGN_CENTER, ALIGN_RIGHT,  0 },
+   { "Cost",     ALIGN_CENTER, ALIGN_RIGHT,  6 },
+};
+
+void TreadInfo::fillRows() const
 {
    static char frictBuf[XtankTreadCount][COL_LEN];
    static char costBuf[XtankTreadCount][COL_LEN];
@@ -2143,7 +2330,15 @@ void TreadInfo::fillRows()
 }
 
 
-void SuspensionInfo::fillRows()
+const TableColumn SuspensionInfo::columns[SuspensionInfo::colCount] =
+{
+   { "Key",        ALIGN_LEFT,   ALIGN_CENTER, 0 },
+   { "Suspension", ALIGN_LEFT,   ALIGN_LEFT,   0 },
+   { "Handling",   ALIGN_CENTER, ALIGN_CENTER, 3 },
+   { "Cost",       ALIGN_CENTER, ALIGN_RIGHT,  6 },
+};
+
+void SuspensionInfo::fillRows() const
 {
    static char handlingBuf[XtankSuspensionCount][COL_LEN];
    static char costBuf[XtankSuspensionCount][COL_LEN];
@@ -2163,7 +2358,15 @@ void SuspensionInfo::fillRows()
 }
 
 
-void BumperInfo::fillRows()
+const TableColumn BumperInfo::columns[BumperInfo::colCount] =
+{
+   { "Key",    ALIGN_LEFT,   ALIGN_CENTER,  0 },
+   { "Bumper", ALIGN_LEFT,   ALIGN_LEFT,    0 },
+   { "Bounce", ALIGN_CENTER, ALIGN_RIGHT,   2 },
+   { "Cost",   ALIGN_RIGHT,  ALIGN_RIGHT,   2 },
+};
+
+void BumperInfo::fillRows() const
 {
    static char elastBuf[XtankBumperCount][COL_LEN];
    static char costBuf[XtankBumperCount][COL_LEN];
@@ -2183,12 +2386,64 @@ void BumperInfo::fillRows()
 }
 
 
-void HeatSinkInfo::fillRows()
+const TableColumn HeatSinkInfo::columns[HeatSinkInfo::colCount] =
+{
+   { "Heat\nSinks",   ALIGN_LEFT,   ALIGN_CENTER,  0 },
+   { "Firing\nBonus", ALIGN_CENTER, ALIGN_RIGHT,   6 },
+   { "Weight",        ALIGN_CENTER, ALIGN_RIGHT,   6 },
+   { "Cost",          ALIGN_CENTER, ALIGN_RIGHT,   6 },
+};
+
+void HeatSinkInfo::fillRows() const
 {
    // Do nothing
 }
 
-void ArmorAllocationInfo::fillRows()
+
+const TableColumn SpecialInfo::columns[SpecialInfo::colCount] =
+{
+   { "Key",     ALIGN_LEFT,   ALIGN_CENTER,  0 },
+   { CHECKBOX,  ALIGN_CENTER, ALIGN_LEFT,    0 },    // Checkbox column
+   { "Special", ALIGN_LEFT,   ALIGN_LEFT,    0 },
+   { "Weight",  ALIGN_RIGHT,  ALIGN_RIGHT,   2 },
+   { "Space",   ALIGN_RIGHT,  ALIGN_RIGHT,   2 },
+   { "Cost",    ALIGN_RIGHT,  ALIGN_RIGHT,   0 },
+};
+
+void SpecialInfo::fillRows() const
+{
+   static char costBuf[XtankSpecialCount][COL_LEN];
+   static char weightBuf[XtankSpecialCount][COL_LEN];
+   static char spaceBuf[XtankSpecialCount][COL_LEN];
+
+   for(S32 i = 0; i < XtankSpecialCount; i++)
+   {
+      const XtankSpecialInfo &si = xtankSpecialInfos[i];
+
+      dSprintf(weightBuf[i], COL_LEN, "%s", cs(comma(si.weight)));
+      dSprintf(spaceBuf[i],  COL_LEN, "%s", cs(comma(si.space)));
+      dSprintf(costBuf[i],   COL_LEN, "%s", cs(comma(si.cost)));
+
+
+      rows[i].cells[0] = InputCodeManager::inputCodeToString(getKeyForIndex(i));
+      rows[i].cells[1] = CHECKBOX;     // Requires special handling
+      rows[i].cells[2] = si.name;
+      rows[i].cells[3] = weightBuf[i];
+      rows[i].cells[4] = spaceBuf[i];
+      rows[i].cells[5] = costBuf[i];
+      rows[i].highlighted = false;
+   }
+}
+
+
+const TableColumn ArmorAllocationInfo::columns[ArmorAllocationInfo::colCount] =
+{
+   { "Key",   ALIGN_LEFT,   ALIGN_CENTER,   0 },
+   { "Side",  ALIGN_LEFT,   ALIGN_LEFT,     0 },
+   { "Units", ALIGN_CENTER, ALIGN_CENTER,   0 },
+};
+
+void ArmorAllocationInfo::fillRows() const
 {
    for(S32 i = 0; i < VehicleSidesCount; i++)
    {
@@ -2204,7 +2459,7 @@ void ArmorAllocationInfo::fillRows()
 
 
 // Update the points and related stats columns for rendering the armor allocation menu
-void ArmorAllocationInfo::updateArmorAllocationMenuItems(XtankArmor armorType, const S32 *armor)
+void ArmorAllocationInfo::updateArmorAllocationMenuItems(XtankArmor armorType, const S32 *armor) const
 {
    static char ptsBuf[VehicleSidesCount][COL_LEN];
 
@@ -2216,8 +2471,17 @@ void ArmorAllocationInfo::updateArmorAllocationMenuItems(XtankArmor armorType, c
 }
 
 
+const TableColumn WeaponInfo2::columns[WeaponInfo2::colCount] =
+{
+   { "Key",    ALIGN_LEFT,   ALIGN_CENTER,  0 },
+   { "Weapon", ALIGN_LEFT,   ALIGN_LEFT,    0 },
+   { "Delay",  ALIGN_CENTER, ALIGN_RIGHT,   6 },
+   { "Weight", ALIGN_CENTER, ALIGN_RIGHT,  10 },
+   { "Cost",   ALIGN_RIGHT,  ALIGN_RIGHT,   0 },
+};
+
 // Row 0 = "None" (empty slot), rows 1..XtankWeapon::COUNT = weapon entries.
-void WeaponInfo2::fillRows()
+void WeaponInfo2::fillRows() const
 {
    static char dlyBuf[(S32)XtankWeapon::COUNT][COL_LEN];
    static char wtBuf[(S32)XtankWeapon::COUNT][COL_LEN];
@@ -2274,26 +2538,6 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
    FontManager::pushFontContext(HelperMenuContext);
    Renderer &r = Renderer::get();
 
-   //if(designPhase == Phase::WEAPONS)
-   //{
-   //   S32 slot = weaponSide;
-   //   if(slot >= 0 && slot < WEAPON_SLOTS)
-   //   {
-   //      if(mHighlightedIndex <= 0)
-   //      {
-   //         preview.weapons[slot] = XtankWeapon::NONE;
-   //         preview.weaponMounts[slot] = XtankMountLocation::NONE;
-   //      }
-   //      else if(mHighlightedIndex < mWeaponItems.size())
-   //      {
-   //         preview.weapons[slot] = (XtankWeapon)mWeaponItems[mHighlightedIndex].itemIndex;
-   //         XtankMountLocation preferred = (XtankMountLocation)preview.weaponMounts[slot];
-   //         S32 previewBodyIdx = MAX(0, MIN((S32)preview.bodyIndex, VehicleBodyCount - 1));
-   //         preview.weaponMounts[slot] = (S8)firstValidMount(previewBodyIdx, preview.weapons[slot], preferred);
-   //      }
-   //   }
-   //}
-
    S32 bodyIdx = (S32)preview.body;
    S32 engineIdx = (S32)preview.engine;
    S32 treadIdx = (S32)preview.tread;
@@ -2336,7 +2580,7 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
    // Specials costs and weights
    for(S32 s = 0; s < XtankSpecialCount; s++)
    {
-      if(hasSpecial(preview.specials, (XtankSpecial)s))
+      if(preview.hasSpecial(s))
       {
          totalWeight += xtankSpecialInfos[s].weight;
          totalCost += xtankSpecialInfos[s].cost;
@@ -2356,7 +2600,7 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
       totalSpace += xtankWeaponInfos[(S32)w].space;
    }
    for(S32 s = 0; s < XtankSpecialCount; s++)
-      if(hasSpecial(preview.specials, (XtankSpecial)s))
+      if(preview.hasSpecial(s))
          totalSpace += xtankSpecialInfos[s].space;
 
    S32 weightLimit = xTankBodyStats[bodyIdx].weightLimit;
@@ -2396,9 +2640,7 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
    ty += LINE_GAP;
 
    r.setColor(overWeight ? Colors::red : Colors::green);
-   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Weight: %s / %s%s",
-      cs(comma(totalWeight)), cs(comma(weightLimit)),
-      overWeight ? " OVER!" : "");
+   drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Weight: %s / %s%s", cs(comma(totalWeight)), cs(comma(weightLimit)), overWeight ? " OVER!" : "");
    ty += LINE_GAP;
 
    r.setColor(overSpace ? Colors::red : Colors::cyan);
@@ -2423,7 +2665,7 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
    // Active specials count
    S32 specialCount = 0;
    for(S32 s = 0; s < XtankSpecialCount; s++)
-      if(hasSpecial(preview.specials, (XtankSpecial)s))
+      if(preview.hasSpecial(s))
          specialCount++;
    if(specialCount > 0)
    {
@@ -2431,14 +2673,8 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
       drawCenteredStringf(PNL_CX, ty, STAT_SZ, "Specials: %d active", specialCount); ty += LINE_GAP;
    }
 
-   renderFullBuildStats(PNL_CX, BUILD_Y, preview);
+   renderFullBuildStats(PNL_CX, BUILD_Y, preview)  ;
    //renderCarouselDots(PNL_CX, DOTS_Y);
-
-   r.setColor(Colors::gray50);
-   if(designPhase == Phase::WEAPONS)
-      drawCenteredStringf(PNL_CX, HINT_Y, 11, "[Lt]/[Rt] mount  [Up]/[Dn] weapon  Tab next slot");
-   else
-      drawCenteredString(PNL_CX, HINT_Y, 11, "[Up]/[Dn] item  Tab/Shift-Tab phase");
 
    FontManager::popFontContext();
 }
@@ -2527,3 +2763,5 @@ void VehiclePreviewRenderer::renderFullBuildStats(S32 cx, S32 y, const XtankDesi
 
 } /* namespace Zap */
 #undef UNSEL_COLOR
+
+

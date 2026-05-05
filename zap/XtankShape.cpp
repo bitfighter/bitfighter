@@ -717,7 +717,7 @@ void XtankDesign::init()
    armor = XtankArmor::DEFAULT;
    suspension = XtankSuspension::DEFAULT;
    bumper = XtankBumper::DEFAULT;
-   specials = 0;
+   specials = 0;     // This is a bitmap, so 0 means "no specials"
 }
 
 
@@ -868,15 +868,15 @@ static S32 getXtankMountBit(XtankMountLocation mount)
 {
    switch(mount)
    {
-   case XtankMountLocation::TURRET1:
-   case XtankMountLocation::TURRET2:
-   case XtankMountLocation::TURRET3:
-   case XtankMountLocation::TURRET4: return M_TURRET;
-   case XtankMountLocation::FRONT:   return M_FRONT;
-   case XtankMountLocation::BACK:    return M_BACK;
-   case XtankMountLocation::LEFT:    return M_LEFT;
-   case XtankMountLocation::RIGHT:   return M_RIGHT;
-   default:            return 0;
+      case XtankMountLocation::TURRET1:
+      case XtankMountLocation::TURRET2:
+      case XtankMountLocation::TURRET3:
+      case XtankMountLocation::TURRET4: return M_TURRET;
+      case XtankMountLocation::FRONT:   return M_FRONT;
+      case XtankMountLocation::BACK:    return M_BACK;
+      case XtankMountLocation::LEFT:    return M_LEFT;
+      case XtankMountLocation::RIGHT:   return M_RIGHT;
+      default:            return 0;
    }
 }
 
@@ -961,7 +961,7 @@ void XtankDesign::selected(Phase phase, S32 index, S32 slot)
          bumper = (XtankBumper)index;
          break;
       case Phase::SPECIALS:
-         specials = index;
+         //specials = index;
          break;
       case Phase::HEATSINK:
          heatSinks = index;
@@ -1021,5 +1021,37 @@ S32 XtankDesign::heatDissipation() const
    return heatSinks * 3;
 }
 
+
+S32 XtankDesign::getSpecialsSpace() const
+{
+   S32 total = 0;
+   for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
+      if(hasSpecial(i))
+         total += xtankSpecialInfos[i].space;
+
+   return total;
+}
+
+
+S32 XtankDesign::getSpecialsWeight() const
+{
+   S32 total = 0;
+   for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
+      if(hasSpecial(i))
+         total += xtankSpecialInfos[i].weight;
+
+   return total;
+}
+
+
+S32 XtankDesign::getSpecialsCost() const
+{
+   S32 total = 0;
+   for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
+      if(hasSpecial(i))
+         total += xtankSpecialInfos[i].cost;
+
+   return total;
+}
 
 } /* namespace Zap */
