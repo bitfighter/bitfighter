@@ -251,7 +251,7 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 // No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
 bool isConvex(const Vector<Point> *verts)
 {
-   if(!verts)
+   if(!verts || verts->empty())
       return true;
 
    int n = verts->size();
