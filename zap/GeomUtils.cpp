@@ -91,6 +91,9 @@ static inline F64 isLeft(const Point &p1, const Point &p2, const Point &p )
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
 bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &point)
 {
+   if(vertexCount == 0)
+      return false;
+
    S32 counter = 0;    // Winding number counter
 
    // loop through all edges of the polygon
@@ -217,6 +220,9 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 // Only used in editor.
 bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point)
 {
+   if(!triangles)
+      return false;
+
    for (S32 i = 0; i + 2 < triangles->size(); i += 3)
    {
       const Point& p0 = (*triangles)[i];
@@ -225,9 +231,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 
       // Cross-product sign test — zero means point is exactly on that edge,
       // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+      F64 d1 = (F64(point.x) - p1.x) * (F64(p0.y) - p1.y) - (F64(p0.x) - p1.x) * (F64(point.y) - p1.y);
+      F64 d2 = (F64(point.x) - p2.x) * (F64(p1.y) - p2.y) - (F64(p1.x) - p2.x) * (F64(point.y) - p2.y);
+      F64 d3 = (F64(point.x) - p0.x) * (F64(p2.y) - p0.y) - (F64(p2.x) - p0.x) * (F64(point.y) - p0.y);
 
       bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
       bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -245,6 +251,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 // No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
 bool isConvex(const Vector<Point> *verts)
 {
+   if(!verts || verts->empty())
+      return true;
+
    int n = verts->size();
    if(n < 3)
       return true;
@@ -293,6 +302,9 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
+   if(inNumVertices == 0)
+      return false;
+
    // Check if the center is inside the polygon  ==> now works for all polys
    if(polygonContainsPoint(inVertices, inNumVertices, inCenter))
    {
@@ -346,6 +358,9 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
+   if(points.empty())
+      return false;
+
    const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
 
@@ -365,6 +380,9 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
+   if(p1.empty() || p2.empty())
+      return false;
+
    F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
 
@@ -393,6 +411,9 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
                                       F32 &collisionTime, Point &normal)
 {
+   if(vertexCount == 0)
+      return false;
+
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;
    Point dp = end - start;
@@ -669,6 +690,9 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 
 bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
 {
+   if(!zone1 || !zone2)
+      return false;
+
    // Check for unlikely but fatal situation: Not enough vertices
    if(zone1->size() < 3 || zone2->size() < 3)
       return false;
@@ -705,6 +729,9 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
 static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
+   if(inNumVertices == 0)
+      return false;
+
    // Loop through edges
    F32 upper_bound = 1.0f;
    bool collision = false;
@@ -783,6 +810,8 @@ static const float EPSILON=0.0000000001f;
 F32 area(const Vector<Point> &contour)
 {
   int n = contour.size();
+  if(n < 3)
+     return 0.0f;
 
   F64 A = 0.0;
 
@@ -1485,6 +1514,9 @@ static void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vec
 void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
       JoinType joinType)
 {
+   if(!inputPoly)
+      return;
+
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
@@ -1702,6 +1734,8 @@ Point mean2d(const Vector<Point> &polyPoints)
 //   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
 
    S32 size = polyPoints.size();
+   if(size == 0)
+      return Point(0,0);
 
    F32 x = 0;
    F32 y = 0;
@@ -1933,6 +1967,9 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
    edges.clear();
 
+   if(corners.empty())
+      return;
+
    S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
    {
@@ -2161,6 +2198,9 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 // Convert a barrier line into segmented chunks with data about possible mitering
 void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
 {
+   if(inputLine.empty())
+      return;
+
    // Create barriers from line segments, with some pre- and post-
    // information to help with mitering
    //

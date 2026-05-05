@@ -1988,4 +1988,92 @@ TEST(GeomUtilsTest, isConvexConcaveC)
 
    EXPECT_FALSE(isConvex(&cshape));
 }
+
+TEST(GeomUtilsTest, triangulatedFillContainsLargeCoordinatesFix)
+{
+   Vector<Point> triangles;
+   F32 big = 1e7f;
+
+   // CCW Triangle
+   // P0: (0, 0)
+   // P1: (big, 0)
+   // P2: (0, big)
+   triangles.push_back(Point(0.0f, 0.0f));
+   triangles.push_back(Point(big, 0.0f));
+   triangles.push_back(Point(0.0f, big));
+
+   // Point on the hypotenuse: (big/2, big/2)
+   // Point slightly outside: (big/2 + 1, big/2 + 1)
+   // d2 should be -2e6 in F64, but likely 0 in F32.
+
+   Point pOutside(big / 2.0f + 1.0f, big / 2.0f + 1.0f);
+
+   EXPECT_FALSE(triangulatedFillContains(&triangles, pOutside));
+}
+
+TEST(GeomUtilsTest, EmptyGeometrySafetyTests)
+{
+   Point outPoint;
+   F32 collisionTime;
+   Point normal;
+   Vector<Point> empty;
+   Vector<Point> poly;
+   poly.push_back(Point(0,0));
+   poly.push_back(Point(10,0));
+   poly.push_back(Point(0,10));
+
+   // polygonIntersectsSegment / polygonsIntersect
+   EXPECT_FALSE(polygonIntersectsSegment(empty, Point(0,0), Point(5,5)));
+   EXPECT_FALSE(polygonsIntersect(empty, poly));
+   EXPECT_FALSE(polygonsIntersect(poly, empty));
+
+   // polygonContainsPoint
+   EXPECT_FALSE(polygonContainsPoint(NULL, 0, Point(0, 0)));
+
+   // polygonCircleIntersect
+   EXPECT_FALSE(polygonCircleIntersect(NULL, 0, Point(0, 0), 10.0f, outPoint));
+
+   // polygonIntersectsSegmentDetailed
+   EXPECT_FALSE(polygonIntersectsSegmentDetailed(NULL, 0, true, Point(0, 0), Point(10, 10), collisionTime, normal));
+   EXPECT_FALSE(polygonIntersectsSegmentDetailed(NULL, 0, false, Point(0, 0), Point(10, 10), collisionTime, normal));
+
+   // PolygonSweptCircleIntersect (calls polygonCircleIntersect and SweptCircleEdgeVertexIntersect)
+   F32 outFraction;
+   EXPECT_FALSE(PolygonSweptCircleIntersect(NULL, 0, Point(0, 0), Point(1, 1), 5.0f, outPoint, outFraction));
+
+   // triangulatedFillContains
+   EXPECT_FALSE(triangulatedFillContains(NULL, Point(0, 0)));
+
+   // isConvex
+   EXPECT_TRUE(isConvex(NULL));
+
+   // zonesTouch
+   EXPECT_FALSE(zonesTouch(NULL, &poly, 1.0f, outPoint, normal));
+   EXPECT_FALSE(zonesTouch(&poly, NULL, 1.0f, outPoint, normal));
+   EXPECT_FALSE(zonesTouch(NULL, NULL, 1.0f, outPoint, normal));
+
+   // area
+   EXPECT_FLOAT_EQ(0.0f, area(empty));
+
+   // mean2d
+   Point m = mean2d(empty);
+   EXPECT_FLOAT_EQ(0.0f, m.x);
+   EXPECT_FLOAT_EQ(0.0f, m.y);
+
+   // offsetPolygon
+   Vector<Point> outPoly;
+   offsetPolygon(NULL, outPoly, 1.0f, ClipperLib::jtMiter);
+   EXPECT_TRUE(outPoly.empty());
+
+   // cornersToEdges
+   Vector<Point> edges;
+   cornersToEdges(empty, edges);
+   EXPECT_TRUE(edges.empty());
+
+   // barrierLineToSegmentData
+   Vector<Vector<Point> > outData;
+   barrierLineToSegmentData(empty, outData);
+   EXPECT_TRUE(outData.empty());
+}
+
 }; // namespace Zap
