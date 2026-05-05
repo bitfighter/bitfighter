@@ -346,6 +346,9 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
+   if(points.size() == 0)
+      return false;
+
    const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
 
@@ -365,6 +368,9 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
+   if(p1.size() == 0 || p2.size() == 0)
+      return false;
+
    F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
 
@@ -393,6 +399,9 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
                                       F32 &collisionTime, Point &normal)
 {
+   if(vertexCount == 0)
+      return false;
+
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;
    Point dp = end - start;
@@ -1933,6 +1942,9 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
    edges.clear();
 
+   if(corners.size() == 0)
+      return;
+
    S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
    {
@@ -2161,6 +2173,9 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 // Convert a barrier line into segmented chunks with data about possible mitering
 void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
 {
+   if(inputLine.size() == 0)
+      return;
+
    // Create barriers from line segments, with some pre- and post-
    // information to help with mitering
    //
