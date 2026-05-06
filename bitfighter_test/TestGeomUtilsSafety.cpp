@@ -16,6 +16,12 @@ TEST(GeomUtilsSafetyTest, polygonContainsPointEmpty)
 {
    Vector<Point> empty;
    EXPECT_FALSE(polygonContainsPoint(empty.address(), empty.size(), Point(0, 0)));
+
+   // Test with fewer than 3 vertices (not a valid polygon)
+   Vector<Point> line;
+   line.push_back(Point(0, 0));
+   line.push_back(Point(10, 0));
+   EXPECT_FALSE(polygonContainsPoint(line.address(), line.size(), Point(5, 0)));
 }
 
 TEST(GeomUtilsSafetyTest, polygonCircleIntersectEmpty)
