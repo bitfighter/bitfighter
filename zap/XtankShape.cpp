@@ -512,11 +512,11 @@ XtankEngineInfo xtankEngineInfos[] =
 XtankTreadInfo xtankTreadInfos[] =
 {
    //    name          friction  cost
-      { "Smooth",       0.70f,  100 },
-      { "Normal",       0.80f,  200 },
-      { "Chained",      0.90f,  400 },
-      { "Spiked",       1.00f, 1000 },
-      { "Hover",        0.20f,  500 },
+   { "Smooth",       0.70f,  100 },
+   { "Normal",       0.80f,  200 },
+   { "Chained",      0.90f,  400 },
+   { "Spiked",       1.00f, 1000 },
+   { "Hover",        0.20f,  500 },
 };
 
 
@@ -550,35 +550,6 @@ XtankTreadInfo xtankTreadInfos[] =
 // bfWeapon maps to an existing BF weapon class for projectile behavior.
 // ---------------------------------------------------------------------------
 
-// Weapon names for UI display (matches XtankWeapon enum order)
-const char *xtankWeaponNames[] =
-{
-   "Light Machine Gun",
-   "Machine Gun",
-   "Heavy Machine Gun",
-   "Light Autocannon",
-   "Autocannon",
-   "Heavy Autocannon",
-   "Light Rkt Launcher",
-   "Rkt Launcher",
-   "Heavy Rkt Launcher",
-   "Acid Sprayer",
-   "Flame Thrower",
-   "Heat Seeker",
-   "Pocket Rocket",
-   "Unguided Missile",
-   "TeleGuided",
-   "TOW Missile",
-   "Land Torpedo",
-   "Blast Cannon",
-   "Pulse Laser",
-   "Mine Layer",
-   "Oil Slick",
-   "Heavy Mortar",
-   "Tactical Nuke",
-   "Anti-Radiation",
-   "Disc Shooter",
-};
 
 // Full 25-weapon xtank catalog with native stats + BF integration.
 // Native xtank fields from weapon-defs.h (damage, reload, speed, etc.)
@@ -618,6 +589,23 @@ XtankWeaponInfo xtankWeaponInfos[] =
    { "Disc Shooter",       0, BIG, 1, BIG,   0,    0,     0,   0,BIG,  0,      0,   0,   0,    0, M_ALL,  0,             0,          0,        0,          0,    WeaponPhaser,    ProjectileStyleXtankBlue   },
 }; // xtankWeaponInfos[]
 
+
+
+const char *getMountLabel(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+      case XtankMountLocation::TURRET1: return "Turret 1";
+      case XtankMountLocation::TURRET2: return "Turret 2";
+      case XtankMountLocation::TURRET3: return "Turret 3";
+      case XtankMountLocation::TURRET4: return "Turret 4";
+      case XtankMountLocation::FRONT:   return "Front";
+      case XtankMountLocation::BACK:    return "Back";
+      case XtankMountLocation::LEFT:    return "Left";
+      case XtankMountLocation::RIGHT:   return "Right";
+      default:                          return "None";
+   }
+}
 
 // ---------------------------------------------------------------------------
 // Default weapon loadout for each xtank vehicle body.
@@ -751,10 +739,8 @@ bool XtankDesign::same(const XtankDesign &other) const
       return false;
 
    for(S32 i = 0; i < VehicleSidesCount; i++)
-   {
       if(armorSides[i] != other.armorSides[i])
          return false;
-   }
 
    // Unordered pairwise comparison: same set of (weapon, mount) pairs regardless of slot order.
    using WMPair = std::pair<XtankWeapon, XtankMountLocation>;
@@ -1053,5 +1039,37 @@ S32 XtankDesign::getSpecialsCost() const
 
    return total;
 }
+
+
+string XtankDesign::getValidMountList(XtankWeapon weapon) const
+{
+   if(weapon == XtankWeapon::NONE)
+      return "--";
+
+   string mounts = "";
+
+   for(S32 i = 0; i < (S32)XtankMountLocation::LAST_TURRET; i++)
+   {
+      XtankMountLocation loc = (XtankMountLocation)i;
+      if(isMountCompatible(body, weapon, loc))
+      {
+         mounts = "Turret";
+         break;
+      }
+   }
+
+   for(S32 i = (S32)XtankMountLocation::LAST_TURRET + 1; i < XtankMountLocationCount; i++)
+   {
+      XtankMountLocation loc = (XtankMountLocation)i;
+      if(isMountCompatible(body, weapon, loc))
+      {
+         mounts += mounts.empty() ? "" : "; ";
+         mounts += getMountLabel(loc);
+      }
+   }
+
+   return mounts;
+}
+
 
 } /* namespace Zap */

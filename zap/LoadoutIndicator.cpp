@@ -20,7 +20,7 @@ using namespace Zap;
 
 namespace Zap { namespace UI {
 
-static const char *getMountLabel(XtankMountLocation mount)
+static const char *getMountAbbrev(XtankMountLocation mount)
 {
    switch(mount)
    {
@@ -204,7 +204,7 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
          XtankWeapon wt = xtankDesign.weapons[i];
          char weapBuf[96];
          if(wt != XtankWeapon::NONE)
-            dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountLabel(xtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
+            dSprintf(weapBuf, sizeof(weapBuf), "#%d %s:%s", i + 1, getMountAbbrev(xtankDesign.weaponMounts[i]), xtankWeaponInfos[(S32)wt].name);
          else
             dSprintf(weapBuf, sizeof(weapBuf), "#%d --", i + 1);
          r.setColor(*INDICATOR_INACTIVE_COLOR);

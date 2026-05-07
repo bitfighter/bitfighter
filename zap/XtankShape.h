@@ -31,6 +31,7 @@
 #include "ShipShape.h"     // for ShipShapeInfo
 #include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon) and ProjectileStyle
 #include "move.h"
+#include "tnlTypes.h"
 
 #include <array>
 
@@ -40,6 +41,7 @@ namespace Zap
 //using std::array;
 
 static const S32 WEAPON_SLOTS = 6;	   // Max number of weapons a vehicle can carry
+static const S32 XTANK_FPS = 15;        //Xtank runs at 15 frames per second, so we use that to convert to time
 
 
 // These really don't belong here; they are part of the vehicle designer, which is in UIXtankHelper at the moment.
@@ -85,9 +87,9 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       Disk,
       Malice,
       Panzy,
-      COUNT,     
+      COUNT,
       BITFIGHTER_SHIP = -1,
-      NONE = -2, 
+      NONE = -2,
       DEFAULT = Lightcycle
    };
    constexpr S32 VehicleBodyCount = (S32)XtankBody::COUNT;
@@ -188,7 +190,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       TACTICAL_NUKE,
       ANTI_RADIATION,
       DISC_SHOOTER,
-      COUNT,    
+      COUNT,
       NONE = -1 // Slot carries no weapon
    };
    constexpr S32 XtankWeaponCount = (S32)XtankWeapon::COUNT;
@@ -228,56 +230,59 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       S32 cost;
    };
 
-   // Names for on-screen display, one per XtankWeapon.
-   extern const char *xtankWeaponNames[];
 
    // Per-weapon parameters: native xtank stats + BF integration fields.
-   struct XtankWeaponInfo
+   class XtankWeaponInfo
    {
-      const char *name;      // Display name
-      S32 damage;            // Damage per hit (xtank native)
-      S32 max_ammo;          // Maximum ammo capacity
-      S32 reload_time;       // Reload time between shots (xtank frames)
-      S32 ammo_speed;        // Projectile speed (xtank units/frame)
-      S32 weight;            // Weight of the weapon
-      S32 space;             // Space required to mount
-      S32 mount_space;       // Mounting space needed
-      S32 frames;            // Projectile lifetime (xtank frames)
-      S32 heat;              // Heat generated per shot
-      S32 ammo_cost;         // Cost per shot
-      S32 cost;              // Purchase cost
-      S32 refill_time;       // Ammo refill time
-      S32 safety;            // Safety distance
-      S32 height;            // Projectile height
-      S32 legalMounts;       // Where weapon can be mounted (bitflags)
-      U64 other_flgs;        // Misc. flags
-      U64 creat_flgs;        // Bullet creation flags
-      U64 disp_flgs;         // Display flags
-      U64 move_flgs;         // Movement flags
-      U64 hit_flgs;          // Hit/damage flags
-      // Bitfighter integration fields:
-      WeaponType bfWeapon;   // Mapped BF weapon for projectile behavior
-      ProjectileStyle style; // Rendering style
+      public:
+         const char *name;      // Display name
+         S32 damage;            // Damage per hit (xtank native)
+         S32 max_ammo;          // Maximum ammo capacity
+         S32 reload_time;       // Reload time between shots (xtank frames)
+         S32 ammo_speed;        // Projectile speed (xtank units/frame)
+         S32 weight;            // Weight of the weapon
+         S32 space;             // Space required to mount
+         S32 mount_space;       // Mounting space needed
+         S32 frames;            // Projectile lifetime (xtank frames)
+         S32 heat;              // Heat generated per shot
+         S32 ammo_cost;         // Cost per shot
+         S32 cost;              // Purchase cost
+         S32 refill_time;       // Ammo refill time
+         S32 safety;            // Safety distance
+         S32 height;            // Projectile height
+         S32 legalMounts;       // Where weapon can be mounted (bitflags)
+         U64 other_flgs;        // Misc. flags
+         U64 creat_flgs;        // Bullet creation flags
+         U64 disp_flgs;         // Display flags
+         U64 move_flgs;         // Movement flags
+         U64 hit_flgs;          // Hit/damage flags
+         // Bitfighter integration fields:
+         WeaponType bfWeapon;   // Mapped BF weapon for projectile behavior
+         ProjectileStyle style; // Rendering style
+
+         S32 range() const
+         {
+            return frames * ammo_speed / XTANK_FPS;
+         }
    };
 
    // One entry per XtankWeapon value.
    extern XtankWeaponInfo xtankWeaponInfos[];
 
    // Helper functions to compute BF-compatible values from native xtank fields.
-   // Xtank runs at 20fps, so 1 frame = 50ms.
    inline U32 xtankFireDelayMs(const XtankWeaponInfo &wi)
    {
-      return (U32)(wi.reload_time * 50);  // frames → milliseconds
+      return (U32)(wi.reload_time * XTANK_FPS); // frames → milliseconds
    }
 
    inline U32 xtankProjVelocity(const XtankWeaponInfo &wi)
    {
-      return (U32)(wi.ammo_speed * 20);  // xtank units/frame → BF units/sec
+      return (U32)(wi.ammo_speed * XTANK_FPS); // xtank units/frame → BF units/sec
    }
 
    inline S32 xtankProjLiveTime(const XtankWeaponInfo &wi)
    {
-      return (S32)(wi.frames * 50);  // frames → milliseconds
+      return (S32)(wi.frames * XTANK_FPS); // frames → milliseconds
    }
 
    // ---------------------------------------------------------------------------
@@ -355,7 +360,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
    // Rubber treads give nimble steering; heavy treads grip harder but turn slower.
    // ---------------------------------------------------------------------------
 
-   enum class XtankTread      
+   enum class XtankTread
    {
       SMOOTH = 0,
       NORMAL,
@@ -439,6 +444,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       COUNT,
       LAST = COUNT - 1,
       NONE = -1,
+      LAST_TURRET = TURRET4,
    };
    constexpr S32 XtankMountLocationCount = (S32)XtankMountLocation::COUNT;
 
@@ -456,6 +462,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
 
    // One entry per XtankBody value.
    extern XtankBodyDefaultWeapons xtankDefaultWeapons[VehicleBodyCount];
+   extern const char *getMountLabel(XtankMountLocation mount);
 
    // ---------------------------------------------------------------------------
    // Xtank special equipment: player-selectable extras that provide gameplay bonuses.
@@ -522,7 +529,7 @@ class XtankDesign
       array<S32, VehicleSidesCount> armorSides;  // per-side armor points (front=0, back=1, left=2, right=3, top=4, bottom=5)
 
       void init(); // Set body + reset all components to defaults
-      const char *getArmorName() const;      // Name of currently selected 
+      const char *getArmorName() const;      // Name of currently selected
       S32 getBodySize() const;
       bool isXtankVehicle() const;
 
@@ -560,6 +567,7 @@ class XtankDesign
       S32 getSpecialsSpace() const;
       S32 getSpecialsWeight() const;
       S32 getSpecialsCost() const;
+      string getValidMountList(XtankWeapon weapon) const;
 };
 
 
@@ -631,7 +639,7 @@ class XtankDesign
 #define HIGH 1
 #define FLY 9
 
-#define BIG ((int) ((unsigned)(~0) >> 1))
+#define BIG S32_MAX
 
 
 

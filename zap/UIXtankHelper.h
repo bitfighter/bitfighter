@@ -29,7 +29,7 @@ enum ColAlignmemt : S32
 
 struct TableRow
 {
-   static const S32 MaxTableColumns = 12;
+   static const S32 MaxTableColumns = 14;
    const char *cells[MaxTableColumns];
    bool highlighted;       // true = force highlighted row color
 };
@@ -41,6 +41,7 @@ struct TableColumn
    ColAlignmemt headerAlignment;
    ColAlignmemt dataAlignment;
    S32 headerNudge; // Use this to make bespoke adjustments to the header position
+   S32 columnNudge = 0;
 };
 
 
@@ -311,8 +312,8 @@ private:
    void fillRows() const override;
 
 public:
-   static const S32 rowCount = (S32)XtankWeapon::COUNT + 1;
-   static const S32 colCount = 5;
+   static const S32 rowCount = (S32)XtankWeapon::COUNT + 1;    // +1 for "None" row
+   static const S32 colCount = 13;
    COL_NUM_ASSERT;
 
    static const TableColumn columns[colCount];
@@ -334,7 +335,7 @@ struct LabelWidth
 };
 
 
-class UIXtankHelper : public HelperMenu 
+class UIXtankHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
 
@@ -472,6 +473,7 @@ class UIXtankHelper : public HelperMenu
 
       void renderArmorStats(S32 left, S32 y, S32 fontSize, F32 alpha) const;
       void renderSpecialsStats(S32 left, S32 y, F32 alpha) const;
+      void renderWeaponStats(S32 left, S32 y, F32 alpha) const;
       const char *getSpecialsHelpString(S32 specialIndex) const;
 
 
