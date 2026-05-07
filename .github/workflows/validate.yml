@@ -10,9 +10,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev libtomcrypt-dev libtommath-dev
+        run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libgl1-mesa-dev libopenal-dev libvorbis-dev libmodplug-dev libalure-dev libspeex-dev libpng-dev libsqlite3-dev libmysqlclient-dev libtomcrypt-dev libtommath-dev
       - name: Build project
         run: |
+          mkdir -p build
           cd build
           cmake ..
           make
