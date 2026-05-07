@@ -237,15 +237,21 @@ string ucase(string strToConvert)
 
 // Return true if str looks like a non-negative int
 // Returns false if str is NULL or empty
+// Note: This function trims leading and trailing whitespace
 bool isPositiveInteger(const char *str)
 {
    if(!str || str[0] == 0)
       return false;
 
+   string s = trim(str);
+
+   if(s.empty())
+      return false;
+
    S32 i = 0;
-   while(str[i])
+   while(s[i])
    {
-      if(str[i] < '0' || str[i] > '9')
+      if(s[i] < '0' || s[i] > '9')
          return false;
       i++;
    }

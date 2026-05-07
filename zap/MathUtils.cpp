@@ -34,6 +34,22 @@ static void swap(F32 &f1, F32 &f2)
 // Returns true if there is such a solution and returns the solution in outX
 bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX)
 {
+   // Handle linear case
+   if (inA == 0.0f)
+   {
+      if (inB == 0.0f)
+         return false;
+
+      F32 x = -inC / inB;
+      if (x >= 0.0f && x <= inUpperBound)
+      {
+         outX = x;
+         return true;
+      }
+      return false;
+   }
+
+   // Quadratic case
    // Check if a solution exists
    F32 determinant = inB * inB - 4.0f * inA * inC;
    if (determinant < 0.0f)
@@ -46,7 +62,7 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
    F32 x1 = q / inA;
-   F32 x2 = inC / q;
+   F32 x2 = (q != 0.0f) ? inC / q : 1e30f;    // Avoid division by zero; x1 will be the correct root (0) if q is zero and inA is not
 
    // Order the results
    if (x2 < x1)
