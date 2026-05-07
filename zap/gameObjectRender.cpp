@@ -2177,6 +2177,80 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
+static void drawFilledAnnulus(const Point &center, F32 innerRadius, F32 outerRadius)
+{
+   static const S32 SEGMENTS = 48;
+   static Vector<Point> vertices;
+   vertices.clear();
+
+   for(S32 i = 0; i <= SEGMENTS; i++)
+   {
+      const F32 theta = FloatTau * (F32)i / (F32)SEGMENTS;
+      const F32 c = cos(theta);
+      const F32 s = sin(theta);
+
+      vertices.push_back(center + Point(c * outerRadius, s * outerRadius));
+      vertices.push_back(center + Point(c * innerRadius, s * innerRadius));
+   }
+
+   Renderer::get().renderPointVector(&vertices, RenderType::TriangleStrip);
+}
+
+
+static void drawFilledBar(const Point &p1, const Point &p2, F32 halfWidth)
+{
+   Point axis = p2 - p1;
+   if(axis.lenSquared() == 0)
+      return;
+
+   Point normal(-axis.y, axis.x);
+   normal.normalize(halfWidth);
+
+   F32 vertices[] = {
+      p1.x + normal.x, p1.y + normal.y,
+      p1.x - normal.x, p1.y - normal.y,
+      p2.x + normal.x, p2.y + normal.y,
+      p2.x - normal.x, p2.y - normal.y
+   };
+
+   Renderer::get().renderVertexArray(vertices, 4, RenderType::TriangleStrip);
+}
+
+
+void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+{
+   Renderer& r = Renderer::get();
+
+   const F32 outerR = (F32)radius;
+   const F32 innerR = outerR * 0.70f;   // Ring thickness
+   const F32 barHalfW = outerR * 0.13f;
+
+   const Point downEnd  = center + Point(0, -outerR);
+   const Point leftEnd  = center + Point(-outerR * 0.8660254f, -outerR * 0.5f);
+   const Point rightEnd = center + Point( outerR * 0.8660254f, -outerR * 0.5f);
+
+   r.pushMatrix();
+      r.translate(center);
+      r.rotate(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      r.translate(-center);
+
+      drawFilledAnnulus(center, innerR, outerR);
+      drawFilledBar(center, downEnd, barHalfW);
+      drawFilledBar(center, leftEnd, barHalfW);
+      drawFilledBar(center, rightEnd, barHalfW);
+   r.popMatrix();
+}
+
+
+void renderSafeZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                    const Point &centroid, F32 angleRadians)
+{
+   renderZone(color, outline, fill);
+   Renderer::get().setColor(*color);
+   renderSafeZoneIcon(centroid, 20, angleRadians);
+}
+
+
 void renderProjectile(const Point &pos, U32 style, U32 time)
 {
    Renderer& r = Renderer::get();
@@ -4169,4 +4243,3 @@ void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &col
 
 
 }
-

@@ -5,6 +5,7 @@
 
 #include "projectile.h"
 #include "ship.h"
+#include "safeZone.h"
 #include "game.h"
 #include "gameConnection.h"
 
@@ -453,15 +454,33 @@ void Projectile::explode(BfObject *hitObject, Point pos)
    if(isGhost())
    {
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mStyle].sparkColors, NumSparkColors);
-
-      SFXProfiles sound;
 
       bool isShip = hitObject && isShipType(hitObject->getObjectTypeNumber());
 
       Ship *ship = NULL;
       if(isShip)
          ship = static_cast<Ship *>(hitObject);
+
+      const Color *sparkColors = GameWeapon::projectileInfo[mStyle].sparkColors;
+      Color desaturatedSparkColors[NumSparkColors];
+      bool useDesaturatedSparks = false;
+
+      if(isShip && ship)
+      {
+         SafeZone *safeZone = static_cast<SafeZone *>(ship->isInZone(SafeZoneTypeNumber));
+         if(safeZone && safeZone->protectsShip(ship))
+         {
+            useDesaturatedSparks = true;
+            for(S32 i = 0; i < NumSparkColors; i++)
+               desaturatedSparkColors[i].interp(0.75f, sparkColors[i], Colors::gray50);
+         }
+      }
+
+      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f,
+                                                           useDesaturatedSparks ? desaturatedSparkColors : sparkColors,
+                                                           NumSparkColors);
+
+      SFXProfiles sound;
 
       if(ship && ship->isModulePrimaryActive(ModuleShield))
          sound = SFXBounceShield;
@@ -1953,4 +1972,3 @@ S32 Seeker::lua_getWeapon(lua_State *L) { return returnWeaponType(L, mWeaponType
 
 
 };
-

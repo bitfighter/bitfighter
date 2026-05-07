@@ -11,6 +11,7 @@
 #include "Colors.h"
 #include "Teleporter.h"
 #include "speedZone.h"
+#include "safeZone.h"
 #include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
 
@@ -1599,6 +1600,13 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
 
    F32 damageAmount = theInfo->damageAmount;
+
+   SafeZone *safeZone = static_cast<SafeZone *>(isInZone(SafeZoneTypeNumber));
+   if(damageAmount > 0 && safeZone && safeZone->protectsShip(this))
+   {
+      damageAmount = 0;
+      theInfo->damageAmount = 0;
+   }
 
    // No damage?  just return
    if(damageAmount == 0)
