@@ -1034,4 +1034,32 @@ TEST(StringUtilsTest, s_fprintfTruncationBug)
    remove(testFile.c_str());
 }
 
+TEST(StringUtilsTest, formatMessageEnhanced)
+{
+   Vector<StringTableEntry> e;
+   for(int j = 0; j < 15; ++j) {
+      char buf[10];
+      sprintf(buf, "entry%d", j);
+      e.push_back(buf);
+   }
+
+   Vector<StringPtr> s;
+   s.push_back("ptr0");
+
+   Vector<S32> i;
+   i.push_back(42);
+
+   // Test escaping %
+   EXPECT_EQ("%e0", formatMessage("%%e0", e, s, i));
+   EXPECT_EQ("100%", formatMessage("100%%", e, s, i));
+
+   // Test multi-digit indices
+   EXPECT_EQ("entry10", formatMessage("%e10", e, s, i));
+   EXPECT_EQ("entry14", formatMessage("%e14", e, s, i));
+
+   // Test boundary cases (safety)
+   EXPECT_EQ("%", formatMessage("%", e, s, i));
+   EXPECT_EQ("%e", formatMessage("%e", e, s, i));
+}
+
 };

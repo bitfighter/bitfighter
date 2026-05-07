@@ -341,25 +341,42 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
    const char *src = format;
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+      if(src[0] == '%')
       {
-         S32 index = src[2] - '0';
-         switch(src[1])
+         if(src[1] == '%')
          {
-            case 'e':
-               if(index < e.size())
-                  result += e[index].getString();
-               break;
-            case 's':
-               if(index < s.size())
-                  result += s[index].getString();
-               break;
-            case 'i':
-               if(index < i.size())
-                  result += itos(i[index]);
-               break;
+            result += '%';
+            src += 2;
          }
-         src += 3;
+         else if((src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+         {
+            char type = src[1];
+            src += 2;
+            S32 index = 0;
+            while(isDigit(*src))
+            {
+               index = index * 10 + (*src - '0');
+               src++;
+            }
+
+            switch(type)
+            {
+               case 'e':
+                  if(index < e.size())
+                     result += e[index].getString();
+                  break;
+               case 's':
+                  if(index < s.size())
+                     result += s[index].getString();
+                  break;
+               case 'i':
+                  if(index < i.size())
+                     result += itos(i[index]);
+                  break;
+            }
+         }
+         else
+            result += *src++;
       }
       else
          result += *src++;
