@@ -82,6 +82,7 @@ set(SHARED_SOURCES
 	ScreenInfo.cpp
 	ServerGame.cpp
 	Settings.cpp
+	safeZone.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp

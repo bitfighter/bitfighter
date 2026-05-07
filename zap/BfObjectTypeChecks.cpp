@@ -183,8 +183,8 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == LineTypeNumber                ||
          x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == LoadoutZoneTypeNumber         ||
          x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == SlipZoneTypeNumber            ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber;
+         x == SafeZoneTypeNumber   || x == AsteroidTypeNumber       || x == TestItemTypeNumber            ||
+         x == ResourceItemTypeNumber || x == EnergyItemTypeNumber   || x == RepairItemTypeNumber;
 }
 
 
@@ -195,19 +195,20 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == LoadoutZoneTypeNumber         ||
          x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == SlipZoneTypeNumber            ||
-         x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == CoreTypeNumber                ||
-         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == BurstTypeNumber               ||
-         x == LineTypeNumber       || x == TextItemTypeNumber       || x == RepairItemTypeNumber          ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == EnergyItemTypeNumber          ||
-         x == BulletTypeNumber     || x == MineTypeNumber           || x == SeekerTypeNumber;
+         x == SafeZoneTypeNumber   || x == GoalZoneTypeNumber       || x == NexusTypeNumber               ||
+         x == CoreTypeNumber       || x == SpeedZoneTypeNumber      || x == TeleporterTypeNumber          ||
+         x == BurstTypeNumber      || x == LineTypeNumber           || x == TextItemTypeNumber            ||
+         x == RepairItemTypeNumber || x == AsteroidTypeNumber       || x == TestItemTypeNumber            ||
+         x == EnergyItemTypeNumber || x == BulletTypeNumber         || x == MineTypeNumber                ||
+         x == SeekerTypeNumber;
 }
 
 
 bool isZoneType(U8 x)      // Zones a ship could be in
 {
    return
-         x == LoadoutZoneTypeNumber || x == GoalZoneTypeNumber   || x == NexusTypeNumber  ||
-         x == ZoneTypeNumber        || x == SlipZoneTypeNumber;
+         x == LoadoutZoneTypeNumber || x == GoalZoneTypeNumber   || x == NexusTypeNumber    ||
+         x == ZoneTypeNumber        || x == SlipZoneTypeNumber   || x == SafeZoneTypeNumber;
 }
 
 
