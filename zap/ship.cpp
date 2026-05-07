@@ -11,6 +11,8 @@
 #include "Colors.h"
 #include "Teleporter.h"
 #include "speedZone.h"
+#include "safeZone.h"
+
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -1103,6 +1105,13 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
 
    F32 damageAmount = theInfo->damageAmount;
+
+   SafeZone *safeZone = static_cast<SafeZone *>(isInZone(SafeZoneTypeNumber));  // Type-filtered query
+   if(damageAmount > 0 && safeZone && safeZone->protectsShip(this))
+   {
+      damageAmount = 0;
+      theInfo->damageAmount = 0;
+   }
 
    // No damage?  just return
    if(damageAmount == 0)

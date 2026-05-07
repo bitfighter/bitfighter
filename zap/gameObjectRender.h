@@ -200,6 +200,10 @@ extern void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians = 
 extern void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid);
 extern void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
+extern void renderSafeZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                           const Point &centroid, F32 angleRadians = 0.0f);
+extern void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
+
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
 extern void renderProjectile(const Point &pos, U32 style, U32 time);
@@ -296,6 +300,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderTextItem
 #define renderSpeedZone
 #define renderSlipZone
+#define renderSafeZone
 #define renderProjectile
 #define renderProjectileRailgun
 #define renderGrenade
