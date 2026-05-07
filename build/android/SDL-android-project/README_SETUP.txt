@@ -1,7 +1,7 @@
 In order to build native libraries for Android, the sources must be put into
 the jni/ folder.
 
-Right now, with no audio, you must copy the following bitfighter directories 
+Right now, with no audio, you must copy the following bitfighter directories
 into the jni/ folder:
 
 libtomcrypt
