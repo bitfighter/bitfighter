@@ -2199,8 +2199,9 @@ static void drawFilledAnnulus(const Point &center, F32 innerRadius, F32 outerRad
 
 static void drawFilledBar(const Point &p1, const Point &p2, F32 halfWidth)
 {
+   static const F32 MIN_AXIS_LEN_SQ = 0.0001f;
    Point axis = p2 - p1;
-   if(axis.lenSquared() == 0)
+   if(axis.lenSquared() < MIN_AXIS_LEN_SQ)
       return;
 
    Point normal(-axis.y, axis.x);
@@ -2220,14 +2221,17 @@ static void drawFilledBar(const Point &p1, const Point &p2, F32 halfWidth)
 void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
    Renderer& r = Renderer::get();
+   static const F32 SQRT3_OVER_2 = 0.8660254f;  // sqrt(3) / 2
+   static const F32 PEACE_RING_INNER_RADIUS_RATIO = 0.70f;
+   static const F32 PEACE_BAR_HALF_WIDTH_RATIO = 0.13f;
 
    const F32 outerR = (F32)radius;
-   const F32 innerR = outerR * 0.70f;   // Ring thickness
-   const F32 barHalfW = outerR * 0.13f;
+   const F32 innerR = outerR * PEACE_RING_INNER_RADIUS_RATIO;
+   const F32 barHalfW = outerR * PEACE_BAR_HALF_WIDTH_RATIO;
 
    const Point downEnd  = center + Point(0, -outerR);
-   const Point leftEnd  = center + Point(-outerR * 0.8660254f, -outerR * 0.5f);
-   const Point rightEnd = center + Point( outerR * 0.8660254f, -outerR * 0.5f);
+   const Point leftEnd  = center + Point(-outerR * SQRT3_OVER_2, -outerR * 0.5f);
+   const Point rightEnd = center + Point( outerR * SQRT3_OVER_2, -outerR * 0.5f);
 
    r.pushMatrix();
       r.translate(center);

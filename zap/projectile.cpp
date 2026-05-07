@@ -465,9 +465,9 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       Color desaturatedSparkColors[NumSparkColors];
       bool useDesaturatedSparks = false;
 
-      if(isShip && ship)
+      if(ship)
       {
-         SafeZone *safeZone = static_cast<SafeZone *>(ship->isInZone(SafeZoneTypeNumber));
+         SafeZone *safeZone = static_cast<SafeZone *>(ship->isInZone(SafeZoneTypeNumber));  // Type-filtered query
          if(safeZone && safeZone->protectsShip(ship))
          {
             useDesaturatedSparks = true;

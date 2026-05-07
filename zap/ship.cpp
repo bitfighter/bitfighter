@@ -1601,7 +1601,7 @@ void Ship::damageObject(DamageInfo *theInfo)
 
    F32 damageAmount = theInfo->damageAmount;
 
-   SafeZone *safeZone = static_cast<SafeZone *>(isInZone(SafeZoneTypeNumber));
+   SafeZone *safeZone = static_cast<SafeZone *>(isInZone(SafeZoneTypeNumber));  // Type-filtered query
    if(damageAmount > 0 && safeZone && safeZone->protectsShip(this))
    {
       damageAmount = 0;
