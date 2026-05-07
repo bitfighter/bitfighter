@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libgl1-mesa-dev libopenal-dev libvorbis-dev libmodplug-dev libalure-dev libspeex-dev libpng-dev libsqlite3-dev libmysqlclient-dev libtomcrypt-dev libtommath-dev
-      - run: mkdir -p build && cd build && cmake .. && make
+      - run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
+      - run: cd build && cmake .. && make
       - run: cp -R resource/* exe/
       - uses: actions/upload-artifact@v4.6.2
         with:
