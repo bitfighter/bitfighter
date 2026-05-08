@@ -47,6 +47,15 @@ extern F32 gLineWidth1;
 extern F32 gLineWidth3;
 
 
+
+void drawLine(const Point &p1, const Point &p2)
+{
+   F32 vertices[] = { p1.x, p1.y, p2.x, p2.y };
+   Renderer::get().renderVertexArray(vertices, 2, RenderType::Lines);
+}
+
+
+
 void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
    drawHorizLine((F32)x1, (F32)x2, (F32)y);
@@ -2018,71 +2027,114 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
-static void drawFilledAnnulus(const Point &center, F32 innerRadius, F32 outerRadius)
+// Render a circle with gaps at the specfied angles.  Currently hardwired for 4, could be generalized.
+// Pass in a sorted list, with all angles between 0 and Tau.
+static void drawInterruptedCircle(const Point &center, F32 radius, const F32 angles[4], F32 halfGap)
 {
-   static const S32 SEGMENTS = 48;
-   static Vector<Point> vertices;
-   vertices.clear();
+   F32 lastAngle = angles[3] + halfGap;
 
-   for(S32 i = 0; i <= SEGMENTS; i++)
+   if(lastAngle >= FloatTau)
+      lastAngle -= FloatTau;
+
+   for(S32 i = 0; i < 4; i++)
    {
-      const F32 theta = FloatTau * (F32)i / (F32)SEGMENTS;
-      const F32 c = cos(theta);
-      const F32 s = sin(theta);
+      F32 gapStart = angles[i] - halfGap;
+      F32 gapEnd = angles[i] + halfGap;
 
-      vertices.push_back(center + Point(c * outerRadius, s * outerRadius));
-      vertices.push_back(center + Point(c * innerRadius, s * innerRadius));
+      F32 arcStart = lastAngle;
+      F32 arcEnd = gapStart;
+
+      if(arcEnd < arcStart)
+         arcEnd += FloatTau;
+
+      if(arcEnd > arcStart)
+         drawArc(center, radius, arcStart, arcEnd);
+
+      lastAngle = gapEnd;
    }
-
-   Renderer::get().renderPointVector(&vertices, RenderType::TriangleStrip);
-}
-
-
-static void drawFilledBar(const Point &p1, const Point &p2, F32 halfWidth)
-{
-   static const F32 MIN_AXIS_LEN_SQ = 0.0001f;
-   Point axis = p2 - p1;
-   if(axis.lenSquared() < MIN_AXIS_LEN_SQ)
-      return;
-
-   Point normal(-axis.y, axis.x);
-   normal.normalize(halfWidth);
-
-   F32 vertices[] = {
-      p1.x + normal.x, p1.y + normal.y,
-      p1.x - normal.x, p1.y - normal.y,
-      p2.x + normal.x, p2.y + normal.y,
-      p2.x - normal.x, p2.y - normal.y
-   };
-
-   Renderer::get().renderVertexArray(vertices, 4, RenderType::TriangleStrip);
 }
 
 
 void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
+   // I started to try to document how this works, but it's messy and involved some trial-and-error.
+   // It works.  You shouldn't have to mess with it.
+
+   static const F32 BAR_HALF_WIDTH_RATIO = .08f;      // <<< This controls how thick the bars are
+
+   // No user servicable parts below!
    Renderer& r = Renderer::get();
-   static const F32 SQRT3_OVER_2 = 0.8660254f;  // sqrt(3) / 2
-   static const F32 PEACE_RING_INNER_RADIUS_RATIO = 0.70f;
-   static const F32 PEACE_BAR_HALF_WIDTH_RATIO = 0.13f;
-
+   static const F32 SQRT3_OVER_2 = sqrt(3) / 2;
    const F32 outerR = (F32)radius;
-   const F32 innerR = outerR * PEACE_RING_INNER_RADIUS_RATIO;
-   const F32 barHalfW = outerR * PEACE_BAR_HALF_WIDTH_RATIO;
+   const F32 halfWidth = outerR * BAR_HALF_WIDTH_RATIO;
+   const F32 innerR = outerR - halfWidth * 2.0f;
 
-   const Point downEnd  = center + Point(0, -outerR);
-   const Point leftEnd  = center + Point(-outerR * SQRT3_OVER_2, -outerR * 0.5f);
-   const Point rightEnd = center + Point( outerR * SQRT3_OVER_2, -outerR * 0.5f);
+   // Absolute angles, where 0 is horizontal facing right
+   const F32 gapAngles[4] = {
+      45 * DEGREES_TO_RADIANS,
+      90 * DEGREES_TO_RADIANS,
+      135 * DEGREES_TO_RADIANS,
+      270 * DEGREES_TO_RADIANS
+   };
 
+
+   // Symbol will be cetnered at (0,0) in matrix coords
    r.pushMatrix();
       r.translate(center);
-      r.rotate(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
-      r.translate(-center);
 
-      drawFilledAnnulus(center, innerR, outerR);
-      drawFilledBar(center, downEnd, barHalfW);
-      drawFilledBar(center, leftEnd, barHalfW);
-      drawFilledBar(center, rightEnd, barHalfW);
+      const F32 circleGap = asin(halfWidth / innerR);    // This much sweep on either side of the centerline
+      drawCircle(Point(0, 0), outerR, nullptr, 1.0f);
+      drawInterruptedCircle(Point(0, 0), innerR, gapAngles, circleGap);
+
+      F32 theta = atan2(innerR, halfWidth) + FloatPi;
+
+      F32 xr = innerR * cos(theta);    // xr, yr are coords on the inner radius
+      F32 yr = innerR * sin(theta);
+
+      F32 x2 = xr + halfWidth * 2;
+      F32 y2 = -(FloatSqrt2 + 1) * halfWidth;
+      F32 y3 = -(FloatSqrt2 - 1) * halfWidth;
+
+      Point p1(xr, y3);
+      Point p2(xr, yr);
+      Point p3(x2, y3);
+      Point p4(x2, yr);
+      Point p6(x2, y2);
+      Point p7(xr, y2);
+
+
+      // Top leg first, then sweep around
+      static const F32 lines1[] = {
+         p1.x, p1.y,  p2.x, p2.y,
+         p3.x, p3.y,  p4.x, p4.y
+      };
+      r.renderVertexArray(lines1, ARRAYSIZE(lines1) / 2, RenderType::Lines);
+
+
+      r.rotate(135, 0, 0, 1);    // Right leg
+      static const F32 lines2[] = {
+         p1.x, p1.y,  p2.x, p2.y,
+         p6.x, p6.y,  p4.x, p4.y
+      };
+      r.renderVertexArray(lines2, ARRAYSIZE(lines2) / 2, RenderType::Lines);
+
+
+      r.rotate(45, 0, 0, 1);     // Bottom leg
+      static const F32 lines3[] = {
+         p7.x, p7.y,  p2.x, p2.y,
+         p6.x, p6.y,  p4.x, p4.y
+      };
+      r.renderVertexArray(lines3, ARRAYSIZE(lines3) / 2, RenderType::Lines);
+
+
+      r.rotate(45, 0, 0, 1);     // Left leg
+      static const F32 lines4[] = {
+         p7.x, p7.y,  p2.x, p2.y,
+         p3.x, p3.y,  p4.x, p4.y
+      };
+      r.renderVertexArray(lines4, ARRAYSIZE(lines4) / 2, RenderType::Lines);
+
+
    r.popMatrix();
 }
 
