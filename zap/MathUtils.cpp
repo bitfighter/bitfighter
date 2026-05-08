@@ -34,6 +34,21 @@ static void swap(F32 &f1, F32 &f2)
 // Returns true if there is such a solution and returns the solution in outX
 bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX)
 {
+   // Handle linear case
+   if (inA == 0.0f)
+   {
+      if (inB == 0.0f)
+         return false;
+
+      F32 x = -inC / inB;
+      if (x >= 0.0f && x <= inUpperBound)
+      {
+         outX = x;
+         return true;
+      }
+      return false;
+   }
+
    // Check if a solution exists
    F32 determinant = inB * inB - 4.0f * inA * inC;
    if (determinant < 0.0f)
@@ -43,6 +58,9 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
    // is not numerically stable when a is close to zero.
    // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
    F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
+
+   if (q == 0.0f)
+      return false;
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
    F32 x1 = q / inA;
