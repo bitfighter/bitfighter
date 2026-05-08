@@ -115,6 +115,11 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    // Bug: avoid division by zero when q = 0
    // 0x^2 + 0x + 0 = 0 -> any x is a root, but we should handle it gracefully
    EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 0.0f, 5.0f, root));
+
+   // Bug: handle case where q = 0, but inA != 0
+   // x^2 = 0 -> x = 0
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, 0.0f, 0.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(0.0f, root);
 }
 
 } // namespace Zap

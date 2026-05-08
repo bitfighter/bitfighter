@@ -60,9 +60,6 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
    // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
    F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
 
-   if (q == 0.0f)
-      return false;
-
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
    F32 x1 = q / inA;
    F32 x2 = (q != 0.0f) ? inC / q : 1e30f;    // Avoid division by zero; x1 will be the correct root (0) if q is zero and inA is not
