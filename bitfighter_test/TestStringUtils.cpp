@@ -185,6 +185,11 @@ TEST(StringUtilsTest, isInteger)
    EXPECT_FALSE(isPositiveInteger(NULL));
    EXPECT_FALSE(isPositiveInteger("-123"));
    EXPECT_FALSE(isPositiveInteger(" "));
+
+   // Whitespace tests
+   EXPECT_TRUE(isPositiveInteger("  123  "));
+   EXPECT_TRUE(isPositiveInteger("\t0\n"));
+   EXPECT_FALSE(isPositiveInteger("  "));
 }
 
 

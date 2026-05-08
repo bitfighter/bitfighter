@@ -86,6 +86,27 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    EXPECT_TRUE(findLowestRootInInterval(0.0f, -3.0f, 2.0f, 1.0f, root));
    EXPECT_NEAR(0.6666666f, root, 1e-6f);
 
+   // Case: inA = 0, inB = 0 (No solution or all solutions)
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 1.0f, 10.0f, root));
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 0.0f, 10.0f, root));
+
+   // Case: small inA
+   // 1e-10 * x^2 - 3x + 2 = 0
+   // Linear root is 2/3 approx 0.6666666
+   // Other root is approx 3 / 1e-10 = 3e10
+   EXPECT_TRUE(findLowestRootInInterval(1e-10f, -3.0f, 2.0f, 1.0f, root));
+   EXPECT_NEAR(0.6666666f, root, 1e-6f);
+
+   // Case: inB = 0, inA != 0, inC != 0
+   // x^2 - 4 = 0 -> roots are 2 and -2
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, 0.0f, -4.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(2.0f, root);
+
+   // Case: inC = 0
+   // x^2 - 3x = 0 -> roots are 0 and 3
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, -3.0f, 0.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(0.0f, root);
+  
    // Bug: handle linear equations correctly (currently might return false or crash)
    // 2x - 4 = 0 -> x = 2
    EXPECT_TRUE(findLowestRootInInterval(0.0f, 2.0f, -4.0f, 5.0f, root));
