@@ -957,14 +957,23 @@ TEST(StringUtilsTest, formatMessage)
 
    EXPECT_EQ("entry0 and entry1", formatMessage("%e0 and %e1", e, s, i));
    EXPECT_EQ("ptr0 is 42", formatMessage("%s0 is %i0", e, s, i));
+
+   // Bug: formatMessage should support multi-digit indices
+   for(int j = 2; j < 12; ++j) e.push_back("entry");
+   e[10] = "ten";
+   EXPECT_EQ("ten", formatMessage("%e10", e, s, i));
+
+   // Bug: formatMessage should support %% to escape %
+   EXPECT_EQ("%e0", formatMessage("%%e0", e, s, i));
+
    EXPECT_EQ("plain text", formatMessage("plain text", e, s, i));
    EXPECT_EQ("invalid %x9 tokens", formatMessage("invalid %x9 tokens", e, s, i));
-   EXPECT_EQ("out of range ", formatMessage("out of range %e9", e, s, i));
+   EXPECT_EQ("out of range ", formatMessage("out of range %e12", e, s, i));
 
    // Long string test to ensure no overflow
    std::string longStr(500, 'a');
    e.push_back(longStr.c_str());
-   EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+   EXPECT_EQ(longStr, formatMessage("%e12", e, s, i));
 
    // Multiple placeholders and mixed types
    EXPECT_EQ("entry0 entry1 ptr0 42 entry0", formatMessage("%e0 %e1 %s0 %i0 %e0", e, s, i));

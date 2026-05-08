@@ -85,6 +85,15 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    // Linear case (a=0): -3x + 2 = 0 -> x = 2/3
    EXPECT_TRUE(findLowestRootInInterval(0.0f, -3.0f, 2.0f, 1.0f, root));
    EXPECT_NEAR(0.6666666f, root, 1e-6f);
+
+   // Bug: handle linear equations correctly (currently might return false or crash)
+   // 2x - 4 = 0 -> x = 2
+   EXPECT_TRUE(findLowestRootInInterval(0.0f, 2.0f, -4.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(2.0f, root);
+
+   // Bug: avoid division by zero when q = 0
+   // 0x^2 + 0x + 0 = 0 -> any x is a root, but we should handle it gracefully
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 0.0f, 5.0f, root));
 }
 
 } // namespace Zap
