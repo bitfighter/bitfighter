@@ -55,7 +55,8 @@ void SafeZone::render()
 
 void SafeZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
-   // Safe zones are intentionally hidden in the editor.
+   // Safe zones are not placeable in the editor, but existing ones should still be visible.
+   renderSafeZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
