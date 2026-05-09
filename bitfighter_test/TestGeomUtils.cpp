@@ -1988,4 +1988,31 @@ TEST(GeomUtilsTest, isConvexConcaveC)
 
    EXPECT_FALSE(isConvex(&cshape));
 }
+
+TEST(GeomUtilsTest, polygonCircleIntersectDegenerateEdge)
+{
+   // Single vertex polygon - forms a degenerate edge with itself (v1=v2)
+   Point vertex(100, 100);
+   Point center(100.5f, 100.5f);
+   F32 radiusSq = 1.0f; // radius 1, dist is sqrt(0.5) < 1
+   Point outPoint;
+
+   // This should return true and not crash/divide by zero
+   EXPECT_TRUE(polygonCircleIntersect(&vertex, 1, center, radiusSq, outPoint));
+   EXPECT_EQ(vertex, outPoint);
+}
+
+TEST(GeomUtilsTest, TriangulateInsideTriangleWinding)
+{
+   // CCW Triangle
+   // (0,0), (10,0), (5,10)
+   EXPECT_TRUE(Triangulate::InsideTriangle(0, 0, 10, 0, 5, 10, 5, 5));
+   EXPECT_FALSE(Triangulate::InsideTriangle(0, 0, 10, 0, 5, 10, 15, 5));
+
+   // CW Triangle
+   // (0,0), (5,10), (10,0)
+   EXPECT_TRUE(Triangulate::InsideTriangle(0, 0, 5, 10, 10, 0, 5, 5));
+   EXPECT_FALSE(Triangulate::InsideTriangle(0, 0, 5, 10, 10, 0, 15, 5));
+}
+
 }; // namespace Zap

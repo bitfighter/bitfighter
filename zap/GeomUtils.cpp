@@ -314,7 +314,7 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       Point v1_v2 = *v2 - *v1;
       Point v1_center = inCenter - *v1;
       F32 fraction = v1_center.dot(v1_v2);
-      if (fraction < 0.0f)
+      if (fraction <= 0.0f)
       {
          // Closest point is v1
          F32 dist_sq = v1_center.lenSquared();
@@ -329,7 +329,7 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       else
       {
          F32 v1_v2_len_sq = v1_v2.lenSquared();
-         if (fraction <= v1_v2_len_sq)
+         if (v1_v2_len_sq > 0.0f && fraction <= v1_v2_len_sq)
          {
             // Closest point is on line segment
             Point point = *v1 + v1_v2 * (fraction / v1_v2_len_sq);
@@ -836,7 +836,8 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
+  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f)) ||
+         ((aCROSSbp <= 0.0f) && (bCROSScp <= 0.0f) && (cCROSSap <= 0.0f));
 };
 
 
