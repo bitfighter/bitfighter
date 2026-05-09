@@ -1810,11 +1810,12 @@ void Ship::setState(ControlObjectData *state)
    mImpulseVector = state->mImpulseVector;
    mEnergy = state->mEnergy;
    mFireTimer = state->mFireTimer;
-   mFastRechargeTimer.reset(state->mFastRechargeTimer, mFastRechargeTimer.getPeriod());
-   mSpyBugPlacementTimer.reset(state->mSpyBugPlacementTimer, mSpyBugPlacementTimer.getPeriod());
-   mModuleSecondaryTimer[ModuleBoost].reset(state->mPulseTimer, mModuleSecondaryTimer[ModuleBoost].getPeriod());
+   mFastRechargeTimer.setCurrent(state->mFastRechargeTimer);
+   mSpyBugPlacementTimer.setCurrent(state->mSpyBugPlacementTimer);
+   mModuleSecondaryTimer[ModuleBoost].setCurrent(state->mPulseTimer);
    mCooldownNeeded = state->mCooldownNeeded;
    mFastRecharging = state->mFastRecharging;
+
 
    // Probably needed, it is because ship don't update modules from Move until after moving the ship.
    mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);
@@ -2316,6 +2317,18 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mFireTimer = (stream->readInt(8) << 4) + 10;
       else
          mFireTimer = 0;
+      // Claude 4.6 Explaantion of the << 4 + 10: 
+      // The pack and unpack are asymmetric in an intentional way.
+      // The >> 4 on write quantizes the timer to 16 ms steps to fit in 8 bits (0–4080 ms range). That
+      // truncation always floors the value — you lose 0–15 ms. On read, << 4 reconstructs the floor of
+      // the bucket.
+      //
+      // The + 10 is a deliberate midpoint bias: instead of always reconstructing at the bottom of the 16
+      // ms bucket (up to 15 ms low), adding half the bucket size (8 ms) centers the reconstruction error
+      // around zero. The value chosen is 10 rather than 8, which is probably a small empirical tweak —
+      // since the packet spends time in transit while the timer is running down, the true value at the
+      // moment of receive is already somewhat less than what was sent, so biasing slightly above the
+      // midpoint compensates for that one-way latency drift.
       setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
    }
 

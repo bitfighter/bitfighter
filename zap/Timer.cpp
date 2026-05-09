@@ -22,6 +22,7 @@ Timer::~Timer()
 }
 
 
+// Return true if timer just expired with this update
 bool Timer::update(U32 timeDelta)
 {
    if(mCurrentCounter == 0)

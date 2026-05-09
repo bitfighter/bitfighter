@@ -51,6 +51,14 @@ public:
    }
 
 
+   // Set the period to a new value and carry on
+   template<typename T>
+   void setCurrent(T newCounter) 
+   { 
+      reset(static_cast<U32>(newCounter), mPeriod); 
+   }
+
+
    void reset(U32 newCounter, U32 newPeriod = 0);
 
    // Remove all time from timer
