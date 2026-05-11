@@ -62,10 +62,10 @@ string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
   string::size_type pos = path.find_last_of("\\/");
-  if (pos == string::npos)
+  if(pos == string::npos)
      return "";
 
-  if (pos == 0)
+  if(pos == 0)
      return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
@@ -121,14 +121,17 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   if (str.find('.') == string::npos)
-      return str;
+   if (str.find('.') != string::npos)
+   {
+      while(str.length() > 0 && str[str.length() - 1]  == '0')
+         str.erase(str.length() - 1);
 
-   while(str.length() > 0 && str[str.length() - 1]  == '0')
-      str.erase(str.length() - 1);
+      if(str.length() > 0 && str[str.length() - 1] == '.')
+         str.erase(str.length() - 1);
+   }
 
-   if(str.length() > 0 && str[str.length() - 1] == '.')
-      str.erase(str.length() - 1);
+   if(str.empty() || str == "-" || str == "-0" || str == "+0")
+      return "0";
 
    return str;
 }
