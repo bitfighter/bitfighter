@@ -189,6 +189,7 @@ TEST(StringUtilsTest, isInteger)
    // Whitespace tests
    EXPECT_TRUE(isPositiveInteger("  123  "));
    EXPECT_TRUE(isPositiveInteger("\t0\n"));
+   EXPECT_TRUE(isPositiveInteger("\v456\v"));
    EXPECT_FALSE(isPositiveInteger("  "));
 }
 
@@ -635,6 +636,7 @@ TEST(StringUtilsTest, trim)
 {
    EXPECT_EQ("abc", trim("  abc  "));
    EXPECT_EQ("abc", trim("\n\t abc \r\n"));
+   EXPECT_EQ("abc", trim("\v abc \v"));
    EXPECT_EQ("abc", trim("\vabc\v"));
    EXPECT_EQ("abc  ", trim_left("  abc  "));
    EXPECT_EQ("  abc", trim_right("  abc  "));
