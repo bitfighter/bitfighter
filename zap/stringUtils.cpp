@@ -968,6 +968,7 @@ string writeLevelString(const char *in)
 bool writeFile(const string &path, const string &contents, bool append)
 {
    ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
+   mode |= ios_base::binary;
 
    ofstream file(path.c_str(), mode);
 

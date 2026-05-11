@@ -637,6 +637,7 @@ TEST(StringUtilsTest, trim)
    EXPECT_EQ("abc", trim("  abc  "));
    EXPECT_EQ("abc", trim("\n\t abc \r\n"));
    EXPECT_EQ("abc", trim("\v abc \v"));
+   EXPECT_EQ("abc", trim("\vabc\v"));
    EXPECT_EQ("abc  ", trim_left("  abc  "));
    EXPECT_EQ("  abc", trim_right("  abc  "));
 
@@ -719,6 +720,13 @@ TEST(StringUtilsTest, fileUtils)
    ASSERT_TRUE(writeFile(testFile, content));
    EXPECT_TRUE(fileExists(testFile));
    EXPECT_EQ(content, readFile(testFile));
+
+   // Verify consistency of writeFile/readFile with potentially tricky characters
+   // On Windows, text mode would translate \n to \r\n
+   string binaryContent = "Line1\nLine2\r\nLine3";
+   ASSERT_TRUE(writeFile("test_binary.txt", binaryContent));
+   EXPECT_EQ(binaryContent, readFile("test_binary.txt"));
+   remove("test_binary.txt");
 
    string appendContent = " Append";
    ASSERT_TRUE(writeFile(testFile, appendContent, true));
