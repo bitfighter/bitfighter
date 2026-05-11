@@ -62,10 +62,10 @@ string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
   string::size_type pos = path.find_last_of("\\/");
-  if (pos == string::npos)
+  if(pos == string::npos)
      return "";
 
-  if (pos == 0)
+  if(pos == 0)
      return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
