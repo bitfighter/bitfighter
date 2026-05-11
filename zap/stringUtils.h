@@ -105,7 +105,7 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 
 // By default we'll mimic the behavior or PHP.  Because that's something to aspire to!
 // http://lu1.php.net/trim
-#define DEFAULT_TRIM_CHARS " \n\r\t\0\x0B"
+#define DEFAULT_TRIM_CHARS " \n\r\t\v"
 
 string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
