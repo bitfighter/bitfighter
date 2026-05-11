@@ -198,54 +198,69 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 //   Point v0(c - a);
 //   Point v1(b - a);
 //   Point v2(p - a);
-//
+
 //   // Compute dot products
-//   float dot00 = v0.dot(v0);
-//   float dot01 = v0.dot(v1);
-//   float dot02 = v0.dot(v2);
-//   float dot11 = v1.dot(v1);
-//   float dot12 = v1.dot(v2);
-//
+//   F32 dot00 = v0.dot(v0);
+//   F32 dot01 = v0.dot(v1);
+//   F32 dot02 = v0.dot(v2);
+//   F32 dot11 = v1.dot(v1);
+//   F32 dot12 = v1.dot(v2);
+
 //   // Compute barycentric coordinates
-//   float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-//   float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-//   float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-//
+//   F32 invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+//   F32 u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+//   F32 v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
 //   // Check if point is in triangle
-//   return (u > 0) && (v > 0) && (u + v < 1);
+//   return (u >= 0) && (v >= 0) && (u + v < 1);
 //}
 
 
-// Return true out if point is in polygon given a triangulated fill.  Points on edge are considered inside.
-// Only used in editor.
-bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point)
+// Use F64 for precision
+static inline bool isLeft( const Point &p1, const Point &p2, const Point &p3, F64 &result )
 {
-   for (S32 i = 0; i + 2 < triangles->size(); i += 3)
-   {
-      const Point& p0 = (*triangles)[i];
-      const Point& p1 = (*triangles)[i + 1];
-      const Point& p2 = (*triangles)[i + 2];
+    result = (F64(p2.x) - p1.x) * (F64(p3.y) - p1.y) - (F64(p3.x) -  p1.x) * (F64(p2.y) - p1.y);
+    return result > 0;
+}
 
-      // Cross-product sign test — zero means point is exactly on that edge,
-      // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+// Return 1, 0, or -1 for CCW, collinear, and CW respectively
+static inline S32 isClockwiseTriangle(const Point &p1, const Point &p2, const Point &p3)
+{
+   F64 result;
+   isLeft(p1, p2, p3, result);
 
-      bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-      bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-      // Point is inside (or on the boundary of) this triangle
-      if (!(has_neg && has_pos))
-         return true;
-   }
-
-   return false;
+   if(result > 0)
+      return 1;
+   if(result < 0)
+      return -1;
+   return 0;
 }
 
 
-// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
-// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
+// Determine if polygon is wound clockwise
+bool isWoundClockwise(const Vector<Point>& inputPoly)
+{
+   if(inputPoly.size() < 2)
+      return true;
+
+   F64 finalSum = 0;
+   S32 i_prev = inputPoly.size() - 1;
+
+   for(S32 i = 0; i < inputPoly.size(); i++)
+   {
+      // (x2-x1)(y2+y1)
+      finalSum += (F64(inputPoly[i].x) - inputPoly[i_prev].x) * (F64(inputPoly[i].y) + inputPoly[i_prev].y);
+      i_prev = i;
+   }
+
+   // Negative result = counter-clockwise
+   if(finalSum < 0)
+      return false;
+
+   return true;
+}
+
+
 bool isConvex(const Vector<Point> *verts)
 {
    int n = verts->size();
@@ -283,17 +298,10 @@ bool isConvex(const Vector<Point> *verts)
 bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &center2, F32 radius2)
 {
    // Remove square root for speed
-   // (r1+r2)^2 > (x2-x1)^2 + (y2-y1)^2
-   if(sq(radius1 + radius2) > center1.distSquared(center2))
-      return true;
-
-   return false;
+   return (center1.distSquared(center2) <= sq(radius1 + radius2));
 }
 
 
-// Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
-// Function returns true when it does and the intersection point is in outPoint
-// Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
    if (inNumVertices == 0)
@@ -349,29 +357,26 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 }
 
 
-// Returns true if polygon instersects or contains segment defined by start - end
-bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
+bool polygonIntersectsSegment(const Vector<Point> &p, const Point &start, const Point &end)
 {
-   if (points.empty())
+   if (p.empty())
       return false;
 
-   const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
+   const Point *v1 = &p[p.size() - 1];
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 0; i < p.size(); i++)
    {
-      if(segmentsIntersect(start, end, *pointPrev, points[i], ct))
+      const Point *v2 = &p[i];
+      if(segmentsIntersect(*v1, *v2, start, end, ct))
          return true;
-      // else
-      pointPrev = &points[i];
+      v1 = v2;
    }
 
-   //  Entire line inside polygon?  If so, then the start will be within.
-   return polygonContainsPoint(points.address(), points.size(), start);
+   return false;
 }
 
 
-// Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
    if (p1.empty() || p2.empty())
@@ -648,155 +653,74 @@ static bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const
 }
 
 
-// Public wrapper for segmentsCollinear that accepts a scaleFact parameter (unused by the current implementation)
-bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 /*unused_scaleFact*/)
-{
-   return segmentsColinear(p1, p2, p3, p4);
-}
-
-
-// Public wrapper for segsOverlap using a default scaleFact of 1.0
-bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd)
-{
-   return segsOverlap(p1, p2, p3, p4, overlapStart, overlapEnd, 1.0f);
-}
-
-// Returns index of points vector closest to point
-S32 findClosestPoint(const Point &point, const Vector<Point> &points)
-{
-   F32 dist = F32_MAX;
-   S32 closest = -1;
-
-   for(S32 i = 0; i < points.size(); i++)
-   {
-      F32 d = points[i].distSquared(point);
-
-      if(d < dist)
-      {
-         dist = d;
-         closest = i;
-      }
-   }
-
-   return closest;
-}
-
-
-bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
-{
-   // Check for unlikely but fatal situation: Not enough vertices
-   if(zone1->size() < 3 || zone2->size() < 3)
-      return false;
-
-   const Point *pi1, *pi2, *pj1, *pj2;
-
-   // Now, do we actually touch?  Let's look, segment by segment
-   for(S32 i = 0; i < zone1->size(); i++)
-   {
-      pi1 = &zone1->get(i);
-      if(i == zone1->size() - 1)
-         pi2 = &zone1->get(0);
-      else
-         pi2 = &zone1->get(i + 1);
-
-      for(S32 j = 0; j < zone2->size(); j++)
-      {
-         pj1 = &zone2->get(j);
-         if(j == zone2->size() - 1)
-            pj2 = &zone2->get(0);
-         else
-            pj2 = &zone2->get(j + 1);
-
-         if(segsOverlap(*pi1, *pi2, *pj1, *pj2, overlapStart, overlapEnd, scaleFact))
-            return true;
-      }
-   }
-
-   return false;
-}
-
-
-// Checks intersection between a polygon an moving circle at inBegin + t * inDelta with radius^2 = inA * t^2 + inB * t + inC, t in [0, 1]
-// Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
-static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
+// Determine if an object at inBegin is colliding with any segments of polygon inVertices.  Calculates when the
+// collision occurred (outCollisionTime) and where (outPoint).
+bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inEnd, float inRadius, float &outCollisionTime, Point &outPoint)
 {
    if (inNumVertices == 0)
       return false;
 
-   // Loop through edges
-   F32 upper_bound = 1.0f;
    bool collision = false;
+   float min_t = outCollisionTime;
+
+   Point v = inEnd - inBegin;
+
+   // Edge intersection
    for (const Point *v1 = inVertices, *v2 = inVertices + inNumVertices - 1; v1 < inVertices + inNumVertices; v2 = v1, ++v1)
    {
-      F32 t;
+      Point edge = *v2 - *v1;
+      float edge_len_sq = edge.lenSquared();
+      Point begin_v1 = inBegin - *v1;
 
-      // Check if circle hits the vertex
-      Point bv1 = *v1 - inBegin;
-      F32 a1 = inA - inDelta.lenSquared();
-      F32 b1 = inB + 2.0f * inDelta.dot(bv1);
-      F32 c1 = inC - bv1.lenSquared();
-      if (findLowestRootInInterval(a1, b1, c1, upper_bound, t))
-         if(inDelta.dot((*v1) - inBegin) > 0)
-         {
-            // We have a collision
-            collision = true;
-            upper_bound = t;
-            outPoint = *v1;
-         }
+      // The distance from a point P to a line v1 + edge * t is:
+      // |(v1 - P) x edge| / |edge|
+      // We want to find t such that the distance is inRadius:
+      // |(v1 - (inBegin + v * t)) x edge|^2 = inRadius^2 * |edge|^2
+      // |(v1 - inBegin) x edge - t * (v x edge)|^2 = inRadius^2 * |edge|^2
+      // Let a = begin_v1 x edge, b = v x edge
+      // (a - t * b)^2 = inRadius^2 * edge_len_sq
+      // This is a quadratic equation in t:
+      // t^2 * b^2 - 2 * t * a * b + a^2 - inRadius^2 * edge_len_sq = 0
 
-      // Check if circle hits the edge
-      Point v1v2 = *v2 - *v1;
-      F32 v1v2_dot_delta = v1v2.dot(inDelta);
-      F32 v1v2_dot_bv1 = v1v2.dot(bv1);
-      F32 v1v2_len_sq = v1v2.lenSquared();
-      F32 a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
-      F32 b2 = v1v2_len_sq * b1 - 2.0f * v1v2_dot_bv1 * v1v2_dot_delta;
-      F32 c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
-      if (findLowestRootInInterval(a2, b2, c2, upper_bound, t))
+      float a = begin_v1.determinant(edge);
+      float b = v.determinant(edge);
+
+      float t;
+      if (findLowestRootInInterval(b * b, -2.0f * a * b, a * a - inRadius * inRadius * edge_len_sq, min_t, t))
       {
          // Check if the intersection point is on the edge
-         F32 f = t * v1v2_dot_delta - v1v2_dot_bv1;
-         if (f >= 0.0f && f <= v1v2_len_sq)
+         Point point = inBegin + v * t;
+         float fraction = (point - *v1).dot(edge);
+         if (fraction >= 0.0f && fraction <= edge_len_sq)
          {
-            Point p(*v1 + v1v2 * (f / v1v2_len_sq));
-            if(inDelta.dot(p - inBegin) > 0)
-            {
-               // We have a collision
-               collision = true;
-               upper_bound = t;
-               outPoint = p;
-            }
+            min_t = t;
+            outPoint = *v1 + edge * (fraction / edge_len_sq);
+            collision = true;
          }
       }
    }
 
-   // Check if we had a collision
-   if (!collision)
-      return false;
-   outFraction = upper_bound;
-   return true;
-}
-
-// Should work with any polygons, convex and concave
-bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inRadius, Point &outPoint, F32 &outFraction)
-{
-   // Test if circle intersects at t = 0
-   if(polygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint, (Point *)&inDelta))
+   // Vertex intersection
+   for (const Point *v1 = inVertices; v1 < inVertices + inNumVertices; ++v1)
    {
-      outFraction = 0;
-      return true;
+      float t;
+      if (circleIntersectsSegment(*v1, inRadius, inBegin, inEnd, t))
+      {
+         if (t < min_t)
+         {
+            min_t = t;
+            outPoint = *v1;
+            collision = true;
+         }
+      }
    }
 
-   // Test if sphere intersects with one of the edges or vertices
-   if (SweptCircleEdgeVertexIntersect(inVertices, inNumVertices, inBegin, inDelta, 0, 0, inRadius * inRadius, outPoint, outFraction))
-   {
-      return true;
-   }
-   return false;
+   if (collision)
+      outCollisionTime = min_t;
+
+   return collision;
 }
 
-
-static const float EPSILON=0.0000000001f;
 
 F32 area(const Vector<Point> &contour)
 {
@@ -838,7 +762,6 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
 
   return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
 };
-
 
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
@@ -948,825 +871,173 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 static const F32 CLIPPER_SCALE_FACT = 1000.0f;
-static const F32 CLIPPER_SCALE_FACT_INVERSE = 1 / CLIPPER_SCALE_FACT;
 
-Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
+
+// Check to see if polygon is complex (i.e. self-intersecting)
+bool polygonIsComplex(const Vector<Point> &contour)
 {
-   Paths outputPolygons;
+   Clipper c;
 
-   outputPolygons.resize(inputPolygons.size());
+   Path p;
+   p.reserve(contour.size());
+   for(S32 i = 0; i < contour.size(); i++)
+      p.push_back(IntPoint(cround(contour[i].x * CLIPPER_SCALE_FACT), cround(contour[i].y * CLIPPER_SCALE_FACT)));
 
-   for(S32 i = 0; i < inputPolygons.size(); i++)
-   {
-      outputPolygons[i].resize(inputPolygons[i]->size());
+   c.AddPath(p, ptSubject, true);
 
-      for(S32 j = 0; j < inputPolygons[i]->size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
-   }
+   Paths solution;
+   c.Execute(ctUnion, solution, pftEvenOdd, pftEvenOdd);
 
-   return outputPolygons;
-}
+   if(solution.size() != 1)      // Self intersection split it into multiple parts
+      return true;
 
-
-// Same as above, using slightly different input structure
-Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
-{
-   Paths outputPolygons;
-
-   outputPolygons.resize(inputPolygons.size());
-
-   for(S32 i = 0; i < inputPolygons.size(); i++)
-   {
-      outputPolygons[i].resize(inputPolygons[i].size());
-
-      for(S32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
-   }
-
-   return outputPolygons;
-}
-
-
-Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons)
-{
-   Vector<Vector<Point> > outputPolygons;
-
-   outputPolygons.resize((U32)inputPolygons.size());
-
-   for(U32 i = 0; i < inputPolygons.size(); i++)
-   {
-      outputPolygons[i].resize((U32)inputPolygons[i].size());
-
-      for(U32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) * CLIPPER_SCALE_FACT_INVERSE, F32(inputPolygons[i][j].Y) * CLIPPER_SCALE_FACT_INVERSE);
-   }
-
-   return outputPolygons;
-}
-
-
-/**
- * Traverse a Clipper PolyTree looking for holes.
- */
-bool containsHoles(const PolyTree &tree)
-{
-   PolyNode *node = tree.GetFirst();
-   while(node)
-   {
-      if(node->IsHole())
-         return true;
-
-      node = node->GetNext();
-   }
+   if(solution[0].size() != contour.size())    // Self intersection resulted in fewer or more vertices
+      return true;
 
    return false;
 }
 
 
-/**
- * Convert a flat list of triangles to a polygon list.
- */
-void trianglesToPolygons(const Vector<Point> &triangles, Vector<Vector<Point> > &result)
+// Given a list of (possibly self-intersecting) polygons, return a list of non-self-intersecting polygons
+void splitSelfIntersectingPolys(const Vector<Vector<Point> > &polys, Vector<Vector<Point> > &result)
 {
-   if(triangles.size() % 3 != 0)
+   Clipper c;
+
+   for(S32 i = 0; i < polys.size(); i++)
    {
-      TNLAssert(false, "triangles.size() is not a multiple of three");
-      return;
+      Path p;
+      p.reserve(polys[i].size());
+
+      for(S32 j = 0; j < polys[i].size(); j++)
+         p.push_back(IntPoint(cround(polys[i][j].x * CLIPPER_SCALE_FACT), cround(polys[i][j].y * CLIPPER_SCALE_FACT)));
+
+      c.AddPath(p, ptSubject, true);
    }
 
-   result.clear();
-   result.reserve(triangles.size() / 3);
-   for(S32 i = 0; i < triangles.size(); i += 3)
+   Paths solution;
+   c.Execute(ctUnion, solution, pftEvenOdd, pftEvenOdd);
+
+   result.reserve(solution.size());
+
+   for(S32 i = 0; i < (S32)solution.size(); i++)
    {
       Vector<Point> poly;
-      poly.push_back(triangles[i]);
-      poly.push_back(triangles[i + 1]);
-      poly.push_back(triangles[i + 2]);
+      poly.reserve(solution[i].size());
+
+      for(S32 j = 0; j < (S32)solution[i].size(); j++)
+         poly.push_back(Point(F32(solution[i][j].X) / CLIPPER_SCALE_FACT, F32(solution[i][j].Y) / CLIPPER_SCALE_FACT));
+
       result.push_back(poly);
    }
 }
 
 
-/**
- * Convert a Recast poly mesh to a polygon list.
- */
-void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
+// Given a polygon that may be self-intersecting, return a set of triangles that fills it
+void triangulateComplexPoly(const Vector<Point> &poly, Vector<Point> &triangles)
 {
-   result.clear();
-   result.reserve(mesh.npolys);
-   for(S32 i = 0; i < mesh.npolys; i++)
+   Vector<Vector<Point> > polys;
+   polys.push_back(poly);
+
+   Vector<Vector<Point> > splitPolys;
+   splitSelfIntersectingPolys(polys, splitPolys);
+
+   for(S32 i = 0; i < splitPolys.size(); i++)
    {
-      Vector<Point> poly;
-      poly.reserve(mesh.nvp);
-      for(S32 j = 0; j < mesh.nvp; j++)
-      {
-         // index of the next vertex
-         U16 vertIndex = mesh.polys[i * mesh.nvp + j];
-
-         // RC_MESH_NULL_IDX marks the end of this polygon
-         if(vertIndex == RC_MESH_NULL_IDX)
-            break;
-
-         const U16 *vert = &mesh.verts[vertIndex * 2];
-
-//         // No more verts in this polygon
-//         if(vert[0] == RC_MESH_NULL_IDX)
-//            break;
-
-         // otherwise, add a new point
-         poly.push_back(Point((S16) (vert[0] - mesh.offsetX), (S16) (vert[1] - mesh.offsetY)));
-      }
-
-      if(poly.size() > 0)
-         result.push_back(poly);
+      Vector<Point> result;
+      Triangulate::Process(splitPolys[i], result);
+      for(S32 j = 0; j < result.size(); j++)
+         triangles.push_back(result[j]);
    }
 }
 
 
-/**
- * Performs a clipper operation on two sets of polygons, giving the result
- * as a Clipper::PolyTree
- */
-bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, PolyTree &solution)
+// Is point in a possibly self-intersecting poly?
+bool triangulatedFillContains(const Vector<Point> &triangles, const Point &point)
 {
-   Paths upscaledSubject = upscaleClipperPoints(subject);
-   Paths upscaledClip = upscaleClipperPoints(clip);
-   Clipper clipper;
-   clipper.StrictlySimple(true);
+   // Standard winding-number/ray casting tests will fail with self-intersecting polys, but we can
+   // just test if it's in any of our triangles.
+   for(S32 i = 0; i < triangles.size(); i += 3)
+      if(polygonContainsPoint(&triangles[i], 3, point))
+         return true;
 
-   try  // there is a "throw" in AddPolygon
-   {
-      clipper.AddPaths(upscaledSubject, ptSubject, true);
-
-      if(clip.size() > 0)
-         clipper.AddPaths(upscaledClip, ptClip, true);
-   }
-   catch(...)
-   {
-      logprintf(LogConsumer::LogError, "Exception thrown by Clipper::AddPolygons");
-      return false;
-   }
-
-   // perform the requested operation
-   return clipper.Execute(operation, solution, pftNonZero, pftNonZero);
+   return false;
 }
 
 
-/**
- * Perform a Clipper operation on two sets of polygons, giving the result as a
- * Vector<Vector<Point> >
- */
-bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip,
-      Vector<Vector<Point> > &result, bool merge, bool forceTriangulate)
+// Compute the area of a set of triangles
+F32 areaOfTriangles(const Vector<Point> &triangles)
 {
-   PolyTree solution;
-   bool success = clipPolygonsAsTree(operation, subject, clip, solution);
-
-   if(!success)
+   F32 totalArea = 0;
+   for(S32 i = 0; i < triangles.size(); i += 3)
    {
-      // clipper failed
-      return false;
+      Vector<Point> tri;
+      tri.push_back(triangles[i]);
+      tri.push_back(triangles[i + 1]);
+      tri.push_back(triangles[i + 2]);
+      totalArea += fabs(area(tri));
    }
-   else if(containsHoles(solution) || forceTriangulate)
-   {
-      // if the solution has holes, then we resort to triangulating them away
-      Vector<Point> resultTriangles;
-      success = Triangulate::processComplex(resultTriangles, Rect(0, 0, 0, 0), solution, false, true);
-
-      if(!success)
-      {
-         // triangulation failed
-         return false;
-      }
-      else if(merge)
-      {
-         // if requested, we merge the triangles into convex polygons
-         rcPolyMesh mesh;
-         success = Triangulate::mergeTriangles(resultTriangles, mesh, 0xFF);
-
-         if(success)
-            polyMeshToPolygons(mesh, result);
-      }
-      else
-      {
-         // otherwise, just return a bunch of triangles
-         trianglesToPolygons(resultTriangles, result);
-      }
-   }
-   else
-   {
-      // otherwise no holes were found, so just downscale the result
-      Paths convertedSolution;
-      PolyTreeToPaths(solution, convertedSolution);
-      result = downscaleClipperPoints(convertedSolution);
-   }
-
-   return success;
+   return totalArea;
 }
 
 
-/**
- * Transforms a list of polygons into triangles
- *
- * Assumes the polygons have been cleaned through Clipper
- */
-bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result)
+void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
-   Vector<Vector<Point> > cleanedInput;
-   splitSelfIntersectingPolys(input, cleanedInput);
-   Paths upscaledInput = upscaleClipperPoints(cleanedInput);
-   Clipper clipper;
-   clipper.StrictlySimple(true);
-
-   try  // there is a "throw" in AddPaths
-   {
-      clipper.AddPaths(upscaledInput, ptSubject, true);
-   }
-   catch(...)
-   {
-      logprintf(LogConsumer::LogError, "Exception thrown by Clipper::AddPolygons");
-      return false;
-   }
-
-   // perform the requested operation
-   PolyTree solution;
-   bool success = clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
-
-   if(success)
-   {
-      Vector<Point> resultTriangles;
-      success = Triangulate::processComplex(resultTriangles, Rect(0, 0, U16_MAX, U16_MAX), solution, false, true);
-
-      if(success)
-      {
-         trianglesToPolygons(resultTriangles, result);
-      }
-   }
-
-   return success;
-}
-
-
-/**
- * Gets a subset of a polygon from index `start` to `stop` inclusive.
- * Wraps around the polygon as needed.
- */
-static Vector<Point> getSubPoly(const Vector<Point> input, U32 start, U32 stop)
-{
-   Vector<Point> result;
-   start %= input.size();
-   stop %= input.size();
-
-   if(start == stop)
-   {
-      // just return the whole thing
-      result = input;
-   }
-   else
-   {
-      // otherwise collect the vertices
-      for(U32 i = start; i != stop; i = (i + 1) % input.size())
-      {
-         result.push_back(input[i]);
-      }
-
-      result.push_back(input[stop]);
-   }
-
-   return result;
-}
-
-
-/**
- */
-static void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<Point> > &result)
-{
-   U32 size = input.size();
-
-   // do nothing for any input with fewer than three vertices
-   if(size < 3)
+   edges.clear();
+   if(corners.empty())
       return;
 
-   bool polyWasSplit = false;
-   // for each segment as i
-   for(U32 i = 0; i < size && !polyWasSplit; i++)
+   edges.reserve(corners.size() * 2);
+
+   for(S32 i = 0; i < corners.size(); i++)
    {
-      // for each segment after after i as j
-      for(U32 j = i + 2; j < size && !polyWasSplit; j++)
-      {
-         // exclude segments adjacent to i
-         if(i == 0 && j == size - 1)
-            continue;
-
-         U32 i2 = i + 1;
-         U32 j2 = j + 1;
-         i2 = i2 < size ? i2 : i2 - size;
-         j2 = j2 < size ? j2 : j2 - size;
-
-         // see if i intersects j
-         Point intersection;
-         if(!findIntersection(input[i], input[i2], input[j], input[j2], intersection))
-         {
-            // if not, continue to the next segment
-            continue;
-         }
-
-         // otherwise, split into two polygons, one for each side of the intersection
-         Vector<Point> p1, p2;
-         p1 = getSubPoly(input, i2, j);
-         p2 = getSubPoly(input, j2, i);
-
-         // add a vertex at the intersection in between the newly connected vertices of each polygon
-         p1.push_back(intersection);
-         p2.push_back(intersection);
-
-         // perform this process on each of the newly created polygons, and return the combined output
-         splitSelfIntersectingPoly(p1, result);
-         splitSelfIntersectingPoly(p2, result);
-
-         // stop processing segment i
-         polyWasSplit = true;
-      }
-   }
-
-   // if no subdivision occured, return the input
-   if(!polyWasSplit)
-      result.push_back(input);
-}
-
-
-/**
- */
-void splitSelfIntersectingPolys(const Vector<Vector<Point> > input, Vector<Vector<Point> > &result)
-{
-   for(S32 i = 0; i < input.size(); i++)
-   {
-      splitSelfIntersectingPoly(input[i], result);
+      edges.push_back(corners[i]);
+      edges.push_back(corners[(i + 1) % corners.size()]);
    }
 }
 
 
-/**
- * Transforms a list of triangles into convex polygons.
- *
- * Any non-triangle polygons will be ignored.
- */
-bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &output)
+// Take a poly represented as a list of points (A-B-C-D) and convert to a list of segments
+// (A-B, B-C, C-D, D-A)
+void barrierLineToSegmentData(const Vector<Point> &points, Vector<Vector<Point> > &outData)
 {
-   rcPolyMesh mesh;
-   Vector<Point> triangles;
+   outData.clear();
+   if(points.empty())
+      return;
 
-   for(S32 i = 0; i < input.size(); i++)
+   for(S32 i = 0; i < points.size(); i++)
    {
-      if(input[i].size() != 3)
-         continue;
-
-      for(S32 j = 0; j < input[i].size(); j++)
-      {
-         triangles.push_back(input[i][j]);
-      }
-   }
-
-   bool success = Triangulate::mergeTriangles(triangles, mesh, 0xFF);
-
-   if(!success)
-      return false;
-
-   polyMeshToPolygons(mesh, output);
-
-   return true;
-}
-
-// Use Clipper to merge inputPolygons, placing the result in outputPolygons
-bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
-{
-   Paths input = upscaleClipperPoints(inputPolygons);
-   Paths solution;
-
-   // Fire up clipper and union!
-   Clipper clipper;
-   clipper.StrictlySimple(true);
-
-   try  // there is a "throw" in AddPolygon
-   {
-      clipper.AddPaths(input, ptSubject, true);
-   }
-   catch(...)
-   {
-      logprintf(LogConsumer::LogError, "clipper.AddPolygons, something went wrong");
-   }
-
-   bool success = clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
-
-   if(success)
-      outputPolygons = downscaleClipperPoints(solution);
-
-   return success;
-}
-
-// Use Clipper to merge inputPolygons, placing the result in outputPolygons
-// NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
-bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution)
-{
-   Paths input = upscaleClipperPoints(inputPolygons);
-
-   // Fire up clipper and union!
-   Clipper clipper;
-   clipper.StrictlySimple(true);
-
-   try  // there is a "throw" in AddPolygon
-   {
-      clipper.AddPaths(input, ptSubject, true);
-   }
-   catch(...)
-   {
-      logprintf(LogConsumer::LogError, "clipper.AddPolygons, something went wrong");
-   }
-
-   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
-}
-
-// Convert a Polygons to a list of points in a-b b-c c-d d-a format
-void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints)
-{
-   // Precomputing list size improves performance dramatically
-   S32 segments = 0;
-
-   for(S32 i = 0; i < solution.size(); i++)
-      segments += solution[i].size();
-
-   lineSegmentPoints.resize(segments * 2);      // 2 points per line segment
-
-   S32 index = 0;
-
-   for(S32 i = 0; i < solution.size(); i++)
-   {
-      if(solution[i].size() == 0)
-         continue;
-
-      for(S32 j = 1; j < solution[i].size(); j++)
-      {
-         lineSegmentPoints[index++] = solution[i][j - 1];
-         lineSegmentPoints[index++] = solution[i][j];
-      }
-
-      // Close the loop
-      lineSegmentPoints[index++] = solution[i][solution[i].size() - 1];
-      lineSegmentPoints[index++] = solution[i][0];
+      Vector<Point> segment;
+      segment.push_back(points[i]);
+      segment.push_back(points[(i + 1) % points.size()]);
+      outData.push_back(segment);
    }
 }
 
 
-// This method offsets polygons and can square or miter any corners
-void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys,
-      const F32 offset, JoinType joinType)
+// Given a path (A-B-C-D), find its centroid.
+// Based on http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
+Point findCentroid(const Vector<Point> &poly)
 {
-   Paths polygons = upscaleClipperPoints(inputPolys);
+   if(poly.size() == 0)
+      return Point(0, 0);
 
-   // Call Clipper to do the dirty work
-   ClipperOffset clipperOffset(0, 0);
-   Paths outPolys(polygons.size());
+   if(poly.size() == 1)
+      return poly[0];
 
-   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
-   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
+   if(poly.size() == 2)
+      return (poly[0] + poly[1]) * 0.5f;
 
-   // Downscale
-   outputPolys = downscaleClipperPoints(outPolys);
-}
-
-
-// This method offsets and squares any acute corners, perfect for bot zones
-void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys,
-      const F32 offset, JoinType joinType)
-{
-   Paths polygons = upscaleClipperPoints(inputPolys);
-
-   // Call Clipper to do the dirty work
-   ClipperOffset clipperOffset(0, 0);
-   Paths outPolys(polygons.size());
-
-   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
-   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
-
-   // Downscale
-   outputPolys = downscaleClipperPoints(outPolys);
-}
-
-
-// Same as expandCenterlineToOutline, but for lines with more than 2 points
-// This method expands a line to a given thickness with ends still squared off
-void offsetLineOpenButt(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
-{
-   // Glue code for Clipper methods
-   Vector<const Vector<Point> *> tempInputVector;
-   tempInputVector.push_back(inputPoly);
-
-   Vector<Vector<Point> > tempOutputVector;
-
-   // Upscale to integer points
-   Paths polygons = upscaleClipperPoints(tempInputVector);
-
-   // Call Clipper to do the dirty work
-   ClipperOffset clipperOffset(0, 0);
-   Paths outPolys(polygons.size());
-
-   clipperOffset.AddPaths(polygons, jtMiter, etOpenButt);
-   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
-
-   // Downscale
-   tempOutputVector = downscaleClipperPoints(outPolys);
-
-   // Return output
-   if(tempOutputVector.size() > 0)
-      outputPoly = tempOutputVector[0];
-}
-
-
-// This method is a generic offsetting method that uses the miter offset
-static void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
-{
-   // Upscale
-   Paths polygons = upscaleClipperPoints(inputPolys);
-
-   // Allow a liberal mitering offset
-   ClipperOffset clipperOffset(50, 0);
-   Paths outPolys(polygons.size());
-
-   clipperOffset.AddPaths(polygons, jtMiter, etClosedPolygon);
-   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
-
-   // Downscale
-   outputPolys = downscaleClipperPoints(outPolys);
-}
-
-
-// Offset a complex polygon by a given amount
-// Uses clipper to create a buffer around a polygon with the given offset
-void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
-      JoinType joinType)
-{
-   Vector<const Vector<Point> *> tempInputVector;
-   tempInputVector.push_back(inputPoly);
-
-   Vector<Vector<Point> > tempOutputVector;
-
-   offsetPolygons(tempInputVector, tempOutputVector, offset, joinType);
-
-   TNLAssert(tempOutputVector.size() > 0, "tempVector empty in offsetPolygon?");
-   if(tempOutputVector.size() > 0)
-      outputPoly = tempOutputVector[0];
-}
-
-
-// Convert a list of floats into a list of points, removing all collinear points
-Vector<Point> floatsToPoints(const Vector<F32> floats)
-{
-   Vector<Point> points;
-   points.reserve(floats.size() / 2);
-
-   for(S32 i = 1; i < floats.size(); i += 2)
-      points.push_back( Point(floats[i-1], floats[i]) );
-
-   removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
-
-   return points;
-}
-
-
-// Test if a complex polygon has clockwise point winding order
-// Implemented from
-// http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
-bool isWoundClockwise(const Vector<Point>& inputPoly)
-{
-   if(inputPoly.size() < 2)
-      return true;
-
-   F64 finalSum = 0;
-   S32 i_prev = inputPoly.size() - 1;
-
-   for(S32 i = 0; i < inputPoly.size(); i++)
-   {
-      // (x2-x1)(y2+y1)
-      finalSum += (F64(inputPoly[i].x) - inputPoly[i_prev].x) * (F64(inputPoly[i].y) + inputPoly[i_prev].y);
-      i_prev = i;
-   }
-
-   // Negative result = counter-clockwise
-   if(finalSum < 0)
-      return false;
-   else
-      return true;
-}
-
-
-// This uses poly2tri to triangulate.  poly2tri isn't very robust so clipper needs to do
-// the cleaning of points before getting here.
-//
-// For assistance with a special case crash, see this utility:
-//    http://javascript.poly2tri.googlecode.com/hg/index.html
-bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
-      const PolyTree &polyTree, bool ignoreFills, bool ignoreHoles)
-{
-   // First build our map extents outline polygon (polyline).  Clockwise into Clipper's format
-   F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
-   F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
-
-   Path outline;
-   outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(miny * CLIPPER_SCALE_FACT)));
-   outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
-   outline.push_back(IntPoint(S64(maxx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
-   outline.push_back(IntPoint(S64(maxx * CLIPPER_SCALE_FACT), S64(miny * CLIPPER_SCALE_FACT)));
-
-
-   // Keep track of memory for all the poly2tri objects we create
-   Vector<p2t::CDT*> cdtRegistry;
-   Vector<Vector<p2t::Point*> > holesRegistry;
-   Vector<Vector<p2t::Point*> > polylinesRegistry;
-
-
-   // Let's be tricky and add our outline to the root node (it should have none), it'll be
-   // our first Clipper hole
-   PolyNode *rootNode = NULL;
-
-   PolyNode tempNode;
-   if(polyTree.Total() == 0)  // Polytree is empty with no root node, e.g. on an empty level
-      rootNode = &tempNode;
-   else
-      rootNode = polyTree.GetFirst()->Parent;
-
-   rootNode->Contour = outline;
-
-   // Now traverse our polyline nodes and triangulate them with only their children holes
-   PolyNode *currentNode = rootNode;
-   while(currentNode != NULL)
-   {
-      // A Clipper hole is actually what we want to build zones for; they become our bounding
-      // polylines.  poly2tri holes are therefore the inverse
-      if((!ignoreHoles && currentNode->IsHole()) ||
-         (!ignoreFills && !currentNode->IsHole()))
-      {
-         // Build up this polyline in poly2tri's format (downscale Clipper points)
-         Vector<p2t::Point*> polyline;
-         for(U32 j = 0; j < currentNode->Contour.size(); j++)
-            polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X), F64(currentNode->Contour[j].Y)));
-
-         polylinesRegistry.push_back(polyline);  // Memory
-
-         // Set our polyline in poly2tri
-         p2t::CDT* cdt = new p2t::CDT(polyline.getStlVector());
-         cdtRegistry.push_back(cdt);
-
-         for(U32 j = 0; j < currentNode->Childs.size(); j++)
-         {
-            PolyNode *childNode = currentNode->Childs[j];
-
-            Vector<p2t::Point*> hole;
-            for(U32 k = 0; k < childNode->Contour.size(); k++)
-               hole.push_back(new p2t::Point(F64(childNode->Contour[k].X), F64(childNode->Contour[k].Y)));
-
-            holesRegistry.push_back(hole);  // Memory
-
-            // Add the holes for this polyline
-            cdt->AddHole(hole.getStlVector());
-         }
-
-         try {
-            cdt->Triangulate();
-         }
-         catch(std::exception &ex)
-         {
-            string msg = string("Error creating bot zones: ") + ex.what() + " ||| Please send the Bitfighter devs a copy of this level!";
-            logprintf(msg.c_str());
-            return false;
-         }
-
-         // Add current output triangles to our total
-         vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
-
-         // Copy our data to TNL::Point and to our output Vector
-         p2t::Triangle *currentTriangle;
-         for(U32 j = 0; j < currentOutput.size(); j++)
-         {
-            currentTriangle = currentOutput[j];
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(0)->y * CLIPPER_SCALE_FACT_INVERSE));
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(1)->y * CLIPPER_SCALE_FACT_INVERSE));
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(2)->y * CLIPPER_SCALE_FACT_INVERSE));
-         }
-      }
-
-      currentNode = currentNode->GetNext();
-   }
-
-
-   // Clean up memory used with poly2tri
-   //
-   // Clean-up workers
-   for(S32 i = 0; i < cdtRegistry.size(); i++)
-      delete cdtRegistry[i];
-
-   // Free the polylines
-   for(S32 i = 0; i < polylinesRegistry.size(); i++)
-   {
-      Vector<p2t::Point*> &polyline = polylinesRegistry[i];
-      polyline.deleteAndClear();
-   }
-
-   // Free the holes
-   for(S32 i = 0; i < holesRegistry.size(); i++)
-   {
-      Vector<p2t::Point*> &hole = holesRegistry[i];
-      hole.deleteAndClear();
-   }
-
-
-   // Make sure we have output data
-   if(outputTriangles.size() == 0)
-      return false;
-
-   return true;
-}
-
-
-// Merge triangles into convex polygons, uses Recast method
-bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& mesh, S32 maxVertices)
-{
-   S32 pointCount = triangleData.size();
-   S32 triangleCount = triangleData.size() / 3;
-
-   TNLAssert(pointCount % 3 == 0, "Triangles are not triangles?");
-
-   Vector<S32> intPoints(pointCount * 2);     // 2 entries per point: x,y
-   intPoints.resize(pointCount * 2);
-   Vector<S32> triangleList(pointCount);      // 1 entry per vertex
-   triangleList.resize(pointCount);
-
-   if(pointCount > U16_MAX) // too many points for rcBuildPolyMesh
-      return false;
-
-   for(S32 i = 0; i < pointCount; i++)
-   {
-      intPoints[2*i]   = (S32)round(triangleData[i].x) + mesh.offsetX;
-      intPoints[2*i+1] = (S32)round(triangleData[i].y) + mesh.offsetY;
-
-      triangleList[i] = i;  // Our triangle list is ordered so every 3 is a triangle in correct winding order
-   }
-
-   return rcBuildPolyMesh(maxVertices, intPoints.address(), pointCount, triangleList.address(), triangleCount, mesh);
-}
-
-
-// This is just an average between all the points
-Point mean2d(const Vector<Point> &polyPoints)
-{
-//   static const F32 NormalizeMultiplier = 64;
-//   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
-
-   S32 size = polyPoints.size();
-
-   F32 x = 0;
-   F32 y = 0;
-   Point p1;
-
-   for(S32 i = 0; i < size; i++)
-   {
-      p1 = polyPoints[i];
-//      p1.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
-
-      x += p1.x;
-      y += p1.y;
-   }
-
-   x /= size;
-   y /= size;
-
-   return Point(x,y);
-}
-
-
-// Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
-//
-// This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
-// Failure mode is checked and calls mean2d as a fallback
-Point findCentroid(const Vector<Point> &polyPoints)
-{
-   S32 size = polyPoints.size();
-
-   if(size == 0)
-      return Point(0,0);
-
+   // Handle larger polygons
    F64 x = 0;
    F64 y = 0;
+
    F64 sArea = 0;  // Signed area
    F64 area = 0;   // Partial signed area
 
-   Point p1;
-   Point p2;
-
-   // All segments except last
-   for(S32 i = 0; i < size - 1; i++)
+   for (S32 i = 0; i < poly.size(); i++)
    {
-      p1 = polyPoints[i];
-      p2 = polyPoints[i+1];
+      const Point &p1 = poly[i];
+      const Point &p2 = poly[(i + 1) % poly.size()];
 
       area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
       sArea += area;
@@ -1775,91 +1046,42 @@ Point findCentroid(const Vector<Point> &polyPoints)
       y += (F64(p1.y) + p2.y) * area;
    }
 
-   // Do last segment
-   p1 = polyPoints[size - 1];
-   p2 = polyPoints[0];
-
-   area = (F64(p1.x) * p2.y - F64(p2.x) * p1.y);
-   sArea += area;
-
-   x += (F64(p1.x) + p2.x) * area;
-   y += (F64(p1.y) + p2.y) * area;
-
    // Zero area means it's likely a complex polygon or something with all points
-   // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
-   // It's not great, but maybe good enough
-   if(fabs(sArea) < 1e-6)  // This is about zero for a floating point number
-      return mean2d(polyPoints);
+   // on a line.  In this case, just return the average of all points.
+   if(sArea == 0)
+   {
+      Point p(0, 0);
+      for(S32 i = 0; i < poly.size(); i++)
+         p += poly[i];
+      return p / (F32)poly.size();
+   }
 
-   // Finish up
    sArea *= 3.0;  // 0.5 * 6  (from area6)
-   x /= sArea;
-   y /= sArea;
 
-   return Point(x,y);
+   return Point(x / sArea, y / sArea);
 }
 
 
-// Find longest edge, so we can align text with it...
-F32 angleOfLongestSide(const Vector<Point> &polyPoints)
+// Get a point that is definitely inside the polygon.  For convex polys, we can use the centroid.
+// For concave polys, the centroid might be outside.  In that case, we find a point that is inside.
+Point findPointInPoly(const Vector<Point> &poly)
 {
-   if(polyPoints.size() <= 1)
-      return 0;
+   Point centroid = findCentroid(poly);
 
-   Point start;
-   Point end;
-   F32 maxlen = -1;
-   F32 ang = 0;
+   if(polygonContainsPoint(poly.address(), poly.size(), centroid))
+      return centroid;
 
-   for(S32 i = 0; i < polyPoints.size(); i++)
-   {
-      Point p1 = polyPoints[i];
-      Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
-      F32 len = p1.distSquared(p2);
+   // If centroid is not in poly, find a point that is.  We'll use the midpoint of a triangle
+   // formed by the first vertex and its two neighbors.
+   Vector<Point> triangles;
+   Triangulate::Process(poly, triangles);
 
-      if(len > maxlen + .1)     // .1 helps in editor if two sides are essentially equal
-      {
-         start = p1;
-         end = p2;
-         maxlen = len;
+   if(triangles.size() >= 3)
+      return (triangles[0] + triangles[1] + triangles[2]) / 3.0f;
 
-         ang = start.angleTo(end);
-      }
-      else if(len > maxlen - .1)    // Lengths are essentially equal... align text along "more horizontal" axis
-      {
-         if(fabs(p1.angleTo(p2)) < fabs(ang))
-         {
-            start = p1;
-            end = p2;
-            ang = start.angleTo(end);
-         }
-      }
-   }
-
-   // Make sure text is right-side-up
-   if(ang < -FloatHalfPi || ang > FloatHalfPi)
-      ang += FloatPi;
-   return ang;
+   return centroid;     // Should never get here for valid polys
 }
 
-
-// Find closest point from p on segment s1-s2 that is perpendicular to s1-s2
-bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest)
-{
-   Point edgeDelta = s2 - s1;    // Vector defining extent of segment
-   Point pointDelta = p - s1;    // Distance from p to start of segment
-
-   float fraction = pointDelta.dot(edgeDelta);  // "Perpendicularize" pointDelta towards edgeDelta
-   float lenSquared = edgeDelta.lenSquared();
-
-   if(fraction > 0 && fraction < lenSquared)                // Intersection!
-   {
-      closest = s1 + edgeDelta * (fraction / lenSquared);   // Closest point
-      return true;
-   }
-   else   // Didn't find a good match
-      return false;
-}
 
 
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime)
@@ -1875,9 +1097,11 @@ bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const 
     F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
+    {
        //if ( numerator1 == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
-    return false;  // PARALLEL;
+       return false;  // PARALLEL;
+    }
 
     F64 ua = numerator1 / denom;
     F64 ub = numerator2 / denom;
@@ -1906,9 +1130,11 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
     F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
+    {
        //if ( numerator == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
-    return false;  // PARALLEL;
+       return false;  // PARALLEL;
+    }
 
     F64 ua = numerator / denom;
     F64 ub = numerator2/ denom;
@@ -1918,680 +1144,8 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
       intersection.set(p1x + ua * (p2x - p1x), p1y + ua * (p2y - p1y));
       return true;
     }
-    else
-       return false;
+
+    return false;
 }
-
-
-Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthReduction)
-{
-   // Determine the directional vector
-   Point dir = endPoint - startPoint;
-
-   // Save current length
-   F32 length = dir.len();
-
-   // Normalize into a unit vector of sorts
-   dir.normalize();
-
-   // Multiply by the new length
-   // Careful!  If lengthReduction is greater than the segment length, you'll get an
-   // end point on the opposite vector!!
-   dir *= (length - lengthReduction);
-
-   // Return the new end-point
-   return startPoint + dir;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Takes a list of vertices representing corners and converts them into a list of lines representing the edges of an object
-// Basically, taking a vector like A-B-C-D and converting it to A-B-B-C-C-D
-void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
-{
-   edges.clear();
-   if (corners.empty())
-      return;
-
-   S32 last = corners.size() - 1;
-   for(S32 i = 0; i < corners.size(); i++)
-   {
-      edges.push_back(corners[last]);
-      edges.push_back(corners[i]);
-      last = i;
-   }
-}
-
-
-// Given the points in points, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
-// for better rendering).  Set extendAmt to 0 to see why it's needed.
-// Populates barrierEnds with the results.
-void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Point> &barrierEnds)
-{
-   barrierEnds.clear();       // Local static vector
-
-   if(points->size() <= 1)    // Protect against bad data
-      return;
-
-   bool loop = (points->first() == points->last());      // Does our barrier form a closed loop?
-
-   Vector<Point> edgeVector;
-   for(S32 i = 0; i < points->size() - 1; i++)
-   {
-      Point e = points->get(i+1) - points->get(i);
-      e.normalize();
-      edgeVector.push_back(e);
-   }
-
-   Point lastEdge = edgeVector[edgeVector.size() - 1];
-   Vector<F32> extend;
-
-   for(S32 i = 0; i < edgeVector.size(); i++)
-   {
-      Point curEdge = edgeVector[i];
-      double cosTheta = curEdge.dot(lastEdge);
-
-      // Do some bounds checking.  Crazy, I know, but trust me, it's worth it!
-      if (cosTheta > 1.0)
-         cosTheta = 1.0;
-      else if(cosTheta < -1.0)
-         cosTheta = -1.0;
-
-      cosTheta = fabs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
-
-      F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
-      if(extendAmt > 0.01f)
-         extendAmt -= 0.01f;
-      extend.push_back(extendAmt);
-
-      lastEdge = curEdge;
-   }
-
-   F32 first = extend[0];
-   extend.push_back(first);
-
-   for(S32 i = 0; i < edgeVector.size(); i++)
-   {
-      F32 extendBack = extend[i];
-      F32 extendForward = extend[i+1];
-      if(i == 0 && !loop)
-         extendBack = 0;
-      if(i == edgeVector.size() - 1 && !loop)
-         extendForward = 0;
-
-      Point start = points->get(i)   - edgeVector[i] * extendBack;
-      Point end   = points->get(i+1) + edgeVector[i] * extendForward;
-
-      barrierEnds.push_back(start);
-      barrierEnds.push_back(end);
-   }
-}
-
-
-// Takes a segment and "puffs its width out" to a rectangle of a specified width, filling cornerPoints.  Does not extend endpoints.
-void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)
-{
-   cornerPoints.clear();
-
-   Point dir = end - start;
-   Point crossVec(dir.y, -dir.x);
-   crossVec.normalize(width * 0.5f);
-
-   cornerPoints.push_back(start + crossVec);
-   cornerPoints.push_back(end   + crossVec);
-   cornerPoints.push_back(end   - crossVec);
-   cornerPoints.push_back(start - crossVec);
-}
-
-
-static bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
-{
-   // Test winding, is either pos, neg, or zero
-   F64 windTest = (F64(p2.y) - p1.y) * (F64(p3.x) - p2.x) - (F64(p2.x) - p1.x) * (F64(p3.y) - p2.y);
-
-   return (windTest > 0);  // 0 is colinear, but we don't care
-}
-
-
-// This expects CCW points
-static void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &polyToAppend)
-{
-   static const F32 MiterLimit = 2.0f;
-
-   // Compute angle between the two vectors
-   Point vec1 = p2-p1;
-   Point vec2 = p2-p3;
-   vec1.normalize();
-   vec2.normalize();
-
-   // Compute normalized normal (len == 1, perpendicular)
-   Point crossVec = Point(vec1.y, -vec1.x); // -90 deg
-
-   // Extend length
-   Point offsetCrossVec = crossVec * offset;
-
-
-   // Find subtended angle of two vectors
-   F32 cosTheta = vec1.dot(vec2);
-
-   // Bounds checking with weird floating values
-   if (cosTheta > 1.0f)
-      cosTheta = 1.0f;
-   else if(cosTheta < -1.0f)
-      cosTheta = -1.0f;
-
-   F32 subtendedAngle = acosf(cosTheta);
-   F32 halfAngle = subtendedAngle * 0.5;
-
-   // Guard against divide by zero
-   if(halfAngle < 0.00001)  // Arbitrary
-      halfAngle = 0.00001;
-
-   // Do mitering
-   // Find length of miter offset
-   F32 miterLen = offset / tanf(halfAngle);
-
-   // Create perpendicular vector and extend to length
-   Point miterVec = vec1 * miterLen;
-
-   // Test miter length to see if we should square it off
-   F32 miterLimitLen = MiterLimit * offset;
-
-   // Too big, time to square it and add two points
-   if(miterVec.lenSquared() > (miterLimitLen * miterLimitLen))
-   {
-      // Determine squared-off vector length, by backtracking off of miter length
-      F32 cosAngle = cosf(halfAngle);
-      F32 hypot = miterLen / cosAngle;
-      F32 removeLen = (hypot - offset) / cosAngle;
-      F32 finalLen = miterLen - removeLen;
-
-      // Compute normalized normal of segment 2, but rotated other direction
-      Point crossVec2 = Point(-vec2.y, vec2.x); // +90 deg
-      Point offsetCrossVec2 = crossVec2 * offset;
-
-      // Compute the two new squared-miter points a
-      Point sq1 = p2 + offsetCrossVec + (vec1 * finalLen);
-      Point sq2 = p2 + offsetCrossVec2 + (vec2 * finalLen);
-
-      // CCW point first
-      polyToAppend.push_back(sq1);
-      polyToAppend.push_back(sq2);
-   }
-
-   // Else only one point to add, the miter point
-   else
-      polyToAppend.push_back(p2 + offsetCrossVec + miterVec);
-
-   return;
-}
-
-// Builds a polygon from a Barrier segment. Will construct miters if given
-// points before (pre) or after (post).
-// The output polygon may be 4 to 6 points, simple convex, and wound CCW
-void constructBarrierPolygon(const Point &start, const Point &end, const Point &pre, const Point &post,
-      F32 width, Vector<Point> &outPoly)
-{
-   F32 offset = width * 0.5f;
-
-   // Determine if pre/post points are dummies (end of barrier)
-   bool isDummyPre  = isnan(pre.x);
-   bool isDummyPost = isnan(post.x);
-
-   // Build normalized normals. Two definitions of 'normal'!
-   Point dirVec = end - start;
-   Point crossVec(-dirVec.y, dirVec.x);
-   crossVec.normalize(offset);  // offset amount
-
-
-   // Now calculate the points. Each of the 4 corners of an expanded segment
-   // could become mitered to one or two points depending on what the pre/post
-   // segment is.   A               D
-   //                 o-----------o
-   //               B               C
-   //
-   // This only took 5 times to design on paper!
-
-   // Corner A
-   if(isDummyPre || !isClockwiseTriangle(pre, start, end))
-      outPoly.push_back(start + crossVec);
-   else
-      addMiterPoints(end, start, pre, offset, outPoly);  // Swap winding
-
-   // Corner B
-   if(isDummyPre || isClockwiseTriangle(pre, start, end))  // Fail fast
-      outPoly.push_back(start - crossVec);
-   else
-      addMiterPoints(pre, start, end, offset, outPoly);
-
-   // Corner C
-   if(isDummyPost || isClockwiseTriangle(start, end, post))
-      outPoly.push_back(end - crossVec);
-   else
-      addMiterPoints(start, end, post, offset, outPoly);
-
-   // Corner D
-   if(isDummyPost || !isClockwiseTriangle(start, end, post))
-      outPoly.push_back(end + crossVec);
-   else
-      addMiterPoints(post, end, start, offset, outPoly);  // Swap winding
-}
-
-
-// Convert a barrier line into segmented chunks with data about possible mitering
-void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
-{
-   if (inputLine.empty())
-      return;
-
-   // Create barriers from line segments, with some pre- and post-
-   // information to help with mitering
-   //
-   // We'll always use 4 points in this order:
-   // - pre:   previous point in line, or Point(NAN,NAN) if none
-   // - start: start of segment
-   // - end:   end of segment
-   // - post:  next point in line, or Point(NAN,NAN) if none
-   Vector<Point> pts(4);
-//   Point dummyPoint = Point(F32_MAX,F32_MAX);
-   Point dummyPoint = Point(NAN,NAN);
-
-   S32 pointCount = inputLine.size(); // Real point size
-
-   // If this line is a loop, add extra points on the end to help with
-   // logic below
-   bool isLineLoop = (inputLine[0] == inputLine[pointCount-1]);
-   if(isLineLoop)
-   {
-      inputLine.push_back(inputLine[1]);
-      // Add the next point if it exists
-      if(pointCount > 2)
-         inputLine.push_back(inputLine[2]);
-      else
-         inputLine.push_back(dummyPoint);
-   }
-   // Otherwise just add dummy points to the end
-   else
-   {
-      inputLine.push_back(dummyPoint);
-      inputLine.push_back(dummyPoint);
-   }
-
-
-   // Extract segment with pre/post points
-   for(S32 i = 0; i < pointCount - 1; i++)  // One less than full loop to guarantee nextPoint(s)
-   {
-      pts.clear();
-
-      Point previousPoint = dummyPoint;
-      Point thisPoint = inputLine[i];
-      Point nextPoint = inputLine[i+1];
-      Point nextNextPoint = inputLine[i+2];  // Guaranteed with extra insertions above
-
-      // Add 2nd-to-last point as pre-point if line forms a closed loop
-      if(isLineLoop && i == 0)
-         previousPoint = inputLine[pointCount-2];
-      // else keep dummy point as previousPoint
-
-      // All other cases there is a guaranteed previousPoint
-      if(i >= 1)
-         previousPoint = inputLine[i-1];
-
-      // Build up loaded segment
-      pts.push_back(previousPoint);
-      pts.push_back(thisPoint);
-      pts.push_back(nextPoint);
-      pts.push_back(nextNextPoint);
-
-      outData.push_back(pts);
-   }
-}
-
-
-static void pushPolyNode(lua_State *L, const PolyNode *node)
-{
-   if(!node)
-   {
-      lua_pushnil(L);
-      return;
-   }
-
-   // create our result
-   lua_createtable(L, 0, 3);                      // -- node
-
-   // set whether this is a hole
-   lua_pushboolean(L, node->IsHole());            // -- node, isHole
-   lua_setfield(L, -2, "hole");                   // -- node
-
-   // set the points
-   lua_createtable(L, (int)node->Contour.size(), 0);   // -- node, points
-   for(U32 i = 1; i <= node->Contour.size(); i++)
-   {
-      const Path &poly = node->Contour;
-      lua_pushnumber(L, i);                       // -- node, points, i
-      luaPushPoint(L, (F32)poly[i - 1].X * CLIPPER_SCALE_FACT_INVERSE, (F32)poly[i - 1].Y * CLIPPER_SCALE_FACT_INVERSE);
-                                                  // -- node, points, i, p
-      lua_settable(L, -3);                        // -- node, points
-   }
-   lua_setfield(L, -2, "points");                 // -- node
-
-   // set the children
-   lua_createtable(L, (int)node->Childs.size(), 0);    // -- node, childs
-   for(U32 i = 1; i <= node->Childs.size(); i++)
-   {
-      lua_pushnumber(L, i);                       // -- node, childs, i
-      pushPolyNode(L, node->Childs[i-1]);         // -- node, childs, i, child
-      lua_settable(L, -3);                        // -- node, childs
-   }
-   lua_setfield(L, -2, "children");               // -- node
-}
-
-#define LUA_STATIC_METHODS(METHOD) \
-   METHOD(offsetPolygons,     ARRAYDEF({{ NUM, TABLE, END }}),                                          1 ) \
-   METHOD(polyganize,         ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(triangulate,        ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(clipPolygons,       ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
-   METHOD(clipPolygonsAsTree, ARRAYDEF({{ INT, TABLE, TABLE, END }}),                                   1 ) \
-   METHOD(segmentsIntersect,  ARRAYDEF({{ PT, PT, PT, PT, END }}),                                      1 ) \
-
-GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
-
-#undef LUA_STATIC_METHODS
-
-
-/**
- * @luafunc static table Geom::clipPolygons(ClipType op, mixed subject, mixed clip, bool mergeAfterTriangulating = false)
- *
- * @brief Perform a clipping operation on sets of polygons.
- *
- * @descr
- * This function uses Bitfighter's polygon manipulation utilities to perform
- * boolean operations on sets of polygons. While these utilities are generally
- * robust, there are a few caveats and some inputs may cause failure.
- *
- * In particular, Bitfighter's engine does not support "holes" in polygons.
- * Because of this, if the result of the requested operation would have holes,
- * the *entire* solution is triangulated to remove them. The triangles may then
- * be optionally merged into convex polygons. This way, the client code (or
- * level designer) can select and manually join the result into the desired
- * shape, rather than making Bitfighter guess (probably incorrectly) how it
- * should look. When no holes are created in the output, this function produces
- * the least number of polygons which represent it.
- *
- * @note
- * This function is highly experimental, and potentially very resource
- * intensive. If the output must be triangulated (because you made a hole), then
- * there is a possibility that the program will crash abruptly. Please use
- * this function with great care, and make sure to constrain the inputs tightly
- * so that users can not induce crashes.
- *
- * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
- * @param subject A table of polygons or a single polygon to use as the subject.
- * @param clip A table of polygons or a single polygon to use as the clip.
- * @param mergeAfterTriangulating Merge triangles into convex polygons when
- *     forced to triangulate the result.
- *
- * @return A table of the solution polygons, or `nil` on failure.
- */
-S32 lua_clipPolygons(lua_State* L)
-{
-   checkArgList(L, "Geom", "clipPolygons");
-
-   if(lua_gettop(L) < 3)
-      return 0;
-
-   // read the arguments
-   ClipType operation = static_cast<ClipType>(lua_tointeger(L, 1));
-   Vector<Vector<Point> > subject = getPolygons(L, 2);
-   Vector<Vector<Point> > clip = getPolygons(L, 3);
-
-   bool merge = true;
-   if(lua_gettop(L) >= 4)
-   {
-      merge = getBool(L, 4);
-      lua_pop(L, 1);
-   }
-
-   // pop the arguments
-   lua_pop(L, 3);
-
-   // try to execute the operation
-   Vector<Vector<Point> > output;
-   if(!clipPolygons(operation, subject, clip, output, merge))
-      return returnNil(L);
-
-   // return the polygons if we're successful
-   return returnPolygons(L, output);
-}
-
-
-/**
- * @luafunc static table Geom::clipPolygonsAsTree(ClipType op, mixed subject, mixed clip)
- *
- * @brief
- * Perform a clipping operation on sets of polygons, keeping holes.
- *
- * @descr
- * This function uses Bitfighter's polygon manipulation utilities to perform
- * boolean operations on sets of polygons, keeping holes, and returning the
- * result as a tree of polygons and holes. This is useful when performing
- * repeated operations on the results of a clipping operation, or when you need
- * to know which polygon is contained in which hole or vice versa.
- *
- * @note This function is highly experimental, and potentially very resource
- * intensive. The algorithm runs in O(n) = n*log(n) time, with respect to the
- * number of vertices.
- *
- * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
- * @param subject A table of polygons or a single polygon to use as the subject.
- * @param clip A table of polygons or a single polygon to use as the clip.
- *
- * @return A tree representing the solution, in the following format:
- * @code
- *   {
- *     points = { p1, p2, ...},
- *     children = { child1, child2, ... }
- *     hole = false -- True if this is a hole.
- *   }
- * @endcode
- * Where each child is a another table with the same structure, representing the
- * holes or polygons contained by this node. Note that all of a polygon's
- * children will be holes, and vice versa.
- */
-S32 lua_clipPolygonsAsTree(lua_State* L)
-{
-   checkArgList(L, "Geom", "clipPolygonsAsTree");
-
-   if(lua_gettop(L) < 3)
-      return 0;
-
-   // read the arguments
-   ClipType operation = static_cast<ClipType>(lua_tointeger(L, 1));
-   Vector<Vector<Point> > subject = getPolygons(L, 2);
-   Vector<Vector<Point> > clip = getPolygons(L, 3);
-
-   // pop the arguments
-   lua_pop(L, 3);
-
-   // try to execute the operation
-   PolyTree solution;
-   if(!clipPolygonsAsTree(operation, subject, clip, solution))
-      return returnNil(L);
-
-   pushPolyNode(L, solution.GetFirst());
-   return 1;
-}
-
-
-/**
- * @luafunc static table Geom::offsetPolygons(num offset, mixed polygons)
- * @brief
- * Offset polygons by the given offset.
- *
- * @descr
- * This offsets polygons using a 'miter' join type.
- *
- * If the input offset generates polygons that overlap, the output can
- * have fewer total polygons than the input.
- *
- * If the input polygon has 'isthmus' pieces, then the output cat have more
- * polygons than the input.
- *
- * @param offset Amount to offset the polygons.
- * @param polygons A table of polygons.
- *
- * @return A table of the solution polygons, or `nil` on failure.
- */
-S32 lua_offsetPolygons(lua_State *L)
-{
-   checkArgList(L, "Geom", "offsetPolygons");
-
-   F32 amount = (F32)lua_tonumber(L, 1);
-   Vector<Vector<Point> > input = getPolygons(L, 2);
-
-   lua_pop(L, 2);
-
-   // try to execute the operation
-   Vector<Vector<Point> > result;
-
-   offsetPolygonsMitered(input, result, amount);
-
-   // No output??
-   if(result.size() == 0)
-      return returnNil(L);
-
-   // return the polygons if we're successful
-   return returnPolygons(L, result);
-}
-
-
-/**
- * @luafunc static table Geom::triangulate(mixed polygons)
- * @brief
- * Break up polygons into triangles.
- *
- * @descr
- * Performs a Constrained Delauney Triangulation on the input. This function
- * is meant to be used for breaking complex polygons into pieces which can then
- * be manipulated either in the editor or through more processing.
- *
- * @param polygons Either a single polygon or a table of polygons.
- *
- * @return A table of triangles or nil on failure.
- */
-S32 lua_triangulate(lua_State *L)
-{
-   checkArgList(L, "Geom", "triangulate");
-
-   Vector<Vector<Point> > input = getPolygons(L, 1);
-   lua_pop(L, 1);
-
-   // try to execute the operation
-   Vector<Vector<Point> > result;
-   if(!triangulate(input, result))
-      return returnNil(L);
-
-   // return the polygons if we're successful
-   return returnPolygons(L, result);
-}
-
-
-/**
- * @luafunc static table Geom::polyganize(mixed triangles)
- * @brief
- * Merge triangles into convex polygons
- *
- * @descr
- * Merges triangles into convex polygons using the Recast library. This
- * function is meant for use as a best-effort to clean up triangles
- * output by geometric operations.
- *
- * @note
- * Any non-triangle polygons in the input will be discarded.
- *
- * @note
- * This function is highly experimental, and potentially very resource
- * intensive. There is a possibility that **the program will crash abruptly**.
- * Please use this function with great care, and make sure to constrain the
- * inputs tightly so that users can not induce crashes.
- *
- * @param triangles Either a single triangle or a table of triangles.
- *
- * @return A table of convex polygons or nil on failure.
- */
-S32 lua_polyganize(lua_State *L)
-{
-   checkArgList(L, "Geom", "polyganize");
-   Vector<Vector<Point> > input = getPolygons(L, 1);
-   lua_pop(L, 1);
-
-   Vector<Vector<Point> > result;
-   if(!polyganize(input, result))
-      return returnNil(L);
-
-   // return the polygons if we're successful
-   return returnPolygons(L, result);
-}
-
-
-/**
- * @luafunc static mixed_bool_num Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
- * @brief Finds intersection of the linesegments (a1, a2) and (b1, b2)
- *
- * @descr Determines if and "when" the line segments a and b intersect. The
- * boolean return value is `true` if the segments intersect. The number return
- * value is a "time" `t` along the line a corresponding to where they intersect.
- * If the segments intersect, the first return value will `true` and the second
- * return value will be in the range [0, 1].  If they do not intersect, the first
- * return value will be false, and the second value should be discarded.
- *
- * To find the actual point of intersection, just use
- * @code
- *   local ok, t = Geom.segmentsIntersect(a1, a2, b1, b2)
- *   if ok == true then
- *     local intersection = a1 + (a2 - a1) * t
- *   end
- * @endcode
- *
- * @return ok,t Returns true if the segments intersect, and a time t
- * along a when the intersect.
- */
-S32 lua_segmentsIntersect(lua_State *L)
-{
-   checkArgList(L, "Geom", "segmentsIntersect");
-   Point p1 = getPointOrXY(L, 1);
-   Point p2 = getPointOrXY(L, 2);
-   Point p3 = getPointOrXY(L, 3);
-   Point p4 = getPointOrXY(L, 4);
-   lua_pop(L, 4);
-
-   F32 intersectionTime;
-   if(segmentsIntersect(p1, p2, p3, p4, intersectionTime))
-   {
-      return returnBool(L, true) + returnFloat(L, intersectionTime);
-   }
-
-   return returnNil(L);
-}
-
-
-// Adapted from http://stackoverflow.com/questions/5193331/is-a-point-inside-regular-hexagon
-// Here, radius is the center is the distance from the center to a vertex, and a side of the hexagon is presumed horizontal
-bool pointInHexagon(const Point &pos, const Point &center, F32 radius)
-{
-   const F32 d = 2 * radius;
-
-   const F32 dx = fabs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
-   const F32 dy = fabs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
-
-   //if(dx / 2 > radius || dy / 2 > radius * FloatSqrt3Half)     // Bounding test (since q2 is in quadrant 2 only 2 tests are needed)
-   //   return false;
-
-   F32 a = 0.25 * FloatSqrt3;
-   return (dy <= a) && (a * dx + 0.25 * dy <= 0.5 * a);
-}
-
 
 };
