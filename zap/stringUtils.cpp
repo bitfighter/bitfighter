@@ -121,14 +121,17 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   if (str.find('.') == string::npos)
-      return str;
+   if (str.find('.') != string::npos)
+   {
+      while(str.length() > 0 && str[str.length() - 1]  == '0')
+         str.erase(str.length() - 1);
 
-   while(str.length() > 0 && str[str.length() - 1]  == '0')
-      str.erase(str.length() - 1);
+      if(str.length() > 0 && str[str.length() - 1] == '.')
+         str.erase(str.length() - 1);
+   }
 
-   if(str.length() > 0 && str[str.length() - 1] == '.')
-      str.erase(str.length() - 1);
+   if(str.empty() || str == "-" || str == "-0" || str == "+0")
+      return "0";
 
    return str;
 }

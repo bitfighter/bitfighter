@@ -133,7 +133,7 @@ TEST(StringUtilsTest, stripZeros)
    EXPECT_EQ("1.1", stripZeros("1.100"));
    EXPECT_EQ("1", stripZeros("1.000"));
    EXPECT_EQ("0", stripZeros("0"));
-   EXPECT_EQ("", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros(".000"));
 }
 
 
@@ -233,6 +233,11 @@ TEST(StringUtilsTest, ftosBugReproduction)
 
    // Bug: ftos(1.0f, 0) incorrectly returns " 1" instead of "1"
    EXPECT_EQ("1", ftos(1.0f, 0));
+   EXPECT_EQ("0", ftos(0.0001f, 2));
+   EXPECT_EQ("0", ftos(-0.0001f, 2));
+   EXPECT_EQ("0", ftos(0.0f));
+   EXPECT_EQ("0", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros("-0"));
 }
 
 
