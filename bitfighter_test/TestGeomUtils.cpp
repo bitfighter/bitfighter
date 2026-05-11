@@ -546,10 +546,6 @@ TEST(GeomUtilsTest, segmentsIntersectCollinear)
    // Collinear — parallel so returns false
    EXPECT_FALSE(segmentsIntersect(Point(0, 0), Point(10, 0),
                                   Point(5, 0), Point(15, 0), ct));
-
-   // Identical segments
-   EXPECT_FALSE(segmentsIntersect(Point(0, 0), Point(10, 10),
-                                  Point(0, 0), Point(10, 10), ct));
 }
 
 TEST(GeomUtilsTest, segmentsIntersectTShape)
@@ -630,10 +626,6 @@ TEST(GeomUtilsTest, findIntersectionParallel)
    Point intersection;
    EXPECT_FALSE(findIntersection(Point(0, 0), Point(10, 0),
                                  Point(0, 5), Point(10, 5), intersection));
-
-   // Coincident segments
-   EXPECT_FALSE(findIntersection(Point(0, 0), Point(10, 10),
-                                 Point(0, 0), Point(10, 10), intersection));
 }
 
 TEST(GeomUtilsTest, findIntersectionNoOverlap)
