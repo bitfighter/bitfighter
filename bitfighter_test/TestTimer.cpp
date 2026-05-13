@@ -123,4 +123,29 @@ TEST(TimerTest, ExtendUnderflow)
    EXPECT_EQ(0u, t.getCurrent());
 }
 
+TEST(TimerTest, ExtendS32Min)
+{
+   Timer t(1000);
+   t.extend(-2147483647 - 1); // S32_MIN
+   EXPECT_EQ(0u, t.getPeriod());
+   EXPECT_EQ(0u, t.getCurrent());
+}
+
+TEST(TimerTest, InvertPrecision)
+{
+   // Period that is not power of 2
+   U32 period = 3333333;
+   Timer t(period);
+   t.update(1234567);
+   U32 remaining = t.getCurrent();
+
+   t.invert();
+   // remaining = 3333333 - 1234567 = 2098766
+   // invert should set it to 1234567
+   EXPECT_EQ(period - remaining, t.getCurrent());
+
+   t.invert();
+   EXPECT_EQ(remaining, t.getCurrent());
+}
+
 }

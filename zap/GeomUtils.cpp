@@ -228,9 +228,11 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 
       // Cross-product sign test — zero means point is exactly on that edge,
       // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+      //
+      // Perform calculations in F64 to maintain precision at large coordinates
+      F64 d1 = (F64(point.x) - p1.x) * (F64(p0.y) - p1.y) - (F64(p0.x) - p1.x) * (F64(point.y) - p1.y);
+      F64 d2 = (F64(point.x) - p2.x) * (F64(p1.y) - p2.y) - (F64(p1.x) - p2.x) * (F64(point.y) - p1.y);
+      F64 d3 = (F64(point.x) - p0.x) * (F64(p2.y) - p0.y) - (F64(p2.x) - p0.x) * (F64(point.y) - p0.y);
 
       bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
       bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -816,14 +818,14 @@ F32 area(const Vector<Point> &contour)
      InsideTriangle decides if a point P is Inside of the triangle
      defined by A, B, C.
    */
-bool Triangulate::InsideTriangle(float Ax, float Ay,
-                                 float Bx, float By,
-                                 float Cx, float Cy,
-                                 float Px, float Py)
+bool Triangulate::InsideTriangle(F64 Ax, F64 Ay,
+                                 F64 Bx, F64 By,
+                                 F64 Cx, F64 Cy,
+                                 F64 Px, F64 Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  F64 cCROSSap, bCROSScp, aCROSSbp;
 
   ax = Cx - Bx;  ay = Cy - By;
   bx = Ax - Cx;  by = Ay - Cy;
@@ -836,15 +838,15 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f)) ||
-         ((aCROSSbp <= 0.0f) && (bCROSScp <= 0.0f) && (cCROSSap <= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0)) ||
+         ((aCROSSbp <= 0.0) && (bCROSScp <= 0.0) && (cCROSSap <= 0.0));
 };
 
 
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  F64 Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
   Ax = contour[V[u]].x;
   Ay = contour[V[u]].y;
@@ -855,7 +857,7 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   Cx = contour[V[w]].x;
   Cy = contour[V[w]].y;
 
-  if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
+  if ( EPSILON > ((Bx-Ax)*(Cy-Ay) - (By-Ay)*(Cx-Ax)) ) return false;
 
   for (p=0;p<n;p++)
   {
@@ -1723,9 +1725,11 @@ Point mean2d(const Vector<Point> &polyPoints)
 //   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
 
    S32 size = polyPoints.size();
+   if(size == 0)
+      return Point(0, 0);
 
-   F32 x = 0;
-   F32 y = 0;
+   F64 x = 0;
+   F64 y = 0;
    Point p1;
 
    for(S32 i = 0; i < size; i++)

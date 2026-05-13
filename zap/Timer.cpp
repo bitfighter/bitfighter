@@ -54,7 +54,7 @@ F32 Timer::getFraction() const
 
 void Timer::invert()
 {
-   mCurrentCounter = U32((1.0f - getFraction()) * mPeriod);
+   mCurrentCounter = mPeriod - mCurrentCounter;
 }
 
 
@@ -85,10 +85,10 @@ void Timer::reset()
 // Note that time could be negative to shorten timer!  -- TODO: Do we really want to alter the timer period here?
 void Timer::extend(S32 time)
 {
-   U32 U32time = U32(abs(time));
-
    if(time > 0)
    {
+      U32 U32time = (U32)time;
+
       if(U32time > (U32_MAX - mPeriod))            // Overflow protection
          mPeriod = U32_MAX;
       else
@@ -102,6 +102,8 @@ void Timer::extend(S32 time)
 
    else if(time < 0)
    {
+      U32 U32time = (U32)-(S64)time;
+
       if(U32time > mPeriod)                        // Underflow protection
          mPeriod = 0;
       else
