@@ -123,4 +123,27 @@ TEST(TimerTest, ExtendUnderflow)
    EXPECT_EQ(0u, t.getCurrent());
 }
 
+TEST(TimerTest, InvertPrecisionBug)
+{
+   U32 largePeriod = 100000000; // 10^8
+   Timer t(largePeriod);
+   t.reset(1, largePeriod); // 1 unit left
+
+   t.invert();
+
+   // Expected: largePeriod - 1 = 99999999
+   // If it has the bug, it might stay at largePeriod due to float precision
+   EXPECT_EQ(99999999u, t.getCurrent());
+}
+
+TEST(TimerTest, ExtendS32MinBug)
+{
+   Timer t(1000);
+   // S32_MIN is -2147483648
+   t.extend(-2147483647 - 1); // S32_MIN
+
+   EXPECT_EQ(0u, t.getPeriod());
+   EXPECT_EQ(0u, t.getCurrent());
+}
+
 }
