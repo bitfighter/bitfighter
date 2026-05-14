@@ -354,8 +354,44 @@ void Platform::forceQuit()
 }
 
 
-U32 x86UNIXGetTickCount();
-U32 x86UNIXGetTickCountMicro();
+static bool sg_initialized = false;
+static timeval sg_startTime;
+
+static void x86UNIXInitTimer()
+{
+   if(!sg_initialized)
+   {
+      sg_initialized = true;
+      ::gettimeofday(&sg_startTime, NULL);
+   }
+}
+
+U32 x86UNIXGetTickCount()
+{
+   x86UNIXInitTimer();
+
+   timeval t;
+   ::gettimeofday(&t, NULL);
+
+   U32 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S32 uSecs = t.tv_usec - sg_startTime.tv_usec;
+
+   // Make granularity 1 ms
+   return (secs * 1000) + (uSecs / 1000);
+}
+
+U32 x86UNIXGetTickCountMicro()
+{
+   x86UNIXInitTimer();
+
+   timeval t;
+   ::gettimeofday(&t, NULL);
+
+   U32 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S32 uSecs = t.tv_usec - sg_startTime.tv_usec;
+
+   return (secs * 1000000) + uSecs;
+}
 //--------------------------------------
 
 U32 Platform::getRealMilliseconds()
@@ -366,53 +402,6 @@ U32 Platform::getRealMilliseconds()
 U32 Platform::getRealMicroseconds()
 {
    return x86UNIXGetTickCountMicro();
-}
-
-static bool   sg_initialized = false;
-static U32 sg_secsOffset  = 0;
-
-U32 x86UNIXGetTickCount()
-{
-   // TODO: What happens when crossing a day boundary?
-   //
-   timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_secsOffset = t.tv_sec;
-   }
-
-   ::gettimeofday(&t, NULL);
-
-   U32 secs  = t.tv_sec - sg_secsOffset;
-   U32 uSecs = t.tv_usec;
-
-   // Make granularity 1 ms
-   return (secs * 1000) + (uSecs / 1000);
-}
-
-static U32 sg_uSecsOffset = 0;
-
-U32 x86UNIXGetTickCountMicro()
-{
-   // TODO: What happens when crossing a day boundary?
-   //
-   timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_uSecsOffset = t.tv_usec;
-   }
-
-   ::gettimeofday(&t, NULL);
-
-   U32 uSecs  = t.tv_usec - sg_uSecsOffset;
-
-   return uSecs;
 }
 
 class UnixTimer

@@ -1724,8 +1724,8 @@ Point mean2d(const Vector<Point> &polyPoints)
 
    S32 size = polyPoints.size();
 
-   F32 x = 0;
-   F32 y = 0;
+   F64 x = 0;
+   F64 y = 0;
    Point p1;
 
    for(S32 i = 0; i < size; i++)
@@ -1740,7 +1740,7 @@ Point mean2d(const Vector<Point> &polyPoints)
    x /= size;
    y /= size;
 
-   return Point(x,y);
+   return Point((F32)x, (F32)y);
 }
 
 
