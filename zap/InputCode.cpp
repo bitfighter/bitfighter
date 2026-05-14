@@ -19,7 +19,7 @@
 #include <ctype.h>
 
 #ifdef TNL_OS_WIN32
-#  include <windows.h>           // For ARRAYSIZE 
+#  include <windows.h>           // For ARRAYSIZE
 #endif
 
 
@@ -91,7 +91,7 @@ void BindingSet::setBinding(BindingNameEnum bindingName, InputCode key)
 #define BINDING(enumName, b, c, memberName, e, f) else if(bindingName == enumName) memberName = key;
     BINDING_TABLE
 #undef BINDING
-   else 
+   else
       TNLAssert(false, "Invalid key binding!");
 }
 
@@ -100,11 +100,11 @@ void BindingSet::setBinding(BindingNameEnum bindingName, InputCode key)
 bool BindingSet::hasKeypad()
 {
    // Generates a statement that looks like:
-   // return InputCodeManager::isKeypadKey(inputSELWEAP1) || 
-   //        InputCodeManager::isKeypadKey(inputSELWEAP2) || 
+   // return InputCodeManager::isKeypadKey(inputSELWEAP1) ||
+   //        InputCodeManager::isKeypadKey(inputSELWEAP2) ||
    //        ...
    //        false;
-   return 
+   return
 #define BINDING(a, b, c, memberName, e, f) InputCodeManager::isKeypadKey(memberName) ||
     BINDING_TABLE
 #undef BINDING
@@ -117,10 +117,11 @@ bool BindingSet::hasKeypad()
 
 // Generates an array of bindingNames for the game
 static const string BindingNames[] = {
-#define BINDING(a, bindingName, c, d, e, f) bindingName, 
+#define BINDING(a, bindingName, c, d, e, f) bindingName,
     BINDING_TABLE
 #undef BINDING
 };
+//BindingNames[] = { "SelWeapon1", "SelWeapon2", "SelWeapon3"...
 
 
 // Generates an array of bindingNames for the editor
@@ -193,7 +194,7 @@ void EditorBindingSet::setBinding(EditorBindingNameEnum bindingName, const strin
 #define EDITOR_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
-   else 
+   else
       TNLAssert(false, "Invalid key binding!");
 }
 
@@ -207,7 +208,7 @@ SpecialBindingSet::SpecialBindingSet()
    // These bindings will be overwritten by config::setDefaultSpecialKeyBindings()...
    // we provide default values here just for the sake of sanity.  And testing.
    // Sanity and testing.  And just because.  Sanity, testing, and just because.
-   // We have one set of binings that apply everywhere; some keys may allow multiple 
+   // We have one set of binings that apply everywhere; some keys may allow multiple
    // definitions so that one can be bound to a joystick button.
 
    // Generates a block of code that looks like this:
@@ -255,7 +256,7 @@ void SpecialBindingSet::setBinding(SpecialBindingNameEnum bindingName, const str
 #define SPECIAL_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
-   else 
+   else
       TNLAssert(false, "Invalid key binding!");
 }
 
@@ -270,10 +271,10 @@ InputCodeManager::InputCodeManager()
    mInputMode = InputModeKeyboard;
 
    // Create two binding sets
-   mBindingSets.resize(2); 
+   mBindingSets.resize(2);
 
    // Set the first to be our current one
-   mCurrentBindingSet = &mBindingSets[0];     
+   mCurrentBindingSet = &mBindingSets[0];
 }
 
 
@@ -303,7 +304,7 @@ void InputCodeManager::dumpInputCodeStates()
 
 // Set state of a input code as Up (false) or Down (true)
 void InputCodeManager::setState(InputCode inputCode, bool state)
-{  
+{
    inputCodeIsDown[(S32)inputCode] = state;
 }
 
@@ -319,7 +320,7 @@ bool InputCodeManager::getState(InputCode inputCode)
 static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
 static const char InputStringJoiner = '+';
 
-// At any given time, for any combination of keys being pressed, there will be an official "input string" that looks a bit like [Ctrl+T] or whatever.  
+// At any given time, for any combination of keys being pressed, there will be an official "input string" that looks a bit like [Ctrl+T] or whatever.
 // This may be different than the keys actually being pressed.  For example, if the A and B keys are down, the inputString will be [A].
 // In the event that two keys are both down, we'll prefer the one passed in inputCode, if possible.
 // This generally works well most of the time, but may need to be cleaned up if it generates erroneous or misleading input strings.
@@ -346,30 +347,30 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
 
    if(baseKey == KEY_NONE)
       return "";
-      
+
    string inputString = "";
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))
          inputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
-   
+
    inputString += inputCodeToString(baseKey);
    return inputString;
 }
 
 
 // Can pass in one of the above, or KEY_NONE to check if no modifiers are pressed
-bool InputCodeManager::checkModifier(InputCode mod1)    
+bool InputCodeManager::checkModifier(InputCode mod1)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
-         if(modifiers[i] == mod1)      
+         if(modifiers[i] == mod1)
             foundCount++;
-         else                                      // Wrong modifier!               
-            return false;        
+         else                                      // Wrong modifier!
+            return false;
       }
 
    return mod1 == KEY_NONE || foundCount == 1;
@@ -384,10 +385,10 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2)
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
-         if(modifiers[i] == mod1 || modifiers[i] == mod2)      
+         if(modifiers[i] == mod1 || modifiers[i] == mod2)
             foundCount++;
-         else                                      // Wrong modifier!               
-            return false;        
+         else                                      // Wrong modifier!
+            return false;
       }
 
    return foundCount == 2;
@@ -402,17 +403,17 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
-         if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
+         if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)
             foundCount++;
-         else                                      // Wrong modifier!               
-            return false;        
+         else                                      // Wrong modifier!
+            return false;
       }
 
    return foundCount == 3;
 }
 
 
-// Array tying InputCodes to string representations; used for translating one to the other 
+// Array tying InputCodes to string representations; used for translating one to the other
 static const char *keyNames[KEY_COUNT];
 static Vector<string> modifierNames;
 
@@ -477,7 +478,7 @@ bool InputCodeManager::isValidInputString(const string &inputString)
    const Vector<string> *mods = InputCodeManager::getModifierNames();
 
 
-   S32 startMod = 0;    
+   S32 startMod = 0;
 
    // Make sure all but the last word are modifiers
    for(S32 i = 0; i < words.size() - 1; i++)
@@ -499,7 +500,7 @@ bool InputCodeManager::isValidInputString(const string &inputString)
 }
 
 
-// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
+// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.
 // This is possibly marginaly less efficient, but will reduce maintenance burdens over time.
 InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
 {
@@ -602,7 +603,7 @@ InputCode InputCodeManager::convertNumPadToNum(InputCode inputCode)
 // Filter out some know spurious keystrokes
 char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 {
-   if((unicode & 0xFF80) != 0) 
+   if((unicode & 0xFF80) != 0)
       return 0;
 
    char ch = unicode & 0x7F;
@@ -621,10 +622,10 @@ InputCode InputCodeManager::getBinding(BindingNameEnum bindingName) const
 // Only used for saving to INI and such where we need to bulk-read bindings
 InputCode InputCodeManager::getBinding(BindingNameEnum bindingName, InputMode inputMode) const
 {
-   S32 mode = (S32)inputMode;    // 0 or 1 at present
+   S32 mode = (S32)inputMode;    // 0 or 1 at present  --> 0 = keyboard, 1 = JS
 
    const BindingSet *bindingSet = &mBindingSets[mode];
-   
+
    return bindingSet->getBinding(bindingName);
 }
 
@@ -784,7 +785,7 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 		   return KEY_QUESTION;
 	   case SDLK_AT:
 		   return KEY_AT;
-   	
+
 	   case SDLK_LEFTBRACKET:
 		   return KEY_OPENBRACKET;
 	   case SDLK_BACKSLASH:
@@ -981,7 +982,7 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 		   return KEY_UNDO;
 
       // Identify some other keys we want to explicitly ignore without triggering the warning below
-      case SDLK_VOLUMEUP:        
+      case SDLK_VOLUMEUP:
       case SDLK_VOLUMEDOWN:
       case SDLK_MUTE:
       case SDLK_AUDIONEXT:
@@ -1077,7 +1078,7 @@ SDL_Keycode InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 		   return SDLK_QUESTION;
 	   case KEY_AT:
 		   return SDLK_AT;
-		   
+
 	   case KEY_OPENBRACKET:
 		   return SDLK_LEFTBRACKET;
 	   case KEY_BACKSLASH:
@@ -1363,7 +1364,7 @@ S16 InputCodeManager::inputCodeToControllerButton(InputCode inputCode)
 bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
    return inputCode >= FIRST_CONTROLLER_BUTTON && inputCode <= LAST_CONTROLLER_BUTTON;
-}       
+}
 
 
 bool InputCodeManager::isKeypadKey(InputCode inputCode)
@@ -1390,9 +1391,15 @@ bool InputCodeManager::isAltKey(InputCode inputCode)
 }
 
 
+bool InputCodeManager::isShiftKey(InputCode inputCode)
+{
+   return inputCode >= FIRST_SHIFT_KEY && inputCode <= LAST_SHIFT_KEY;
+}
+
+
 bool InputCodeManager::isModified(InputCode inputCode)
 {
-   return isCtrlKey(inputCode) || isAltKey(inputCode);
+   return isCtrlKey(inputCode) || isAltKey(inputCode) || isShiftKey(inputCode);
 }
 
 
@@ -1408,6 +1415,8 @@ InputCode InputCodeManager::getModifier(InputCode inputCode)
       return KEY_CTRL;
    else if(isAltKey(inputCode))
       return KEY_ALT;
+   else if(isShiftKey(inputCode))
+	  return KEY_SHIFT;
    else
       return KEY_NONE;
 
@@ -1443,26 +1452,32 @@ InputCode InputCodeManager::getBaseKey(InputCode inputCode)
 
       case KEY_CTRL_1:
       case KEY_ALT_1:
+	  case KEY_SHIFT_1:
          return KEY_1;
 
       case KEY_CTRL_2:
       case KEY_ALT_2:
+	  case KEY_SHIFT_2:
          return KEY_2;
 
       case KEY_CTRL_3:
       case KEY_ALT_3:
+	  case KEY_SHIFT_3:
          return KEY_3;
 
       case KEY_CTRL_4:
       case KEY_ALT_4:
+	  case KEY_SHIFT_4:
          return KEY_4;
 
       case KEY_CTRL_5:
       case KEY_ALT_5:
+	  case KEY_SHIFT_5:
          return KEY_5;
 
       case KEY_CTRL_6:
       case KEY_ALT_6:
+	  case KEY_SHIFT_6:
          return KEY_6;
 
       case KEY_CTRL_9:
@@ -1577,172 +1592,182 @@ void InputCodeManager::initializeKeyNames()
       keyNames[i] = "Unknown Key";
 
    // Now keys we know with our locally defined names
-   keyNames[S32(KEY_BACKSPACE)]       = "Backspace";        
-   keyNames[S32(KEY_DELETE)]          = "Del";              
-   keyNames[S32(KEY_TAB)]             = "Tab";              
-   keyNames[S32(KEY_ENTER)]           = "Enter";            
-   keyNames[S32(KEY_ESCAPE)]          = "Esc";              
-   keyNames[S32(KEY_SPACE)]           = "Space";      // First keyboardchar          
-   keyNames[S32(KEY_0)]               = "0";                
-   keyNames[S32(KEY_1)]               = "1";                
-   keyNames[S32(KEY_2)]               = "2";                
-   keyNames[S32(KEY_3)]               = "3";                
-   keyNames[S32(KEY_4)]               = "4";                
-   keyNames[S32(KEY_5)]               = "5";                
-   keyNames[S32(KEY_6)]               = "6";                
-   keyNames[S32(KEY_7)]               = "7";                
-   keyNames[S32(KEY_8)]               = "8";                
-   keyNames[S32(KEY_9)]               = "9";                
-   keyNames[S32(KEY_A)]               = "A";                
-   keyNames[S32(KEY_B)]               = "B";                
-   keyNames[S32(KEY_C)]               = "C";                
-   keyNames[S32(KEY_D)]               = "D";                
-   keyNames[S32(KEY_E)]               = "E";                
-   keyNames[S32(KEY_F)]               = "F";                
-   keyNames[S32(KEY_G)]               = "G";                
-   keyNames[S32(KEY_H)]               = "H";                
-   keyNames[S32(KEY_I)]               = "I";                
+   keyNames[S32(KEY_BACKSPACE)]       = "Backspace";
+   keyNames[S32(KEY_DELETE)]          = "Del";
+   keyNames[S32(KEY_TAB)]             = "Tab";
+   keyNames[S32(KEY_ENTER)]           = "Enter";
+   keyNames[S32(KEY_ESCAPE)]          = "Esc";
+   keyNames[S32(KEY_SPACE)]           = "Space";      // First keyboardchar
+   keyNames[S32(KEY_0)]               = "0";
+   keyNames[S32(KEY_1)]               = "1";
+   keyNames[S32(KEY_2)]               = "2";
+   keyNames[S32(KEY_3)]               = "3";
+   keyNames[S32(KEY_4)]               = "4";
+   keyNames[S32(KEY_5)]               = "5";
+   keyNames[S32(KEY_6)]               = "6";
+   keyNames[S32(KEY_7)]               = "7";
+   keyNames[S32(KEY_8)]               = "8";
+   keyNames[S32(KEY_9)]               = "9";
+   keyNames[S32(KEY_A)]               = "A";
+   keyNames[S32(KEY_B)]               = "B";
+   keyNames[S32(KEY_C)]               = "C";
+   keyNames[S32(KEY_D)]               = "D";
+   keyNames[S32(KEY_E)]               = "E";
+   keyNames[S32(KEY_F)]               = "F";
+   keyNames[S32(KEY_G)]               = "G";
+   keyNames[S32(KEY_H)]               = "H";
+   keyNames[S32(KEY_I)]               = "I";
    keyNames[S32(KEY_J)]               = "J";
    keyNames[S32(KEY_K)]               = "K";
    keyNames[S32(KEY_L)]               = "L";
-   keyNames[S32(KEY_M)]               = "M";                
-   keyNames[S32(KEY_N)]               = "N";                
-   keyNames[S32(KEY_O)]               = "O";                
-   keyNames[S32(KEY_P)]               = "P";                
-   keyNames[S32(KEY_Q)]               = "Q";                
-   keyNames[S32(KEY_R)]               = "R";                
-   keyNames[S32(KEY_S)]               = "S";                
-   keyNames[S32(KEY_T)]               = "T";                
-   keyNames[S32(KEY_U)]               = "U";                
-   keyNames[S32(KEY_V)]               = "V";                
-   keyNames[S32(KEY_W)]               = "W";                
-   keyNames[S32(KEY_X)]               = "X";                
-   keyNames[S32(KEY_Y)]               = "Y";                
-   keyNames[S32(KEY_Z)]               = "Z";                
-   keyNames[S32(KEY_TILDE)]           = "~";                
-   keyNames[S32(KEY_MINUS)]           = "-"; 
-   keyNames[S32(KEY_PLUS)]            = "+"; 
-   keyNames[S32(KEY_EQUALS)]          = "=";                
-   keyNames[S32(KEY_OPENBRACKET)]     = "[";                
-   keyNames[S32(KEY_CLOSEBRACKET)]    = "]";                
-   keyNames[S32(KEY_BACKSLASH)]       = "\\";               
-   keyNames[S32(KEY_SEMICOLON)]       = ";";                
-   keyNames[S32(KEY_QUOTE)]           = "'";                
-   keyNames[S32(KEY_COMMA)]           = ",";                
-   keyNames[S32(KEY_PERIOD)]          = ".";                
-   keyNames[S32(KEY_SLASH)]           = "/";       // last keyboardchar      
-   
+   keyNames[S32(KEY_M)]               = "M";
+   keyNames[S32(KEY_N)]               = "N";
+   keyNames[S32(KEY_O)]               = "O";
+   keyNames[S32(KEY_P)]               = "P";
+   keyNames[S32(KEY_Q)]               = "Q";
+   keyNames[S32(KEY_R)]               = "R";
+   keyNames[S32(KEY_S)]               = "S";
+   keyNames[S32(KEY_T)]               = "T";
+   keyNames[S32(KEY_U)]               = "U";
+   keyNames[S32(KEY_V)]               = "V";
+   keyNames[S32(KEY_W)]               = "W";
+   keyNames[S32(KEY_X)]               = "X";
+   keyNames[S32(KEY_Y)]               = "Y";
+   keyNames[S32(KEY_Z)]               = "Z";
+   keyNames[S32(KEY_TILDE)]           = "~";
+   keyNames[S32(KEY_MINUS)]           = "-";
+   keyNames[S32(KEY_PLUS)]            = "+";
+   keyNames[S32(KEY_EQUALS)]          = "=";
+   keyNames[S32(KEY_OPENBRACKET)]     = "[";
+   keyNames[S32(KEY_CLOSEBRACKET)]    = "]";
+   keyNames[S32(KEY_BACKSLASH)]       = "\\";
+   keyNames[S32(KEY_SEMICOLON)]       = ";";
+   keyNames[S32(KEY_QUOTE)]           = "'";
+   keyNames[S32(KEY_COMMA)]           = ",";
+   keyNames[S32(KEY_PERIOD)]          = ".";
+   keyNames[S32(KEY_SLASH)]           = "/";       // last keyboardchar
+
    keyNames[S32(KEY_EXCLAIM)] = "!";
    keyNames[S32(KEY_HASH)] = "#";
 
-   keyNames[S32(KEY_PAGEUP)]          = "Page Up";          
-   keyNames[S32(KEY_PAGEDOWN)]        = "Page Down";        
-   keyNames[S32(KEY_END)]             = "End";              
-   keyNames[S32(KEY_HOME)]            = "Home";             
-   keyNames[S32(KEY_LEFT)]            = "Left Arrow";       
-   keyNames[S32(KEY_UP)]              = "Up Arrow";         
-   keyNames[S32(KEY_RIGHT)]           = "Right Arrow";      
-   keyNames[S32(KEY_DOWN)]            = "Down Arrow";       
-   keyNames[S32(KEY_INSERT)]          = "Insert";           
-   keyNames[S32(KEY_F1)]              = "F1";               
-   keyNames[S32(KEY_F2)]              = "F2";               
-   keyNames[S32(KEY_F3)]              = "F3";               
-   keyNames[S32(KEY_F4)]              = "F4";               
-   keyNames[S32(KEY_F5)]              = "F5";               
-   keyNames[S32(KEY_F6)]              = "F6";               
-   keyNames[S32(KEY_F7)]              = "F7";               
-   keyNames[S32(KEY_F8)]              = "F8";               
-   keyNames[S32(KEY_F9)]              = "F9";               
-   keyNames[S32(KEY_F10)]             = "F10";              
-   keyNames[S32(KEY_F11)]             = "F11";              
-   keyNames[S32(KEY_F12)]             = "F12";  
+   keyNames[S32(KEY_PAGEUP)]          = "Page Up";
+   keyNames[S32(KEY_PAGEDOWN)]        = "Page Down";
+   keyNames[S32(KEY_END)]             = "End";
+   keyNames[S32(KEY_HOME)]            = "Home";
+   keyNames[S32(KEY_LEFT)]            = "Left Arrow";
+   keyNames[S32(KEY_UP)]              = "Up Arrow";
+   keyNames[S32(KEY_RIGHT)]           = "Right Arrow";
+   keyNames[S32(KEY_DOWN)]            = "Down Arrow";
+   keyNames[S32(KEY_INSERT)]          = "Insert";
+   keyNames[S32(KEY_F1)]              = "F1";
+   keyNames[S32(KEY_F2)]              = "F2";
+   keyNames[S32(KEY_F3)]              = "F3";
+   keyNames[S32(KEY_F4)]              = "F4";
+   keyNames[S32(KEY_F5)]              = "F5";
+   keyNames[S32(KEY_F6)]              = "F6";
+   keyNames[S32(KEY_F7)]              = "F7";
+   keyNames[S32(KEY_F8)]              = "F8";
+   keyNames[S32(KEY_F9)]              = "F9";
+   keyNames[S32(KEY_F10)]             = "F10";
+   keyNames[S32(KEY_F11)]             = "F11";
+   keyNames[S32(KEY_F12)]             = "F12";
 
-   keyNames[S32(KEY_SHIFT)]           = "Shift";            
-   keyNames[S32(KEY_ALT)]             = "Alt";              
-   keyNames[S32(KEY_CTRL)]            = "Ctrl";             
-   keyNames[S32(KEY_META)]            = "Meta";             
-   keyNames[S32(KEY_SUPER)]           = "Super";  
+   keyNames[S32(KEY_SHIFT)]           = "Shift";
+   keyNames[S32(KEY_ALT)]             = "Alt";
+   keyNames[S32(KEY_CTRL)]            = "Ctrl";
+   keyNames[S32(KEY_META)]            = "Meta";
+   keyNames[S32(KEY_SUPER)]           = "Super";
 
-   keyNames[S32(MOUSE_LEFT)]          = "Left-mouse";       
-   keyNames[S32(MOUSE_MIDDLE)]        = "Middle-mouse";     
-   keyNames[S32(MOUSE_RIGHT)]         = "Right-mouse";      
-   keyNames[S32(MOUSE_WHEEL_UP)]      = "Mouse Wheel Up";   
-   keyNames[S32(MOUSE_WHEEL_DOWN)]    = "Mouse Wheel Down"; 
+   keyNames[S32(MOUSE_LEFT)]          = "Left-mouse";
+   keyNames[S32(MOUSE_MIDDLE)]        = "Middle-mouse";
+   keyNames[S32(MOUSE_RIGHT)]         = "Right-mouse";
+   keyNames[S32(MOUSE_WHEEL_UP)]      = "Mouse Wheel Up";
+   keyNames[S32(MOUSE_WHEEL_DOWN)]    = "Mouse Wheel Down";
 
-   keyNames[S32(BUTTON_1)]            = "Button 1";         
-   keyNames[S32(BUTTON_2)]            = "Button 2";         
-   keyNames[S32(BUTTON_3)]            = "Button 3";         
-   keyNames[S32(BUTTON_4)]            = "Button 4";         
-   keyNames[S32(BUTTON_5)]            = "Button 5";         
-   keyNames[S32(BUTTON_6)]            = "Button 6";         
+   keyNames[S32(BUTTON_1)]            = "Button 1";
+   keyNames[S32(BUTTON_2)]            = "Button 2";
+   keyNames[S32(BUTTON_3)]            = "Button 3";
+   keyNames[S32(BUTTON_4)]            = "Button 4";
+   keyNames[S32(BUTTON_5)]            = "Button 5";
+   keyNames[S32(BUTTON_6)]            = "Button 6";
    keyNames[S32(BUTTON_TRIGGER_LEFT)] = "L Trigger";
    keyNames[S32(BUTTON_TRIGGER_RIGHT)]= "R Trigger";
-   keyNames[S32(BUTTON_9)]            = "Button 9";         
-   keyNames[S32(BUTTON_10)]           = "Button 10";        
+   keyNames[S32(BUTTON_9)]            = "Button 9";
+   keyNames[S32(BUTTON_10)]           = "Button 10";
    keyNames[S32(BUTTON_GUIDE)]        = "Guide";
-   keyNames[S32(BUTTON_BACK)]         = "Back";             
-   keyNames[S32(BUTTON_START)]        = "Start";            
-   keyNames[S32(BUTTON_DPAD_UP)]      = "DPad Up";          
-   keyNames[S32(BUTTON_DPAD_DOWN)]    = "DPad Down";        
-   keyNames[S32(BUTTON_DPAD_LEFT)]    = "DPad Left";        
-   keyNames[S32(BUTTON_DPAD_RIGHT)]   = "DPad Right";       
-   keyNames[S32(STICK_1_LEFT)]        = "Stick 1 Left";     
-   keyNames[S32(STICK_1_RIGHT)]       = "Stick 1 Right";    
-   keyNames[S32(STICK_1_UP)]          = "Stick 1 Up";       
-   keyNames[S32(STICK_1_DOWN)]        = "Stick 1 Down";     
-   keyNames[S32(STICK_2_LEFT)]        = "Stick 2 Left";     
-   keyNames[S32(STICK_2_RIGHT)]       = "Stick 2 Right";    
-   keyNames[S32(STICK_2_UP)]          = "Stick 2 Up";       
-   keyNames[S32(STICK_2_DOWN)]        = "Stick 2 Down";  
+   keyNames[S32(BUTTON_BACK)]         = "Back";
+   keyNames[S32(BUTTON_START)]        = "Start";
+   keyNames[S32(BUTTON_DPAD_UP)]      = "DPad Up";
+   keyNames[S32(BUTTON_DPAD_DOWN)]    = "DPad Down";
+   keyNames[S32(BUTTON_DPAD_LEFT)]    = "DPad Left";
+   keyNames[S32(BUTTON_DPAD_RIGHT)]   = "DPad Right";
+   keyNames[S32(STICK_1_LEFT)]        = "Stick 1 Left";
+   keyNames[S32(STICK_1_RIGHT)]       = "Stick 1 Right";
+   keyNames[S32(STICK_1_UP)]          = "Stick 1 Up";
+   keyNames[S32(STICK_1_DOWN)]        = "Stick 1 Down";
+   keyNames[S32(STICK_2_LEFT)]        = "Stick 2 Left";
+   keyNames[S32(STICK_2_RIGHT)]       = "Stick 2 Right";
+   keyNames[S32(STICK_2_UP)]          = "Stick 2 Up";
+   keyNames[S32(STICK_2_DOWN)]        = "Stick 2 Down";
 
-   keyNames[S32(MOUSE)]               = "Mouse";            
-   keyNames[S32(LEFT_JOYSTICK)]       = "Left joystick";    
-   keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick"; 
+   keyNames[S32(MOUSE)]               = "Mouse";
+   keyNames[S32(LEFT_JOYSTICK)]       = "Left joystick";
+   keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick";
 
    keyNames[S32(KEY_CTRL_M)]          = "Ctrl+M";                 // First ctrl key
-   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl+Q";      
-   keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";                 
-   keyNames[S32(KEY_CTRL_1)]          = "Ctrl+1";                 
-   keyNames[S32(KEY_CTRL_2)]          = "Ctrl+2";                 
+   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl+Q";
+   keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";
+   keyNames[S32(KEY_CTRL_1)]          = "Ctrl+1";
+   keyNames[S32(KEY_CTRL_2)]          = "Ctrl+2";
    keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";
    keyNames[S32(KEY_CTRL_4)]          = "Ctrl+4";
    keyNames[S32(KEY_CTRL_5)]          = "Ctrl+5";
    keyNames[S32(KEY_CTRL_6)]          = "Ctrl+6";
    keyNames[S32(KEY_CTRL_9)]          = "Ctrl+9";                 // Last ctrl key
 
+   keyNames[S32(KEY_SHIFT_1)]         = "Shift+1";                // First shift key
+   keyNames[S32(KEY_SHIFT_2)]         = "Shift+2";
+   keyNames[S32(KEY_SHIFT_3)]         = "Shift+3";
+   keyNames[S32(KEY_SHIFT_4)]         = "Shift+4";
+   keyNames[S32(KEY_SHIFT_5)]         = "Shift+5";
+   keyNames[S32(KEY_SHIFT_6)]         = "Shift+6";
+   keyNames[S32(KEY_SHIFT_7)]         = "Shift+7";
+   keyNames[S32(KEY_SHIFT_8)]         = "Shift+8";
+   keyNames[S32(KEY_SHIFT_9)]         = "Shift+9";                // Last shift key
+
    keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
-   keyNames[S32(KEY_ALT_2)]           = "Alt+2";                  
-   keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  
+   keyNames[S32(KEY_ALT_2)]           = "Alt+2";
+   keyNames[S32(KEY_ALT_3)]           = "Alt+3";
    keyNames[S32(KEY_ALT_4)]           = "Alt+4";
    keyNames[S32(KEY_ALT_5)]           = "Alt+5";
    keyNames[S32(KEY_ALT_6)]           = "Alt+6";
    keyNames[S32(KEY_ALT_9)]           = "Alt+9";                  // Last alt key
 
-   keyNames[S32(KEY_BACKQUOTE)]       = "`";                
-   keyNames[S32(KEY_MENU)]            = "Menu";             
-   keyNames[S32(KEY_KEYPAD_DIVIDE)]   = "Keypad /";         
-   keyNames[S32(KEY_KEYPAD_MULTIPLY)] = "Keypad *";         
-   keyNames[S32(KEY_KEYPAD_MINUS)]    = "Keypad -";         
-   keyNames[S32(KEY_KEYPAD_PLUS)]     = "Keypad +";         
-   keyNames[S32(KEY_PRINT)]           = "PrntScrn";         
-   keyNames[S32(KEY_PAUSE)]           = "Pause";            
-   keyNames[S32(KEY_SCROLLOCK)]       = "ScrollLock";       
-   keyNames[S32(KEY_KEYPAD1)]         = "Keypad 1";         
-   keyNames[S32(KEY_KEYPAD2)]         = "Keypad 2";         
-   keyNames[S32(KEY_KEYPAD3)]         = "Keypad 3";         
-   keyNames[S32(KEY_KEYPAD4)]         = "Keypad 4";         
-   keyNames[S32(KEY_KEYPAD5)]         = "Keypad 5";         
-   keyNames[S32(KEY_KEYPAD6)]         = "Keypad 6";         
-   keyNames[S32(KEY_KEYPAD7)]         = "Keypad 7";         
-   keyNames[S32(KEY_KEYPAD8)]         = "Keypad 8";         
-   keyNames[S32(KEY_KEYPAD9)]         = "Keypad 9";         
-   keyNames[S32(KEY_KEYPAD0)]         = "Keypad 0";         
-   keyNames[S32(KEY_KEYPAD_PERIOD)]   = "Keypad .";         
-   keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
-   keyNames[S32(KEY_LESS)]            = "Less";    
+   keyNames[S32(KEY_BACKQUOTE)]       = "`";
+   keyNames[S32(KEY_MENU)]            = "Menu";
+   keyNames[S32(KEY_KEYPAD_DIVIDE)]   = "Keypad /";
+   keyNames[S32(KEY_KEYPAD_MULTIPLY)] = "Keypad *";
+   keyNames[S32(KEY_KEYPAD_MINUS)]    = "Keypad -";
+   keyNames[S32(KEY_KEYPAD_PLUS)]     = "Keypad +";
+   keyNames[S32(KEY_PRINT)]           = "PrntScrn";
+   keyNames[S32(KEY_PAUSE)]           = "Pause";
+   keyNames[S32(KEY_SCROLLOCK)]       = "ScrollLock";
+   keyNames[S32(KEY_KEYPAD1)]         = "Keypad 1";
+   keyNames[S32(KEY_KEYPAD2)]         = "Keypad 2";
+   keyNames[S32(KEY_KEYPAD3)]         = "Keypad 3";
+   keyNames[S32(KEY_KEYPAD4)]         = "Keypad 4";
+   keyNames[S32(KEY_KEYPAD5)]         = "Keypad 5";
+   keyNames[S32(KEY_KEYPAD6)]         = "Keypad 6";
+   keyNames[S32(KEY_KEYPAD7)]         = "Keypad 7";
+   keyNames[S32(KEY_KEYPAD8)]         = "Keypad 8";
+   keyNames[S32(KEY_KEYPAD9)]         = "Keypad 9";
+   keyNames[S32(KEY_KEYPAD0)]         = "Keypad 0";
+   keyNames[S32(KEY_KEYPAD_PERIOD)]   = "Keypad .";
+   keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";
+   keyNames[S32(KEY_LESS)]            = "Less";
 
    for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
-      modifierNames.push_back(keyNames[S32(modifiers[i])]);            
+      modifierNames.push_back(keyNames[S32(modifiers[i])]);
 }
 
 

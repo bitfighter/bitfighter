@@ -290,6 +290,7 @@ public:
    static bool isKeyboardKey(InputCode inputCode);             // Is inputCode a key on the keyboard?
    static bool isCtrlKey(InputCode inputCode);                 // Is inputCode modified with ctrl (e.g. KEY_CTRL_M)?
    static bool isAltKey(InputCode inputCode);                  // Is inputCode modified with alt (e.g. KEY_ALT_1)?
+   static bool isShiftKey(InputCode inputCode);                // Is inputCode modified with shift (e.g. KEY_SHIFT_1)?
    static bool isModifier(InputCode inputCode);                // Is inputCode a modifier key?
    static bool isModified(InputCode inputCode);                // Does inputCode have a modifier attached to it?
 

@@ -124,6 +124,11 @@ enum InputCode : U32 {
    KEY_CTRL_4, KEY_CTRL_5, KEY_CTRL_6,
    KEY_CTRL_9,
 
+   // Keep these together for isShiftKey() -- KEY_SHIFT_1 and KEY_SHIFT_9 are markers for bounds of shift keys
+   KEY_SHIFT_1, KEY_SHIFT_2, KEY_SHIFT_3,
+   KEY_SHIFT_4, KEY_SHIFT_5, KEY_SHIFT_6,
+   KEY_SHIFT_7, KEY_SHIFT_8, KEY_SHIFT_9,
+
    // Keep these together for isAltKey() -- KEY_ALT_1 and KEY_ALT_9 are markers for bounds of alt keys
    KEY_ALT_1, KEY_ALT_2, KEY_ALT_3,
    KEY_ALT_4, KEY_ALT_5, KEY_ALT_6,
@@ -134,20 +139,23 @@ enum InputCode : U32 {
    BUTTON_UNKNOWN
 };
 
-static const U32 FIRST_KEYBOARD_KEY = (U32)KEY_0;
-static const U32 LAST_KEYBOARD_KEY  = (U32)KEY_KEYPAD_EQUALS;
+static const U32 FIRST_KEYBOARD_KEY = KEY_0;
+static const U32 LAST_KEYBOARD_KEY  = KEY_KEYPAD_EQUALS;
 
-static const U32 FIRST_PRINTABLE_KEY = (U32)KEY_0;    // Note that KEY_SPACE is not in this range!
-static const U32 LAST_PRINTABLE_KEY = (U32)KEY_SLASH;
+static const U32 FIRST_PRINTABLE_KEY = KEY_0;    // Note that KEY_SPACE is not in this range!
+static const U32 LAST_PRINTABLE_KEY = KEY_SLASH;
 
-static const U32 FIRST_CONTROLLER_BUTTON = (U32)BUTTON_1;
-static const U32 LAST_CONTROLLER_BUTTON  = (U32)BUTTON_DPAD_RIGHT;
+static const U32 FIRST_CONTROLLER_BUTTON = BUTTON_1;
+static const U32 LAST_CONTROLLER_BUTTON  = BUTTON_DPAD_RIGHT;
 
-static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
-static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_9;
+static const U32 FIRST_CTRL_KEY = KEY_CTRL_M;
+static const U32 LAST_CTRL_KEY  = KEY_CTRL_9;
 
-static const U32 FIRST_ALT_KEY = (U32)KEY_ALT_1;
-static const U32 LAST_ALT_KEY  = (U32)KEY_ALT_9;
+static const U32 FIRST_ALT_KEY = KEY_ALT_1;
+static const U32 LAST_ALT_KEY  = KEY_ALT_9;
+
+static const U32 FIRST_SHIFT_KEY = KEY_SHIFT_1;
+static const U32 LAST_SHIFT_KEY  = KEY_SHIFT_9;
 
 };
 
