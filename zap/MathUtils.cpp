@@ -86,24 +86,35 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 }
 
 
-// Round numToRound up to the nearest mulitple of multiple
+// Round numToRound up to the nearest multiple of multiple
 // Source: http://stackoverflow.com/a/3407254/103252
 S32 roundUp(S32 numToRound, S32 multiple)
 {
-   multiple = abs(multiple);
-
    if(multiple == 0)
       return numToRound;
 
-   S32 remainder = numToRound % multiple;
+   // Use U32 to safely handle S32_MIN
+   U32 absMultiple = (multiple < 0) ? -(U32)multiple : (U32)multiple;
 
-   if(remainder == 0)
-      return numToRound;
+   if(numToRound >= 0)
+   {
+      U32 remainder = (U32)numToRound % absMultiple;
 
-   if(numToRound < 0)
-      return numToRound - remainder;
+      if(remainder == 0)
+         return numToRound;
 
-   return numToRound + multiple - remainder;
+      return (S32)((U32)numToRound + absMultiple - remainder);
+   }
+   else
+   {
+      U32 absNum = -(U32)numToRound;
+      U32 remainder = absNum % absMultiple;
+
+      if(remainder == 0)
+         return numToRound;
+
+      return numToRound + (S32)remainder;
+   }
 }
 
 };
