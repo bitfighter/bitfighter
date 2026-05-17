@@ -90,12 +90,12 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 // Source: http://stackoverflow.com/a/3407254/103252
 S32 roundUp(S32 numToRound, S32 multiple)
 {
-   multiple = abs(multiple);
-
    if(multiple == 0)
       return numToRound;
 
-   S32 remainder = numToRound % multiple;
+   U32 absMultiple = (U32)std::abs((S64)multiple);
+
+   S32 remainder = (S32)(numToRound % (S64)absMultiple);
 
    if(remainder == 0)
       return numToRound;
@@ -103,7 +103,7 @@ S32 roundUp(S32 numToRound, S32 multiple)
    if(numToRound < 0)
       return numToRound - remainder;
 
-   return numToRound + multiple - remainder;
+   return (S32)(numToRound + (S64)absMultiple - remainder);
 }
 
 };
