@@ -822,22 +822,22 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
                                  float Px, float Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  F64 cCROSSap, bCROSScp, aCROSSbp;
 
-  ax = Cx - Bx;  ay = Cy - By;
-  bx = Ax - Cx;  by = Ay - Cy;
-  cx = Bx - Ax;  cy = By - Ay;
-  apx= Px - Ax;  apy= Py - Ay;
-  bpx= Px - Bx;  bpy= Py - By;
-  cpx= Px - Cx;  cpy= Py - Cy;
+  ax = F64(Cx) - Bx;  ay = F64(Cy) - By;
+  bx = F64(Ax) - Cx;  by = F64(Ay) - Cy;
+  cx = F64(Bx) - Ax;  cy = F64(By) - Ay;
+  apx= F64(Px) - Ax;  apy= F64(Py) - Ay;
+  bpx= F64(Px) - Bx;  bpy= F64(Py) - By;
+  cpx= F64(Px) - Cx;  cpy= F64(Py) - Cy;
 
   aCROSSbp = ax*bpy - ay*bpx;
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f)) ||
-         ((aCROSSbp <= 0.0f) && (bCROSScp <= 0.0f) && (cCROSSap <= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0)) ||
+         ((aCROSSbp <= 0.0) && (bCROSScp <= 0.0) && (cCROSSap <= 0.0));
 };
 
 
