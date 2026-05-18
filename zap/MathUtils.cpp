@@ -87,7 +87,6 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
 
 // Round numToRound up to the nearest mulitple of multiple
-// Source: http://stackoverflow.com/a/3407254/103252
 S32 roundUp(S32 numToRound, S32 multiple)
 {
    if(multiple == 0)
