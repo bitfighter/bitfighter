@@ -65,6 +65,18 @@ TEST(MathUtilsTest, RoundUp)
    EXPECT_EQ(10, roundUp(10, -5));
    EXPECT_EQ(-5, roundUp(-7, -5));
 
+   // Test with S32_MIN
+   EXPECT_EQ(0, roundUp(0, S32_MIN));
+   EXPECT_EQ(S32_MIN, roundUp(1, S32_MIN));
+   EXPECT_EQ(0, roundUp(-1, S32_MIN));
+
+   // Additional test cases
+   EXPECT_EQ(100, roundUp(7, 100));
+   EXPECT_EQ(200, roundUp(117, 100));
+   EXPECT_EQ(500, roundUp(477, 100));
+   EXPECT_EQ(1100, roundUp(1077, 100));
+   EXPECT_EQ(60, roundUp(52, 20));
+   EXPECT_EQ(90, roundUp(74, 30));
    // Test with S32_MIN as multiple
    // Multiple is 2^31. Multiples are ..., -2^31, 0, 2^31...
    // For 10, the next multiple is 2^31, which overflows S32 to -2^31
