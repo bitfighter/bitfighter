@@ -816,10 +816,10 @@ F32 area(const Vector<Point> &contour)
      InsideTriangle decides if a point P is Inside of the triangle
      defined by A, B, C.
    */
-bool Triangulate::InsideTriangle(float Ax, float Ay,
-                                 float Bx, float By,
-                                 float Cx, float Cy,
-                                 float Px, float Py)
+bool Triangulate::InsideTriangle(F64 Ax, F64 Ay,
+                                 F64 Bx, F64 By,
+                                 F64 Cx, F64 Cy,
+                                 F64 Px, F64 Py)
 
 {
   F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
@@ -844,7 +844,7 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  F64 Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
   Ax = contour[V[u]].x;
   Ay = contour[V[u]].y;
@@ -855,14 +855,14 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   Cx = contour[V[w]].x;
   Cy = contour[V[w]].y;
 
-  if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
+  if ( (F64)EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
 
   for (p=0;p<n;p++)
   {
     if( (p == u) || (p == v) || (p == w) ) continue;
     Px = contour[V[p]].x;
     Py = contour[V[p]].y;
-    if (InsideTriangle(Ax,Ay,Bx,By,Cx,Cy,Px,Py)) return false;
+    if (InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py)) return false;
   }
 
   return true;
