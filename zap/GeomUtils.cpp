@@ -816,35 +816,35 @@ F32 area(const Vector<Point> &contour)
      InsideTriangle decides if a point P is Inside of the triangle
      defined by A, B, C.
    */
-bool Triangulate::InsideTriangle(float Ax, float Ay,
-                                 float Bx, float By,
-                                 float Cx, float Cy,
-                                 float Px, float Py)
+bool Triangulate::InsideTriangle(F64 Ax, F64 Ay,
+                                 F64 Bx, F64 By,
+                                 F64 Cx, F64 Cy,
+                                 F64 Px, F64 Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  F64 cCROSSap, bCROSScp, aCROSSbp;
 
-  ax = Cx - Bx;  ay = Cy - By;
-  bx = Ax - Cx;  by = Ay - Cy;
-  cx = Bx - Ax;  cy = By - Ay;
-  apx= Px - Ax;  apy= Py - Ay;
-  bpx= Px - Bx;  bpy= Py - By;
-  cpx= Px - Cx;  cpy= Py - Cy;
+  ax = F64(Cx) - Bx;  ay = F64(Cy) - By;
+  bx = F64(Ax) - Cx;  by = F64(Ay) - Cy;
+  cx = F64(Bx) - Ax;  cy = F64(By) - Ay;
+  apx= F64(Px) - Ax;  apy= F64(Py) - Ay;
+  bpx= F64(Px) - Bx;  bpy= F64(Py) - By;
+  cpx= F64(Px) - Cx;  cpy= F64(Py) - Cy;
 
   aCROSSbp = ax*bpy - ay*bpx;
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f)) ||
-         ((aCROSSbp <= 0.0f) && (bCROSScp <= 0.0f) && (cCROSSap <= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0)) ||
+         ((aCROSSbp <= 0.0) && (bCROSScp <= 0.0) && (cCROSSap <= 0.0));
 };
 
 
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  F64 Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
   Ax = contour[V[u]].x;
   Ay = contour[V[u]].y;
@@ -855,14 +855,14 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   Cx = contour[V[w]].x;
   Cy = contour[V[w]].y;
 
-  if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
+  if ( (F64)EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
 
   for (p=0;p<n;p++)
   {
     if( (p == u) || (p == v) || (p == w) ) continue;
     Px = contour[V[p]].x;
     Py = contour[V[p]].y;
-    if (InsideTriangle(Ax,Ay,Bx,By,Cx,Cy,Px,Py)) return false;
+    if (InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py)) return false;
   }
 
   return true;
