@@ -132,4 +132,39 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    EXPECT_FLOAT_EQ(0.0f, root);
 }
 
+TEST(MathUtilsTest, RoundUpEdgeCases)
+{
+   // Basic cases
+   EXPECT_EQ(10, roundUp(7, 5));
+   EXPECT_EQ(10, roundUp(10, 5));
+
+   // Zero multiple - should return numToRound
+   EXPECT_EQ(7, roundUp(7, 0));
+
+   // Negative numToRound
+   EXPECT_EQ(-5, roundUp(-7, 5));
+   EXPECT_EQ(-10, roundUp(-10, 5));
+
+   // Negative multiple
+   EXPECT_EQ(10, roundUp(7, -5));
+   EXPECT_EQ(-5, roundUp(-7, -5));
+
+   // S32_MIN multiple
+   // std::abs(S32_MIN) is undefined behavior for 32-bit signed ints,
+   // but our fixed roundUp uses S64 to handle it safely.
+   // roundUp(7, S32_MIN) -> 7 % 2147483648 = 7.
+   // Since 7 > 0 and remainder != 0, returns 7 + 2147483648 - 7 = 2147483648.
+   // Wait, 2147483648 is S32_MAX + 1, so it overflows back to S32_MIN when cast to S32.
+   EXPECT_EQ((S32)S32_MIN, roundUp(7, (S32)S32_MIN));
+
+   // S32_MIN numToRound
+   // roundUp(S32_MIN, 1) -> remainder 0, returns S32_MIN
+   EXPECT_EQ((S32)S32_MIN, roundUp((S32)S32_MIN, 1));
+
+   // Potential overflow: roundUp(S32_MAX, 2)
+   // S32_MAX = 2147483647. 2147483647 % 2 = 1.
+   // 2147483647 + 2 - 1 = 2147483648 (overflows to S32_MIN)
+   EXPECT_EQ((S32)S32_MIN, roundUp(2147483647, 2));
+}
+
 } // namespace Zap
