@@ -64,6 +64,16 @@ TEST(MathUtilsTest, RoundUp)
    EXPECT_EQ(10, roundUp(7, -5));
    EXPECT_EQ(10, roundUp(10, -5));
    EXPECT_EQ(-5, roundUp(-7, -5));
+
+   // Test with S32_MIN as multiple
+   // Multiple is 2^31. Multiples are ..., -2^31, 0, 2^31...
+   // For 10, the next multiple is 2^31, which overflows S32 to -2^31
+   EXPECT_EQ(-2147483647 - 1, roundUp(10, -2147483647 - 1));
+   EXPECT_EQ(0, roundUp(-10, -2147483647 - 1));
+
+   // Test with S32_MIN as numToRound
+   // S32_MIN is -2147483648. Next multiple of 3 is -2147483646.
+   EXPECT_EQ(-2147483646, roundUp(-2147483647 - 1, 3));
 }
 
 TEST(MathUtilsTest, FindLowestRootInInterval)
