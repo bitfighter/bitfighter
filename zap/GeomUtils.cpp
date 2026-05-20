@@ -228,9 +228,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 
       // Cross-product sign test — zero means point is exactly on that edge,
       // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+      F64 d1 = (F64(point.x) - p1.x) * (F64(p0.y) - p1.y) - (F64(p0.x) - p1.x) * (F64(point.y) - p1.y);
+      F64 d2 = (F64(point.x) - p2.x) * (F64(p1.y) - p2.y) - (F64(p1.x) - p2.x) * (F64(point.y) - p2.y);
+      F64 d3 = (F64(point.x) - p0.x) * (F64(p2.y) - p0.y) - (F64(p2.x) - p0.x) * (F64(point.y) - p0.y);
 
       bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
       bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -731,36 +731,53 @@ static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVer
       F32 t;
 
       // Check if circle hits the vertex
-      Point bv1 = *v1 - inBegin;
-      F32 a1 = inA - inDelta.lenSquared();
-      F32 b1 = inB + 2.0f * inDelta.dot(bv1);
-      F32 c1 = inC - bv1.lenSquared();
-      if (findLowestRootInInterval(a1, b1, c1, upper_bound, t))
-         if(inDelta.dot((*v1) - inBegin) > 0)
+      F64 bv1x = F64(v1->x) - inBegin.x;
+      F64 bv1y = F64(v1->y) - inBegin.y;
+      F64 inDeltaLenSq = inDelta.lenSquared();
+
+      F64 a1 = F64(inA) - inDeltaLenSq;
+      F64 b1 = F64(inB) + 2.0 * (inDelta.x * bv1x + inDelta.y * bv1y);
+      F64 c1 = F64(inC) - (bv1x * bv1x + bv1y * bv1y);
+      if (findLowestRootInInterval((F32)a1, (F32)b1, (F32)c1, upper_bound, t))
+      {
+         if(inDelta.x * (F64(v1->x) - inBegin.x) + inDelta.y * (F64(v1->y) - inBegin.y) > 0)
          {
             // We have a collision
             collision = true;
             upper_bound = t;
             outPoint = *v1;
          }
+      }
+            collision = true;
+            upper_bound = t;
+            outPoint = *v1;
+         }
 
       // Check if circle hits the edge
-      Point v1v2 = *v2 - *v1;
-      F32 v1v2_dot_delta = v1v2.dot(inDelta);
-      F32 v1v2_dot_bv1 = v1v2.dot(bv1);
-      F32 v1v2_len_sq = v1v2.lenSquared();
-      F32 a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
-      F32 b2 = v1v2_len_sq * b1 - 2.0f * v1v2_dot_bv1 * v1v2_dot_delta;
-      F32 c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
-      if (findLowestRootInInterval(a2, b2, c2, upper_bound, t))
+      F64 v1v2x = F64(v2->x) - v1->x;
+      F64 v1v2y = F64(v2->y) - v1->y;
+      F64 v1v2_dot_delta = v1v2x * inDelta.x + v1v2y * inDelta.y;
+      F64 v1v2_dot_bv1 = v1v2x * bv1x + v1v2y * bv1y;
+      F64 v1v2_len_sq = v1v2x * v1v2x + v1v2y * v1v2y;
+      F64 a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
+      F64 b2 = v1v2_len_sq * b1 - 2.0 * v1v2_dot_bv1 * v1v2_dot_delta;
+      F64 c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
+      if (findLowestRootInInterval((F32)a2, (F32)b2, (F32)c2, upper_bound, t))
       {
          // Check if the intersection point is on the edge
-         F32 f = t * v1v2_dot_delta - v1v2_dot_bv1;
-         if (f >= 0.0f && f <= v1v2_len_sq)
+         F64 f = t * v1v2_dot_delta - v1v2_dot_bv1;
+         if (f >= 0.0 && f <= v1v2_len_sq)
          {
-            Point p(*v1 + v1v2 * (f / v1v2_len_sq));
-            if(inDelta.dot(p - inBegin) > 0)
+            Point p(*v1 + (Point(v1v2x, v1v2y) * (F32)(f / v1v2_len_sq)));
+            if(inDelta.x * (F64(p.x) - inBegin.x) + inDelta.y * (F64(p.y) - inBegin.y) > 0)
             {
+               // We have a collision
+               collision = true;
+               upper_bound = t;
+               outPoint = p;
+            }
+         }
+      }
                // We have a collision
                collision = true;
                upper_bound = t;
@@ -822,29 +839,29 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
                                  float Px, float Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  F64 cCROSSap, bCROSScp, aCROSSbp;
 
-  ax = Cx - Bx;  ay = Cy - By;
-  bx = Ax - Cx;  by = Ay - Cy;
-  cx = Bx - Ax;  cy = By - Ay;
-  apx= Px - Ax;  apy= Py - Ay;
-  bpx= Px - Bx;  bpy= Py - By;
-  cpx= Px - Cx;  cpy= Py - Cy;
+  ax = F64(Cx) - Bx;  ay = F64(Cy) - By;
+  bx = F64(Ax) - Cx;  by = F64(Ay) - Cy;
+  cx = F64(Bx) - Ax;  cy = F64(By) - Ay;
+  apx= F64(Px) - Ax;  apy= F64(Py) - Ay;
+  bpx= F64(Px) - Bx;  bpy= F64(Py) - By;
+  cpx= F64(Px) - Cx;  cpy= F64(Py) - Cy;
 
   aCROSSbp = ax*bpy - ay*bpx;
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f)) ||
-         ((aCROSSbp <= 0.0f) && (bCROSScp <= 0.0f) && (cCROSSap <= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0)) ||
+         ((aCROSSbp <= 0.0) && (bCROSScp <= 0.0) && (cCROSSap <= 0.0));
 };
 
 
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  F64 Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
   Ax = contour[V[u]].x;
   Ay = contour[V[u]].y;
@@ -862,7 +879,7 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
     if( (p == u) || (p == v) || (p == w) ) continue;
     Px = contour[V[p]].x;
     Py = contour[V[p]].y;
-    if (InsideTriangle(Ax,Ay,Bx,By,Cx,Cy,Px,Py)) return false;
+    if (InsideTriangle((float)Ax, (float)Ay, (float)Bx, (float)By, (float)Cx, (float)Cy, (float)Px, (float)Py)) return false;
   }
 
   return true;
@@ -1847,15 +1864,17 @@ F32 angleOfLongestSide(const Vector<Point> &polyPoints)
 // Find closest point from p on segment s1-s2 that is perpendicular to s1-s2
 bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest)
 {
-   Point edgeDelta = s2 - s1;    // Vector defining extent of segment
-   Point pointDelta = p - s1;    // Distance from p to start of segment
+   F64 edgeDeltaX = F64(s2.x) - s1.x;
+   F64 edgeDeltaY = F64(s2.y) - s1.y;
+   F64 pointDeltaX = F64(p.x) - s1.x;
+   F64 pointDeltaY = F64(p.y) - s1.y;
 
-   float fraction = pointDelta.dot(edgeDelta);  // "Perpendicularize" pointDelta towards edgeDelta
-   float lenSquared = edgeDelta.lenSquared();
+   F64 fraction = pointDeltaX * edgeDeltaX + pointDeltaY * edgeDeltaY;
+   F64 lenSquared = edgeDeltaX * edgeDeltaX + edgeDeltaY * edgeDeltaY;
 
    if(fraction > 0 && fraction < lenSquared)                // Intersection!
    {
-      closest = s1 + edgeDelta * (fraction / lenSquared);   // Closest point
+      closest = s1 + (s2 - s1) * (F32)(fraction / lenSquared);   // Closest point
       return true;
    }
    else   // Didn't find a good match

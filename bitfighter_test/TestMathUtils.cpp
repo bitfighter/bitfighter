@@ -122,4 +122,13 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    EXPECT_FLOAT_EQ(0.0f, root);
 }
 
+
+TEST(MathUtilsPrecisionTest, findLowestRootInIntervalLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   F32 root;
+   EXPECT_TRUE(findLowestRootInInterval(offset, -offset, 0.25f * offset, 1.0f, root));
+   EXPECT_NEAR(0.5f, root, 0.001f);
+}
+
 } // namespace Zap

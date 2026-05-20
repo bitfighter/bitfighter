@@ -2015,4 +2015,37 @@ TEST(GeomUtilsTest, TriangulateInsideTriangleWinding)
    EXPECT_FALSE(Triangulate::InsideTriangle(0, 0, 5, 10, 10, 0, 15, 5));
 }
 
+
+TEST(GeomUtilsPrecisionTest, findNormalPointLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Point p(offset + 5.0f, offset + 5.0f);
+   Point s1(offset, offset);
+   Point s2(offset + 10.0f, offset);
+   Point closest;
+
+   EXPECT_TRUE(findNormalPoint(p, s1, s2, closest));
+   EXPECT_NEAR(offset + 5.0f, closest.x, 0.1f);
+   EXPECT_NEAR(offset, closest.y, 0.1f);
+}
+
+TEST(GeomUtilsPrecisionTest, triangulatedFillContainsLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   Vector<Point> triangles;
+   triangles.push_back(Point(offset, offset));
+   triangles.push_back(Point(offset + 10.0f, offset));
+   triangles.push_back(Point(offset + 5.0f, offset + 10.0f));
+
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(offset + 5.0f, offset + 5.0f)));
+   EXPECT_FALSE(triangulatedFillContains(&triangles, Point(offset + 11.0f, offset + 5.0f)));
+}
+
+TEST(GeomUtilsPrecisionTest, TriangulateInsideTriangleLargeCoordinates)
+{
+   F32 offset = 1e6f;
+   EXPECT_TRUE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset + 5.0f, offset + 10.0f, offset + 5.0f, offset + 5.0f));
+   EXPECT_FALSE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset + 5.0f, offset + 10.0f, offset + 11.0f, offset + 5.0f));
+}
+
 }; // namespace Zap
