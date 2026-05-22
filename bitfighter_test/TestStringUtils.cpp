@@ -608,7 +608,7 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\"quoted\\\"", sanitizeForJson("\"quoted\""));
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
-   EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("&<>", sanitizeForJson("&<>")); // Should NOT escape HTML entities
    EXPECT_EQ("", sanitizeForJson(NULL));
 
    // Control characters

@@ -51,18 +51,21 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
    // Quadratic case
    // Check if a solution exists
-   F32 determinant = inB * inB - 4.0f * inA * inC;
-   if (determinant < 0.0f)
+   F64 b = inB;
+   F64 a = inA;
+   F64 c = inC;
+   F64 determinant = b * b - 4.0 * a * c;
+   if (determinant < 0.0)
       return false;
 
    // The standard way of doing this is by computing: x = (-b +/- Sqrt(b^2 - 4 a c)) / 2 a
    // is not numerically stable when a is close to zero.
    // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
-   F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
+   F64 q = -0.5 * (b + (b < 0.0? -1.0 : 1.0) * sqrt(determinant));
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
-   F32 x1 = q / inA;
-   F32 x2 = (q != 0.0f) ? inC / q : 1e30f;    // Avoid division by zero; x1 will be the correct root (0) if q is zero and inA is not
+   F32 x1 = (F32)(q / a);
+   F32 x2 = (q != 0.0) ? (F32)(c / q) : 1e30f;    // Avoid division by zero; x1 will be the correct root (0) if q is zero and inA is not
 
    // Order the results
    if (x2 < x1)

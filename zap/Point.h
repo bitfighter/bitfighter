@@ -159,24 +159,30 @@ public:
 
    inline bool operator<(const Point& pt) const
    {
-      // Here we say that a point is less than another if its distance
-      // from the origin is less than the other's
-      return sq(x) + sq(y) < sq(pt.x) + sq(pt.y);
+      if(x != pt.x)
+         return x < pt.x;
+      return y < pt.y;
    }
 
    inline bool operator>(const Point& pt) const
    {
-      return sq(x) + sq(y) > sq(pt.x) + sq(pt.y);
+      if(x != pt.x)
+         return x > pt.x;
+      return y > pt.y;
    }
 
    inline bool operator<=(const Point& pt) const
    {
-      return !operator>(pt);
+      if(x != pt.x)
+         return x < pt.x;
+      return y <= pt.y;
    }
 
    inline bool operator>=(const Point& pt) const
    {
-      return !operator<(pt);
+      if(x != pt.x)
+         return x > pt.x;
+      return y >= pt.y;
    }
 }; // class
 

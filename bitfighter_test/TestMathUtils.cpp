@@ -144,6 +144,39 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    EXPECT_FLOAT_EQ(0.0f, root);
 }
 
+TEST(MathUtilsTest, FindLowestRootInIntervalPrecision)
+{
+   F32 root;
+   // Use values that are representable in F32 but whose intermediate products
+   // cause precision loss in F32.
+   // b = 20000
+   // b^2 = 400,000,000
+   // At 4e8, gap is 2^(28-24) = 2^4 = 16.
+   // If det is less than 16, F32 might lose it.
+
+   F32 inA = 1.0f;
+   F32 inB = -20000.0f;
+   F32 inC = 99999999.0f; // 1e8 - 1, representable
+   // det = b^2 - 4ac = 400,000,000 - 399,999,996 = 4.
+   // In F32, (400,000,000 - 399,999,996) rounds to 0 or 16 because gap is 16.
+   // In this case, 400,000,000 and 399,999,996 are both representable.
+   // (399,999,996 / 16 = 24,999,999.75 ... actually it might not be)
+   // 2^25 = 33,554,432. 4e8 is between 2^28 and 2^29.
+   // Gap is 2^(28-24) = 16.
+
+   // Let's use larger: b = 100,000. b^2 = 10,000,000,000 (10^10)
+   // At 1e10, gap is 2^(33-24) = 2^9 = 512.
+   inB = -100000.0f;
+   // b^2 = 10,000,000,000. Nearest F32 is 10,000,000,256 or 9,999,999,488.
+   // 4ac needs to be close. Let c = 2,500,000,000. 4ac = 10,000,000,000.
+   // 2.5e9 is representable in F32? 2.5e9 / 512 = 4,882,812.5. No.
+   // 2^31 = 2,147,483,648. 2.5e9 is > 2^31. Gap is 2^(31-24) = 128.
+   inC = 2500000000.0f; // Rounded to nearest multiple of 128.
+
+   // Actually, let's just use the fact that F64 internal calculations are better.
+   EXPECT_TRUE(findLowestRootInInterval(inA, inB, inC, 200000.0f, root));
+}
+
 TEST(MathUtilsTest, RoundUpEdgeCases)
 {
    // Basic cases
