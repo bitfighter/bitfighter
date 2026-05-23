@@ -110,6 +110,7 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim(const string &source, const string &t = DEFAULT_TRIM_CHARS);
+string cleanString(string str, const string &defaultValue = "");
 
 void trim_right_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
 void trim_left_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);

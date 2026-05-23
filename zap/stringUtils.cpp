@@ -812,6 +812,17 @@ string trim(const string &source, const string &t)
 }
 
 
+// Removes leading and trailing whitespace; if string is empty, returns defaultValue
+string cleanString(string str, const string &defaultValue)
+{
+   trim_in_place(str);
+   if(str == "")
+      return defaultValue;
+
+   return str;
+}
+
+
 // These string methods operate on the given string in-place
 void trim_left_in_place(string &source, const string &t)
 {

@@ -637,6 +637,18 @@ TEST(StringUtilsTest, sanitizeForJson)
 }
 
 
+TEST(StringUtilsTest, cleanString)
+{
+   EXPECT_EQ("abc", cleanString("  abc  "));
+   EXPECT_EQ("abc", cleanString("\n\t abc \r\n"));
+   EXPECT_EQ("abc", cleanString("abc"));
+   EXPECT_EQ("Default", cleanString("  ", "Default"));
+   EXPECT_EQ("Default", cleanString("", "Default"));
+   EXPECT_EQ("", cleanString("", ""));
+   EXPECT_EQ("Default", cleanString("\v \v", "Default"));
+}
+
+
 TEST(StringUtilsTest, trim)
 {
    EXPECT_EQ("abc", trim("  abc  "));

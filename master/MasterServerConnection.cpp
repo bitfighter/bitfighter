@@ -535,7 +535,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
          fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                      first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()).c_str(),
-                     server->mCSProtocolVersion, server->mLevelName.getString(), server->mLevelType.getString(), server->mPlayerCount);
+                     server->mCSProtocolVersion, sanitizeForJson(server->mLevelName.getString()).c_str(), sanitizeForJson(server->mLevelType.getString()).c_str(), server->mPlayerCount);
          playerCount += server->mPlayerCount;
          serverCount++;
          first = false;
@@ -1477,11 +1477,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Ve
 // Remove leading/trailing spaces, provide default if name is empty
 string MasterServerConnection::cleanName(string name)    // Makes copy of name that we can alter
 {
-   trim(name);
-   if(name == "")
-      return "ChumpChange";
-
-   return name;
+   return Zap::cleanString(name, "ChumpChange");
 }
 
 
