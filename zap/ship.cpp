@@ -191,6 +191,7 @@ namespace Zap
 	     mVehicleDesign = *clientInfo->getOldDesign();
 	  mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
 	  mTankSpeed = 0;
+	  mSpeedFraction = 0.0f;             // Start stopped
 
 	  // Xtank ammo/heat runtime state
 	  mHeat = 0.0f;
@@ -546,7 +547,10 @@ namespace Zap
 	  F32 maxTurnRate = xt_max_turn * TURN_SCALE;                                // radians/sec
 
 	  // --- Input mapping ---
-	  F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
+	  // mCurrentMove.speedFraction is the cruise-control throttle set by the speed keys (packed into Move).
+	  // The vehicle drives at that fraction of max speed; WASD forward/back is ignored.
+	  F32 throttle = mCurrentMove.speedFraction;
+
 	  F32 steer = mCurrentMove.x;   // +1 = clockwise, -1 = counter-clockwise
 
 	  // --- Get current velocity ---

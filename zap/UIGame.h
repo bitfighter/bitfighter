@@ -183,6 +183,7 @@ private:
 
    bool xTankMode();
    bool toggleWeapon(S32 slotIndex);
+   void setXtankSpeed(S32 key);   // key: -1=full reverse, 0=100% forward, 1-9=10%-90%
 
     public : explicit GameUserInterface(ClientGame *game); // Constructor
    virtual ~GameUserInterface();                  // Destructor

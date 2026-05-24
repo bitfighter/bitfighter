@@ -48,6 +48,7 @@ namespace Zap
       y = 0;
       angle = 0;
       xtank = false;
+      speedFraction = 0.0f;      // Vehicles start not moving
 
       for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       {
@@ -88,7 +89,8 @@ namespace Zap
       return move->x == x &&
              move->y == y &&
              move->angle == angle &&
-             move->fire == fire;
+             move->fire == fire &&
+             move->speedFraction == speedFraction;
    }
 
 
@@ -118,6 +120,10 @@ namespace Zap
             stream->writeFlag(modulePrimary[i]);
             stream->writeFlag(moduleSecondary[i]);
          }
+
+         // Pack xtank speed fraction as a signed 7-bit integer (-10 to 10, mapped from -1.0..1.0 in steps of 0.1)
+         if(stream->writeFlag(xtank))
+            stream->writeRangedU32((U32)(S32)roundf(speedFraction * 10.0f) + 10, 0, 20);
       }
       if(packTime)
       {
@@ -153,6 +159,10 @@ namespace Zap
             modulePrimary[i] = stream->readFlag();
             moduleSecondary[i] = stream->readFlag();
          }
+
+         xtank = stream->readFlag();
+         if(xtank)
+            speedFraction = (F32)((S32)stream->readRangedU32(0, 20) - 10) / 10.0f;
       }
 
       if(unpackTime)

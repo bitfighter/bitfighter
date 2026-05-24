@@ -30,6 +30,7 @@ public:
    void initialize();
 
    bool xtank;	  // True if player is in xtank mode
+   F32 speedFraction;   // Xtank cruise-control throttle: -1=full reverse, 0=stop, 1=full forward
 
    F32 x, y;
    F32 angle;

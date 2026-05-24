@@ -1449,7 +1449,8 @@ bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
 
 bool GameUserInterface::xTankMode()
 {
-   return getGame()->isXtankModeGame();
+   Ship *ship = getGame()->getLocalPlayerShip();
+   return ship && ship->isXtankVehicle();
 }
 
 
@@ -1492,7 +1493,40 @@ bool GameUserInterface::checkXtankKeys(InputCode inputCode)
    else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP6, inputCode))
       return toggleWeapon(5);
 
+   // Speed keys: 0=full forward, 1-9=10%-90%, -=full reverse
+   switch(inputCode)
+   {
+      case KEY_0:     setXtankSpeed(0);   return true;
+      case KEY_1:     setXtankSpeed(1);   return true;
+      case KEY_2:     setXtankSpeed(2);   return true;
+      case KEY_3:     setXtankSpeed(3);   return true;
+      case KEY_4:     setXtankSpeed(4);   return true;
+      case KEY_5:     setXtankSpeed(5);   return true;
+      case KEY_6:     setXtankSpeed(6);   return true;
+      case KEY_7:     setXtankSpeed(7);   return true;
+      case KEY_8:     setXtankSpeed(8);   return true;
+      case KEY_9:     setXtankSpeed(9);   return true;
+      case KEY_MINUS: setXtankSpeed(-1);  return true;
+      default: break;
+   }
+
    return false;
+}
+
+
+void GameUserInterface::setXtankSpeed(S32 key)
+{
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(!ship)
+      return;
+
+   // key: -1 = full reverse, 0 = stop, 1-9 = 10%-100% forward  (9 steps)
+   if(key < 0)
+      ship->mSpeedFraction = -1.0f;
+   else if(key == 0)
+      ship->mSpeedFraction = 0;
+   else
+      ship->mSpeedFraction = key / 9.0f;
 }
 
 
@@ -1896,6 +1930,13 @@ Move *GameUserInterface::getCurrentMove()
          mCurrentMove.modulePrimary[i]   = mModPrimaryActivated[i];
          mCurrentMove.moduleSecondary[i] = mModSecondaryActivated[i];
       }
+
+      // Copy xtank speed setting into the move so the server receives it
+      if(ship && ship->isXtankVehicle())
+      {
+         mCurrentMove.xtank = true;
+         mCurrentMove.speedFraction = ship->mSpeedFraction;
+      }
    }
    else
    {
@@ -2093,14 +2134,62 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    totalWidth = cols * cardWidth + (cols - 1) * cardGap;
    S32 totalHeight = rows * cardHeight + (rows - 1) * cardGap;
 
+   const S32 speedBarHeight = 20;   // height of the speed indicator row
+   const S32 speedBarGap = 6;       // gap between speed row and weapon cards
+
    S32 startX = (screenWidth - totalWidth) / 2;
-   S32 startY = screenHeight - totalHeight - overlayPadding;
+   S32 startY = screenHeight - totalHeight - overlayPadding - speedBarHeight - speedBarGap;
 
    Renderer &r = Renderer::get();
 
    drawFilledRect(startX - overlayPadding,              startY - overlayPadding,
-                  startX + totalWidth + overlayPadding, startY + totalHeight + overlayPadding,
+                  startX + totalWidth + overlayPadding, startY + totalHeight + speedBarHeight + speedBarGap + overlayPadding,
                   Colors::black, 0.65f, Colors::white, 0.70f);
+
+   // --- Speed indicator ---
+   F32 speedFrac = ship->mSpeedFraction;
+
+   char speedLabel[32];
+   if(speedFrac < 0.0f)
+      dSprintf(speedLabel, sizeof(speedLabel), "SPD: REV");
+   else
+      dSprintf(speedLabel, sizeof(speedLabel), "SPD: %d%%", (S32)roundf(speedFrac * 100.0f));
+
+   S32 lblW = getStringWidth(11, speedLabel);
+   r.setColor(speedFrac < 0.0f ? Colors::cyan : Colors::white);
+   drawString(startX, startY, 11, speedLabel);
+
+   const S32 barMargin = lblW + 8;
+   S32 sbarX = startX + barMargin;
+   S32 sbarY = startY + 4;
+   S32 sbarW = totalWidth - barMargin;
+   S32 sbarH = 10;
+
+   // background track
+   r.setColor(Colors::gray40);
+   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
+
+   // fill
+   if(speedFrac < 0.0f)
+   {
+      // Reverse: fill entire bar in cyan
+      r.setColor(Colors::cyan);
+      drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
+   }
+   else if(speedFrac > 0.0f)
+   {
+      S32 fillW = max(1, (S32)floor(speedFrac * sbarW));
+      const Color *fc = (speedFrac < 0.4f) ? &Colors::yellow : &Colors::green80;
+      r.setColor(*fc);
+      drawRect(sbarX, sbarY, sbarX + fillW, sbarY + sbarH, RenderType::TriangleFan);
+   }
+
+   // outline
+   r.setColor(Colors::gray70);
+   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::LineLoop);
+
+   // weapon cards start below the speed row
+   S32 cardsStartY = startY + speedBarHeight + speedBarGap;
 
    for(S32 idx = 0; idx < weaponCount; idx++)
    {
@@ -2108,7 +2197,7 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
       S32 col = idx % cols;
       S32 row = idx / cols;
       S32 x = startX + col * (cardWidth + cardGap);
-      S32 y = startY + row * (cardHeight + cardGap);
+      S32 y = cardsStartY + row * (cardHeight + cardGap);
 
       const XtankWeapon weapon = design->weapons[slot];
       const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
