@@ -84,6 +84,7 @@ set(SHARED_SOURCES
 	Settings.cpp
 	safeZone.cpp
 	reloadZone.cpp
+	fuelZone.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp
@@ -102,7 +103,7 @@ set(SHARED_SOURCES
 	Timer.cpp
 	WallSegmentManager.cpp
 	WeaponInfo.cpp
-	XtankShape.cpp
+	VehicleDesign.cpp
 	Zone.cpp
 	zoneControlGame.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastAlloc.cpp
@@ -193,7 +194,7 @@ set(CLIENT_SOURCES
 	UINameEntry.cpp
 	UIQueryServers.cpp
 	UITeamDefMenu.cpp
-	UIXtankHelper.cpp
+	UIVehicleDesigner.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
 	VoiceRecorder.cpp

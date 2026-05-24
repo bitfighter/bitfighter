@@ -2361,6 +2361,56 @@ void renderReloadZone(const Color *color, const Vector<Point> *outline, const Ve
 }
 
 
+// Draw a simple fuel-canister silhouette for FuelZone.
+void renderFuelZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+{
+   Renderer &r = Renderer::get();
+   r.pushMatrix();
+   r.translate(center);
+   r.rotate(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+
+   // Canister body
+   F32 hw = radius * 0.40f;
+   F32 hh = radius * 0.55f;
+   F32 capH = radius * 0.15f;
+
+   // Body rectangle
+   static const S16 body[] = {
+      (S16)-1, (S16)-1,
+      (S16) 1, (S16)-1,
+      (S16) 1, (S16) 1,
+      (S16)-1, (S16) 1
+   };
+   // Draw body scaled manually
+   F32 bx = hw, by = hh;
+   F32 bodyPts[] = { -bx, -by,  bx, -by,  bx, by,  -bx, by };
+   r.renderVertexArray(bodyPts, 4, RenderType::LineLoop);
+
+   // Cap (nozzle) at top
+   F32 cx = hw * 0.5f;
+   F32 cyBot = -hh;
+   F32 cyTop = -hh - capH;
+   F32 capPts[] = { -cx, cyBot,  cx, cyBot,  cx, cyTop,  -cx, cyTop };
+   r.renderVertexArray(capPts, 4, RenderType::LineLoop);
+
+   // Fuel-drop teardrop inside body (simplified: small diamond)
+   F32 dr = radius * 0.18f;
+   F32 dropPts[] = { 0, -dr*1.4f,  dr*0.7f, 0,  0, dr,  -dr*0.7f, 0 };
+   r.renderVertexArray(dropPts, 4, RenderType::LineLoop);
+
+   r.popMatrix();
+}
+
+
+void renderFuelZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                    const Point &centroid, F32 angleRadians)
+{
+   renderZone(color, outline, fill);
+   Renderer::get().setColor(*color);
+   renderFuelZoneIcon(centroid, 20, angleRadians);
+}
+
+
 void renderProjectile(const Point &pos, U32 style, U32 time)
 {
    Renderer& r = Renderer::get();

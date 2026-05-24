@@ -2105,8 +2105,9 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    const S32 screenWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 screenHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   // --- Speed indicator (always shown for xtank vehicles) ---
-   const S32 speedBarHeight = 20;
+   // --- Speed + Fuel indicators (always shown for xtank vehicles) ---
+   const S32 statusRowHeight = 20;   // height of each status row
+   const S32 statusRowGap   = 4;    // gap between speed row and fuel row
    const S32 speedBarWidth  = 300;
    S32 spdX = (screenWidth - speedBarWidth) / 2;
 
@@ -2118,9 +2119,44 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    S32 rows = weaponCount > 0 ? (weaponCount + cols - 1) / cols : 0;
    S32 cardsHeight = rows > 0 ? rows * cardHeight + (rows - 1) * cardGap : 0;
    const S32 speedBarGap = 6;
-   S32 spdY = screenHeight - cardsHeight - overlayPadding - speedBarHeight - (cardsHeight > 0 ? speedBarGap : 0);
+   // Speed row is bottommost (just above weapon cards); fuel row sits above speed row.
+   S32 spdY  = screenHeight - cardsHeight - overlayPadding - statusRowHeight - (cardsHeight > 0 ? speedBarGap : 0);
+   S32 fuelY = spdY - statusRowHeight - statusRowGap;
 
    Renderer &r = Renderer::get();
+
+   // --- Fuel bar ---
+   {
+      F32 fuelFrac = (ship->mMaxFuel > 0) ? (ship->mFuel / ship->mMaxFuel) : 0.0f;
+      char fuelLabel[32];
+      dSprintf(fuelLabel, sizeof(fuelLabel), "FUEL: %d%%", (S32)roundf(fuelFrac * 100.0f));
+
+      S32 flblW = getStringWidth(11, fuelLabel);
+      const Color *fuelTextColor = (fuelFrac < 0.10f) ? &Colors::red
+                                 : (fuelFrac < 0.40f) ? &Colors::yellow : &Colors::white;
+      r.setColor(*fuelTextColor);
+      drawString(spdX, fuelY + 4, 11, fuelLabel);
+
+      S32 fbX = spdX + flblW + 8;
+      S32 fbY = fuelY + 4;
+      S32 fbW = speedBarWidth - flblW - 8;
+      S32 fbH = 10;
+
+      r.setColor(Colors::gray40);
+      drawRect(fbX, fbY, fbX + fbW, fbY + fbH, RenderType::TriangleFan);
+
+      if(fuelFrac > 0.0f)
+      {
+         S32 fillW = max(1, (S32)floor(fuelFrac * fbW));
+         const Color *fc = (fuelFrac < 0.10f) ? &Colors::red
+                         : (fuelFrac < 0.40f) ? &Colors::yellow : &Colors::green80;
+         r.setColor(*fc);
+         drawRect(fbX, fbY, fbX + fillW, fbY + fbH, RenderType::TriangleFan);
+      }
+
+      r.setColor(Colors::gray70);
+      drawRect(fbX, fbY, fbX + fbW, fbY + fbH, RenderType::LineLoop);
+   }
 
    F32 speedFrac = ship->mSpeedFraction;
 
@@ -2186,7 +2222,7 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    S32 startX = (screenWidth - totalWidth) / 2;
    S32 startY = screenHeight - totalHeight - overlayPadding;
 
-   drawFilledRect(startX - overlayPadding,              spdY - overlayPadding,
+   drawFilledRect(startX - overlayPadding,              fuelY - overlayPadding,
                   startX + totalWidth + overlayPadding, startY + totalHeight + overlayPadding,
                   Colors::black, 0.65f, Colors::white, 0.70f);
 

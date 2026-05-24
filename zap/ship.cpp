@@ -13,6 +13,7 @@
 #include "speedZone.h"
 #include "safeZone.h"
 #include "reloadZone.h"
+#include "fuelZone.h"
 #include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
 
@@ -199,6 +200,15 @@ namespace Zap
 	  mLoadout.set(DefaultLoadout);
 	  mVehicleDesign.reset();
 	  initXtankWeaponStates();   // Must come after mVehicleDesign is fully settled
+
+	  // Fuel: initialize from engine fcap
+	  {
+		 const S32 engineIdx = MAX(0, MIN((S32)mVehicleDesign.engine, XtankEngineCount - 1));
+		 mMaxFuel = (F32)xtankEngineInfos[engineIdx].fcap;
+		 if(mMaxFuel <= 0) mMaxFuel = 100.0f;  // safe fallback for default/unset design
+		 mFuel = mMaxFuel;
+	  }
+	  mWasInFuelZone = false;
 
 	  // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
 	  if(clientInfo && clientInfo->getOldLoadout()->getModule(0) != ModuleNone)
@@ -551,7 +561,16 @@ namespace Zap
 	  // The vehicle drives at that fraction of max speed; WASD forward/back is ignored.
 	  F32 throttle = mCurrentMove.speedFraction;
 
+	  // --- Fuel: enforce empty-tank cutout ---
+	  // When out of fuel the engine cuts out completely (spec §4).
+	  if(mFuel <= 0.0f)
+		 throttle = 0.0f;
+
 	  F32 steer = mCurrentMove.x;   // +1 = clockwise, -1 = counter-clockwise
+
+	  // When out of fuel, turning is also blocked (spec §4).
+	  if(mFuel <= 0.0f)
+		 steer = 0.0f;
 
 	  // --- Get current velocity ---
 	  Point vel = getVel(stateIndex);
@@ -694,6 +713,25 @@ namespace Zap
 	  // (Lateral velocity is preserved -- the vehicle can drift/skid.)
 	  Point headingVec(ch, sh);
 	  mTankSpeed = getVel(stateIndex).dot(headingVec);
+
+	  // --- Fuel consumption (spec §3) ---
+	  // Δfuel = FUEL_CONSUME × MAX_SPEED × (drive/max_speed)²
+	  //       = 0.025 × throttle²   (per xtank frame)
+	  // Scale from xtank frames to real seconds via dt.
+	  if(!isGhost())   // server-authoritative only
+	  {
+		 const F32 FUEL_CONSUME = 0.001f;
+		 const F32 XTANK_MAX_SPEED = 25.0f;
+		 // drive = |throttle| * max_speed in xtank units → ratio = throttle
+		 F32 driveRatio = fabsf(mCurrentMove.speedFraction);
+		 F32 fuelDelta = FUEL_CONSUME * XTANK_MAX_SPEED * driveRatio * driveRatio;
+		 // fuelDelta is per xtank frame; convert to per-second and scale by dt
+		 fuelDelta *= XTANK_FPS * dt;
+		 mFuel -= fuelDelta;
+		 if(mFuel < 0.0f)
+			mFuel = 0.0f;
+		 setMaskBits(XtankFuelMask);
+	  }
 
 	  return result;
    }
@@ -1105,6 +1143,73 @@ namespace Zap
    }
 
 
+   // Handle fuel refill while inside a FuelZone (spec §5).
+   // Requirements: xtank vehicle, stopped (|speed| < 5), centered within 25 BF units of zone centroid.
+   // Rate: +1 unit/frame at XTANK_FPS (20 fps), i.e. +XTANK_FPS per second, costing fuel_cost money/unit.
+   void Ship::processXtankFuel(U32 deltaMs)
+   {
+	  if(!isXtankVehicle())
+		 return;
+
+	  BfObject *zoneObj = isInZone(FuelZoneTypeNumber);
+
+	  if(!zoneObj)
+	  {
+		 mWasInFuelZone = false;
+		 return;
+	  }
+
+	  FuelZone *zone = dynamic_cast<FuelZone *>(zoneObj);
+	  if(!zone || !zone->isActiveForShip(this))
+	  {
+		 mWasInFuelZone = false;
+		 return;
+	  }
+
+	  // Must be stopped
+	  if(fabsf(mTankSpeed) >= 5.0f)
+		 return;
+
+	  // isInZone() already confirms the ship is inside the zone polygon.
+	  // No additional centroid-proximity check is needed.
+
+	  if(mFuel >= mMaxFuel)
+		 return;   // Tank already full
+
+	  const S32 engineIdx = MAX(0, MIN((S32)mVehicleDesign.engine, XtankEngineCount - 1));
+	  // XtankEngineInfo::fuel is the per-unit refuel cost (5, 8, 10...); ::cost is the engine purchase price.
+	  const S32 fuelCost = xtankEngineInfos[engineIdx].fuel;
+
+	  // Rate: +1 unit/frame at XTANK_FPS, scaled to real dt in seconds
+	  const F32 XTANK_FPS = 20.0f;
+	  F32 dt = deltaMs * 0.001f;
+	  F32 unitsToAdd = 1.0f * XTANK_FPS * dt;
+
+	  // Money check: if this costs money, limit to what we can afford
+	  if(fuelCost > 0)
+	  {
+		 F32 maxAffordable = (F32)mMoney / (F32)fuelCost;
+		 if(unitsToAdd > maxAffordable)
+			 unitsToAdd = maxAffordable;
+	  }
+
+	  if(unitsToAdd <= 0)
+		 return;   // Out of money
+
+	  // Clamp to tank capacity
+	  F32 needed = mMaxFuel - mFuel;
+	  if(unitsToAdd > needed)
+		 unitsToAdd = needed;
+
+	  mFuel += unitsToAdd;
+	  if(fuelCost > 0)
+		 mMoney -= (S32)(unitsToAdd * (F32)fuelCost + 0.5f);
+
+	  mWasInFuelZone = true;
+	  setMaskBits(XtankFuelMask);
+   }
+
+
    void Ship::processXtankWeaponFire()
    {
 	  GameType *gameType = getGame()->getGameType();
@@ -1344,7 +1449,10 @@ namespace Zap
 		 rechargeEnergy();
 
 		 if(isXtankVehicle() && path == ServerProcessingUpdatesFromClient)
+		 {
 			processXtankRefill(mCurrentMove.time);
+			processXtankFuel(mCurrentMove.time);
+		 }
 	  }
 	  // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
 	  else if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
@@ -2196,15 +2304,23 @@ namespace Zap
 	  if(isXtankVehicle())
 	  {
 		 if(stream->writeFlag(updateMask & XtankWeaponAmmoMask))
-			for(S32 i = 0; i < WEAPON_SLOTS; i++)
-			   if(mVehicleDesign.weapons[i] != XtankWeapon::NONE)
-			   {
+			 for(S32 i = 0; i < WEAPON_SLOTS; i++)
+				if(mVehicleDesign.weapons[i] != XtankWeapon::NONE)
+				{
 				  const XtankWeaponState &ws = mWeaponStates[i];
 				  XtankWeapon weapon = mVehicleDesign.weapons[i];
 				  const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
 				  if(wi.max_ammo != S32_MAX)
 					 stream->writeRangedU32((U32)MAX(0, ws.ammo), 0, (U32)wi.max_ammo);
-			   }
+				}
+
+		 // Pack fuel as a ranged U32 with 0..fcap range.
+		 if(stream->writeFlag(updateMask & XtankFuelMask))
+		 {
+			 const S32 engineIdx = MAX(0, MIN((S32)mVehicleDesign.engine, XtankEngineCount - 1));
+			 U32 fcap = (U32)MAX(1, xtankEngineInfos[engineIdx].fcap);
+			 stream->writeRangedU32((U32)MAX(0.0f, mFuel), 0, fcap);
+		 }
 	  }
 
 	  return 0;
@@ -2431,15 +2547,24 @@ namespace Zap
 	  if(isXtankVehicle())
 	  {
 		 if(stream->readFlag())     // XtankWeaponStateMask
-			for(S32 i = 0; i < WEAPON_SLOTS; i++)
-			   if(mVehicleDesign.weapons[i] != XtankWeapon::NONE)
-			   {
+			 for(S32 i = 0; i < WEAPON_SLOTS; i++)
+				if(mVehicleDesign.weapons[i] != XtankWeapon::NONE)
+				{
 				  XtankWeaponState &ws = mWeaponStates[i];
 				  XtankWeapon weapon = mVehicleDesign.weapons[i];
 				  const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
 				  if(wi.max_ammo != S32_MAX)
 					 ws.ammo = (S32)stream->readRangedU32(0, (U32)wi.max_ammo);		// Read ammo for each slot
-			   }
+				}
+
+		 // Fuel level
+		 if(stream->readFlag())     // XtankFuelMask
+		 {
+			 const S32 engineIdx = MAX(0, MIN((S32)mVehicleDesign.engine, XtankEngineCount - 1));
+			 U32 fcap = (U32)MAX(1, xtankEngineInfos[engineIdx].fcap);
+			 mFuel = (F32)stream->readRangedU32(0, fcap);
+			 mMaxFuel = (F32)fcap;
+		 }
 	  }
 
 #endif

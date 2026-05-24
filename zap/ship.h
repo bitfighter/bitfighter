@@ -107,7 +107,8 @@ public:
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
       SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
       XtankWeaponAmmoMask = Parent::FirstFreeMask << 8, // Ammo changed
-      FirstFreeMask       = Parent::FirstFreeMask << 9
+      XtankFuelMask       = Parent::FirstFreeMask << 9, // Fuel level changed
+      FirstFreeMask       = Parent::FirstFreeMask << 10
    };
 
 
@@ -198,6 +199,9 @@ public:
    F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
    F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
    F32 mSpeedFraction;        // Throttle cap: -1=full reverse, 0=stop, 0.1-0.9=10%-100%, 1=full forward
+   F32 mFuel;                 // Current fuel level [0, mMaxFuel]
+   F32 mMaxFuel;              // Tank capacity from engine's XtankEngineInfo::fcap
+   bool mWasInFuelZone;       // True when ship was in a FuelZone last tick
    VehicleDesign mVehicleDesign;  // Per-player vehicle configuration (body + per-slot weapons)
 
 
@@ -287,6 +291,7 @@ public:
    void coolHeat(U32 deltaMs);                    // Dissipate vehicle heat over deltaMs
    void advanceXtankTimers(U32 deltaMs);          // Decrement per-weapon reload timers
    void processXtankRefill(U32 deltaMs);          // Handle ammo refill when inside a ReloadZone
+   void processXtankFuel(U32 deltaMs);            // Handle fuel refill when inside a FuelZone
 
    F32 getHeat() const   { return mHeat; }
    S32 getMoney() const  { return mMoney; }
