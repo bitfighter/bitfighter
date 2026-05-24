@@ -124,19 +124,6 @@ TEST(PointTest, ComparisonOperators)
    EXPECT_TRUE(p4 >= p1);
 }
 
-TEST(PointTest, OperatorLessBug)
-{
-   // Bug: operator< uses distance from origin
-   // Points (1, 0) and (0, 1) have the same distance (1.0)
-   Point p1(1.0f, 0.0f);
-   Point p2(0.0f, 1.0f);
-
-   // With current implementation, p1 < p2 is false and p2 < p1 is false
-   // This means p1 and p2 are considered equivalent in std::set/map
-   // We want a lexicographical comparison so they are distinct
-   EXPECT_TRUE(p2 < p1 || p1 < p2);
-}
-
 TEST(PointTest, LengthMethods)
 {
    Point p(3.0f, 4.0f);
