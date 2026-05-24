@@ -2099,26 +2099,75 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
          weaponSlots[weaponCount++] = i;
    }
 
-   if(weaponCount == 0)
-      return;
-
-
    FontManager::pushFontContext(WeaponPanelContext);
 
-
-   const S32 maxColumns = 3;
-   S32 cols = weaponCount < maxColumns ? weaponCount : maxColumns;
-   S32 rows = (weaponCount + cols - 1) / cols;
-
-   const S32 cardHeight = 46;
-   const S32 cardGap = 8;
-   const S32 cardPadding = 8;
    const S32 overlayPadding = 10;
+   const S32 screenWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 screenHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+
+   // --- Speed indicator (always shown for xtank vehicles) ---
+   const S32 speedBarHeight = 20;
+   const S32 speedBarWidth  = 300;
+   S32 spdX = (screenWidth - speedBarWidth) / 2;
+
+   // Position: just above weapon cards if they exist, otherwise just above bottom margin
+   const S32 cardHeight = 46;
+   const S32 cardGap    = 8;
+   const S32 maxColumns = 3;
+   S32 cols = weaponCount > 0 ? (weaponCount < maxColumns ? weaponCount : maxColumns) : 1;
+   S32 rows = weaponCount > 0 ? (weaponCount + cols - 1) / cols : 0;
+   S32 cardsHeight = rows > 0 ? rows * cardHeight + (rows - 1) * cardGap : 0;
+   const S32 speedBarGap = 6;
+   S32 spdY = screenHeight - cardsHeight - overlayPadding - speedBarHeight - (cardsHeight > 0 ? speedBarGap : 0);
+
+   Renderer &r = Renderer::get();
+
+   F32 speedFrac = ship->mSpeedFraction;
+
+   char speedLabel[32];
+   if(speedFrac < 0.0f)
+      dSprintf(speedLabel, sizeof(speedLabel), "SPD: REV");
+   else
+      dSprintf(speedLabel, sizeof(speedLabel), "SPD: %d%%", (S32)roundf(speedFrac * 100.0f));
+
+   S32 lblW = getStringWidth(11, speedLabel);
+   r.setColor(speedFrac < 0.0f ? Colors::cyan : Colors::white);
+   drawString(spdX, spdY + 4, 11, speedLabel);
+
+   S32 sbarX = spdX + lblW + 8;
+   S32 sbarY = spdY + 4;
+   S32 sbarW = speedBarWidth - lblW - 8;
+   S32 sbarH = 10;
+
+   r.setColor(Colors::gray40);
+   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
+
+   if(speedFrac < 0.0f)
+   {
+      r.setColor(Colors::cyan);
+      drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
+   }
+   else if(speedFrac > 0.0f)
+   {
+      S32 fillW = max(1, (S32)floor(speedFrac * sbarW));
+      const Color *fc = (speedFrac < 0.4f) ? &Colors::yellow : &Colors::green80;
+      r.setColor(*fc);
+      drawRect(sbarX, sbarY, sbarX + fillW, sbarY + sbarH, RenderType::TriangleFan);
+   }
+
+   r.setColor(Colors::gray70);
+   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::LineLoop);
+
+   if(weaponCount == 0)
+   {
+      FontManager::popFontContext();
+      return;
+   }
+
+   // --- Weapon cards ---
    const S32 minCardWidth = 140;
    const S32 maxCardWidth = 260;
-
-   const S32 screenWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-   const S32 screenHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   const S32 cardPadding = 4;
 
    S32 totalWidth = screenWidth - 2 * overlayPadding;
    S32 cardWidth = (totalWidth - (cols - 1) * cardGap) / cols;
@@ -2134,62 +2183,14 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    totalWidth = cols * cardWidth + (cols - 1) * cardGap;
    S32 totalHeight = rows * cardHeight + (rows - 1) * cardGap;
 
-   const S32 speedBarHeight = 20;   // height of the speed indicator row
-   const S32 speedBarGap = 6;       // gap between speed row and weapon cards
-
    S32 startX = (screenWidth - totalWidth) / 2;
-   S32 startY = screenHeight - totalHeight - overlayPadding - speedBarHeight - speedBarGap;
+   S32 startY = screenHeight - totalHeight - overlayPadding;
 
-   Renderer &r = Renderer::get();
-
-   drawFilledRect(startX - overlayPadding,              startY - overlayPadding,
-                  startX + totalWidth + overlayPadding, startY + totalHeight + speedBarHeight + speedBarGap + overlayPadding,
+   drawFilledRect(startX - overlayPadding,              spdY - overlayPadding,
+                  startX + totalWidth + overlayPadding, startY + totalHeight + overlayPadding,
                   Colors::black, 0.65f, Colors::white, 0.70f);
 
-   // --- Speed indicator ---
-   F32 speedFrac = ship->mSpeedFraction;
-
-   char speedLabel[32];
-   if(speedFrac < 0.0f)
-      dSprintf(speedLabel, sizeof(speedLabel), "SPD: REV");
-   else
-      dSprintf(speedLabel, sizeof(speedLabel), "SPD: %d%%", (S32)roundf(speedFrac * 100.0f));
-
-   S32 lblW = getStringWidth(11, speedLabel);
-   r.setColor(speedFrac < 0.0f ? Colors::cyan : Colors::white);
-   drawString(startX, startY, 11, speedLabel);
-
-   const S32 barMargin = lblW + 8;
-   S32 sbarX = startX + barMargin;
-   S32 sbarY = startY + 4;
-   S32 sbarW = totalWidth - barMargin;
-   S32 sbarH = 10;
-
-   // background track
-   r.setColor(Colors::gray40);
-   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
-
-   // fill
-   if(speedFrac < 0.0f)
-   {
-      // Reverse: fill entire bar in cyan
-      r.setColor(Colors::cyan);
-      drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::TriangleFan);
-   }
-   else if(speedFrac > 0.0f)
-   {
-      S32 fillW = max(1, (S32)floor(speedFrac * sbarW));
-      const Color *fc = (speedFrac < 0.4f) ? &Colors::yellow : &Colors::green80;
-      r.setColor(*fc);
-      drawRect(sbarX, sbarY, sbarX + fillW, sbarY + sbarH, RenderType::TriangleFan);
-   }
-
-   // outline
-   r.setColor(Colors::gray70);
-   drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::LineLoop);
-
-   // weapon cards start below the speed row
-   S32 cardsStartY = startY + speedBarHeight + speedBarGap;
+   S32 cardsStartY = startY;
 
    for(S32 idx = 0; idx < weaponCount; idx++)
    {
