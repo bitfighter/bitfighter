@@ -276,7 +276,7 @@ string sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
       return value;
 
    // If any of the above exist then do some escaping
@@ -307,16 +307,6 @@ string sanitizeForJson(const char *value)
             result += "\\t";
             break;
 
-            // For html markup entities
-         case '&':
-            result += "&amp;";
-            break;
-         case '<':
-            result += "&lt;";
-            break;
-         case '>':
-            result += "&gt;";
-            break;
          default:
             if(isControlCharacter(*c))
             {
