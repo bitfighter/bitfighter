@@ -53,9 +53,9 @@ LoadoutIndicator::~LoadoutIndicator()
 
 void LoadoutIndicator::reset()
 {
-   mCurrLoadout.resetLoadout();
-   mPrevLoadout.resetLoadout();
-   mXtankDesign = XtankDesign();   // Reset to bodyIndex=-1 (no xtank)
+   mCurrLoadout.reset();
+   mPrevLoadout.reset();
+   mXtankDesign = VehicleDesign();   // Reset to bodyIndex=-1 (no xtank)
    resetScrollTimer();
 }
 
@@ -91,7 +91,7 @@ void LoadoutIndicator::setModuleSecondary(ShipModule module, bool isActive)
 }
 
 
-void LoadoutIndicator::setXtankDesign(const XtankDesign &design)
+void LoadoutIndicator::setXtankDesign(const VehicleDesign &design)
 {
    mXtankDesign = design;
 }
@@ -159,13 +159,13 @@ void setModuleColor(Renderer &r, const ShipModule &module, bool isPrimaryActive,
 
 
 // Returns width
-static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesign,
+static S32 doRender(const LoadoutTracker &loadout, const VehicleDesign &xtankDesign,
                     ClientGame *game, S32 top)
 {
    Renderer& r = Renderer::get();
 
    // Xtank mode: show body name + engine + treads + heat sinks + per-slot weapon names.
-   if(!xtankDesign.isXtankVehicle())
+   if(xtankDesign.isXtankVehicle())
    {
       FontManager::pushFontContext(LoadoutIndicatorContext);
 
@@ -316,7 +316,7 @@ S32 LoadoutIndicator::render(ClientGame *game) const
    top = Parent::prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
    if(top != NO_RENDER)
    {
-      XtankDesign empty;  // For the previous-loadout slot we don't track a prev xtank design
+      VehicleDesign empty;  // For the previous-loadout slot we don't track a prev xtank design
       doRender(mPrevLoadout, empty, game, top);
       doneRendering();
    }

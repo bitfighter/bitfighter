@@ -8,6 +8,7 @@
 
 namespace Zap
 {     
+   // These contexts are used to control the base font.  If you add one, be sure to update FontManager::setFontContext().
    enum FontContext {
       BigMessageContext,       // Press any key to respawn, etc.
       HelpItemContext,         // In-game help messages
@@ -20,6 +21,7 @@ namespace Zap
       ErrorMsgContext,         // For big red boxes and such
       KeyContext,              // For keyboard keys
       LoadoutIndicatorContext, // For the obvious
+      WeaponPanelContext,      // For xtank weapon status
       HelperMenuContext,       // For Loadout Menus and such
       HelperMenuHeadlineContext,
       TextEffectContext,       // Yard Sale!!! text and the like

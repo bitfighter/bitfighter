@@ -47,6 +47,8 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankCarouselSlots.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankAmmo.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankPackUnpack.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )
 

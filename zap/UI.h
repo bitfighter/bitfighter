@@ -109,7 +109,8 @@ public:
    string getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding);
 
    void setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode);
-   bool checkInputCode(BindingNameEnum, InputCode inputCode);
+   bool checkInputCode(BindingNameEnum binding, InputCode inputCode);
+
    const char *getInputCodeString(GameSettings *settings, BindingNameEnum binding);
 
    // Input event handlers

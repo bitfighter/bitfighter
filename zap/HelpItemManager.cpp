@@ -34,17 +34,18 @@ static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
 struct HelpItems {
    U8 associatedObjectTypeNumber;
-   bool autoAdd;   
+   bool autoAdd;
    bool highlightObjectiveArrows;
    HighlightItem::Whose whose;
    HelpItemManager::Priority priority;
+   HelpItemManager::GameMode mode;
    const char *helpMessages[MAX_LINES + 1];
 };
 
 
 static const HelpItems helpItems[] = {
-#  define HELP_TABLE_ITEM(a, assItem, autoAdd, highlightObjArrows, whose, priority, items) \
-             { assItem, autoAdd, highlightObjArrows, HighlightItem::whose, HelpItemManager::priority, items},
+#  define HELP_TABLE_ITEM(a, assItem, autoAdd, highlightObjArrows, whose, priority, mode, items) \
+             { assItem, autoAdd, highlightObjArrows, HighlightItem::whose, HelpItemManager::priority, HelpItemManager::mode, items},
       HELP_ITEM_TABLE
 #  undef HELP_TABLE_ITEM
 };
@@ -154,7 +155,7 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
    // 20 seconds of a game!
    if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0 && game->getRemainingGameTime() > 20)
       moveItemFromQueueToActiveList(game);
-      
+
    // Expire displayed items
    for(S32 i = 0; i < mHelpTimer.size(); i++)
    {
@@ -176,7 +177,7 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
          mHelpFading[i] = true;
 
          // Reset the timer to a new value based on the number of lines in the item -- this
-         // will keep the rollup effect going at a constant speed 
+         // will keep the rollup effect going at a constant speed
          mHelpTimer[i].reset(getRollupPeriod(i));
       }
    }
@@ -208,7 +209,7 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
    S32 itemToShow = 0;
 
    Vector<WeightedHelpItem> *items = NULL;
-   
+
    bool useHighPriorityQueue = true;
 
    while(true)
@@ -229,7 +230,7 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
             return;
          }
       }
-  
+
       // Handle special case -- want to suppress, but not delete, this item if there are bots in the game
       if(items->get(itemToShow).helpItem == AddBotsItem && game->getBotCount() > 0)
       {
@@ -259,8 +260,8 @@ static void renderHelpTextBracket(S32 x, S32 top, S32 bot, S32 stubLen)
 
 static void renderIndicatorBracket(S32 left, S32 right, S32 top, S32 stubLen)
 {
-   drawHorizLine(left,  right, top);   
-   drawVertLine (left,  top,   top + stubLen); 
+   drawHorizLine(left,  right, top);
+   drawVertLine (left,  top,   top + stubLen);
    drawVertLine (right, top,   top + stubLen);
 }
 
@@ -285,9 +286,9 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
 
       // Some loadouts are long enough that we get a weird display... min fixes that.
       // (This may no longer be a problem now that the help text was shortened.)
-      const S32 indicatorMiddle   = min(x + w / 2, textLeft - 15);   
+      const S32 indicatorMiddle   = min(x + w / 2, textLeft - 15);
 
-      const S32 indicatorLeft  = x -     indicatorHorizontalGap;                   
+      const S32 indicatorLeft  = x -     indicatorHorizontalGap;
       const S32 indicatorRight = x + w + indicatorHorizontalGap;
 
       renderHelpTextBracket(textLeft, textTop, textBottom, stubLen);
@@ -325,10 +326,10 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
    {
       const S32 indicatorLeft  = UI::EnergyGaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
       const S32 indicatorRight = UI::EnergyGaugeRenderer::GaugeLeftMargin + UI::EnergyGaugeRenderer::GuageWidth + indicatorHorizontalGap;
-      const S32 indicatorTop   = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 
-                                          (UI::EnergyGaugeRenderer::GaugeBottomMargin + 
-                                           UI::EnergyGaugeRenderer::GaugeHeight + 
-                                           UI::EnergyGaugeRenderer::SafetyLineExtend + 
+      const S32 indicatorTop   = DisplayManager::getScreenInfo()->getGameCanvasHeight() -
+                                          (UI::EnergyGaugeRenderer::GaugeBottomMargin +
+                                           UI::EnergyGaugeRenderer::GaugeHeight +
+                                           UI::EnergyGaugeRenderer::SafetyLineExtend +
                                            indicatorVerticalGap);
 
       const S32 textMiddle = (textTop + textBottom) / 2;
@@ -412,7 +413,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 
    if(!mEnabled)
       return;
-   
+
    FontManager::pushFontContext(HelpItemContext);
 
    for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
@@ -427,11 +428,11 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
       // than normal.  That, combined with scissors clipping, results in the rolling-up effect.
       F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
-      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"),
                              0, yPos - FontSize, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
 
       doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
-      yPos += height - offset;      
+      yPos += height - offset;
 
       scissorsManager.disable();
    }
@@ -468,7 +469,7 @@ void HelpItemManager::debugAdvanceHelpItem()
 // Now only used internally
 void HelpItemManager::queueHelpItem(HelpItem item)
 {
-   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow || 
+   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow ||
              helpItems[item].priority == GameStart, "This method is only for Paced/GameStart items!");
 
    // Don't queue items we've already seen
@@ -493,14 +494,14 @@ void HelpItemManager::queueHelpItem(HelpItem item)
 }
 
 
-// The weight factor allows us to require several events to "vote" for removing an item before 
+// The weight factor allows us to require several events to "vote" for removing an item before
 // it happens... basically once the weights OR to 0xFF, the item is toast.
 void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 weight)
 {
    //TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
    if(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow)      // for now
    {
-      Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : 
+      Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems :
                                                                                 &mLowPriorityQueuedItems;
       S32 index = -1;
       for(S32 i = 0; i < queue->size(); i++)
@@ -644,7 +645,7 @@ void HelpItemManager::addStartingHelpItemsToQueue(const ClientGame *game)
 {
    // Queue up some initial help messages for the new users
    reset();
-   addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!     
+   addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!
 
    if(game->getInputMode() == InputModeKeyboard)          // Show help related to basic movement and shooting
       addInlineHelpItem(ControlsKBItem);
@@ -666,7 +667,7 @@ void HelpItemManager::addStartingHelpItemsToQueue(const ClientGame *game)
 
    // And finally...
    addInlineHelpItem(F1HelpItem);             // How to get Help
-   
+
    if(game->getBotCount() == 0)
       addInlineHelpItem(AddBotsItem);         // Add some bots?
 }
@@ -708,7 +709,7 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
    if(!messageCameFromQueue)
    {
       Priority pr = helpItems[item].priority;
-      TNLAssert(pr != GameStart || !queueHasGameStartItems(), 
+      TNLAssert(pr != GameStart || !queueHasGameStartItems(),
                         "Any lingering GameStart items should have been removed in onGameStarting()!");
 
       // GameStart means remove any GameStart items in queue, and add to high priority queue only if it is empty
@@ -727,7 +728,7 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
          return;
 
       // Don't add if there are high priority queued items waiting
-      if(mHighPriorityQueuedItems.size() > 0 && !messageCameFromQueue)  
+      if(mHighPriorityQueuedItems.size() > 0 && !messageCameFromQueue)
          return;
    }
 
@@ -785,7 +786,7 @@ void HelpItemManager::buildItemsToHighlightList()
          HighlightItem item;
          item.type = itemType;
          item.whose = helpItems[mHelpItems[i]].whose;
-      
+
          mItemsToHighlight.push_back(item);
       }
    }

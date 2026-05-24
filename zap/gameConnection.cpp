@@ -1085,7 +1085,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), Ne
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    LoadoutTracker req(loadout);
-   getClientInfo()->requestLoadout(req);
+   getClientInfo()->requestDesign(&req);
+}
+
+
+// Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestVehicleDesign, (Vector<U8> design), (design), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+{
+   VehicleDesign req(design);
+   getClientInfo()->requestDesign(&req);
 }
 
 

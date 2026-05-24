@@ -1206,12 +1206,12 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       if(!levelHasLoadoutZone())
       {
          // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
-         clientInfo->updateLoadout(true, mEngineerEnabled);
+         clientInfo->updateDesign(true, mEngineerEnabled);
       }
       else
       {
          // Still using old loadout because we haven't entered a loadout zone yet...
-         clientInfo->updateLoadout(false, mEngineerEnabled, true);
+         clientInfo->updateDesign(false, mEngineerEnabled, true);
 
          // Unless we're actually spawning onto a loadout zone
          Vector<DatabaseObject *> loadoutZones;
@@ -1299,24 +1299,24 @@ void GameType::updateShipLoadout(BfObject *shipObject)
    ClientInfo *clientInfo = shipObject->getOwner();
 
    if(clientInfo)
-      clientInfo->updateLoadout(true, mEngineerEnabled);
+      clientInfo->updateDesign(true, mEngineerEnabled);
 }
 
 
 // Make loadout effective immediately if we're in a loadout zone
 // clientInfo already has the loadout; we only get here from ClientInfo::requestLoadout
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout)
+void GameType::makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo)
 {
    Ship *ship = clientInfo->getShip();
 
-   if(ship)
+   if(ship && ship->isBitfighterShip())
    {
       BfObject *object = ship->isInZone(LoadoutZoneTypeNumber);
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
-            clientInfo->updateLoadout(true, mEngineerEnabled);
+            clientInfo->updateDesign(true, mEngineerEnabled);
    }
 }
 
@@ -3583,6 +3583,17 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
    if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
       static_cast<Ship *>(controlObject)->selectWeapon(indx);
+}
+
+
+// Client tells server that they chose the specified weapon
+GAMETYPE_RPC_C2S(GameType, c2sToggleWeapon, (RangedU32<0, MaxXtankWeaponSlots> indx, bool isActive), (indx, isActive))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   BfObject *controlObject = source->getControlObject();
+
+   if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
+      static_cast<Ship *>(controlObject)->toggleWeapon(indx, isActive);
 }
 
 

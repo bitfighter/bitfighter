@@ -264,7 +264,7 @@ public:
    bool isInScoreboardMode();
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
-   void xtankDesignUpdated(const XtankDesign &design);
+   void xtankDesignUpdated(const VehicleDesign &design);
    bool isShowingDebugShipCoords();
    Point worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight);
    void resetCommandersMap();

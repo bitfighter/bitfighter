@@ -29,6 +29,7 @@
 #include "MathUtils.h"           // For converting radians to degrees, sq()
 #include "GeomUtils.h"
 
+#include "pictureloader.h"
 #include "tnlRandom.h"
 
 #ifdef SHOW_SERVER_SITUATION
@@ -2216,7 +2217,7 @@ static void drawInterruptedCircle(const Point &center, F32 radius, const F32 ang
 
 void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
-   // I started to try to document how this works, but it's messy and involved some trial-and-error.  
+   // I started to try to document how this works, but it's messy and involved some trial-and-error.
    // It works.  You shouldn't have to mess with it.
 
    static const F32 BAR_HALF_WIDTH_RATIO = .08f;      // <<< This controls how thick the bars are
@@ -2225,11 +2226,11 @@ void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
    Renderer& r = Renderer::get();
    static const F32 SQRT3_OVER_2 = sqrt(3) / 2;
    const F32 outerR = (F32)radius;
-   const F32 halfWidth = outerR * BAR_HALF_WIDTH_RATIO;     
+   const F32 halfWidth = outerR * BAR_HALF_WIDTH_RATIO;
    const F32 innerR = outerR - halfWidth * 2.0f;
 
    // Absolute angles, where 0 is horizontal facing right
-   const F32 gapAngles[4] = {    
+   const F32 gapAngles[4] = {
       45 * DEGREES_TO_RADIANS,
       90 * DEGREES_TO_RADIANS,
       135 * DEGREES_TO_RADIANS,
@@ -2268,7 +2269,7 @@ void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
          p3.x, p3.y,  p4.x, p4.y
       };
       r.renderVertexArray(lines1, ARRAYSIZE(lines1) / 2, RenderType::Lines);
-      
+
 
       r.rotate(135, 0, 0, 1);    // Right leg
       static const F32 lines2[] = {
@@ -2304,6 +2305,59 @@ void renderSafeZone(const Color *color, const Vector<Point> *outline, const Vect
    renderZone(color, outline, fill);
    Renderer::get().setColor(*color);
    renderSafeZoneIcon(centroid, 20, angleRadians);
+}
+
+
+// Render linework from an SVG.  Keep it simple!
+// Trace a bitmap with Inkscape Object > Trace Bitmap > Detection Mode > Centerline tracing.
+// It will look gimpy in Inkscape, but will render nicely here.
+void renderFromSvgData(const SvgGeometry *geom, F32 radius, const Point &center)
+{
+   // Scale so the SVG height maps to 2*radius, centered on `center`
+   F32 scale = (2.0f * radius) / geom->height;
+   F32 offX = center.x - geom->width * 0.5f * scale;
+   F32 offY = center.y - geom->height * 0.5f * scale;
+
+   Renderer &r = Renderer::get();
+
+   //r.setColor(Colors::red);
+   r.pushMatrix();
+   r.translate(offX, offY, 0);
+   r.scale(scale, scale, 1);
+
+   for(const SvgContour &contour : geom->contours)
+   {
+      U32 npts = (U32)(contour.pts.size() / 2);
+      RenderType type = contour.closed ? RenderType::LineLoop : RenderType::LineStrip;
+      r.renderVertexArray(contour.pts.data(), npts, type);
+   }
+
+   r.popMatrix();
+}
+
+
+// Draw a bullet silhouette using coordinates in an SVG
+void renderReloadZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+{
+   // Load and tessellate SVG once; reuse geometry every frame
+   static SvgGeometry *geom = NULL;
+   if(!geom)
+   {
+      geom = LoadSvgGeometry("bullet2.svg");
+      if(!geom)
+         return;
+   }
+
+   renderFromSvgData(geom, radius, center);
+}
+
+
+void renderReloadZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                      const Point &centroid, F32 angleRadians)
+{
+   renderZone(color, outline, fill);
+   Renderer::get().setColor(*color);
+   renderReloadZoneIcon(centroid, 20, angleRadians);
 }
 
 

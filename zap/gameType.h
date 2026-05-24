@@ -356,8 +356,11 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   void makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout);
+   void makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo);
    void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
+
+   void updateShipDesign(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
+
 
    const Color &getTeamHealthBarColor(const BfObject *obj) const;      // Get the color of a ship's health bar
 
@@ -438,6 +441,7 @@ public:
    TNL_DECLARE_RPC(c2sChooseNextWeapon, ());
    TNL_DECLARE_RPC(c2sChoosePrevWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
+   TNL_DECLARE_RPC(c2sToggleWeapon, (RangedU32<0, MaxXtankWeaponSlots> index, bool isActive));
    TNL_DECLARE_RPC(c2sDropItem, ());
 
    // These are used when the client sees something happen and wants a confirmation from the server

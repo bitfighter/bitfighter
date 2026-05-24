@@ -8,7 +8,7 @@
 
 #include "UI.h"
 #include "UILevelInfoDisplayer.h"
-#include "HelperManager.h"   
+#include "HelperManager.h"
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
@@ -127,6 +127,7 @@ private:
    // Retnder helpers
    void renderInputModeChangeAlert() const;
    void renderTalkingClients() const;        // Render things related to voice chat
+   void renderXtankWeaponStatusOverlay() const;
    void renderChatMsgs() const;
    void renderAnnouncement(S32 pos) const;
    void renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) const;
@@ -172,6 +173,7 @@ private:
 
    // Some key event handlers
    bool processPlayModeKey(InputCode inputCode);
+   bool checkXtankKeys(InputCode inputCode);
    void checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode);
    bool shouldCountdownHelpItemTimer() const;
 
@@ -179,8 +181,10 @@ private:
 
    SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0) const;
 
-public:
-   explicit GameUserInterface(ClientGame *game);  // Constructor
+   bool xTankMode();
+   bool toggleWeapon(S32 slotIndex);
+
+    public : explicit GameUserInterface(ClientGame *game); // Constructor
    virtual ~GameUserInterface();                  // Destructor
 
    bool displayInputModeChangeAlert;
@@ -210,12 +214,12 @@ public:
    void serverLoadedLevel(const string &levelName);
 
    void render();                         // Render game screen
-  
+
    void renderReticle() const;            // Render crosshairs
    void renderWrongModeIndicator() const;
    void renderProgressBar() const;        // Render level-load progress bar
    void renderShutdownMessage() const;    // Render an alert if server is shutting down
-   void renderLostConnectionMessage() const; 
+   void renderLostConnectionMessage() const;
    void renderSuspendedMessage() const;
    void renderLevelUpMessage(S32 newLevel) const;
    void renderLevelListDisplayer() const;
@@ -225,11 +229,11 @@ public:
    bool isChatting() const;               // Returns true if player is composing a chat message
 
    void resetCommandersMap();             // Turn off commander's map when connecting to server
-   F32 getCommanderZoomFraction() const; 
+   F32 getCommanderZoomFraction() const;
 
    void toggleShowingShipCoords();
-   void toggleShowingObjectIds();  
-   void toggleShowingMeshZones();  
+   void toggleShowingObjectIds();
+   void toggleShowingMeshZones();
    void toggleShowDebugBots();
 
    void addInlineHelpItem(HelpItem item);
@@ -255,7 +259,7 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    void clearDisplayers();
-   
+
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
    bool shouldRenderLevelInfo() const;
@@ -294,8 +298,8 @@ public:
 
    void onTextInput(char ascii);
 
-   void chooseNextWeapon();           
-   void choosePrevWeapon();   
+   void chooseNextWeapon();
+   void choosePrevWeapon();
    void selectWeapon(U32 index);    // Choose weapon by its index
    void activateModule(S32 index);  // Activate a specific module by its index
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
@@ -304,11 +308,11 @@ public:
    void setModuleSecondary(ShipModule module, bool isActive);
 
    // Xtank design helpers
-   void xtankDesignUpdated(const XtankDesign &design);   // Updates the HUD indicator
-   void applyXtankDesign(const XtankDesign &design);     // Applies design to ship + mCurrentMove
+   void xtankDesignUpdated(const VehicleDesign &design);   // Updates the HUD indicator
+   void applyXtankDesign(const VehicleDesign &design);     // Applies design to ship + mCurrentMove
 
    void toggleLevelRating();
-   
+
    static string getPersonalRatingString(PersonalRating rating);
    static string getTotalRatingString(S16 rating);
 
@@ -317,7 +321,7 @@ public:
    Point getTimeLeftIndicatorWidthAndHeight() const;
    bool scoreboardIsVisible() const;
 
-   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
+   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);
    void exitHelper();
 
    // Testing methods

@@ -53,7 +53,7 @@ TEST_F(LoadoutTrackerTest, ToVector)
 {
    U8 items[] = { ModuleSensor, ModuleArmor, WeaponBounce, WeaponPhaser, WeaponBurst };
 
-   Vector<U8> outItems = rubric.toU8Vector();
+   Vector<U8> outItems = rubric.pack();
    ASSERT_EQ(outItems.size(), ShipModuleCount + ShipWeaponCount);
    for(S32 i = 0; i < outItems.size(); i++)
       ASSERT_EQ(outItems[i], items[i]);
@@ -69,7 +69,7 @@ TEST_F(LoadoutTrackerTest, ToString)
    ASSERT_NE("", noItems.toString(false));      // Expect something different than empty string
 }
 
-   
+
 };
 
 

@@ -22,67 +22,93 @@ using namespace std;
 namespace Zap 
 {
 
-class LoadoutTracker
+class Statistics;   // Forward declaration
+
+// Abstract class to track vehicle designs and ship loadouts.
+class DesignTracker
 {
-private:
-   ShipModule mModules[ShipModuleCount];     // Modules player's ship is carrying
-   WeaponType mWeapons[ShipWeaponCount];     // Weapons player's ship is carrying
+   public:
+	  virtual ~DesignTracker() { /* Do nothing */ }
 
-   U32 mActiveWeapon;      // Index of active weapon
+	  virtual void reset() = 0;    // Reset this design to a sane default
 
-   bool mModulePrimaryActive[ModuleCount];         // Is the primary component of the module active at this moment?
-   bool mModuleSecondaryActive[ModuleCount];       // Is the secondary component of the module active?
+	  virtual bool operator == (const DesignTracker &other) const = 0;
+	  bool operator != (const DesignTracker &other) const;
+	  virtual Vector<U8> pack() const = 0;
 
-public:
-   LoadoutTracker();                            // Constructor
-   LoadoutTracker(const string &loadoutStr);  
-   LoadoutTracker(const Vector<U8> &loadout);
-   virtual ~LoadoutTracker();
+	  virtual bool isValid() const = 0;
+	  virtual bool isValidForLevel(bool engineerAllowed) const = 0;
+	  virtual void set(const string &str) = 0;
+	  virtual void saveDesignStats(Statistics &statistics) const = 0;
 
-   bool operator == (const LoadoutTracker &other) const;
-   bool operator != (const LoadoutTracker &other) const;
-
-   bool update(const LoadoutTracker &tracker);
-
-   // Set loadout in bulk
-   void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
-   void setLoadout(const string &loadoutStr);
-
-   // Or set loadout a la carte
-   void setModule(U32 moduleIndex, ShipModule module);
-   void setWeapon(U32 weaponIndex, WeaponType weapon);
-
-   void setModulePrimary(ShipModule module, bool isActive);
-   void setModuleSecondary(ShipModule module, bool isActive);
-
-   void setModuleIndexPrimary(U32 moduleIndex, bool isActive);
-   void setModuleIndexSecondary(U32 moduleIndex, bool isActive);
-
-   void deactivateAllModules();
-
-   void setActiveWeapon(U32 weaponIndex);
-
-   bool isValid() const;
-   bool isWeaponActive(U32 weaponIndex) const;
-
-   WeaponType getWeapon(U32 weaponIndex) const;
-   WeaponType getActiveWeapon() const;
-   U32 getActiveWeaponIndex() const;
-
-   void resetLoadout();    // Reset this loadout to its factory settings
+	  virtual void writeToStream(BitStream *stream) = 0;
+	  virtual void readFromStream(BitStream *stream) = 0;
+};
 
 
+class LoadoutTracker : public DesignTracker
+{
+   private:
+	  ShipModule mModules[ShipModuleCount];     // Modules player's ship is carrying
+	  WeaponType mWeapons[ShipWeaponCount];     // Weapons player's ship is carrying
 
-   ShipModule getModule(U32 modIndex) const;
+	  U32 mActiveWeapon;      // Index of active weapon
 
-   bool hasModule(ShipModule mod) const;
-   bool hasWeapon(WeaponType weapon) const;
+	  bool mModulePrimaryActive[ModuleCount];         // Is the primary component of the module active at this moment?
+	  bool mModuleSecondaryActive[ModuleCount];       // Is the secondary component of the module active?
 
-   bool isModulePrimaryActive(ShipModule module) const;
-   bool isModuleSecondaryActive(ShipModule module) const;
+   public:
+	  LoadoutTracker();                            // Constructor
+	  LoadoutTracker(const string &loadoutStr);  
+	  LoadoutTracker(const Vector<U8> &loadout);
+	  virtual ~LoadoutTracker();
 
-   Vector<U8> toU8Vector() const;
-   string toString(bool compact) const;
+	  bool operator == (const DesignTracker &other) const override;
+
+	  bool update(const LoadoutTracker &tracker);
+	  void writeToStream(BitStream *stream) override;
+	  void readFromStream(BitStream *stream) override;
+
+	  // Set loadout in bulk
+	  void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
+	  void set(const string &loadoutStr);
+
+	  // Or set loadout a la carte
+	  void setModule(U32 moduleIndex, ShipModule module);
+	  void setWeapon(U32 weaponIndex, WeaponType weapon);
+
+	  void setModulePrimary(ShipModule module, bool isActive);
+	  void setModuleSecondary(ShipModule module, bool isActive);
+
+	  void setModuleIndexPrimary(U32 moduleIndex, bool isActive);
+	  void setModuleIndexSecondary(U32 moduleIndex, bool isActive);
+
+	  void deactivateAllModules();
+
+	  void setActiveWeapon(U32 weaponIndex);
+
+	  bool isValid() const;
+	  bool isValidForLevel(bool engineerAllowed) const;
+	  bool isWeaponActive(U32 weaponIndex) const;
+
+	  WeaponType getWeapon(U32 weaponIndex) const;
+	  WeaponType getActiveWeapon() const;
+	  U32 getActiveWeaponIndex() const;
+
+	  void reset();    // Reset this loadout to its factory settings
+
+	  ShipModule getModule(U32 modIndex) const;
+
+	  bool hasModule(ShipModule mod) const;
+	  bool hasWeapon(WeaponType weapon) const;
+
+	  bool isModulePrimaryActive(ShipModule module) const;
+	  bool isModuleSecondaryActive(ShipModule module) const;
+
+	  Vector<U8> pack() const;
+	  string toString(bool compact) const;
+
+	  void saveDesignStats(Statistics &statistics) const override;
 };
 
 

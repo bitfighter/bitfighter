@@ -1236,7 +1236,7 @@ S32 Robot::lua_setLoadoutWeapon(lua_State *L)
    loadout.setWeapon(slot, weapon);
 
    // Now request the new one
-   getOwner()->requestLoadout(loadout);
+   getOwner()->requestDesign(&loadout);
 
    return 0;
 }
@@ -1265,7 +1265,7 @@ S32 Robot::lua_setLoadoutModule(lua_State *L)
    loadout.setModule(slot, module);
 
    // Now request the new one
-   getOwner()->requestLoadout(loadout);
+   getOwner()->requestDesign(&loadout);
 
    return 0;
 }

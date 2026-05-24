@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 //
-// XtankShape.cpp - Vehicle body shape data derived from the xtank game.
+// VehicleDesign.cpp - Vehicle body shape data derived from the xtank game.
 //
 // Polygon vertices were extracted from the xtank Display/Objects/*.obj files
 // (picinfo[0], the east-facing / 0-degree view) and then rotated 90 degrees
@@ -25,8 +25,9 @@
 //------------------------------------------------------------------------------
 
 #include "XtankShape.h"
-#include "UIXtankHelper.h"
+#include "UIVehicleDesigner.h"
 #include "MathUtils.h"
+#include "TnlBitStream.h"
 
 using std::array;
 
@@ -563,6 +564,7 @@ XtankWeaponInfo xtankWeaponInfos[] =
 {
    /*                             reload*/
    /* name               dam ammo  time  spd  wgt   spc  mspc  fr  ht  a$   cost  refl safety hgt  mount o_flgs  creat_flgs      disp_flgs    move_flgs   hit_flgs       bfWeapon         style */
+   { "None",  1, 300, 133,   17,   20,  200,  200, 22,  0,  1,   1000,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
    { "Light Machine Gun",  1, 300, 133,   17,   20,  200,  200, 22,  0,  1,   1000,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
    { "Machine Gun",        2, 250, 200,   17,   50,  225,  225, 22,  1,  2,   2200,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
    { "Heavy Machine Gun",  3, 200, 200,   17,  100,  250,  250, 22,  2,  3,   3000,   1,   0, NORM,  M_ALL,  2,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
@@ -680,25 +682,116 @@ XtankSpecialInfo xtankSpecialInfos[XtankSpecialCount] =
 };
 
 
-XtankDesign::XtankDesign()    // Constructor
+// Constructor
+VehicleDesign::VehicleDesign()    
 {
    init();
+}
+
+
+// Deserializing constructor
+VehicleDesign::VehicleDesign(const Vector<U8> &design)
+{
+   init();
+   unpack(design);
+}
+
+
+// Fills design with the serialized bytes representing this VehicleDesign. 
+Vector<U8> VehicleDesign::pack() const
+{
+   Vector<U8> design(35);
+
+   design.push_back(U8(body));
+   design.push_back(U8(engine));
+   design.push_back(U8(tread));
+   design.push_back(U8(bumper));
+   design.push_back(U8(suspension));
+   design.push_back(U8(heatSinks));
+   design.push_back(U8(armor));
+   
+
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+   {
+      S32 value = armorSides[i];
+      U8 hi = U8(value >> 8);
+      U8 lo = U8(value & 0xFF);
+
+      design.push_back(hi);
+      design.push_back(lo);
+   }
+
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      design.push_back(U8(weapons[i]));
+      design.push_back(U8(weaponMounts[i]));
+   }
+
+   U8 b3 = U8(specials >> 24);
+   U8 b2 = U8((specials >> 16) & 0xFF);
+   U8 b1 = U8((specials >> 8) & 0xFF);
+   U8 b0 = U8(specials & 0xFF);
+
+   design.push_back(b3);
+   design.push_back(b2);
+   design.push_back(b1);
+   design.push_back(b0);
+
+   return design;
+}
+
+
+void VehicleDesign::unpack(const Vector<U8> design)
+{
+   S32 index = 0;
+
+   body = (XtankBody)design[index++];
+   engine = (XtankEngine)design[index++];
+   tread = (XtankTread)design[index++];
+   bumper = (XtankBumper)design[index++];
+   suspension = (XtankSuspension)design[index++];
+   heatSinks = design[index++];
+   armor = (XtankArmor)design[index++];
+   
+   // Each side can have up to MAX_ARMOR_PER_SIDE armor, currently 999, so we need to U8s to store each side's armor value.
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+   {
+      U8 hi = design[index++];
+      U8 lo = design[index++];
+
+      U16 combined = (U16(hi) << 8) | U16(lo);
+
+      armorSides[i] = (S32)combined;
+   }
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      weapons[i] = (XtankWeapon)design[index++];
+      weaponMounts[i] = (XtankMountLocation)design[index++];
+   }
+
+   U8 b3 = design[index++];
+   U8 b2 = design[index++];
+   U8 b1 = design[index++];
+   U8 b0 = design[index++];
+
+   // Specials is a bitmap of up to 32 special features, so we need 4 U8s to store it.
+   specials = (U32(b3) << 24) | (U32(b2) << 16) | (U32(b1) << 8) | (U32(b0));
+
+   TNLAssert(design.size() == index, "Got wrong number of bytes!");
+}
+
+
+void VehicleDesign::init()
+{
+   reset();
    for(S32 i = 0; i < WEAPON_SLOTS; i++)
       preferredMounts[i] = XtankMountLocation::TURRET1;
 }
 
 
-void XtankDesign::init()
+// Transforms this design into a relatively useless standard starting point
+void VehicleDesign::reset()
 {
-   for(S32 i = 0; i < WEAPON_SLOTS; i++)
-   {
-      weapons[i] = XtankWeapon::NONE;
-      weaponMounts[i] = XtankMountLocation::NONE;
-   }
-   // Xtank-style default armor: all sides start at 0 and are set explicitly.
-   for(S32 i = 0; i < VehicleSidesCount; i++)
-      armorSides[i] = 0;
-
    body = XtankBody::DEFAULT;
    engine = XtankEngine::DEFAULT;
    tread = XtankTread::DEFAULT;
@@ -707,40 +800,34 @@ void XtankDesign::init()
    suspension = XtankSuspension::DEFAULT;
    bumper = XtankBumper::DEFAULT;
    specials = 0;     // This is a bitmap, so 0 means "no specials"
-}
-
-
-XtankDesign::XtankDesign(const Move &move)
-{
-   body = (XtankBody)move.bodyIndex;
-   engine = (XtankEngine)move.engineType;
-   tread = (XtankTread)move.treadType;
-   armor = (XtankArmor)move.armorType;
-   suspension = (XtankSuspension)move.suspensionType;
-   bumper = (XtankBumper)move.bumperType;
-   heatSinks = move.heatSinkCount;
-   specials = move.specials;
-
-   for(S32 i = 0; i < VehicleSidesCount; i++)
-      armorSides[i] = move.armorSides[i];
 
    for(S32 i = 0; i < WEAPON_SLOTS; i++)
    {
-      weapons[i] = (XtankWeapon)move.weaponSlot[i];
-      weaponMounts[i] = (XtankMountLocation)move.weaponMount[i];
-      preferredMounts[i] = (XtankMountLocation)move.weaponMount[i];
+      weapons[i] = XtankWeapon::NONE;
+      weaponMounts[i] = XtankMountLocation::NONE;
    }
+   // Xtank-style default armor: all sides start at 0 and are set explicitly.
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+      armorSides[i] = 0;
 }
 
-bool XtankDesign::same(const XtankDesign &other) const
+
+bool VehicleDesign::operator == (const DesignTracker &other) const
 {
-   if(engine != other.engine || tread != other.tread || armor != other.armor ||
-      suspension != other.suspension || bumper != other.bumper || heatSinks != other.heatSinks ||
-      specials != other.specials)
+   const VehicleDesign *o = dynamic_cast<const VehicleDesign *>(&other);
+   TNLAssert(o, "Comparing VehicleDesign with non-VehicleDesign!");
+
+   if(!o)
+      return false;
+
+
+   if(engine != o->engine || tread != o->tread || armor != o->armor ||
+      suspension != o->suspension || bumper != o->bumper || heatSinks != o->heatSinks ||
+      specials != o->specials)
       return false;
 
    for(S32 i = 0; i < VehicleSidesCount; i++)
-      if(armorSides[i] != other.armorSides[i])
+      if(armorSides[i] != o->armorSides[i])
          return false;
 
    // Unordered pairwise comparison: same set of (weapon, mount) pairs regardless of slot order.
@@ -749,7 +836,7 @@ bool XtankDesign::same(const XtankDesign &other) const
    for(S32 i = 0; i < WEAPON_SLOTS; i++)
    {
       mine[i] = { weapons[i],       weaponMounts[i] };
-      theirs[i] = { other.weapons[i], other.weaponMounts[i] };
+      theirs[i] = { o->weapons[i], o->weaponMounts[i] };
    }
    std::sort(mine, mine + WEAPON_SLOTS);
    std::sort(theirs, theirs + WEAPON_SLOTS);
@@ -762,26 +849,26 @@ bool XtankDesign::same(const XtankDesign &other) const
 
 
 // Name of currently selected armor
-const char *XtankDesign::getArmorName() const
+const char *VehicleDesign::getArmorName() const
 {
    return xtankArmorInfos[(S32)armor].name;
 }
 
 
 // Size of currently selected body
-S32 XtankDesign::getBodySize() const
+S32 VehicleDesign::getBodySize() const
 {
    return xTankBodyStats[(S32)body].size;
 }
 
 
-bool XtankDesign::isXtankVehicle() const
+bool VehicleDesign::isXtankVehicle() const
 {
    return body != XtankBody::BITFIGHTER_SHIP && body != XtankBody::NONE;
 }
 
 
-void XtankDesign::reduceArmor(VehicleSides side, S32 amount)
+void VehicleDesign::reduceArmor(VehicleSides side, S32 amount)
 {
    S32 sideIndex = (S32)side;
    if(armorSides[sideIndex] - amount >= 0)
@@ -791,7 +878,7 @@ void XtankDesign::reduceArmor(VehicleSides side, S32 amount)
 }
 
 
-void XtankDesign::increaseArmor(VehicleSides side, S32 amount)
+void VehicleDesign::increaseArmor(VehicleSides side, S32 amount)
 {
    S32 sideIndex = (S32)side;
    if(armorSides[sideIndex] + amount <= MAX_ARMOR_PER_SIDE)
@@ -801,7 +888,7 @@ void XtankDesign::increaseArmor(VehicleSides side, S32 amount)
 }
 
 
-void XtankDesign::nextArmor()
+void VehicleDesign::nextArmor()
 {
    S32 nextArmor = (S32)armor + 1;
    if(nextArmor == (S32)XtankArmorCount)
@@ -811,7 +898,7 @@ void XtankDesign::nextArmor()
 }
 
 
-void XtankDesign::previousArmor()
+void VehicleDesign::previousArmor()
 {
    S32 prevArmor = (S32)armor - 1;
    if(prevArmor < 0)
@@ -821,7 +908,7 @@ void XtankDesign::previousArmor()
 }
 
 
-void XtankDesign::nextMount(S32 slot)
+void VehicleDesign::nextMount(S32 slot)
 {
    XtankWeapon w = weapons[slot];
 
@@ -835,7 +922,7 @@ void XtankDesign::nextMount(S32 slot)
 }
 
 
-void XtankDesign::previousMount(S32 slot)
+void VehicleDesign::previousMount(S32 slot)
 {
    XtankWeapon w = weapons[slot];
 
@@ -894,7 +981,7 @@ static bool weaponAllowedAtMount(XtankWeapon weapon, XtankMountLocation mount)
 }
 
 
-bool XtankDesign::isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMountLocation mount)
+bool VehicleDesign::isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMountLocation mount)
 {
    // Does this body have the specified mountpoint?
    if(!bodySupportsMount(body, mount))
@@ -905,7 +992,7 @@ bool XtankDesign::isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMou
 }
 
 
-XtankMountLocation XtankDesign::firstValidMount(XtankBody body, XtankWeapon weapon, XtankMountLocation preferred)
+XtankMountLocation VehicleDesign::firstValidMount(XtankBody body, XtankWeapon weapon, XtankMountLocation preferred)
 {
    if(isMountCompatible(body, weapon, preferred))
       return preferred;
@@ -921,8 +1008,54 @@ XtankMountLocation XtankDesign::firstValidMount(XtankBody body, XtankWeapon weap
 }
 
 
+void VehicleDesign::writeToStream(BitStream *stream)
+{
+   stream->writeEnum(body, XtankBody::COUNT);
+   stream->writeEnum(engine, XtankEngine::COUNT);
+   stream->writeEnum(tread, XtankTread::COUNT);
+   stream->writeEnum(armor, XtankArmor::COUNT);
+   stream->writeEnum(suspension, XtankSuspension::COUNT);
+   stream->writeEnum(bumper, XtankBumper::COUNT);
+
+   stream->writeRangedU32(heatSinks, 0, MAX_HEAT_SINKS);
+   stream->writeRangedU32(specials, 0, MAX_SPECIALS);
+
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      stream->writeEnum(weapons[i], XtankWeapon::COUNT);
+      stream->writeEnum(weaponMounts[i], XtankMountLocation::COUNT);
+   }
+   // Xtank-style default armor: all sides start at 0 and are set explicitly.
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+      stream->writeRangedU32(armorSides[i], 0, MAX_ARMOR_PER_SIDE);
+}
+
+
+void VehicleDesign::readFromStream(BitStream *stream)
+{
+   body = stream->readEnum(XtankBody::COUNT);
+   engine = stream->readEnum(XtankEngine::COUNT);
+   tread = stream->readEnum(XtankTread::COUNT);
+   armor = stream->readEnum(XtankArmor::COUNT);
+   suspension = stream->readEnum(XtankSuspension::COUNT);
+   bumper = stream->readEnum(XtankBumper::COUNT);
+
+   heatSinks = stream->readRangedU32(0, MAX_HEAT_SINKS);
+   specials = stream->readRangedU32(0, MAX_SPECIALS);
+
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      weapons[i] = stream->readEnum(XtankWeapon::COUNT);
+      weaponMounts[i] = stream->readEnum(XtankMountLocation::COUNT);
+   }
+   // Xtank-style default armor: all sides start at 0 and are set explicitly.
+   for(S32 i = 0; i < VehicleSidesCount; i++)
+      armorSides[i] = stream->readRangedU32(0, MAX_ARMOR_PER_SIDE);
+}
+
+
 // Slot is ignored except when assigning weapons
-void XtankDesign::selected(Phase phase, S32 index, S32 slot)
+void VehicleDesign::selected(Phase phase, S32 index, S32 slot)
 {
    switch(phase)
    {
@@ -972,14 +1105,14 @@ void XtankDesign::selected(Phase phase, S32 index, S32 slot)
 }
 
 
-void XtankDesign::setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mountPoint)
+void VehicleDesign::setWeapon(S32 slot, XtankWeapon weapon, XtankMountLocation mountPoint)
 {
    weapons[slot] = weapon;
    weaponMounts[slot] = mountPoint;
 }
 
 
-S32 XtankDesign::slotsInUse() const
+S32 VehicleDesign::slotsInUse() const
 {
    S32 slots = 0;
    for(S32 i = 0; i < WEAPON_SLOTS; i++)
@@ -1003,13 +1136,13 @@ S32 XtankDesign::slotsInUse() const
 // every 5 frames, the vehicle’s heat is reduced by:
 // v->vdesc->heat_sinks + 1 (default case)
 // So each heat sink gives you + 1 heat dissipation per 5 frames, on top of a base 1.
-S32 XtankDesign::heatDissipation() const
+S32 VehicleDesign::heatDissipation() const
 {
    return heatSinks * 3;
 }
 
 
-S32 XtankDesign::getSpecialsSpace() const
+S32 VehicleDesign::getSpecialsSpace() const
 {
    S32 total = 0;
    for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
@@ -1020,7 +1153,7 @@ S32 XtankDesign::getSpecialsSpace() const
 }
 
 
-S32 XtankDesign::getSpecialsWeight() const
+S32 VehicleDesign::getSpecialsWeight() const
 {
    S32 total = 0;
    for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
@@ -1031,7 +1164,7 @@ S32 XtankDesign::getSpecialsWeight() const
 }
 
 
-S32 XtankDesign::getSpecialsCost() const
+S32 VehicleDesign::getSpecialsCost() const
 {
    S32 total = 0;
    for(S32 i = 0; i < (S32)XtankSpecialCount; i++)
@@ -1042,7 +1175,14 @@ S32 XtankDesign::getSpecialsCost() const
 }
 
 
-string XtankDesign::getValidMountList(XtankWeapon weapon) const
+// Deserialize from a string, perhaps from a settings file.
+void VehicleDesign::set(const string &loadoutStr)
+{
+   TNLAssert(false, "Needs to be implemented!");
+}
+
+
+string VehicleDesign::getValidMountList(XtankWeapon weapon) const
 {
    if(weapon == XtankWeapon::NONE)
       return "--";
@@ -1071,6 +1211,28 @@ string XtankDesign::getValidMountList(XtankWeapon weapon) const
 
    return mounts;
 }
+
+
+// Minimal validity test; basically seeing if it has been set or not.
+bool VehicleDesign::isValid() const
+{
+   return true;
+}
+
+
+// All designs currently valid
+bool VehicleDesign::isValidForLevel(bool engineerAllowed) const
+{
+   return isValid();
+}
+
+
+void VehicleDesign::saveDesignStats(Statistics &statistics) const
+{
+   // TODO: Implement something here
+}
+
+
 
 
 } /* namespace Zap */

@@ -69,8 +69,12 @@ private:
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
    Statistics mStatistics;          // Statistics tracker
    SafePtr<Ship> mShip;             // SafePtr will return NULL if ship object is deleted
-   LoadoutTracker mOnDeckLoadout;
-   LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   
+   LoadoutTracker mOnDeckLoadout;   // On-deck loadout, activated when ship enters a loadout zone
+   LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout; Client: to check if using same loadout configuration
+
+   VehicleDesign mOnDeckDesign;
+   VehicleDesign mActiveDesign;    // Server: to respawn with old design; Client: to check if using same loadout configuration
 
    bool mNeedToCheckAuthenticationWithMaster;
 
@@ -119,19 +123,22 @@ public:
    U16 getGamesPlayed() const;
 
    // Whole mess of loadout related functions
-   const LoadoutTracker &getOnDeckLoadout() const;
-   const LoadoutTracker &getOldLoadout() const;
+   const LoadoutTracker *getOnDeckLoadout() const;
+   const LoadoutTracker *getOldLoadout() const;
+
+   const VehicleDesign *getOnDeckDesign() const;
+   const VehicleDesign *getOldDesign() const;
 
    void resetActiveLoadout();
    void saveActiveLoadout(const LoadoutTracker &loadout);
-   void updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent = false);
+   void saveActiveDesign(const VehicleDesign &design);
+   void updateDesign(bool useOnDeck, bool engineerAllowed, bool silent = false);      // For Bitfighter and Xtank
+
+
    void resetLoadout(bool levelHasLoadoutZone);
-   void resetLoadout();
-   void requestLoadout(const LoadoutTracker &loadout);
+   void requestDesign(const DesignTracker *design);    // For Bitfighter and Xtank
 
    Timer respawnTimer;
-
-   bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
 
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();

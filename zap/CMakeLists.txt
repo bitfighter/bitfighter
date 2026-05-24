@@ -83,6 +83,7 @@ set(SHARED_SOURCES
 	ServerGame.cpp
 	Settings.cpp
 	safeZone.cpp
+	reloadZone.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp
@@ -116,7 +117,7 @@ set(EXTRA_SOURCES
 )
 
 # Client-only classes
-set(CLIENT_SOURCES 
+set(CLIENT_SOURCES
 	AppIntegrator.cpp
 	AToBScroller.cpp
 	ChatCommands.cpp
@@ -135,6 +136,7 @@ set(CLIENT_SOURCES
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
+	pictureloader.cpp
     GaugeRenderer.cpp
 	GL2Renderer.cpp
 	GL2RingBuffer.cpp
@@ -202,10 +204,10 @@ set(CLIENT_SOURCES
 file(GLOB BITFIGHTER_HEADERS *.h)
 
 file(GLOB OTHER_HEADERS
-	${CLIPPER_INCLUDE_DIR}/*.hpp 
-	${CMAKE_SOURCE_DIR}/other/*.h 
-	${CMAKE_SOURCE_DIR}/fontstash/*.h 
-	${CMAKE_SOURCE_DIR}/recast/*.h 
+	${CLIPPER_INCLUDE_DIR}/*.hpp
+	${CMAKE_SOURCE_DIR}/other/*.h
+	${CMAKE_SOURCE_DIR}/fontstash/*.h
+	${CMAKE_SOURCE_DIR}/recast/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/common/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/*.h
@@ -235,7 +237,7 @@ set(SHARED_LIBS
 
 # libraries used only on the client
 set(CLIENT_LIBS
-	${SDL_LIBRARY}	
+	${SDL_LIBRARY}
 	${PNG_LIBRARY}
 	${GL_LIBRARY}
 	${GL_LOADER_LIBRARY}
@@ -278,7 +280,7 @@ include(bitfighterd.cmake)
 if(COMPILE_CLIENT)
 	include(bitfighter_client.cmake)
 	include(bitfighter.cmake)
-	
+
 	# The test suite requires the client dependencies
 	if(COMPILE_TEST_SUITE)
 		include(bitfighter_test.cmake)
@@ -311,7 +313,7 @@ if(COMPILE_CLIENT)
 		${SPEEX_INCLUDE_DIR}
 		${SPARKLE_INCLUDE_DIR}
 	)
-	
+
 	if(COMPILE_TEST_SUITE)
 		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/include)
 	endif()

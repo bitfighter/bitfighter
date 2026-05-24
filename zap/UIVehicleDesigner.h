@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _UI_XTANK_HELPER_H_
-#define _UI_XTANK_HELPER_H_
+#ifndef _UI_VEHICLE_DESIGNER_H_
+#define _UI_VEHICLE_DESIGNER_H_
 
 #include "helperMenu.h"
 #include "XtankShape.h"    // for XtankDesign, XtankBody, XtankWeapon
@@ -70,7 +70,7 @@ public:
    virtual const TableColumn *getColumns() const = 0;
    virtual const TableRow *getRows() const = 0;
 
-   S32 render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const XtankDesign &design) const;
+   S32 render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const VehicleDesign &design) const;
 };
 
 
@@ -312,7 +312,7 @@ private:
    void fillRows() const override;
 
 public:
-   static const S32 rowCount = (S32)XtankWeapon::COUNT + 1;    // +1 for "None" row
+   static const S32 rowCount = (S32)XtankWeapon::COUNT;     // Includes NONE row
    static const S32 colCount = 13;
    COL_NUM_ASSERT;
 
@@ -335,7 +335,7 @@ struct LabelWidth
 };
 
 
-class UIXtankHelper : public HelperMenu
+class VehicleDesignerUserInterface : public HelperMenu
 {
    typedef HelperMenu Parent;
 
@@ -351,8 +351,8 @@ class UIXtankHelper : public HelperMenu
       SpecialInfo         mSpecialsInfo;
       ArmorAllocationInfo mArmorAllocationInfo;
 
-      XtankDesign mDesignInProgress;
-      XtankDesign mOriginalDesign;
+      VehicleDesign mDesignInProgress;
+      VehicleDesign mOriginalDesign;
       Phase mPhase;
 
       S32 mWeaponSlot;
@@ -478,8 +478,8 @@ class UIXtankHelper : public HelperMenu
 
 
    public:
-      UIXtankHelper();
-      virtual ~UIXtankHelper();
+      VehicleDesignerUserInterface();
+      virtual ~VehicleDesignerUserInterface();
 
       HelperMenu::HelperMenuType getType();
 
@@ -492,7 +492,7 @@ class UIXtankHelper : public HelperMenu
 
       // Fills phaseAtSlot[] and weaponSlotAtSlot[] for `size` display slots centered on
       // the current phase/weapon-slot, using a linear clamped virtual sequence.
-      // Exposed as public/static so it can be tested without a live UIXtankHelper instance.
+      // Exposed as public/static so it can be tested without a live VehicleDesignerUserInterface instance.
       //static void computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot,
       //   S32 slotsInUse, Phase phaseAtSlot[],
       //   S32 weaponSlotAtSlot[], S32 size);
@@ -504,21 +504,21 @@ class VehiclePreviewRenderer
 {
    public:
       // Draw the floating preview panel on the right side of the screen.
-      static void renderPreviewPanel(const XtankDesign &preview, Phase designPhase, S32 activeWaponSlot);
-      static S32 renderWeaponList(Phase designPhase, S32 activeWeaponSlot, S32 left, S32 cx, S32 y, const XtankDesign &preview, S32 fontSz, S32 lineGap);
+      static void renderPreviewPanel(const VehicleDesign &preview, Phase designPhase, S32 activeWaponSlot);
+      static S32 renderWeaponList(Phase designPhase, S32 activeWeaponSlot, S32 left, S32 cx, S32 y, const VehicleDesign &preview, S32 fontSz, S32 lineGap);
 
       // Draw the carousel position dots + arrows inside the preview panel.
       //static void renderCarouselDots(S32 cx, S32 y);
 
       // Draw combined effective vehicle stats (speed/reverse/accel/turn/fire-rate)
       // derived from the full current preview design.
-      static void renderFullBuildStats(S32 cx, S32 y, const XtankDesign &preview);
+      static void renderFullBuildStats(S32 cx, S32 y, const VehicleDesign &preview);
 
 };
 
 
 } /* namespace Zap */
-#endif /* _UI_XTANK_HELPER_H_ */
+#endif /* _UI_VEHICLE_DESIGNER_H_ */
 
 
 

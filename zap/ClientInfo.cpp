@@ -5,6 +5,7 @@
 
 #include "ClientInfo.h"
 
+#include "XtankShape.h"        // For VehicleDesign
 #include "gameConnection.h"
 #include "playerInfo.h"
 #include "EngineeredItem.h"   // For EngineerModuleDeployer def
@@ -209,88 +210,86 @@ void ClientInfo::setIsBusy(bool isBusy)
 }
 
 
-bool ClientInfo::isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed)
-{
-   if(!loadout.isValid())
-      return false;
-
-   // Reject if module contains engineer but it is not enabled on this level
-   if(!engineerAllowed && loadout.hasModule(ModuleEngineer))
-      return false;
-
-   // Check for illegal weapons
-   if(loadout.hasWeapon(WeaponTurret))
-      return false;
-
-   return true;     // Passed validation
-}
-
-
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
 // Updates the ship's loadout to the current or on-deck loadout
-void::ClientInfo::updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent)
+void ClientInfo::updateDesign(bool useOnDeck, bool engineerAllowed, bool silent)
 {
-   LoadoutTracker loadout = useOnDeck ? getOnDeckLoadout() : getOldLoadout();
-
-   // This could be triggered if on-deck loadout were set on a level where engineer were allowed,
-   // but not actualized until after a level change where engineer was banned.
-   if(!isLoadoutValid(loadout, engineerAllowed))   
-      return;
-
    Ship *ship = getShip();
 
-   bool loadoutChanged = false;
+
+   const DesignTracker *design;
+
+   if(ship->getGame()->isXtankModeGame())
+      design = useOnDeck ? getOnDeckDesign() : getOldDesign();
+   else
+      design = useOnDeck ? getOnDeckLoadout() : getOldLoadout();
+
+   // This could be triggered if on-deck design were set on a level where engineer were allowed,
+   // but not actualized until after a level change where engineer was banned.
+   if(!design->isValidForLevel(engineerAllowed))
+      return;
+
+   bool changed = false;
    if(ship)
-      loadoutChanged = ship->setLoadout(loadout.toU8Vector(), silent);
+   {
+      const VehicleDesign *vd = dynamic_cast<const VehicleDesign *>(design);
+      const LoadoutTracker *lt = dynamic_cast<const LoadoutTracker *>(design);
+
+      if(vd)
+         changed = ship->setDesign(*vd, silent);
+      else if(lt)
+         changed = ship->setLoadout(*lt, silent);
+
+      ship->onNewLoadoutAccpeted();
+   }
 
    // Write some stats
-   if(loadoutChanged)
-   {
-      // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
-      // second 16 bits to weapons.  The integer created might look like so:
-      //    00000000000001110000000000000011
-      U32 loadoutHash = 0;
-      for(S32 i = 0; i < ShipModuleCount; i++)
-         loadoutHash |= BIT(loadout.hasModule(ShipModule(i)) ? 1 : 0);
-
-      for(S32 i = 0; i < ShipWeaponCount; i++)
-         loadoutHash |= BIT(loadout.hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
-
-      getStatistics()->addLoadout(loadoutHash);
-   }
+   if(changed)
+      design->saveDesignStats(mStatistics);
 }
 
 
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 {
-   // Save current loadout to put on-deck
-   LoadoutTracker loadout = getOnDeckLoadout();
+   Ship *ship = getShip();
+   if(!ship)
+      return;
 
-   resetLoadout();
-   mActiveLoadout.resetLoadout();
+   const DesignTracker *design;
+
+   // Save current loadout to put on-deck
+   if(ship->isXtankVehicle())    // Never hits this line...
+      design = getOnDeckDesign();
+   else
+      design = getOnDeckLoadout();
+
+
+   mOnDeckDesign.set(DefaultLoadout);      // "Turbo, Shield, Phaser, Mine, Burst"
+
+   mActiveLoadout.reset();
 
    // If the current level has a loadout zone, put last level's load-out on-deck
    if(levelHasLoadoutZone)
-      requestLoadout(loadout);
+      requestDesign(design);
 }
 
 
-void ClientInfo::resetLoadout()
+const LoadoutTracker *ClientInfo::getOnDeckLoadout() const
 {
-   mOnDeckLoadout.setLoadout(DefaultLoadout);
+   return &mOnDeckLoadout;
 }
 
 
-const LoadoutTracker &ClientInfo::getOnDeckLoadout() const
+const VehicleDesign *ClientInfo::getOnDeckDesign() const
 {
-   return mOnDeckLoadout;
+   return &mOnDeckDesign;
 }
 
 
 // Resets this mOldLoadout to its factory settings
 void ClientInfo::resetActiveLoadout()
 {
-   mActiveLoadout.resetLoadout();
+   mActiveLoadout.reset();
 }
 
 
@@ -298,6 +297,13 @@ void ClientInfo::resetActiveLoadout()
 void ClientInfo::saveActiveLoadout(const LoadoutTracker &loadout)
 {
    mActiveLoadout = loadout;
+}
+
+
+// This is only called when a ship/bot dies
+void ClientInfo::saveActiveDesign(const VehicleDesign &design)
+{
+   mActiveDesign = design;
 }
 
 
@@ -558,24 +564,70 @@ void ClientInfo::sTeleporterCleanup()
 }
 
 
-// Client has requested a new loadout
-void ClientInfo::requestLoadout(const LoadoutTracker &loadout)
+// Client has requested a new loadout or design
+// Runs on client and server
+void ClientInfo::requestDesign(const DesignTracker *design)
 {
-   if(!loadout.isValid())
+   // Ignore invalid designs
+   if(!design->isValid())
       return;
 
-   mOnDeckLoadout = loadout;
+   const LoadoutTracker *lt = dynamic_cast<const LoadoutTracker *>(design);
+   const VehicleDesign *vd = dynamic_cast<const VehicleDesign *>(design);
+
+   Ship *ship = getShip();
+   
+
+
+   if(mGame->isServer())
+   {
+      if(lt)
+      {
+         mOnDeckLoadout = *lt;      // Copies lt into mOnDeckLoadout
+
+         if(ship)
+            ship->setLoadout(*lt);  // Marks LoadoutMask dirty so ghost system replicates the change
+      }
+      else if(vd)
+      {
+         mOnDeckDesign = *vd;       // Copies vd into mOnDeckDesign
+
+         if(ship)
+            ship->setDesign(*vd);   // Marks LoadoutMask dirty so ghost system replicates the change
+      }
+      else
+      {
+         TNLAssert(false, "Design passed to requestDesign is neither a loadout nor a design!");
+         return;                 // Not a loadout or design -- bail)
+      }
+   }
+   else if(lt)
+   {
+      if(ship)
+         ship->setLoadout(*lt);  // Marks LoadoutMask dirty so ghost system replicates the change
+   }
+   else if(vd)
+   {
+      if(ship)
+         ship->setDesign(*vd);   // Marks LoadoutMask dirty so ghost system replicates the change
+   }
 
    GameType *gt = mGame->getGameType();
 
    if(gt)
-      gt->makeRequestedLoadoutActiveIfShipIsInLoadoutZone(this, loadout);
+      gt->makeRequestedLoadoutActiveIfShipIsInLoadoutZone(this);
 }
 
 
-const LoadoutTracker &ClientInfo::getOldLoadout() const
+const LoadoutTracker *ClientInfo::getOldLoadout() const
 {
-   return mActiveLoadout;
+   return &mActiveLoadout;
+}
+
+
+const VehicleDesign *ClientInfo::getOldDesign() const    // Probably improperly named -- getActiveDesign?
+{
+   return &mActiveDesign;
 }
 
 
@@ -704,8 +756,8 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
    {
       if(spawnDelayed)                                   // Tell client their spawn has been delayed
          getConnection()->s2cPlayerSpawnDelayed(0);      // Any penalty will be sent later
-		else
-			getConnection()->s2cPlayerSpawnUndelayed();
+	  else
+		 getConnection()->s2cPlayerSpawnUndelayed();
 
       mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);  // Notify other clients
    }

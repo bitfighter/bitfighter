@@ -99,6 +99,12 @@ enum SettingSource {
    DEFAULT
 };
 
+enum class GameMode {
+   BITFIGHTER,
+   XTANK,
+   COUNT
+};
+
 
 class GameSettings
 {
@@ -153,6 +159,8 @@ private:
    Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    
    Vector<string> getPlaylist();       
 
+   const GameMode mGameMode = GameMode::XTANK;     // Const for now, will be changeable later
+
 public:
    GameSettings();            // Constructor
    virtual ~GameSettings();   // Destructor
@@ -198,6 +206,8 @@ public:
    Vector<string> *getSpecifiedLevels();
 
    void setLoginCredentials(const string &name, const string &password, bool savePassword);
+
+   bool isXtankMode() const;
 
 
    bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
@@ -262,7 +272,7 @@ public:
 
    LevelSource *chooseLevelSource(Game *game); // determines what levelsource you want to use
 
-   LoadoutTracker getLoadoutPreset(S32 index);
+   const LoadoutTracker *getLoadoutPreset(S32 index);
    void setLoadoutPreset(const LoadoutTracker *preset, S32 index);
 
    void addConfigurationError(const string &errorMessage);

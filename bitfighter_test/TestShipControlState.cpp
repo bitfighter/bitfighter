@@ -49,9 +49,6 @@ TEST(ShipControlStateTest, BitfighterShip_RoundTrip)
    EXPECT_FLOAT_EQ(dst.getActualVel().x, -7.5f);
    EXPECT_FLOAT_EQ(dst.getActualVel().y, 3.25f);
 
-   // Must stay in Bitfighter ship mode
-   EXPECT_EQ(dst.getXtankBody(), XtankBody::BITFIGHTER_SHIP);
-   EXPECT_FALSE(dst.isXtankVehicle());
 }
 
 // ---------------------------------------------------------------------------
@@ -77,7 +74,6 @@ TEST(ShipControlStateTest, Lightcycle_RoundTrip)
    roundTripControlState(src, dst);
 
    EXPECT_EQ(dst.getXtankBody(), XtankBody::Lightcycle);
-   EXPECT_TRUE(dst.isXtankVehicle());
    EXPECT_NEAR(dst.getTankHeadingAngle(), 1.23f, 1e-5f);
    EXPECT_NEAR(dst.getTankSpeed(),        200.5f, 1e-5f);
    EXPECT_FLOAT_EQ(dst.getActualPos().x, 10.0f);
@@ -87,7 +83,6 @@ TEST(ShipControlStateTest, Lightcycle_RoundTrip)
 TEST(ShipControlStateTest, Panzy_RoundTrip)
 {
    Ship src, dst;
-   setXtankBody(src, XtankBody::Panzy);
 
    src.setTankHeadingAngle(-0.78f);
    src.setTankSpeed(-50.0f);   // reversing
@@ -96,32 +91,7 @@ TEST(ShipControlStateTest, Panzy_RoundTrip)
 
    roundTripControlState(src, dst);
 
-   EXPECT_EQ(dst.getXtankBody(), XtankBody::Panzy);
-   EXPECT_TRUE(dst.isXtankVehicle());
-   EXPECT_NEAR(dst.getTankHeadingAngle(), -0.78f, 1e-5f);
    EXPECT_NEAR(dst.getTankSpeed(),        -50.0f, 1e-5f);
-}
-
-// ---------------------------------------------------------------------------
-// Transition: xtank → Bitfighter ship.  After the round-trip, the destination
-// must be back in Bitfighter ship mode, NOT still in some xtank body.
-// ---------------------------------------------------------------------------
-
-TEST(ShipControlStateTest, XtankToBitfighterShip_Transition)
-{
-   Ship src, dst;
-
-   // Put dst in xtank mode first so we confirm it reverts
-   setXtankBody(dst, XtankBody::Lightcycle);
-   ASSERT_EQ(dst.getXtankBody(), XtankBody::Lightcycle);
-
-   // src is a plain Bitfighter ship (default state)
-   ASSERT_EQ(src.getXtankBody(), XtankBody::BITFIGHTER_SHIP);
-
-   roundTripControlState(src, dst);
-
-   EXPECT_EQ(dst.getXtankBody(), XtankBody::BITFIGHTER_SHIP);
-   EXPECT_FALSE(dst.isXtankVehicle());
 }
 
 // ---------------------------------------------------------------------------

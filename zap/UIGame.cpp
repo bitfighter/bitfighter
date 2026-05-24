@@ -55,6 +55,23 @@ static const S32 CHAT_WRAP_WIDTH = 700;            // Max width of chat messages
 static const S32 SRV_MSG_WRAP_WIDTH = 750;
 
 
+static const char *getXtankMountAbbrev(XtankMountLocation mount)
+{
+   switch(mount)
+   {
+      case XtankMountLocation::TURRET1: return "T1";
+      case XtankMountLocation::TURRET2: return "T2";
+      case XtankMountLocation::TURRET3: return "T3";
+      case XtankMountLocation::TURRET4: return "T4";
+      case XtankMountLocation::FRONT:   return "F";
+      case XtankMountLocation::BACK:    return "B";
+      case XtankMountLocation::LEFT:    return "L";
+      case XtankMountLocation::RIGHT:   return "R";
+      default:                          return "-";
+   }
+}
+
+
 // Constructor
 GameUserInterface::GameUserInterface(ClientGame *game) :
                   Parent(game),
@@ -519,6 +536,7 @@ void GameUserInterface::render()
    renderWrongModeIndicator();            // Try to avert confusion after player has changed btwn joystick and keyboard modes
    renderChatMsgs();                      // Render incoming chat and server msgs
    mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
+   renderXtankWeaponStatusOverlay();      // Draw lower-center xtank weapon status overlay
 
    renderLevelListDisplayer();            // List of levels loaded while hosting
    renderProgressBar();                   // Status bar that shows progress of loading this level
@@ -1168,39 +1186,22 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 
 
 // Notify the HUD that the server has sent an updated xtank design.
-void GameUserInterface::xtankDesignUpdated(const XtankDesign &design)
+void GameUserInterface::xtankDesignUpdated(const VehicleDesign &design)
 {
    mLoadoutIndicator.setXtankDesign(design);
 }
 
 
-// Apply an xtank design chosen by the player (via the UIXtankHelper).
+// Apply an xtank design chosen by the player (via the VehicleDesignerUserInterface).
 // Updates the local ship immediately for responsive rendering, and sets the
 // Move fields so the server will receive the new design on the next tick.
-void GameUserInterface::applyXtankDesign(const XtankDesign &design)
+void GameUserInterface::applyXtankDesign(const VehicleDesign &design)
 {
-   // Update the move so the server learns about the new design.
-   mCurrentMove.bodyIndex    = (S8)design.body;
-   mCurrentMove.engineType   = (S8)design.engine;
-   mCurrentMove.treadType    = (S8)design.tread;
-   mCurrentMove.heatSinkCount = design.heatSinks;
-   mCurrentMove.armorType     = (S8)design.armor;
-   mCurrentMove.suspensionType = (S8)design.suspension;
-   mCurrentMove.bumperType     = (S8)design.bumper;
-   mCurrentMove.specials       = design.specials;
-   for(S32 i = 0; i < 6; i++)
-      mCurrentMove.armorSides[i] = design.armorSides[i];
-   for(S32 i = 0; i < MaxXtankWeaponSlots; i++)
-      mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
-   for(S32 i = 0; i < MaxXtankWeaponSlots; i++)
-      mCurrentMove.weaponMount[i] = (S8)design.weaponMounts[i];
-
-   // Update the local ship immediately (client-side prediction).
    Ship *ship = getGame()->getLocalPlayerShip();
    if(ship)
    {
-      ship->mXtankBody = design.body;
-      ship->mXtankDesign    = design;
+      ship->mVehicleDesign = design;
+      ship->initXtankWeaponStates();
    }
 
    // Notify the HUD indicator.
@@ -1411,18 +1412,14 @@ static void saveLoadoutPreset(ClientGame *game, const LoadoutTracker *loadout, S
 
 static void loadLoadoutPreset(ClientGame *game, S32 slot)
 {
-   LoadoutTracker loadout = game->getSettings()->getLoadoutPreset(slot);
+   const LoadoutTracker *loadout = game->getSettings()->getLoadoutPreset(slot);
 
-   if(!loadout.isValid())
+   if(!loadout->isValid())
    {
       string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl+" + itos(slot + 1);
       game->displayErrorMessage(msg.c_str());
       return;
    }
-
-   //GameType *gameType = game->getGameType();
-   //if(!gameType)
-   //   return;
 
    game->requestLoadoutPreset(slot);
 }
@@ -1450,6 +1447,55 @@ bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
 }
 
 
+bool GameUserInterface::xTankMode()
+{
+   return getGame()->isXtankModeGame();
+}
+
+
+bool GameUserInterface::toggleWeapon(S32 slotIndex)
+{
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(!ship)
+      return false;
+
+   TNLAssert(slotIndex >= 0 && slotIndex < MaxXtankWeaponSlots, "Invalid slot");
+
+   ship->toggleWeapon(slotIndex);
+   
+   GameType *gameType = getGame()->getGameType();
+   if(gameType)
+      gameType->c2sToggleWeapon(slotIndex, ship->getXtankWeaponState(slotIndex).isActive());
+
+
+   mHelpItemManager.removeInlineHelpItem(XtToggleWeaponItem, true, 0xFF - 1);    // Player has demonstrated knowledge of how to toggle weapons
+
+   return true;      // For convenience
+}
+
+
+bool GameUserInterface::checkXtankKeys(InputCode inputCode)
+{
+   if(!xTankMode())
+      return false;
+
+   if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP1, inputCode))
+      return toggleWeapon(0);
+   else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP2, inputCode))
+      return toggleWeapon(1);
+   else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP3, inputCode))
+      return toggleWeapon(2);
+   else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP4, inputCode))
+      return toggleWeapon(3);
+   else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP5, inputCode))
+      return toggleWeapon(4);
+   else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP6, inputCode))
+      return toggleWeapon(5);
+
+   return false;
+}
+
+
 // Can only get here if we're not in chat mode
 bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 {
@@ -1460,6 +1506,9 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       EventManager::get()->addSteps(1);
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
+      
+   else if(checkXtankKeys(inputCode))
+      return true;
 
    // Ctrl+Alt+Shift+X toggles between the Lightcycle xtank body and the regular ship.
    // Pressing once enters Lightcycle mode (modules are suppressed); pressing again returns
@@ -1473,11 +1522,6 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          XtankBody body = ship->getXtankBody();
          const char *bodyName = (body == XtankBody::BITFIGHTER_SHIP) ? "Bitfighter Ship" : xtankBodyNames[(S32)body];
          getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
-
-         // Propagate the new body choice to the server via the Move struct.
-         // mCurrentMove.bodyIndex is delta-compressed, so it will be sent
-         // in the next packet and every packet thereafter until it changes.
-         mCurrentMove.bodyIndex = (S8)body;
       }
    }
 
@@ -1816,6 +1860,10 @@ static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *t
 Move *GameUserInterface::getCurrentMove()
 {
    Move *move = &mCurrentMove;
+   Ship *ship = getGame()->getLocalPlayerShip();
+
+   move->xtank = ship && ship->isXtankVehicle();
+
 
    if(!mDisableShipKeyboardInput && getUIManager()->isCurrentUI<GameUserInterface>() && !gConsole.isVisible())
    {
@@ -1991,6 +2039,145 @@ void GameUserInterface::renderTalkingClients() const
          y += TEXT_HEIGHT + 5;
       }
    }
+}
+
+
+void GameUserInterface::renderXtankWeaponStatusOverlay() const
+{
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(!ship || !ship->isXtankVehicle())
+      return;
+
+   const VehicleDesign *design = ship->getXtankDesign();
+
+   S32 weaponSlots[WEAPON_SLOTS];
+   S32 weaponCount = 0;
+   for(S32 i = 0; i < WEAPON_SLOTS; i++)
+   {
+      if(design->weapons[i] != XtankWeapon::NONE)
+         weaponSlots[weaponCount++] = i;
+   }
+
+   if(weaponCount == 0)
+      return;
+
+
+   FontManager::pushFontContext(WeaponPanelContext);
+
+
+   const S32 maxColumns = 3;
+   S32 cols = weaponCount < maxColumns ? weaponCount : maxColumns;
+   S32 rows = (weaponCount + cols - 1) / cols;
+
+   const S32 cardHeight = 46;
+   const S32 cardGap = 8;
+   const S32 cardPadding = 8;
+   const S32 overlayPadding = 10;
+   const S32 minCardWidth = 140;
+   const S32 maxCardWidth = 260;
+
+   const S32 screenWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 screenHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+
+   S32 totalWidth = screenWidth - 2 * overlayPadding;
+   S32 cardWidth = (totalWidth - (cols - 1) * cardGap) / cols;
+
+   if(cardWidth > maxCardWidth)
+      cardWidth = maxCardWidth;
+   if(cardWidth < minCardWidth)
+   {
+      cardWidth = minCardWidth;
+      cols = max(1, (totalWidth + cardGap) / (minCardWidth + cardGap));
+      rows = (weaponCount + cols - 1) / cols;
+   }
+   totalWidth = cols * cardWidth + (cols - 1) * cardGap;
+   S32 totalHeight = rows * cardHeight + (rows - 1) * cardGap;
+
+   S32 startX = (screenWidth - totalWidth) / 2;
+   S32 startY = screenHeight - totalHeight - overlayPadding;
+
+   Renderer &r = Renderer::get();
+
+   drawFilledRect(startX - overlayPadding,              startY - overlayPadding,
+                  startX + totalWidth + overlayPadding, startY + totalHeight + overlayPadding,
+                  Colors::black, 0.65f, Colors::white, 0.70f);
+
+   for(S32 idx = 0; idx < weaponCount; idx++)
+   {
+      S32 slot = weaponSlots[idx];
+      S32 col = idx % cols;
+      S32 row = idx / cols;
+      S32 x = startX + col * (cardWidth + cardGap);
+      S32 y = startY + row * (cardHeight + cardGap);
+
+      const XtankWeapon weapon = design->weapons[slot];
+      const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
+      const XtankWeaponState &ws = ship->getXtankWeaponState(slot);
+      const char *mountLabel = getXtankMountAbbrev(design->weaponMounts[slot]);
+
+      // T1 Heavy Machine Gun
+      char header[64];
+      dSprintf(header, sizeof(header), "%s %s", mountLabel, wi.name);
+
+      r.setColor(Colors::white);
+      drawString(x + cardPadding, y + 8, 13, header);
+
+      // EMPTY
+      bool hasAmmo = ws.hasAmmo();
+      bool isActive = ws.isActive();
+      const char *statusText = hasAmmo ? (isActive ? "ONLINE" : "OFFLINE") : "EMPTY";
+      const Color *statusColor = hasAmmo ? (isActive ? &Colors::green80 : &Colors::gray80) : &Colors::red;
+      r.setColor(*statusColor);
+      drawString(x + cardPadding, y + 24, 11, statusText);
+
+      // 0/200
+      char ammoText[32];
+      if(wi.max_ammo == S32_MAX)
+         dSprintf(ammoText, sizeof(ammoText), "∞");
+      else
+         dSprintf(ammoText, sizeof(ammoText), "%d/%d", ws.ammo, wi.max_ammo);
+
+      S32 ammoWidth = getStringWidth(11, ammoText);
+      r.setColor(Colors::white);
+      drawString(x + cardWidth - cardPadding - ammoWidth, y + 24, 11, ammoText);
+
+      S32 barX = x + cardPadding;
+      S32 barY = y + 34;
+      S32 barW = cardWidth - 2 * cardPadding;
+      S32 barH = 8;
+
+      r.setColor(Colors::gray50);
+      drawRect(barX, barY, barX + barW, barY + barH, RenderType::LineLoop);
+
+      F32 fillRatio = 0.0f;
+      if(wi.max_ammo > 0 && wi.max_ammo != S32_MAX)
+      {
+         fillRatio = F32(ws.ammo) / F32(wi.max_ammo);
+         if(fillRatio < 0.0f)
+            fillRatio = 0.0f;
+         else if(fillRatio > 1.0f)
+            fillRatio = 1.0f;
+      }
+
+      if(fillRatio > 0.0f)
+      {
+         S32 fillWidth = max(1, (S32)floor(fillRatio * barW));
+         const Color *fillColor;
+         if(!isActive)
+            fillColor = &Colors::gray50;
+         else if(fillRatio < 0.33f)
+            fillColor = &Colors::red;
+         else if(fillRatio < 0.66f)
+            fillColor = &Colors::yellow;
+         else
+            fillColor = &Colors::green80;
+
+         r.setColor(*fillColor);
+         drawRect(barX, barY, barX + fillWidth, barY + barH, RenderType::TriangleFan);
+      }
+   }
+
+   FontManager::popFontContext();
 }
 
 
@@ -2216,7 +2403,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       // Lazily initialize list
       if(itemTypes.size() == 0)
       {
-#define HELP_TABLE_ITEM(a, itemType, c, d, e, f, g) \
+#define HELP_TABLE_ITEM(a, itemType, c, d, e, f, g, h) \
          if(itemType != UnknownTypeNumber) \
             itemTypes.push_back(itemType);
          HELP_ITEM_TABLE

@@ -31,7 +31,9 @@ void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2);
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor);
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha);
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
+void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha = 1.0f);
+void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha = 1.0f);
+
 
 void drawHollowRect(const Point &center, S32 width, S32 height);
 void drawHollowRect(const Point &p1, const Point &p2);

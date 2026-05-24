@@ -720,20 +720,21 @@ void ClientGame::requestLoadoutPreset(S32 index)
    if(!conn)
       return;
 
-   LoadoutTracker loadout = getSettings()->getLoadoutPreset(index);
+   const LoadoutTracker *loadout = getSettings()->getLoadoutPreset(index);
 
-   displayShipDesignChangedMessage(loadout, "Loaded preset " + itos(index + 1) + ": ",
-                                             "Modifications canceled: preset design same as the current");
+   displayShipDesignChangedMessage(loadout, cs("Loaded preset " + itos(index + 1) + ": " + loadout->toString(false)),
+                                            "Modifications canceled: preset design same as the current");
 
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
-   // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
+   // that matches A, it would be better to have loadout remain
+   // unchanged if I entered a loadout zone.
    // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-   conn->c2sRequestLoadout(loadout.toU8Vector());    
+   conn->c2sRequestLoadout(loadout->pack());    
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
-                                                                                const char *msgToShowIfLoadoutsAreTheSame)
+void ClientGame::displayShipDesignChangedMessage(const DesignTracker *loadout, const char *baseSuccesString,
+                                                                               const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
       return;
@@ -742,7 +743,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    if(!ship)
       return;
 
-   if(ship->isLoadoutSameAsCurrent(loadout))
+   if(ship->isXtankVehicle() && ship->getXtankDesign() == loadout || !ship->isXtankVehicle() && ship->getLoadout() == loadout)
    {
       displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
       return;
@@ -756,10 +757,10 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    GameType *gt = getGameType();
 
    // Show new loadout
-   displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
+   displaySuccessMessage(baseSuccesString);
 
    displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
-                                                           "Changes will be activated when you respawn");
+                                                     "Changes will be activated when you respawn");
 }
 
 
@@ -1187,7 +1188,7 @@ void ClientGame::setActiveWeapon(U32 weaponIndex)
 }
 
 
-void ClientGame::xtankDesignUpdated(const XtankDesign &design)
+void ClientGame::xtankDesignUpdated(const VehicleDesign &design)
 {
    getUIManager()->xtankDesignUpdated(design);
 }

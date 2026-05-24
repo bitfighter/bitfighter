@@ -1,9 +1,9 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright Chris Eykamp
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "UIXtankHelper.h"
+#include "UIVehicleDesigner.h"
 
 #include "UIGame.h"
 #include "UIManager.h"
@@ -75,7 +75,7 @@ struct XtankDerivedStats
 
 
 // Derive movement values from original xtank stats (body_stat + engine/treads).
-static XtankDerivedStats getDerivedStats(const XtankDesign &design)
+static XtankDerivedStats getDerivedStats(const VehicleDesign &design)
 {
    static const F32 XTANK_FPS = 20.0f;
    static const F32 BF_SCALE = 1.5f;
@@ -177,7 +177,7 @@ static const InputCode sArmorAllocationKeys[VehicleSidesCount] =
 //// Returns a human-readable side label for a turret based on its mount position
 //// in body space (+Y = forward/nose).  Thresholds are intentionally generous so
 //// all layouts produce a useful label.
-//const char *UIXtankHelper::getTurretSideLabel(S32 bodyIdx, S32 slot)
+//const char *VehicleDesignerUserInterface::getTurretSideLabel(S32 bodyIdx, S32 slot)
 //{
 //   if(bodyIdx < 0 || bodyIdx >= VehicleBodyCount) return "Slot";
 //   const XtankBodyTurrets &bt = xtankTurretInfos[bodyIdx];
@@ -195,7 +195,7 @@ static const InputCode sArmorAllocationKeys[VehicleSidesCount] =
 ////////////////////////////////////////
 
 // Constructor
-UIXtankHelper::UIXtankHelper()
+VehicleDesignerUserInterface::VehicleDesignerUserInterface()
 {
    mPhase = Phase::BODY;
    mWeaponSlot = 0;
@@ -228,17 +228,17 @@ UIXtankHelper::UIXtankHelper()
 
 
 // Destructor
-UIXtankHelper::~UIXtankHelper()
+VehicleDesignerUserInterface::~VehicleDesignerUserInterface()
 {
    // Do nothing
 }
 
 
-HelperMenu::HelperMenuType UIXtankHelper::getType() { return XtankHelperType; }
+HelperMenu::HelperMenuType VehicleDesignerUserInterface::getType() { return XtankHelperType; }
 
 
 // Build the body-selection menu items (used for background cards).
-void UIXtankHelper::buildBodyItems()
+void VehicleDesignerUserInterface::buildBodyItems()
 {
    mBodyItems.clear();
    for(S32 i = 0; i < VehicleBodyCount; i++)
@@ -260,7 +260,7 @@ void UIXtankHelper::buildBodyItems()
 
 
 // Build the engine-selection menu items.
-void UIXtankHelper::buildEngineItems()
+void VehicleDesignerUserInterface::buildEngineItems()
 {
    mEngineItems.clear();
 
@@ -292,7 +292,7 @@ void UIXtankHelper::buildEngineItems()
 
 
 // Build the tread-selection menu items.
-void UIXtankHelper::buildTreadItems()
+void VehicleDesignerUserInterface::buildTreadItems()
 {
    mTreadItems.clear();
 
@@ -322,7 +322,7 @@ void UIXtankHelper::buildTreadItems()
 
 
 // Build the armor-type selection menu items.
-void UIXtankHelper::buildArmorItems()
+void VehicleDesignerUserInterface::buildArmorItems()
 {
    mArmorItems.clear();
    static string armorHelpTexts[XtankArmorCount];
@@ -352,7 +352,7 @@ void UIXtankHelper::buildArmorItems()
 // Build the 6-item armor-sides phase list (Front / Back / Left / Right / Top / Bottom).
 // Items have no hotkeys; point values are edited live with +/- in processInputCode.
 // Only called onActivated
-void UIXtankHelper::buildArmorSidesItems()
+void VehicleDesignerUserInterface::buildArmorSidesItems()
 {
    mArmorSidesItems.clear();
    for(S32 i = 0; i < 6; i++)
@@ -373,7 +373,7 @@ void UIXtankHelper::buildArmorSidesItems()
 
 
 // Build the suspension-type selection menu items.
-void UIXtankHelper::buildSuspensionItems()
+void VehicleDesignerUserInterface::buildSuspensionItems()
 {
    mSuspensionItems.clear();
    static string suspHelpTexts[XtankSuspensionCount];
@@ -401,7 +401,7 @@ void UIXtankHelper::buildSuspensionItems()
 
 
 // Build the bumper-type selection menu items.
-void UIXtankHelper::buildBumperItems()
+void VehicleDesignerUserInterface::buildBumperItems()
 {
    mBumperItems.clear();
    static string bumperHelpTexts[XtankBumperCount];
@@ -429,7 +429,7 @@ void UIXtankHelper::buildBumperItems()
 
 
 // Build the special equipment selection menu items.
-void UIXtankHelper::buildSpecialsItems()
+void VehicleDesignerUserInterface::buildSpecialsItems()
 {
    mSpecialsItems.clear();
    static string specHelpTexts[XtankSpecialCount];
@@ -481,7 +481,7 @@ static S32 getMaxKeyWidth(S32 fontSize)
 
 
 // Build the heat-sink count selection menu items (1-6).
-//void UIXtankHelper::buildHeatSinkItems()
+//void VehicleDesignerUserInterface::buildHeatSinkItems()
 //{
 //   mHeatSinkItems.clear();
 //   static string hsHelpTexts[MAX_HEAT_SINKS + 1];  // persistent storage
@@ -518,7 +518,7 @@ static S32 getMaxKeyWidth(S32 fontSize)
 
 
 // Build the weapon-selection menu items for a given slot.
-void UIXtankHelper::buildWeaponItems()
+void VehicleDesignerUserInterface::buildWeaponItems()
 {
    mWeaponItems.clear();
 
@@ -540,6 +540,9 @@ void UIXtankHelper::buildWeaponItems()
    // One entry per weapon (dynamically assigned keys 1-9, A-P).
    for(S32 w = 0; w < (S32)XtankWeapon::COUNT; w++)
    {
+      if(w == (S32)XtankWeapon::NONE)
+         continue;
+
       OverlayMenuItem item;
       item.key = getKeyForIndex(w);  // Use dynamic key assignment
       item.button = KEY_NONE;
@@ -556,7 +559,7 @@ void UIXtankHelper::buildWeaponItems()
 
 
 //// Returns how many weapon slots (excluding `excludeSlot`) are assigned to `mount`.
-//S32 UIXtankHelper::countWeaponsOnMount(XtankMountLocation mount, S32 excludeSlot) const
+//S32 VehicleDesignerUserInterface::countWeaponsOnMount(XtankMountLocation mount, S32 excludeSlot) const
 //{
 //   S32 count = 0;
 //   for(S32 i = 0; i < WEAPON_SLOTS; i++)
@@ -571,7 +574,7 @@ void UIXtankHelper::buildWeaponItems()
 
 
 // Remove any "holes" in the weapon list so all selected weapons are contiguous at the front.
-void UIXtankHelper::normalizeWeaponPanels()
+void VehicleDesignerUserInterface::normalizeWeaponPanels()
 {
    // Compact all active weapons to the front so the weapon panel sequence is
    // always: [selected weapons...] + [one trailing None], capped at 6.
@@ -607,7 +610,7 @@ void UIXtankHelper::normalizeWeaponPanels()
 // Update the colors of items in a menu to highlight the selected one.
 // The highlighted item (at mHighlightedIndex) gets the selected color,
 // all others get the unselected color.
-void UIXtankHelper::updateItemColors(Vector<OverlayMenuItem> &items)
+void VehicleDesignerUserInterface::updateItemColors(Vector<OverlayMenuItem> &items)
 {
    for(S32 i = 0; i < items.size(); i++)
    {
@@ -625,7 +628,7 @@ void UIXtankHelper::updateItemColors(Vector<OverlayMenuItem> &items)
 }
 
 
-void UIXtankHelper::onActivated()
+void VehicleDesignerUserInterface::onActivated()
 {
    mPhase = Phase(0);	  // Start with body selection
    mFromPhase = Phase(0);
@@ -638,11 +641,11 @@ void UIXtankHelper::onActivated()
 
    // Pre-populate the design from the ship's current state.
    Ship *ship = getGame()->getLocalPlayerShip();
-   if(ship && ship->mXtankDesign.isXtankVehicle())
-      mDesignInProgress = ship->mXtankDesign;
+   if(ship && ship->mVehicleDesign.isXtankVehicle())
+      mDesignInProgress = ship->mVehicleDesign;
    else
       // No existing design — start from a clean default.
-      mDesignInProgress.init();
+      mDesignInProgress.reset();
 
    // Snapshot so ESC can restore the original.
    mOriginalDesign = mDesignInProgress;
@@ -701,7 +704,7 @@ void UIXtankHelper::onActivated()
 }
 
 
-void UIXtankHelper::render()
+void VehicleDesignerUserInterface::render()
 {
    if(mPhase == Phase::BODY)           updateItemColors(mBodyItems);
    else if(mPhase == Phase::ENGINE)    updateItemColors(mEngineItems);
@@ -721,7 +724,7 @@ void UIXtankHelper::render()
 }
 
 
-void UIXtankHelper::idle(U32 delta)
+void VehicleDesignerUserInterface::idle(U32 delta)
 {
    mTransitionTimer.update(delta);
    Parent::idle(delta);
@@ -729,7 +732,7 @@ void UIXtankHelper::idle(U32 delta)
 
 
 // Return true if the key was handled.
-bool UIXtankHelper::processInputCode(InputCode inputCode)
+bool VehicleDesignerUserInterface::processInputCode(InputCode inputCode)
 {
    // ESC: restore the original design and exit without applying changes.
    if(inputCode == KEY_ESCAPE || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_BACK)
@@ -1047,7 +1050,7 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
 
 
 // Show next panel
-void UIXtankHelper::navigateForward(bool changePhase)
+void VehicleDesignerUserInterface::navigateForward(bool changePhase)
 {
    Phase prevPhase = mPhase;
    mFromPhase = mPhase;
@@ -1063,7 +1066,7 @@ void UIXtankHelper::navigateForward(bool changePhase)
 
 
 // Show previous panel
-void UIXtankHelper::navigateBackward(bool changePhase)
+void VehicleDesignerUserInterface::navigateBackward(bool changePhase)
 {
    Phase prevPhase = mPhase;
    mFromPhase = mPhase;
@@ -1078,7 +1081,7 @@ void UIXtankHelper::navigateBackward(bool changePhase)
 }
 
 
-void UIXtankHelper::navigate()
+void VehicleDesignerUserInterface::navigate()
 {
    S32 newWidth = widthForPhase(mPhase);
    setExpectedWidth_MidTransition(newWidth);
@@ -1091,7 +1094,7 @@ void UIXtankHelper::navigate()
 }
 
 
-S32 UIXtankHelper::widthForPhase(Phase phase) const
+S32 VehicleDesignerUserInterface::widthForPhase(Phase phase) const
 {
    if(phase == Phase::BODY)        return getTotalDisplayWidth(mBodyButtonsWidth, mBodyItemsDisplayWidth);
    if(phase == Phase::ENGINE)      return getTotalDisplayWidth(mEngineButtonsWidth, mEngineItemsDisplayWidth);
@@ -1111,7 +1114,7 @@ S32 UIXtankHelper::widthForPhase(Phase phase) const
 // Set mHighlightedIndex to reflect the current value in mDesignInProgress for
 // the given phase, so when the player navigates back they see their own choice
 // already highlighted.
-S32 UIXtankHelper::getHighlightedIndexForPhase() const
+S32 VehicleDesignerUserInterface::getHighlightedIndexForPhase() const
 {
    switch(mPhase)
    {
@@ -1153,7 +1156,7 @@ S32 UIXtankHelper::getHighlightedIndexForPhase() const
 }
 
 
-const Vector<OverlayMenuItem> *UIXtankHelper::getItemsForPhase(Phase phase) const
+const Vector<OverlayMenuItem> *VehicleDesignerUserInterface::getItemsForPhase(Phase phase) const
 {
    switch(phase)
    {
@@ -1183,7 +1186,7 @@ static S32 getCheckBoxColSize(S32 fontSize)
 
 // Generic component table renderer for components in the vehicle designer.
 // Returns the y-position just below the last rendered table row.
-S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const XtankDesign &design) const
+S32 ComponentInfo::render(S32 left, S32 top, S32 fontSize, S32 rowGap, S32 highlightedRow, const VehicleDesign &design) const
 {
    const S32 columnCount = getColCount();
    const S32 colGap = 6;
@@ -1328,7 +1331,7 @@ static const S32 GAP = STAT_SZ + 5;
 
 
 // Render the right half of the armor allocation card
-void UIXtankHelper::renderArmorStats(S32 x, S32 y, S32 size, F32 alpha) const
+void VehicleDesignerUserInterface::renderArmorStats(S32 x, S32 y, S32 size, F32 alpha) const
 {
    Renderer &r = Renderer::get();
 
@@ -1364,7 +1367,7 @@ void UIXtankHelper::renderArmorStats(S32 x, S32 y, S32 size, F32 alpha) const
 }
 
 
-const char *UIXtankHelper::getSpecialsHelpString(S32 specialIndex) const
+const char *VehicleDesignerUserInterface::getSpecialsHelpString(S32 specialIndex) const
 {
    switch((XtankSpecial)specialIndex)
    {
@@ -1398,7 +1401,7 @@ const char *UIXtankHelper::getSpecialsHelpString(S32 specialIndex) const
 }
 
 
-void UIXtankHelper::renderSpecialsStats(S32 left, S32 y, F32 alpha) const
+void VehicleDesignerUserInterface::renderSpecialsStats(S32 left, S32 y, F32 alpha) const
 {
    Renderer &r = Renderer::get();
 
@@ -1420,7 +1423,7 @@ void UIXtankHelper::renderSpecialsStats(S32 left, S32 y, F32 alpha) const
 }
 
 
-void UIXtankHelper::renderWeaponStats(S32 left, S32 y, F32 alpha) const
+void VehicleDesignerUserInterface::renderWeaponStats(S32 left, S32 y, F32 alpha) const
 {
    Renderer &r = Renderer::get();
 
@@ -1461,7 +1464,7 @@ static const S32 HELP_PADDING = 15;
 
 // Render one panel.
 // centerFraction: 0.0 = fully background (adjacent), 1.0 = fully foreground (center).
-void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phase, F32 cf)
+void VehicleDesignerUserInterface::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phase, F32 cf)
 {
    if(phase == Phase::NONE)
       return;
@@ -1563,7 +1566,7 @@ void UIXtankHelper::renderCard(S32 left, S32 top, S32 right, S32 bot, Phase phas
 }
 
 
-void UIXtankHelper::renderHelpText(S32 x, S32 y) const
+void VehicleDesignerUserInterface::renderHelpText(S32 x, S32 y) const
 {
    const S32 HELP_SIZE = 12;
    const S32 gap = 15;
@@ -1642,7 +1645,7 @@ void UIXtankHelper::renderHelpText(S32 x, S32 y) const
 
 
 // Special heatsink panel
-S32 UIXtankHelper::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX)
+S32 VehicleDesignerUserInterface::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX)
 {
    Renderer &r = Renderer::get();
 
@@ -1675,7 +1678,7 @@ S32 UIXtankHelper::renderHeatSinkPanel(S32 top, S32 left, F32 alpha, S32 colTwoX
 
 
 // Draw a table of items
-S32 UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel)
+S32 VehicleDesignerUserInterface::renderItemTable(const Vector<OverlayMenuItem> *items, S32 top, S32 left, bool isActive, Phase phase, S32 highlightedIndex, F32 grayLevel)
 {
    if(!items || items->size() == 0)
       return 0;
@@ -1771,7 +1774,7 @@ S32 UIXtankHelper::renderItemTable(const Vector<OverlayMenuItem> *items, S32 top
 }
 
 
-ComponentInfo *UIXtankHelper::getCurrentComponentInfo(bool isCenter)
+ComponentInfo *VehicleDesignerUserInterface::getCurrentComponentInfo(bool isCenter)
 {
    // On the center card, use a ComponentInfo table renderer for phases that have one.
    // Background cards always fall through to the generic item-list renderer.
@@ -1796,7 +1799,7 @@ ComponentInfo *UIXtankHelper::getCurrentComponentInfo(bool isCenter)
 }
 
 
-void UIXtankHelper::renderWeaponPanelTitle(S32 titlex, S32 titley, S32 right, S32 size, bool isCenter)
+void VehicleDesignerUserInterface::renderWeaponPanelTitle(S32 titlex, S32 titley, S32 right, S32 size, bool isCenter)
 {
    Renderer &r = Renderer::get();
 
@@ -1862,7 +1865,7 @@ static S32 tabWidths[PhaseCount] = {};
 
 // Returns "Weapon N" for weapon slots, otherwise the phase title.
 // buf must be at least bufLen bytes.  Returns buf (or a static string).
-LabelWidth UIXtankHelper::getTabLabel(Phase phase) const
+LabelWidth VehicleDesignerUserInterface::getTabLabel(Phase phase) const
 {
    static const char *sPhaseTitles[] =
    {
@@ -1908,7 +1911,7 @@ LabelWidth UIXtankHelper::getTabLabel(Phase phase) const
 static S32 totalRowWidth = 0;      // Cached value, lazily initialized below
 
 
-void UIXtankHelper::renderTabBar()
+void VehicleDesignerUserInterface::renderTabBar()
 {
    Renderer &r = Renderer::get();
    FontManager::pushFontContext(HelperMenuContext);
@@ -1962,7 +1965,7 @@ void UIXtankHelper::renderTabBar()
 // Returns the required panel height (in pixels) for the given phase,
 // sized to fit title + content rows + help text + nav hint.
 // The panel is bottom-anchored at PANEL_BOT; its top = PANEL_BOT - height.
-S32 UIXtankHelper::panelBotForPhase(Phase phase) const
+S32 VehicleDesignerUserInterface::panelBotForPhase(Phase phase) const
 {
    static const S32 ROW_GAP      = 16;   // matches renderItemTable / ComponentInfo::render
    static const S32 ITEM_SZ      = 13;
@@ -2037,7 +2040,7 @@ S32 UIXtankHelper::panelBotForPhase(Phase phase) const
 }
 
 
-void UIXtankHelper::renderFloatingMenus()
+void VehicleDesignerUserInterface::renderFloatingMenus()
 {
    FontManager::pushFontContext(HelperMenuContext);
 
@@ -2080,7 +2083,7 @@ void UIXtankHelper::renderFloatingMenus()
 // Display slot 2 = center (current), 1 = one back, 0 = two back,
 // slot 3 = one ahead, 4 = two ahead.  Clamped so we never show a
 // position before BODY or past the last weapon slot.
-//void UIXtankHelper::computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot, S32 slotsInUse,
+//void VehicleDesignerUserInterface::computeCarouselSlots(Phase currentPhase, S32 currentWeaponSlot, S32 slotsInUse,
 //                                         Phase phaseAtSlot[], S32 weaponSlotAtSlot[], // <== Populate these arrays
 //                                         S32 cardsToFill)
 //{
@@ -2120,17 +2123,34 @@ void UIXtankHelper::renderFloatingMenus()
 //}
 
 
-void UIXtankHelper::applyDesign()
+void VehicleDesignerUserInterface::applyDesign()
 {
+   normalizeWeaponPanels();   // Compact slots so weapon indices match Shift-1/2/3 key bindings
+
    GameUserInterface *gui = getGame()->getUIManager()->getUI<GameUserInterface>();
    if(gui)
       gui->applyXtankDesign(mDesignInProgress);
+
+   GameConnection *conn = getGame()->getConnectionToServer();
+
+   if(conn)
+   {
+      if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
+         getGame()->displayShipDesignChangedMessage(&mDesignInProgress, "New vehicle design accepeted",
+            "Modifications canceled: new ship design same as the current");
+
+      // Request design even if it was the same -- if I have design A, with on-deck design B, and I enter a new design
+      // that matches A, it would be better to have design remain unchanged if I entered a loadout zone.
+      // Tell server design has changed.  Server will activate it when we enter a loadout zone.
+      conn->c2sRequestVehicleDesign(mDesignInProgress.pack());
+   }
+
 
    exitHelper();
 }
 
 
-void UIXtankHelper::activateHelp(UIManager *uiManager)
+void VehicleDesignerUserInterface::activateHelp(UIManager *uiManager)
 {
    // Direct to the weapons help page.
    uiManager->getUI<InstructionsUserInterface>()->activatePage(
@@ -2140,7 +2160,7 @@ void UIXtankHelper::activateHelp(UIManager *uiManager)
 
 // Returns the number of selectable items in the current phase so UP/DOWN
 // arrow key cycling knows when to wrap.
-S32 UIXtankHelper::currentPhaseItemCount()
+S32 VehicleDesignerUserInterface::currentPhaseItemCount()
 {
    if(mPhase == Phase::ARMOR_SIDES)
       return VehicleSidesCount;
@@ -2550,16 +2570,21 @@ void WeaponInfo2::fillRows() const
    static char ammoCostBuf[rowCount][COL_LEN];
    static char costBuf[rowCount][COL_LEN];
 
-   // Row 0: "None" placeholder
-   rows[0].cells[0] = InputCodeManager::inputCodeToString(KEY_0);
-   rows[0].cells[1] = "None";
-   for(S32 i = 2; i < colCount; i++)
-      rows[0].cells[i] = "--";
-   rows[0].highlighted = false;
 
    for(S32 i = 0; i < rowCount; i++)
    {
-      const XtankWeaponInfo &wi = xtankWeaponInfos[i];
+      if(i == 0)
+      {
+         // Row 0: "None" placeholder
+         rows[0].cells[0] = InputCodeManager::inputCodeToString(KEY_0);
+         rows[0].cells[1] = "None";
+         for(S32 i = 2; i < colCount; i++)
+            rows[0].cells[i] = "--";
+         rows[0].highlighted = false;
+         continue;
+      }
+
+      const XtankWeaponInfo &wi = xtankWeaponInfos[i];    
       dSprintf(damageBuf[i],       COL_LEN, "%s", cs(comma(wi.damage)));
       dSprintf(rangeBuf[i],        COL_LEN, "%s", cs(comma(wi.range())));
       if(wi.max_ammo == S32_MAX)
@@ -2582,23 +2607,21 @@ void WeaponInfo2::fillRows() const
       dSprintf(ammoCostBuf[i],     COL_LEN, "%s", cs(comma(wi.ammo_cost)));
       dSprintf(costBuf[i],         COL_LEN, "%s", cs(comma(wi.cost)));
 
-      // +1 because of None row at the top
       S32 c = 0;
-      rows[i + 1].cells[c] = InputCodeManager::inputCodeToString(getKeyForIndex(i)); c += 1;
-      rows[i + 1].cells[c] = wi.name;                                                c += 1;
-      rows[i + 1].cells[c] = damageBuf[i];                                           c += 1;
-      rows[i + 1].cells[c] = rangeBuf[i];                                            c += 1;
-      rows[i + 1].cells[c] = ammoBuf[i];                                             c += 1;
-      rows[i + 1].cells[c] = fireRateBuf[i];                                         c += 1;
-      //rows[i + 1].cells[c] = safetyBuf[i];                                           c += 1;
-      rows[i + 1].cells[c] = speedBuf[i];                                            c += 1;
-      rows[i + 1].cells[c] = weightBuf[i];                                           c += 1;
-      rows[i + 1].cells[c] = vehicleSpaceBuf[i];                                     c += 1;
-      rows[i + 1].cells[c] = mountSpaceBuf[i];                                       c += 1;
-      rows[i + 1].cells[c] = heatBuf[i];                                             c += 1;
-      rows[i + 1].cells[c] = ammoCostBuf[i];                                         c += 1;
-      rows[i + 1].cells[c] = costBuf[i];                                             c += 1;
-      rows[i + 1].highlighted = false;
+      rows[i].cells[c] = InputCodeManager::inputCodeToString(getKeyForIndex(i)); c += 1;
+      rows[i].cells[c] = wi.name;                                                c += 1;
+      rows[i].cells[c] = damageBuf[i];                                           c += 1;
+      rows[i].cells[c] = rangeBuf[i];                                            c += 1;
+      rows[i].cells[c] = ammoBuf[i];                                             c += 1;
+      rows[i].cells[c] = fireRateBuf[i];                                         c += 1;
+      rows[i].cells[c] = speedBuf[i];                                            c += 1;
+      rows[i].cells[c] = weightBuf[i];                                           c += 1;
+      rows[i].cells[c] = vehicleSpaceBuf[i];                                     c += 1;
+      rows[i].cells[c] = mountSpaceBuf[i];                                       c += 1;
+      rows[i].cells[c] = heatBuf[i];                                             c += 1;
+      rows[i].cells[c] = ammoCostBuf[i];                                         c += 1;
+      rows[i].cells[c] = costBuf[i];                                             c += 1;
+      rows[i].highlighted = false;
    }
 }
 
@@ -2606,7 +2629,7 @@ void WeaponInfo2::fillRows() const
 // Draw overall ship preview/spec panel on the right side of the screen.
 // This is intentionally aggregate-focused: highlighted-item details live in
 // the active center card, while this panel shows what the ship becomes.
-void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phase designPhase, S32 activeWaponSlot)
+void VehiclePreviewRenderer::renderPreviewPanel(const VehicleDesign &preview, Phase designPhase, S32 activeWaponSlot)
 {
    static const S32 PNL_LEFT = 680;
    static const S32 PNL_RIGHT = 1050;
@@ -2772,7 +2795,7 @@ void VehiclePreviewRenderer::renderPreviewPanel(const XtankDesign &preview, Phas
 
 
 // Render the small weapons table on the ship preview
-S32 VehiclePreviewRenderer::renderWeaponList(Phase designPhase, S32 activeWeaponSlot, S32 left, S32 cx, S32 y, const XtankDesign &preview, S32 fontSz, S32 lineGap)
+S32 VehiclePreviewRenderer::renderWeaponList(Phase designPhase, S32 activeWeaponSlot, S32 left, S32 cx, S32 y, const VehicleDesign &preview, S32 fontSz, S32 lineGap)
 {
    Renderer &r = Renderer::get();
 
@@ -2821,7 +2844,7 @@ S32 VehiclePreviewRenderer::renderWeaponList(Phase designPhase, S32 activeWeapon
 
 // Draw a "Current  Build Stats" section showing effective vehicle performance
 // with the given (potentially preview) component indices applied.
-void VehiclePreviewRenderer::renderFullBuildStats(S32 cx, S32 y, const XtankDesign &preview)
+void VehiclePreviewRenderer::renderFullBuildStats(S32 cx, S32 y, const VehicleDesign &preview)
 {
    XtankDerivedStats derived = getDerivedStats(preview);
    S32 hs = CLAMP(preview.heatSinks, 0, MAX_HEAT_SINKS);

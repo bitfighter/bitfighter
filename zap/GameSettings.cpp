@@ -476,6 +476,12 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 }
 
 
+bool GameSettings::isXtankMode() const
+{
+   return mGameMode == GameMode::XTANK;
+}
+
+
 // User name has been corrected by master server (usually changing only capitalization and such
 void GameSettings::updatePlayerName(const string &name)
 {
@@ -579,10 +585,10 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 }
 
 
-LoadoutTracker GameSettings::getLoadoutPreset(S32 index) 
+const LoadoutTracker *GameSettings::getLoadoutPreset(S32 index) 
 { 
    TNLAssert(index >= 0 && index < mLoadoutPresets.size(), "Preset index out of range!") ;
-   return mLoadoutPresets[index]; 
+   return &mLoadoutPresets[index]; 
 }
 
 

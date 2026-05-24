@@ -13,6 +13,7 @@
 #include "LoadoutTracker.h"
 #include "gameConnection.h"
 #include "ClientGame.h"
+#include "stringUtils.h"
 
 
 namespace Zap
@@ -85,14 +86,14 @@ void LoadoutHelper::pregameSetup(bool engineerEnabled)
 
 void LoadoutHelper::rebuildPresetItems()
 {
-   preset1 = "Preset 1 - " + getGame()->getSettings()->getLoadoutPreset(0).toString(false);
-   preset2 = "Preset 2 - " + getGame()->getSettings()->getLoadoutPreset(1).toString(false);
-   preset3 = "Preset 3 - " + getGame()->getSettings()->getLoadoutPreset(2).toString(false);
-   preset4 = "Preset 4 - " + getGame()->getSettings()->getLoadoutPreset(3).toString(false);
-   preset5 = "Preset 5 - " + getGame()->getSettings()->getLoadoutPreset(4).toString(false);
-   preset6 = "Preset 6 - " + getGame()->getSettings()->getLoadoutPreset(5).toString(false);
+   preset1 = "Preset 1 - " + getGame()->getSettings()->getLoadoutPreset(0)->toString(false);
+   preset2 = "Preset 2 - " + getGame()->getSettings()->getLoadoutPreset(1)->toString(false);
+   preset3 = "Preset 3 - " + getGame()->getSettings()->getLoadoutPreset(2)->toString(false);
+   preset4 = "Preset 4 - " + getGame()->getSettings()->getLoadoutPreset(3)->toString(false);
+   preset5 = "Preset 5 - " + getGame()->getSettings()->getLoadoutPreset(4)->toString(false);
+   preset6 = "Preset 6 - " + getGame()->getSettings()->getLoadoutPreset(5)->toString(false);
 
-#define GET_COLOR(p) getGame()->getSettings()->getLoadoutPreset(p).isValid() ? UNSEL_COLOR : &Colors::DisabledGray
+#define GET_COLOR(p) getGame()->getSettings()->getLoadoutPreset(p)->isValid() ? UNSEL_COLOR : &Colors::DisabledGray
 
    // Need to rebuild these on every activation in case the user has changed their presets
    const OverlayMenuItem presetItems[] = {
@@ -219,10 +220,10 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(mShowingPresets)
    {
-      LoadoutTracker loadout = getGame()->getSettings()->getLoadoutPreset(index);
+      const LoadoutTracker *loadout = getGame()->getSettings()->getLoadoutPreset(index);
 
       // Ignore presets that have not been defined (these are displayed but cannot be chosen)
-      if(!loadout.isValid())
+      if(!loadout->isValid())
          return true;
 
       getGame()->requestLoadoutPreset(index);
@@ -279,13 +280,13 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       if(conn)
       {
          if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-            getGame()->displayShipDesignChangedMessage(loadout, "Selected loadout: ", 
+            getGame()->displayShipDesignChangedMessage(&loadout, cs("Selected loadout: " + loadout.toString(false)),
                                                                 "Modifications canceled: new ship design same as the current");
 
          // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
          // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
          // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-         conn->c2sRequestLoadout(loadout.toU8Vector());     
+         conn->c2sRequestLoadout(loadout.pack());     
       }
       exitHelper();     
    }

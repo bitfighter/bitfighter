@@ -432,6 +432,7 @@ void FontManager::setFontContext(FontContext fontContext)
       setFont(FontModernVision);
       return;
 
+   case WeaponPanelContext:
    case HelperMenuContext:
    case HelpItemContext:
       setFont(FontPlay);

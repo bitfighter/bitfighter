@@ -307,7 +307,7 @@ static void doScenario11(GamePair &gamePair)
 
    gameUI->activateHelper(HelperMenu::LoadoutHelperType);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
-   ASSERT_EQ("", serverGame->getClientInfo(0)->getOnDeckLoadout().toString(true));   // Prove there's no on deck loadout
+   ASSERT_EQ("", serverGame->getClientInfo(0)->getOnDeckLoadout()->toString(true));   // Prove there's no on deck loadout
 
    // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
    // Feed the UI some keys... like we're configuring a loadout!  
@@ -317,7 +317,7 @@ static void doScenario11(GamePair &gamePair)
 
    gamePair.idle(10, 10);
    // Check the on deck loadout on server -- does not get set on the client
-   ASSERT_EQ("Turbo,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout().toString(true));
+   ASSERT_EQ("Turbo,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout()->toString(true));
 
    gameUI->activateHelper(HelperMenu::LoadoutHelperType);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
@@ -329,7 +329,7 @@ static void doScenario11(GamePair &gamePair)
    ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
 
    gamePair.idle(10, 10);   
-   ASSERT_EQ("Turbo,Sensor,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout().toString(true));
+   ASSERT_EQ("Turbo,Sensor,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout()->toString(true));
 }
 
 

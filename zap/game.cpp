@@ -1315,6 +1315,12 @@ void Game::setActiveTeamManager(TeamManager *teamManager)
 }
 
 
+bool Game::isXtankModeGame() const
+{
+   return getSettings()->isXtankMode();
+}
+
+
 // Overridden on client
 void Game::setLevelDatabaseId(U32 id)
 {

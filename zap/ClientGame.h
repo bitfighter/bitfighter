@@ -109,8 +109,8 @@ public:
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
 
    void requestLoadoutPreset(S32 index);
-   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString, 
-                                                                       const char *msgToShowIfLoadoutsAreTheSame);
+   void displayShipDesignChangedMessage(const DesignTracker *loadout, const char *baseSuccesString,
+                                                                      const char *msgToShowIfLoadoutsAreTheSame);
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
@@ -228,7 +228,7 @@ public:
    void quitEngineerHelper();
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
-   void xtankDesignUpdated(const XtankDesign &design);
+   void xtankDesignUpdated(const VehicleDesign &design);
    bool isShowingDebugShipCoords();
 
    void requestSpawnDelayed(bool incursPenalty) const;

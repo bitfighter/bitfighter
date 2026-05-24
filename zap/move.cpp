@@ -47,28 +47,13 @@ namespace Zap
       x = 0;
       y = 0;
       angle = 0;
-      bodyIndex = -1;   // -1 = normal BF ship (XtankBodyNone)
+      xtank = false;
 
       for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       {
          modulePrimary[i] = false;
          moduleSecondary[i] = false;
       }
-
-      for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-         weaponSlot[i] = -1;   // -1 = XtankWeapon::None
-      for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-         weaponMount[i] = -1;
-
-      engineType = (S8)XtankEngine::DEFAULT;
-      treadType = (S8)XtankTread::DEFAULT;
-      heatSinkCount = (S8)XtankHeatSinkDefault;
-      armorType = (S8)XtankArmor::DEFAULT;
-      suspensionType = (S8)XtankSuspension::DEFAULT;
-      bumperType = (S8)XtankBumper::DEFAULT;
-      specials = 0;
-      for(U32 i = 0; i < 6; i++)
-         armorSides[i] = 0;
    }
 
 
@@ -100,30 +85,10 @@ namespace Zap
          if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
             return false;
 
-      for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-         if(move->weaponSlot[i] != weaponSlot[i])
-            return false;
-
-      for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-         if(move->weaponMount[i] != weaponMount[i])
-            return false;
-
-      for(U32 i = 0; i < 6; i++)
-         if(move->armorSides[i] != armorSides[i])
-            return false;
-
       return move->x == x &&
-         move->y == y &&
-         move->angle == angle &&
-         move->fire == fire &&
-         move->bodyIndex == bodyIndex &&
-         move->engineType == engineType &&
-         move->treadType == treadType &&
-         move->heatSinkCount == heatSinkCount &&
-         move->armorType == armorType &&
-         move->suspensionType == suspensionType &&
-         move->bumperType == bumperType &&
-         move->specials == specials;
+             move->y == y &&
+             move->angle == angle &&
+             move->fire == fire;
    }
 
 
@@ -152,44 +117,6 @@ namespace Zap
          {
             stream->writeFlag(modulePrimary[i]);
             stream->writeFlag(moduleSecondary[i]);
-         }
-
-         // Body index: -1 (BF ship) through VehicleBodyCount - 1; stored as 0..VehicleBodyCount
-         stream->writeRangedU32((U32)(bodyIndex + 1), 0, VehicleBodyCount);
-
-         // Weapon slots + mount assignments: only present when an xtank body is active.
-         // Each slot value -1..XtankWeapon::COUNT - 1 is stored as 0..XtankWeapon::COUNT . 
-         if(bodyIndex >= 0)
-         {
-            for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-               stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, (U32)XtankWeapon::COUNT);
-            for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-               stream->writeRangedU32((U32)(weaponMount[i] + 1), 0, (U32)XtankMountLocation::COUNT);
-
-            // Engine type: 0..XtankEngineCount-1
-            stream->writeRangedU32((U32)engineType, 0, XtankEngineCount - 1);
-
-            // Tread type: 0..XtankTreadCount-1
-            stream->writeRangedU32((U32)treadType, 0, XtankTreadCount - 1);
-
-            // Heat sink count: straight up non-negative number
-            stream->writeRangedU32((U32)heatSinkCount, 0, MAX_HEAT_SINKS);
-
-            // Armor type: 0..XtankArmorCount-1
-            stream->writeRangedU32((U32)armorType, 0, XtankArmorCount - 1);
-
-            // Suspension type: 0..XtankSuspensionCount-1
-            stream->writeRangedU32((U32)suspensionType, 0, XtankSuspensionCount - 1);
-
-            // Bumper type: 0..XtankBumperCount-1
-            stream->writeRangedU32((U32)bumperType, 0, XtankBumperCount - 1);
-
-            // Specials bitmask: 0..4095 (12 bits used)
-            stream->writeInt(specials, 16);
-
-            // Per-side armor points: 4 × U8 (0-255 each)
-            for(U32 i = 0; i < 6; i++)
-               stream->writeInt((U32)armorSides[i], 8);
          }
       }
       if(packTime)
@@ -226,53 +153,15 @@ namespace Zap
             modulePrimary[i] = stream->readFlag();
             moduleSecondary[i] = stream->readFlag();
          }
-
-         // Body index: stored as 0..VehicleBodyCount, representing -1..VehicleBodyCount-1
-         bodyIndex = (S8)(stream->readRangedU32(0, VehicleBodyCount) - 1);
-
-         // Weapon slots + mount assignments: present only when an xtank body is active.
-         if(bodyIndex >= 0)
-         {
-            for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-               weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeaponCount) - 1);
-            for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-               weaponMount[i] = (S8)(stream->readRangedU32(0, XtankMountLocationCount) - 1);
-
-            engineType = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
-            treadType = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
-            heatSinkCount = (S8)(stream->readRangedU32(0, MAX_HEAT_SINKS));
-            armorType = (S8)stream->readRangedU32(0, XtankArmorCount - 1);
-         suspensionType = (S8)stream->readRangedU32(0, XtankSuspensionCount - 1);
-         bumperType     = (S8)stream->readRangedU32(0, XtankBumperCount - 1);
-         specials       = (U16)stream->readInt(16);
-         for(U32 i = 0; i < 6; i++)
-            armorSides[i] = (U8)stream->readInt(8);
       }
-      else
+
+      if(unpackTime)
       {
-         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-            weaponSlot[i] = -1;
-         for(U32 i = 0; i < ARRAYSIZE(weaponMount); i++)
-            weaponMount[i] = -1;
-         engineType    = (S8)XtankEngine::DEFAULT;
-         treadType     = (S8)XtankTread::DEFAULT;
-         heatSinkCount = (S8)XtankHeatSinkDefault;
-         armorType     = (S8)XtankArmor::DEFAULT;
-         suspensionType = (S8)XtankSuspension::DEFAULT;
-         bumperType     = (S8)XtankBumper::DEFAULT;
-         specials       = 0;
-         for(U32 i = 0; i < 6; i++)
-            armorSides[i] = 0;
+         time = stream->readRangedU32(0, MaxMoveTime);
+         if(time >= U32(MaxMoveTime))
+            time = stream->readInt(MoveTimeBits) + MaxMoveTime;
       }
    }
-
-   if(unpackTime)
-   {
-      time = stream->readRangedU32(0, MaxMoveTime);
-      if(time >= U32(MaxMoveTime))
-         time = stream->readInt(MoveTimeBits) + MaxMoveTime;
-   }
-}
 
 
 // Pack and unpack the move to ensure the effects of rounding are same on client and server
@@ -292,16 +181,17 @@ string Move::toString()
    string firing = fire ? "FIRE!!" : "NOFIRE";
    string modpstr, modsstr;
 
-   Point p(x,y);
+   Point p(x, y);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
-      modpstr += modulePrimary[i]   ? "1" : "0";
+      modpstr += modulePrimary[i] ? "1" : "0";
       modsstr += moduleSecondary[i] ? "1" : "0";
    }
 
-   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr + sep + "body=" + itos(bodyIndex);
+   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr;
+
 }
 
 
-};
+};    // namespace Zap

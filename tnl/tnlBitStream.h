@@ -166,8 +166,16 @@ public:
 
    /// Writes an enumeration value in the range of 0 ... enumRange - 1.
    void writeEnum(U32 enumValue, U32 enumRange);
+   /// Writes an enumeration value for any scoped enum type.
+   template<typename T>
+   typename std::enable_if<std::is_enum<T>::value>::type
+   writeEnum(T enumValue, T enumRange) { writeEnum(static_cast<U32>(enumValue), static_cast<U32>(enumRange)); }
    /// Reads an enumeration value in the range 0 ... enumRange - 1.
    U32 readEnum(U32 enumRange);
+   /// Reads an enumeration value for any scoped enum type.
+   template<typename T>
+   typename std::enable_if<std::is_enum<T>::value, T>::type
+   readEnum(T enumRange) { return static_cast<T>(readEnum(static_cast<U32>(enumRange))); }
 
    /// Writes a float from 0 to 1 inclusive, using bitCount bits of precision.
    void writeFloat(F32 f, U8 bitCount);
@@ -387,15 +395,36 @@ inline U32 BitStream::readRangedU32(U32 rangeStart, U32 rangeEnd)
    return val + rangeStart;
 }
 
+
 inline void BitStream::writeEnum(U32 enumValue, U32 enumRange)
 {
    writeInt(enumValue, getNextBinLog2(enumRange));
 }
 
+
 inline U32 BitStream::readEnum(U32 enumRange)
 {
    return U32(readInt(getNextBinLog2(enumRange)));
 }
+
+
+/// Overload for scoped enums (enum class): casts to U32 before writing.
+template<typename T>
+inline typename std::enable_if<std::is_enum<T>::value>::type
+writeEnum(BitStream *stream, T enumValue, T enumRange)
+{
+   stream->writeEnum(static_cast<U32>(enumValue), static_cast<U32>(enumRange));
+}
+
+
+/// Overload for scoped enums (enum class): reads a U32 and casts back to the enum type.
+template<typename T>
+inline typename std::enable_if<std::is_enum<T>::value, T>::type
+readEnum(BitStream *stream, T enumRange)
+{
+   return static_cast<T>(stream->readEnum(static_cast<U32>(enumRange)));
+}
+
 
 /// PacketStream provides a network interface to the BitStream for easy construction of data packets.
 class PacketStream : public BitStream

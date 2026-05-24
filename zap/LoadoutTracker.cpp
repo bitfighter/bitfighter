@@ -5,7 +5,9 @@
 
 
 #include "LoadoutTracker.h"
+#include "statistics.h"
 #include "stringUtils.h"      // For parseString
+#include "tnlBitStream.h"
 
 #include "tnlLog.h"
 
@@ -13,27 +15,35 @@
 namespace Zap
 {
 
+
+bool DesignTracker::operator != (const DesignTracker &other) const
+{
+   return !(*this == other);
+}
+
+
 // Constructor
 LoadoutTracker::LoadoutTracker()
 {
-   resetLoadout();
+   reset();
 }
 
 
 // Constructor
 LoadoutTracker::LoadoutTracker(const string &loadoutStr)
 {
-   resetLoadout();
-   setLoadout(loadoutStr);
+   reset();
+   set(loadoutStr);
 }
 
 
 // Constructor
 LoadoutTracker::LoadoutTracker(const Vector<U8> &loadout)
 {
-   resetLoadout();
+   reset();
    setLoadout(loadout);
 }
+
 
 // Destructor
 LoadoutTracker::~LoadoutTracker()
@@ -43,7 +53,7 @@ LoadoutTracker::~LoadoutTracker()
 
 
 // Reset this loadout to its factory settings
-void LoadoutTracker::resetLoadout()
+void LoadoutTracker::reset()
 {
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModules[i] = ModuleNone;
@@ -85,10 +95,31 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 }
 
 
+void LoadoutTracker::writeToStream(BitStream *stream)
+{
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      stream->writeEnum(getModule(i), ModuleCount);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      stream->writeEnum(getWeapon(i), WeaponCount);
+}
+
+
+void LoadoutTracker::readFromStream(BitStream *stream)
+{
+   // Update loadout
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      setModule(i, (ShipModule)stream->readEnum(ModuleCount));
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      setWeapon(i, (WeaponType)stream->readEnum(WeaponCount));
+}
+
+
 // Takes a vector of U8s repesenting loadout... M,M,W,W,W
 void LoadoutTracker::setLoadout(const Vector<U8> &items)
 {
-   resetLoadout();
+   reset();
 
    // Check for the proper number of items
    if(items.size() != ShipModuleCount + ShipWeaponCount)
@@ -112,7 +143,7 @@ void LoadoutTracker::setLoadout(const Vector<U8> &items)
 }
 
 
-void LoadoutTracker::setLoadout(const string &loadoutStr)
+void LoadoutTracker::set(const string &loadoutStr)
 {
    // If we have a loadout string, try to get something useful out of it.
    // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
@@ -147,7 +178,7 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
       if(!found)
       {
          logprintf(LogConsumer::ConfigurationError, "Unknown module found in loadout preset in INI file: %s", word);
-         resetLoadout();
+         reset();
          return;
       }
    }
@@ -168,7 +199,7 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
       if(!found)
       {
          logprintf(LogConsumer::ConfigurationError, "Unknown weapon found in loadout preset in INI file: %s", word);
-         resetLoadout();
+         reset();
          return;
       }
    }
@@ -247,9 +278,28 @@ bool LoadoutTracker::hasWeapon(WeaponType weapon) const
 }
 
 
+// Minimal validity test; basically seeing if it has been set or not.
 bool LoadoutTracker::isValid() const
 {
    return mModules[0] != ModuleNone;
+}
+
+
+// Is this design valid for the current game?  Design comes from the client, so might be Sneaky Pete.
+bool LoadoutTracker::isValidForLevel(bool engineerAllowed) const
+{
+   if(!isValid())
+      return false;
+
+   // Reject if module contains engineer but it is not enabled on this level
+   if(!engineerAllowed && hasModule(ModuleEngineer))
+      return false;
+
+   // Check for illegal weapons
+   if(hasWeapon(WeaponTurret))
+      return false;
+
+   return true;     // Passed validation
 }
 
 
@@ -296,7 +346,7 @@ bool LoadoutTracker::isModuleSecondaryActive(ShipModule module) const
 }
 
 
-Vector<U8> LoadoutTracker::toU8Vector() const
+Vector<U8> LoadoutTracker::pack() const
 {
    Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
 
@@ -310,23 +360,23 @@ Vector<U8> LoadoutTracker::toU8Vector() const
 }
 
 
-bool LoadoutTracker::operator == (const LoadoutTracker &other) const 
+bool LoadoutTracker::operator == (const DesignTracker &other) const 
 {
+   const LoadoutTracker *o = dynamic_cast<const LoadoutTracker *>(&other);
+   TNLAssert(o, "Comparing LoadoutTracker with non-LoadoutTracker!");
+
+   if(!o)
+      return false;
+
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(getModule(i) != other.getModule(i))
+      if(getModule(i) != o->getModule(i))
          return false;
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(getWeapon(i) != other.getWeapon(i))
+      if(getWeapon(i) != o->getWeapon(i))
          return false;
 
    return true;
-}
-
-
-bool LoadoutTracker::operator != (const LoadoutTracker &other) const 
-{
-   return !(*this == other);
 }
 
 
@@ -348,5 +398,23 @@ string LoadoutTracker::toString(bool compact) const
 
    return listToString(loadoutStrings, compact ? "," : ", ");
 }
+
+
+void LoadoutTracker::saveDesignStats(Statistics &statistics) const
+{
+   // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
+   // second 16 bits to weapons.  The integer created might look like so:
+   //    00000000000001110000000000000011
+   U32 loadoutHash = 0;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutHash |= BIT(hasModule(ShipModule(i)) ? 1 : 0);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadoutHash |= BIT(hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
+
+   statistics.addLoadout(loadoutHash);
+}
+
 
 }

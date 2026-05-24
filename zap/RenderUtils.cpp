@@ -634,19 +634,25 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
-   drawFilledRect(x1, y1, x2, y2, fillColor, 1, outlineColor);
+   drawFilledRect(x1, y1, x2, y2, fillColor, 1, outlineColor, 1.0f);
 }
 
 
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
+void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
 {
    Renderer& r = Renderer::get();
 
    r.setColor(fillColor, fillAlpha);
    drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 
-   r.setColor(outlineColor, 1);
+   r.setColor(outlineColor, outlineAlpha);
    drawRect(x1, y1, x2, y2, RenderType::LineLoop);
+}
+
+
+void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
+{
+   drawFilledRect((F32)x1, (F32)y1, (F32)x2, (F32)y2, fillColor, fillAlpha, outlineColor, outlineAlpha);
 }
 
 

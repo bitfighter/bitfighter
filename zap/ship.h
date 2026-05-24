@@ -32,6 +32,8 @@ class Statistics;
 class Teleporter;
 struct ControlObjectData;
 
+
+
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
 {
@@ -75,9 +77,6 @@ private:
 
    LoadoutTracker checkAndBuildLoadout(lua_State *L, S32 profile);
 
-   // Tank driving physics helper (xtank bodies only)
-   F32 processTankMove(U32 stateIndex);
-
 protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;
@@ -107,7 +106,7 @@ public:
       RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
       SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
-      XtankBodyMask       = Parent::FirstFreeMask << 8, // Xtank body index changed
+      XtankWeaponAmmoMask = Parent::FirstFreeMask << 8, // Ammo changed
       FirstFreeMask       = Parent::FirstFreeMask << 9
    };
 
@@ -120,11 +119,12 @@ public:
    static const S32 PulseMinVelocity = 1000;       // Minimum speed of Pulse
    static const S32 EnergyMax = 100000;            // Energy when fully charged   TODO: Make this lower resolution
 
-   enum {
-      MaxVelocity = 450,        // points per second
-      Acceleration = 2500,      // points per second per second
-      BoostMaxVelocity = 700,   // points per second
-      BoostAccelFact = 2,       // Will modify Acceleration
+   enum
+   {
+      MaxVelocity = 450,      // points per second
+      Acceleration = 2500,    // points per second per second
+      BoostMaxVelocity = 700, // points per second
+      BoostAccelFact = 2,     // Will modify Acceleration
 
       VisibilityRadius = 30,
       KillDeleteDelay = 1500,
@@ -152,7 +152,9 @@ public:
       WarpFadeInTime = 500,
    };
 
-   S32 mFireTimer;
+   const F32 HeatLimit = 100;  // How hot is too hot?
+
+   S32 mFireTimer;      // Use S32 here because we need to be able to set it to a negative value when catching up with delayed packets
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
@@ -180,6 +182,8 @@ public:
    Timer mSpyBugPlacementTimer;
    Timer mFastRechargeTimer;
 
+   bool mWasInReloadZone;
+
    void setChangeTeamMask();
 
 #ifndef ZAP_DEDICATED
@@ -191,10 +195,15 @@ public:
 
    // Xtank body index and tank physics state.  Present in all builds because
    // the server must run tank driving physics when an xtank body is active.
-   XtankBody mXtankBody; // -1 (XtankBodyNone) = normal BF ship; >=0 = xtank body
    F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
    F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
-   XtankDesign mXtankDesign;  // Per-player vehicle configuration (body + per-slot weapons)
+   VehicleDesign mVehicleDesign;  // Per-player vehicle configuration (body + per-slot weapons)
+
+
+   // Xtank runtime ammo and heat state.  Only meaningful when isXtankVehicle() is true.
+   array<XtankWeaponState, WEAPON_SLOTS> mWeaponStates;  // Per-slot ammo/reload/refill/status
+   F32 mHeat;    // Current vehicle heat (0 = cold, > 100 = too hot to fire)
+   S32 mMoney;   // Current vehicle money balance for ammo refills
 
    F32 mass;            // Mass of ship, not used
    bool mHasExploded;
@@ -213,6 +222,9 @@ public:
 
    F32 getHealth() const;
    S32 getEnergy() const;
+
+   const VehicleDesign *getXtankDesign() const;
+   const XtankWeaponState &getXtankWeaponState(S32 slot) const;
 
    // Related to mounting and carrying items
    S32 getMountedItemCount() const;
@@ -233,6 +245,7 @@ public:
    void onGhostRemove();
 
    bool hasModule(ShipModule mod) const;
+   void onNewLoadoutAccpeted();
 
    bool isDestroyed();
    bool isVisible(bool viewerHasSensor);
@@ -248,6 +261,8 @@ public:
 
    const LoadoutTracker *getLoadout() const;
    bool setLoadout(const LoadoutTracker &loadout, bool silent = false);
+   bool setDesign(const VehicleDesign &newDesign, bool silent = false);
+
    bool isLoadoutSameAsCurrent(const LoadoutTracker &loadout);
 
    ClientInfo *getClientInfo() const;
@@ -256,11 +271,24 @@ public:
 
    void setMove(const Move &move);      // Used by tests only
    F32 processMove(U32 stateIndex);
+   F32 processShipMove(U32 stateIndex);
+   F32 processTankMove(U32 stateIndex);         
 
    void processWeaponFire();
+   void processBfWeaponFire();
+   void processXtankWeaponFire();
    void processModules();
    void rechargeEnergy();
    void resetFastRecharge();
+
+   // Xtank ammo / heat helpers
+   void initXtankWeaponStates();                  // Fill mWeaponStates from current mXtankDesign
+   void coolHeat(U32 deltaMs);                    // Dissipate vehicle heat over deltaMs
+   void advanceXtankTimers(U32 deltaMs);          // Decrement per-weapon reload timers
+   void processXtankRefill(U32 deltaMs);          // Handle ammo refill when inside a ReloadZone
+
+   F32 getHeat() const   { return mHeat; }
+   S32 getMoney() const  { return mMoney; }
 
 #ifndef ZAP_DEDICATED
 private:
@@ -276,12 +304,12 @@ public:
 
 #ifndef ZAP_DEDICATED
    // Returns the ShipShapeInfo to use for rendering/spark emission:
-   // either an xtank body or the standard BF shape, depending on mXtankBodyIndex.
+   // either an xtank body or the standard BF shape, depending on mXtankDesign.body.
    const ShipShapeInfo *getActiveShipShapeInfo() const;
 #endif
 
    // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
-   XtankBody getXtankBody() const { return mXtankBody; }
+   XtankBody getXtankBody() const { return mVehicleDesign.body; }
 
    // Returns the current tank hull heading angle (radians).  Only meaningful when getXtankBodyIndex() >= 0.
    F32 getTankHeadingAngle() const { return mTankHeadingAngle; }
@@ -294,13 +322,16 @@ public:
    void setTankSpeed(F32 speed)        { mTankSpeed = speed; }
    bool getCooldownNeeded() const      { return mCooldownNeeded; }
    void setCooldownNeeded(bool val)    { mCooldownNeeded = val; }
-   void setXtankBodyForTest(XtankBody body) { mXtankBody = body; }
+   void setXtankBodyForTest(XtankBody body) { mVehicleDesign.body = body; }
 
    // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
    // Also resets tank physics heading to current aim angle.
    void cycleXtankBody();
 
-   bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
+   void toggleWeapon(S32 slotIndex);
+   void toggleWeapon(S32 slotIndex, bool isActive);
+
+       bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
@@ -327,9 +358,13 @@ public:
    void readControlState(BitStream *stream);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void findClientInfoFromName();
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   void unpackLoadout(BitStream *stream);
+
+   void unpackDesign(BitStream *stream);
+
+   void findClientInfoFromName();
    void updateInterpolation();
 
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);

@@ -492,9 +492,9 @@ void showPresetsHandler(ClientGame *game, const Vector<string> &words)
    {
       string display;
 
-      if(game->getSettings()->getLoadoutPreset(i).isValid())
+      if(game->getSettings()->getLoadoutPreset(i)->isValid())
       {
-         string loadoutStr = game->getSettings()->getLoadoutPreset(i).toString(false);
+         string loadoutStr = game->getSettings()->getLoadoutPreset(i)->toString(false);
          display = "Preset " + itos(i + 1) + ": " + loadoutStr;
       }
       else

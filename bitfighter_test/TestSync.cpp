@@ -55,10 +55,7 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    Ship serverShip, clientShip;
 
    // Do the initial full update so that clientShip enters xtank mode.
-   // We have to set bodyIndex in the move so that processMove() will switch
-   // mXtankBodyIndex from -1 to 0, which is what triggers XtankBodyMask.
    Move tankMove;
-   tankMove.bodyIndex = 0;          // Spider body
    serverShip.setMove(tankMove);
 
    // processMove manually drives the server-side physics and body switch.
@@ -75,7 +72,6 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    // ---------- Steering phase ----------
    // Apply a steering move on the server so that mTankHeadingAngle changes.
    Move steerMove;
-   steerMove.bodyIndex = 0;
    steerMove.x         = 1.0f;   // Full right turn
    steerMove.time      = 100;    // 100 ms frame
 
@@ -116,7 +112,6 @@ TEST(SyncTest, TankRotatingInPlaceSendsPositionMask)
 
    // Enter xtank mode, no throttle.
    Move tankMove;
-   tankMove.bodyIndex = 0;
    serverShip.setMove(tankMove);
    serverShip.processMove(ActualState);
    packUnpack(serverShip, clientShip);
@@ -125,7 +120,6 @@ TEST(SyncTest, TankRotatingInPlaceSendsPositionMask)
 
    // Steer right with zero throttle — tank rotates but does not translate.
    Move rotateMove;
-   rotateMove.bodyIndex = 0;
    rotateMove.x         = 1.0f;
    rotateMove.y         = 0.0f;
    rotateMove.time      = 200;
@@ -151,7 +145,6 @@ TEST(SyncTest, TankCoastingSpeedSentViaPositionMask)
 
    // Enter xtank mode with forward throttle to build up some speed.
    Move driveMove;
-   driveMove.bodyIndex = 0;
    driveMove.y         = -1.0f;  // Forward throttle (W key: move.y = -1 = forward)
    driveMove.time      = 200;
 
@@ -163,7 +156,6 @@ TEST(SyncTest, TankCoastingSpeedSentViaPositionMask)
 
    // Now release throttle — tank should be coasting with non-zero speed.
    Move coastMove;
-   coastMove.bodyIndex = 0;
    coastMove.x = 0;
    coastMove.y = 0;
    coastMove.time = 100;
@@ -207,7 +199,6 @@ TEST(SyncTest, TankHeadingPropagatesAcrossTwoClients)
 
    // --- Switch player 1 to xtank mode via addPendingMove ---
    Move tankMove;
-   tankMove.bodyIndex = 0;   // Spider body
    tankMove.time      = 32;
    client1->getConnectionToServer()->addPendingMove(&tankMove);
    GamePair::idle(10, 20);   // Allow XtankBodyMask to propagate to client 2
@@ -220,7 +211,6 @@ TEST(SyncTest, TankHeadingPropagatesAcrossTwoClients)
 
    // --- Steer the tank to change heading ---
    Move steerMove;
-   steerMove.bodyIndex = 0;
    steerMove.x         = 1.0f;   // Full right steer
    steerMove.y         = 0.0f;
    steerMove.time      = 32;
@@ -262,7 +252,6 @@ TEST(SyncTest, TankCoastingPropagatesAcrossTwoClients)
    // Switch to xtank mode and drive forward for a few frames.
    {
       Move tankMove;
-      tankMove.bodyIndex = 0;
       tankMove.y         = -1.0f;   // Forward throttle
       tankMove.time      = 32;
       for(S32 i = 0; i < 10; i++)
@@ -276,7 +265,6 @@ TEST(SyncTest, TankCoastingPropagatesAcrossTwoClients)
    // Release throttle — tank starts coasting.
    {
       Move coastMove;
-      coastMove.bodyIndex = 0;
       coastMove.x = 0;
       coastMove.y = 0;
       coastMove.time = 32;

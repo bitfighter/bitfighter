@@ -357,6 +357,7 @@ Game *BfObject::getGame() const
 }
 
 
+
 // These will all be overridden by various child classes
 bool BfObject::hasTeam()            { return true; }
 bool BfObject::canBeNeutral()       { return true; }

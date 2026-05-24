@@ -71,6 +71,14 @@ namespace Zap
    BINDING( BINDING_SAVE_PRESET_4,      "SaveLoadoutPreset4",  false, keySavePreset4,    KEY_CTRL_4,       KEY_CTRL_4       ) \
    BINDING( BINDING_SAVE_PRESET_5,      "SaveLoadoutPreset5",  false, keySavePreset5,    KEY_CTRL_5,       KEY_CTRL_5       ) \
    BINDING( BINDING_SAVE_PRESET_6,      "SaveLoadoutPreset6",  false, keySavePreset6,    KEY_CTRL_6,       KEY_CTRL_6       ) \
+   \
+   BINDING( BINDING_XT_TOGGLE_WEAP1,    "ToggleWeapon1",  false,  keyToggleWeapon1,  KEY_SHIFT_1,   KEY_SHIFT_1 ) \
+   BINDING( BINDING_XT_TOGGLE_WEAP2,    "ToggleWeapon2",  false,  keyToggleWeapon2,  KEY_SHIFT_2,   KEY_SHIFT_2 ) \
+   BINDING( BINDING_XT_TOGGLE_WEAP3,    "ToggleWeapon3",  false,  keyToggleWeapon3,  KEY_SHIFT_3,   KEY_SHIFT_3 ) \
+   BINDING( BINDING_XT_TOGGLE_WEAP4,    "ToggleWeapon4",  false,  keyToggleWeapon4,  KEY_SHIFT_4,   KEY_SHIFT_4 ) \
+   BINDING( BINDING_XT_TOGGLE_WEAP5,    "ToggleWeapon5",  false,  keyToggleWeapon5,  KEY_SHIFT_5,   KEY_SHIFT_5 ) \
+   BINDING( BINDING_XT_TOGGLE_WEAP6,    "ToggleWeapon6",  false,  keyToggleWeapon6,  KEY_SHIFT_6,   KEY_SHIFT_6 ) \
+
 /*---------------------------------------------------------------------------------------------------------------------------*/
 
 
@@ -119,6 +127,7 @@ namespace Zap
    EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"        ) \
 /*-------------------------------------------------------------------------------------------------------*/
 
+
 /*---------------------------------------SPECIAL_BINDING_TABLE-------------------------------------*/
 /*                                                                  BindingSet          Def. kb    */
 /*                       Enum                    Name in INI        member name         binding    */
@@ -126,7 +135,7 @@ namespace Zap
    SPECIAL_BINDING( BINDING_SCREENSHOT_1,       "Screenshot_1",     keyScreenshot1,    "PrntScrn")  \
    SPECIAL_BINDING( BINDING_SCREENSHOT_2,       "Screenshot_2",     keyScreenshot2,    "Ctrl+Q")    \
 /*-------------------------------------------------------------------------------------------------*/
-   
+
 
 enum BindingNameEnum {
 #define BINDING(enumName, b, c, d, e, f) enumName,
@@ -246,7 +255,7 @@ public:
    static string getBindingName(BindingNameEnum binding);
    static string getEditorBindingName(EditorBindingNameEnum binding);
    static string getSpecialBindingName(SpecialBindingNameEnum binding);
-   
+
    InputCode getKeyBoundToBindingCodeName(const string &name) const;
    string getEditorKeyBoundToBindingCodeName(const string &name) const;
    string getSpecialKeyBoundToBindingCodeName(const string &name) const;
@@ -266,8 +275,8 @@ private:
 public:
    static string getCurrentInputString(InputCode inputCode);
 
-   static bool checkModifier(InputCode mod1);            
-   static bool checkModifier(InputCode mod1, InputCode mod2);            
+   static bool checkModifier(InputCode mod1);
+   static bool checkModifier(InputCode mod1, InputCode mod2);
    static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);
 
    static bool isValidInputString(const string &inputString);
@@ -305,7 +314,7 @@ public:
 
    static S16 inputCodeToControllerButton(InputCode inputCode);
 
-   InputCode getBinding(BindingNameEnum bindingName) const; 
+   InputCode getBinding(BindingNameEnum bindingName) const;
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);

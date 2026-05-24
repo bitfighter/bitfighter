@@ -14,14 +14,14 @@
 // convention.  Coordinates were then scaled to fit within the standard
 // Ship::CollisionRadius of 24 units.
 //
-// Keep this file and its companion XtankShape.cpp cleanly separated from the
+// Keep this file and its companion VehicleDesign.cpp cleanly separated from the
 // rest of the Bitfighter codebase.  The only integration points are:
-//   - ship.h / ship.cpp  (mXtankBodyIndex/mXtankDesign fields, cycleXtankBody(), tank physics)
+//   - ship.h / ship.cpp  (mXtankDesign.body/mXtankDesign fields, cycleXtankBody(), tank physics)
 //   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey; BINDING_LOADOUT xtank design menu)
 //   - move.h / move.cpp  (Move::bodyIndex, Move::weaponSlot[], Move::engineType,
 //                         Move::treadType, Move::heatSinkCount, Move::specials fields)
 //   - gameWeapons.h/cpp  (GameWeapon::createXtankProjectile)
-//   - UIXtankHelper.h/cpp (vehicle design helper menu)
+//   - UIVehicleDesigner.h/cpp (vehicle design helper menu)
 //   - LoadoutIndicator.h/cpp (HUD panel)
 //------------------------------------------------------------------------------
 
@@ -30,8 +30,11 @@
 
 #include "ShipShape.h"     // for ShipShapeInfo
 #include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon) and ProjectileStyle
+#include "LoadoutTracker.h"
 #include "move.h"
 #include "tnlTypes.h"
+#include "tnlVector.h"
+#include "Timer.h"
 
 #include <array>
 
@@ -41,10 +44,28 @@ namespace Zap
 //using std::array;
 
 static const S32 WEAPON_SLOTS = 6;	   // Max number of weapons a vehicle can carry
-static const S32 XTANK_FPS = 15;        //Xtank runs at 15 frames per second, so we use that to convert to time
+static const S32 XTANK_FPS = 15;       //Xtank runs at 15 frames per second, so we use that to convert to time
+
+// Starting money for xtank vehicles.  The xtank formula scales with the most-expensive vehicle
+// in the match, but we use a constant here for now.  Revisit when per-match economy is added.
+static const S32 STARTING_MONEY = 5000;
 
 
-// These really don't belong here; they are part of the vehicle designer, which is in UIXtankHelper at the moment.
+// Per-weapon runtime state for xtank vehicles.  One entry per WEAPON_SLOTS slot.
+struct XtankWeaponState
+{
+   S32 ammo;           // Current ammo count (0 = empty)
+   Timer reloadTimer;  // Time remaining until the weapon can fire again
+   Timer refillTimer;  // Tracks refilling when inside a ReloadZone
+   bool mIsActive;     // Weapon is on (or off)
+
+   bool hasAmmo() const { return ammo > 0; }
+   bool isActive() const { return mIsActive; }
+   void setActive(bool isActive) { mIsActive = isActive; }
+};
+
+
+// These really don't belong here; they are part of the vehicle designer, which is in VehicleDesignerUserInterface at the moment.
 enum class Phase
 {
    BODY = 0,
@@ -70,7 +91,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
    extern const char *xtankBodyNames[];
 
    // Enum of all 14 xtank vehicle bodies (in the order they appear in xtank's
-   // objects.c).  XtankBodyNone represents "show the normal BF ship".
+   // objects.c).  BITFIGHTER_SHIP represents "show the normal BF ship".
    enum class XtankBody
    {
       Lightcycle = 0,
@@ -88,8 +109,8 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       Malice,
       Panzy,
       COUNT,
-      BITFIGHTER_SHIP = -1,
-      NONE = -2,
+      NONE,
+      BITFIGHTER_SHIP,
       DEFAULT = Lightcycle
    };
    constexpr S32 VehicleBodyCount = (S32)XtankBody::COUNT;
@@ -165,7 +186,8 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
    // XtankWeapon::NONE represents "this turret slot carries no weapon".
    enum class XtankWeapon
    {
-      LIGHT_MACHINE_GUN = 0,
+      NONE = 0,            // Slot carries no weapon
+      LIGHT_MACHINE_GUN,
       MACHINE_GUN,
       HEAVY_MACHINE_GUN,
       LIGHT_AUTOCANNON,
@@ -191,7 +213,6 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       ANTI_RADIATION,
       DISC_SHOOTER,
       COUNT,
-      NONE = -1 // Slot carries no weapon
    };
    constexpr S32 XtankWeaponCount = (S32)XtankWeapon::COUNT;
 
@@ -238,7 +259,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
          const char *name;      // Display name
          S32 damage;            // Damage per hit (xtank native)
          S32 max_ammo;          // Maximum ammo capacity
-         S32 reload_time;       // Reload time between shots (xtank frames)
+         S32 reload_time;       // Reload time between shots (ms)
          S32 ammo_speed;        // Projectile speed (xtank units/frame)
          S32 weight;            // Weight of the weapon
          S32 space;             // Space required to mount
@@ -403,6 +424,7 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
 
    extern SuspensionStat suspensionStat[];
 
+
    enum class XtankBumper
    {
       NONE = 0,
@@ -485,6 +507,8 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
       XtankSpecialCount   = 12,
    };
 
+   const S32 MAX_SPECIALS = 1 << XtankSpecialCount;      // 2^12 = 4096 
+
    struct XtankSpecialInfo
    {
       const char *name;        // Display name
@@ -505,15 +529,18 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
 S32 getXtankMountBit(XtankMountLocation mount);
 
 
-const S32 MAX_ARMOR_PER_SIDE = 999;    // Effetively unlimited
+const S32 MAX_ARMOR_PER_SIDE = 999;    // Arbitrary cap imported from original -- you could theoretically fit 2082 kevlar armor units on a Panzy
 
-class XtankDesign
+class VehicleDesign : public DesignTracker
 {
    public:
-      XtankDesign();                 // Default constructor (bodyIndex = None)
-      XtankDesign(const Move &move);
+      VehicleDesign();                    // Default constructor (bodyIndex = None)
+      VehicleDesign(const Vector<U8> &design);   // Constructor from serialized
 
-      bool same(const XtankDesign &other) const;
+      Vector<U8> pack() const;                 // Serialize to byte vector for network transmission
+      void unpack(const Vector<U8> design);    // Deserialize
+
+      bool operator == (const DesignTracker &other) const override;
 
       XtankBody body;           // XtankBody, -1 = normal BF ship
       array<XtankWeapon, WEAPON_SLOTS> weapons;    // active weapon per weapon number slot (0..5)
@@ -525,10 +552,12 @@ class XtankDesign
       XtankArmor armor;
       XtankSuspension suspension;  // index into suspensionStat[]
       XtankBumper bumper;          // index into bumperStat[]
-      U32 specials;           // bitmask of XtankSpecial bits
+      U32 specials;                // bitmask of XtankSpecial bits
       array<S32, VehicleSidesCount> armorSides;  // per-side armor points (front=0, back=1, left=2, right=3, top=4, bottom=5)
 
-      void init(); // Set body + reset all components to defaults
+      void init();      // Set body + reset all components to defaults; clear() plus a little more
+      void reset();     // Reset this to its factory settings
+
       const char *getArmorName() const;      // Name of currently selected
       S32 getBodySize() const;
       bool isXtankVehicle() const;
@@ -542,6 +571,10 @@ class XtankDesign
 
       void nextMount(S32 slot);
       void previousMount(S32 slot);
+
+
+      void writeToStream(BitStream *stream) override;
+      void readFromStream(BitStream *stream) override;
 
       static bool isMountCompatible(XtankBody body, XtankWeapon weapon, XtankMountLocation mount);
       static XtankMountLocation firstValidMount(XtankBody body, XtankWeapon weapon, XtankMountLocation preferred);
@@ -564,10 +597,17 @@ class XtankDesign
       }
 
 
+
       S32 getSpecialsSpace() const;
       S32 getSpecialsWeight() const;
       S32 getSpecialsCost() const;
       string getValidMountList(XtankWeapon weapon) const;
+
+      bool isValid() const override;   
+      bool isValidForLevel(bool engineerAllowed) const override;
+
+      void set(const string &loadoutStr) override;    // Deserialize from a string representation
+      void saveDesignStats(Statistics &statistics) const override;
 };
 
 
