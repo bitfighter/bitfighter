@@ -74,6 +74,7 @@ class ClientInfo;
    TYPE_NUMBER( SafeZoneTypeNumber,            true,              "SafeZone",            "SafeZone"            ) \
    TYPE_NUMBER( ReloadZoneTypeNumber,          true,              "ReloadZone",          "ReloadZone"          ) \
    TYPE_NUMBER( FuelZoneTypeNumber,            true,              "FuelZone",            "FuelZone"            ) \
+   TYPE_NUMBER( RepairZoneTypeNumber,          true,              "RepairZone",          "RepairZone"          ) \
    TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBug",              "SpyBug"              ) \
    TYPE_NUMBER( CoreTypeNumber,                true,              "CoreItem",            "CoreItem"            ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "Zone",                "Zone"                ) \

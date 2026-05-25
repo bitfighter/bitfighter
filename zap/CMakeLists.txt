@@ -85,6 +85,7 @@ set(SHARED_SOURCES
 	safeZone.cpp
 	reloadZone.cpp
 	fuelZone.cpp
+	repairZone.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp

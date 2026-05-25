@@ -222,6 +222,8 @@ extern void renderReloadZone(const Color *color, const Vector<Point> *outline, c
                              const Point &centroid, F32 angleRadians = 0.0f);
 extern void renderFuelZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
                            const Point &centroid, F32 angleRadians = 0.0f);
+extern void renderRepairZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                             const Point &centroid, F32 angleRadians = 0.0f);
 extern void renderReloadZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
@@ -342,6 +344,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderNavMeshBorders
 #define renderReloadZone
 #define renderFuelZone
+#define renderRepairZone
 #define renderRepairItem
 #define renderEnergyItem
 #define renderAsteroid

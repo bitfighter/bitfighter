@@ -2123,7 +2123,69 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    S32 spdY  = screenHeight - cardsHeight - overlayPadding - statusRowHeight - (cardsHeight > 0 ? speedBarGap : 0);
    S32 fuelY = spdY - statusRowHeight - statusRowGap;
 
+   // Armor indicator: two rows — spatial sides on top, vertical sides below.
+   // Row 1 (combat sides): FRONT | LEFT | RIGHT | BACK
+   // Row 2 (vertical):             TOP  | BOTTOM
+   const S32 armorRowHeight = 36;   // two text rows
+   S32 armorY = fuelY - armorRowHeight - statusRowGap;
+
    Renderer &r = Renderer::get();
+
+   // --- Armor indicator: all 6 sides ---
+   {
+      // VehicleSides: 0=Front,1=Back,2=Left,3=Right,4=Top,5=Bottom
+      // Display order for row 1 (spatial L-R as seen from above): Left, Front, Right, Back
+      // Row 2 centred: Top, Bottom
+      static const S32 row1Sides[] = { 2, 0, 3, 1 };   // Left, Front, Right, Back
+      static const char *row1Labels[] = { "L", "F", "R", "B" };
+      static const S32 row2Sides[] = { 4, 5 };          // Top, Bottom
+      static const char *row2Labels[] = { "T", "Bo" };
+
+      const S32 fontSize = 10;
+      const S32 rowH     = 14;
+      const S32 colW     = 68;   // width per column
+      const S32 numRow1  = 4;
+      const S32 numRow2  = 2;
+
+      // Center both rows independently
+      S32 row1W = numRow1 * colW;
+      S32 row1X = (screenWidth - row1W) / 2;
+      S32 row2W = numRow2 * colW;
+      S32 row2X = (screenWidth - row2W) / 2;
+
+      S32 row1Y = armorY;
+      S32 row2Y = armorY + rowH + 2;
+
+      // "ARM" label to the left of row 1
+      r.setColor(Colors::white);
+      drawString(row1X - 30, row1Y + 1, 9, "ARM");
+
+      auto drawSideEntry = [&](S32 x, S32 y, S32 sideIdx, const char *label)
+      {
+         S32 maxHP = ship->getMaxArmorSide(sideIdx) * 100;
+         S32 curHP = ship->getArmorSide(sideIdx);
+         F32 frac  = (maxHP > 0) ? ((F32)curHP / (F32)maxHP) : 0.0f;
+
+         const Color *c = (frac <= 0.0f) ? &Colors::red
+                        : (frac < 0.20f) ? &Colors::red
+                        : (frac < 0.50f) ? &Colors::yellow
+                        :                  &Colors::green80;
+         r.setColor(*c);
+
+         // Show "F:45/50" — divide by 100 to convert internal ticks back to armor points
+         char buf[32];
+         S32 cur = curHP / 100;
+         S32 mx  = maxHP / 100;
+         dSprintf(buf, sizeof(buf), "%s: %d/%d", label, cur, mx);
+         drawString(x, y, fontSize, buf);
+      };
+
+      for(S32 i = 0; i < numRow1; i++)
+         drawSideEntry(row1X + i * colW, row1Y, row1Sides[i], row1Labels[i]);
+
+      for(S32 i = 0; i < numRow2; i++)
+         drawSideEntry(row2X + i * colW, row2Y, row2Sides[i], row2Labels[i]);
+   }
 
    // --- Fuel bar ---
    {

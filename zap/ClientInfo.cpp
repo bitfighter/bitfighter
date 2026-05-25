@@ -591,6 +591,7 @@ void ClientInfo::requestDesign(const DesignTracker *design)
       else if(vd)
       {
          mOnDeckDesign = *vd;       // Copies vd into mOnDeckDesign
+         mActiveDesign = *vd;       // Also prime mActiveDesign so first spawn gets correct armor/stats
 
          if(ship)
             ship->setDesign(*vd);   // Marks LoadoutMask dirty so ghost system replicates the change

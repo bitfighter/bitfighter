@@ -14,6 +14,7 @@
 #include "safeZone.h"
 #include "reloadZone.h"
 #include "fuelZone.h"
+#include "repairZone.h"
 #include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
 
@@ -189,7 +190,7 @@ namespace Zap
 	  // Tank physics state — present in all builds (server runs tank physics)
 	  // Use the active (old) design for respawn, or fall back to on-deck for first spawn
 	  if(clientInfo)
-	     mVehicleDesign = *clientInfo->getOldDesign();
+		 mVehicleDesign = *clientInfo->getOldDesign();
 	  mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
 	  mTankSpeed = 0;
 	  mSpeedFraction = 0.0f;             // Start stopped
@@ -198,6 +199,13 @@ namespace Zap
 	  mHeat = 0.0f;
 	  mMoney = STARTING_MONEY;
 	  mLoadout.set(DefaultLoadout);
+
+	  // Save armor from the real design before reset() zeroes armorSides.
+	  // mArmorSides uses a 100× internal tick scale to allow sub-point damage accumulation.
+	  array<S32, VehicleSidesCount> savedArmorSides;
+	  for(S32 i = 0; i < VehicleSidesCount; i++)
+		 savedArmorSides[i] = mVehicleDesign.armorSides[i];
+
 	  mVehicleDesign.reset();
 	  initXtankWeaponStates();   // Must come after mVehicleDesign is fully settled
 
@@ -210,8 +218,16 @@ namespace Zap
 	  }
 	  mWasInFuelZone = false;
 
-	  // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
-	  if(clientInfo && clientInfo->getOldLoadout()->getModule(0) != ModuleNone)
+	  // Armor: initialize per-side HP (×100 ticks) from design maximums saved before reset().
+	  // Also restore armorSides onto mVehicleDesign so pack/unpack max ranges are correct.
+	  for(S32 i = 0; i < VehicleSidesCount; i++)
+	  {
+		 mVehicleDesign.armorSides[i] = savedArmorSides[i];
+		 mArmorSides[i] = savedArmorSides[i] * 100;
+	  }
+	  mWasInRepairZone = false;
+		  mRepairAccumMs = 0.0f;
+		  if(clientInfo && clientInfo->getOldLoadout()->getModule(0) != ModuleNone)
 		 mLoadout = *clientInfo->getOldLoadout();
 	  // TODO: Probably need something for xtank here
 
@@ -1143,8 +1159,7 @@ namespace Zap
    }
 
 
-   // Handle fuel refill while inside a FuelZone (spec §5).
-   // Requirements: xtank vehicle, stopped (|speed| < 5), centered within 25 BF units of zone centroid.
+   // Handle fuel refill while inside a FuelZone
    // Rate: +1 unit/frame at XTANK_FPS (20 fps), i.e. +XTANK_FPS per second, costing fuel_cost money/unit.
    void Ship::processXtankFuel(U32 deltaMs)
    {
@@ -1207,6 +1222,69 @@ namespace Zap
 
 	  mWasInFuelZone = true;
 	  setMaskBits(XtankFuelMask);
+   }
+
+
+   void Ship::processXtankRepair(U32 deltaMs)
+   {
+      if(!isXtankVehicle())
+         return;
+
+      BfObject *zoneObj = isInZone(RepairZoneTypeNumber);
+
+      if(!zoneObj)
+      {
+         mWasInRepairZone = false;
+         return;
+      }
+
+      RepairZone *zone = dynamic_cast<RepairZone *>(zoneObj);
+      if(!zone || !zone->isActiveForShip(this))
+      {
+         mWasInRepairZone = false;
+         return;
+      }
+
+      // Must be stopped
+      if(fabsf(mTankSpeed) >= 5.0f)
+         return;
+
+      // Repair rate: +1 armor point/side every 3 xtank frames (150 ms), per spec §7
+      static const F32 REPAIR_INTERVAL_MS = 150.0f;
+      mRepairAccumMs += (F32)deltaMs;
+      if(mRepairAccumMs < REPAIR_INTERVAL_MS)
+         return;
+      mRepairAccumMs -= REPAIR_INTERVAL_MS;
+
+      const S32 armorIdx = MAX(0, MIN((S32)mVehicleDesign.armor, XtankArmorCount - 1));
+      const S32 bodySize = mVehicleDesign.getBodySize();
+      const S32 costPerPoint = xtankArmorInfos[armorIdx].cost * bodySize;
+
+      bool anyRepaired = false;
+      for(S32 i = 0; i < VehicleSidesCount; i++)
+      {
+         // HP is stored as integer ticks (100 per damage unit) to match the damage path.
+         // Design max is in design armor points; convert to the same scale.
+         S32 maxHP = mVehicleDesign.armorSides[i] * 100;
+         if(mArmorSides[i] >= maxHP)
+              continue;   // This side is full
+
+         if(costPerPoint > 0 && mMoney < costPerPoint)
+              continue;   // Can't afford this point
+
+         mArmorSides[i] += 100;   // Repair 1 armor point (stored as 100 internal ticks)
+         if(mArmorSides[i] > maxHP)
+              mArmorSides[i] = maxHP;
+         if(costPerPoint > 0)
+              mMoney -= costPerPoint;
+         anyRepaired = true;
+      }
+
+      if(anyRepaired)
+      {
+         mWasInRepairZone = true;
+         setMaskBits(XtankArmorMask);
+      }
    }
 
 
@@ -1452,6 +1530,7 @@ namespace Zap
 		 {
 			processXtankRefill(mCurrentMove.time);
 			processXtankFuel(mCurrentMove.time);
+			processXtankRepair(mCurrentMove.time);
 		 }
 	  }
 	  // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
@@ -1866,6 +1945,28 @@ namespace Zap
    }
 
 
+   // Returns the armor-side index hit by a projectile traveling in impulseVelocity.
+   // impulseVelocity is the projectile's velocity vector (shooter→ship).
+   // headingAngle uses standard trig convention (angle from +X axis).
+   VehicleSides Ship::getHitSideFromImpulse(const Point &impulseVelocity, F32 headingAngle)
+   {
+      // Negate so hitDir points FROM the shooter side, i.e. the face that was struck.
+      Point hitDir = impulseVelocity * -1.0f;
+      hitDir.normalize();
+
+      Point nose(cosf(headingAngle), sinf(headingAngle));
+      Point right(sinf(headingAngle), -cosf(headingAngle));  // 90° CW
+
+      F32 dotFront = hitDir.dot(nose);
+      F32 dotRight = hitDir.dot(right);
+
+      if(fabsf(dotFront) >= fabsf(dotRight))
+         return (dotFront >= 0) ? VehicleSides::SIDE_FRONT : VehicleSides::SIDE_BACK;  
+      else
+         return (dotRight >= 0) ? VehicleSides::SIDE_LEFT : VehicleSides::SIDE_RIGHT; 
+   }
+   
+
    void Ship::damageObject(DamageInfo *theInfo)
    {
 	  TNLAssert(mHasExploded || mHealth > 0, "One must be true!  If this never fires, remove mHealth == 0 from if below.");  // Added 22-Sep-2013 by Watusimoto
@@ -1923,38 +2024,35 @@ namespace Zap
 		 if(hasArmor)
 			damageAmount *= ARMOR_DAMAGE_REDUCTION_FACTOR;           // Any other damage, including asteroids
 
-		 // Xtank directional armor: reduce damage based on which hull side was hit
-		 if(isXtankVehicle() && theInfo->impulseVector.lenSquared() > 0)
+		 // Xtank directional armor: apply per-side HP tracking per spec.
+		 // Armor absorbs all damage; health is NOT used for xtank vehicles.
+		 if(isXtankVehicle())
 		 {
-			// Determine which side of the ship was hit.
-			// impulseVector points FROM projectile TO ship (direction of impact).
-			Point hitDir = theInfo->impulseVector;
-			hitDir.normalize();
+			// Determine which side of the ship was hit; default to front if no direction available.
+			VehicleSides hitSide = (theInfo->impulseVector.lenSquared() > 0)
+			   ? getHitSideFromImpulse(theInfo->impulseVector, mTankHeadingAngle)
+			   : VehicleSides::SIDE_FRONT;
 
-			// Ship facing: heading 0 means nose points up (+y), so nose = (sin(h), cos(h)).
-			F32 heading = mTankHeadingAngle;
-			Point nose(sinf(heading), cosf(heading));
-			Point right(cosf(heading), -sinf(heading));  // 90 CW = right side
+			// Flat defense absorption: subtract material's defense value from damage.
+			S32 armorIdx = MAX(0, MIN((S32)mVehicleDesign.armor, XtankArmorCount - 1));
+			S32 defense = xtankArmorInfos[armorIdx].defense;
+			F32 reducedDamage = MAX(0.0f, damageAmount - (F32)defense / 10.0f);
 
-			F32 dotFront = hitDir.dot(nose);   // +1 = hit from front, -1 = hit from back
-			F32 dotRight = hitDir.dot(right);  // +1 = hit from right, -1 = hit from left
+			// Deduct from this side's HP pool (stored as integer ticks, 100 per point).
+			S32 &sideHP = mArmorSides[(S32)hitSide];
+			S32 dmgTicks = (S32)(reducedDamage * 100.0f);
+			sideHP -= dmgTicks;
+			if(sideHP < 0)
+			   sideHP = 0;
+			setMaskBits(XtankArmorMask);
 
-			// armorSides: 0=front, 1=back, 2=left, 3=right
-			S32 hitSide;
-			if(fabsf(dotFront) >= fabsf(dotRight))
-			   hitSide = (dotFront >= 0) ? 0 : 1;  // front or back
-			else
-			   hitSide = (dotRight >= 0) ? 3 : 2;  // right or left
-
-			U8 points = mVehicleDesign.armorSides[hitSide];
-			if(points > 0)
+			if(sideHP == 0)
 			{
-			   S32 armorIdx = MAX(0, MIN((S32)mVehicleDesign.armor, XtankArmorCount - 1));
-			   S32 defense = xtankArmorInfos[armorIdx].defense;
-			   // Each armor point absorbs 'defense' hundredths of damage; capped at 80%.
-			   F32 absorption = MIN(0.80f, (F32)(points * defense) / 100.0f);
-			   damageAmount *= (1.0f - absorption);
+			   // Side depleted — vehicle destroyed immediately (xtank spec §4).
+			   killAndScore(theInfo);
 			}
+			// Armor absorbed the hit; do NOT touch mHealth.
+			return;
 		 }
 
 		 // TODO: RAMPLATE special increases collision damage dealt; implement when
@@ -2321,6 +2419,18 @@ namespace Zap
 			 U32 fcap = (U32)MAX(1, xtankEngineInfos[engineIdx].fcap);
 			 stream->writeRangedU32((U32)MAX(0.0f, mFuel), 0, fcap);
 		 }
+
+		 // Pack per-side armor HP.
+		 if(stream->writeFlag(updateMask & XtankArmorMask))
+		 {
+			 for(S32 i = 0; i < VehicleSidesCount; i++)
+			 {
+				// Design max stored as armor points; HP is 100x that scale.
+				S32 maxHP = mVehicleDesign.armorSides[i] * 100;
+				if(maxHP <= 0) maxHP = 1;
+				stream->writeRangedU32((U32)MAX(0, mArmorSides[i]), 0, (U32)maxHP);
+			 }
+		 }
 	  }
 
 	  return 0;
@@ -2565,6 +2675,17 @@ namespace Zap
 			 mFuel = (F32)stream->readRangedU32(0, fcap);
 			 mMaxFuel = (F32)fcap;
 		 }
+
+		 // Per-side armor HP
+		 if(stream->readFlag())     // XtankArmorMask
+		 {
+			 for(S32 i = 0; i < VehicleSidesCount; i++)
+			 {
+				S32 maxHP = mVehicleDesign.armorSides[i] * 100;
+				if(maxHP <= 0) maxHP = 1;
+				mArmorSides[i] = (S32)stream->readRangedU32(0, (U32)maxHP);
+			 }
+		 }
 	  }
 
 #endif
@@ -2620,6 +2741,12 @@ namespace Zap
    void Ship::unpackDesign(BitStream *stream)
    {
 	  mVehicleDesign.readFromStream(stream);
+
+	  // Prime mArmorSides to full for the new design.  Any in-progress damage will be
+	  // corrected by a following XtankArmorMask packet; on a fresh spawn this gives the
+	  // client the correct starting values immediately without waiting for a damage event.
+	  for(S32 i = 0; i < VehicleSidesCount; i++)
+		 mArmorSides[i] = mVehicleDesign.armorSides[i] * 100;
    }
 
 
@@ -2819,7 +2946,11 @@ namespace Zap
 	  mVehicleDesign = newDesign;
 	  initXtankWeaponStates();
 
-	  setMaskBits(LoadoutMask);
+	  // Reset armor HP to new design maximums (×100 ticks to match internal damage scale).
+	  for(S32 i = 0; i < VehicleSidesCount; i++)
+		 mArmorSides[i] = mVehicleDesign.armorSides[i] * 100;
+
+	  setMaskBits(LoadoutMask | XtankArmorMask);
 
 	  if(!silent)
 	  {

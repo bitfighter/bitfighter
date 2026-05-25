@@ -49,6 +49,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankCarouselSlots.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankAmmo.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankPackUnpack.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankArmorSide.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )
 
@@ -75,6 +76,7 @@ set_target_properties(bitfighter_test
 	PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
 	COMPILE_DEFINITIONS BITFIGHTER_TEST
+	VS_KEYWORD "GoogleTest"
 )
 
 

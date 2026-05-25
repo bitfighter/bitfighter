@@ -108,7 +108,8 @@ public:
       SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
       XtankWeaponAmmoMask = Parent::FirstFreeMask << 8, // Ammo changed
       XtankFuelMask       = Parent::FirstFreeMask << 9, // Fuel level changed
-      FirstFreeMask       = Parent::FirstFreeMask << 10
+      XtankArmorMask      = Parent::FirstFreeMask << 10, // Per-side armor HP changed
+      FirstFreeMask       = Parent::FirstFreeMask << 11
    };
 
 
@@ -202,6 +203,9 @@ public:
    F32 mFuel;                 // Current fuel level [0, mMaxFuel]
    F32 mMaxFuel;              // Tank capacity from engine's XtankEngineInfo::fcap
    bool mWasInFuelZone;       // True when ship was in a FuelZone last tick
+   bool mWasInRepairZone;     // True when ship was in a RepairZone last tick
+   F32  mRepairAccumMs;       // Accumulator for repair-zone tick timing
+   array<S32, VehicleSidesCount> mArmorSides;  // Current per-side armor HP [0..MAX_ARMOR_PER_SIDE]
    VehicleDesign mVehicleDesign;  // Per-player vehicle configuration (body + per-slot weapons)
 
 
@@ -292,9 +296,17 @@ public:
    void advanceXtankTimers(U32 deltaMs);          // Decrement per-weapon reload timers
    void processXtankRefill(U32 deltaMs);          // Handle ammo refill when inside a ReloadZone
    void processXtankFuel(U32 deltaMs);            // Handle fuel refill when inside a FuelZone
+   void processXtankRepair(U32 deltaMs);          // Handle armor repair when inside a RepairZone
+
+   // Returns the armor side hit by a projectile traveling in impulseVelocity,
+   // given the hull's heading angle (standard trig convention, angle from +X axis).
+   // Pure function; exposed for unit testing.
+   static VehicleSides getHitSideFromImpulse(const Point &impulseVelocity, F32 headingAngle);
 
    F32 getHeat() const   { return mHeat; }
    S32 getMoney() const  { return mMoney; }
+   S32 getArmorSide(S32 side) const    { return mArmorSides[side]; }
+   S32 getMaxArmorSide(S32 side) const { return mVehicleDesign.armorSides[side]; }
 
 #ifndef ZAP_DEDICATED
 private:

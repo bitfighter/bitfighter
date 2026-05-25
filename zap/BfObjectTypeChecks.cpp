@@ -184,7 +184,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == LoadoutZoneTypeNumber         ||
          x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == SlipZoneTypeNumber            ||
          x == SafeZoneTypeNumber   || x == ReloadZoneTypeNumber     || x == FuelZoneTypeNumber             ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber          ||
+         x == RepairZoneTypeNumber  || x == AsteroidTypeNumber      ||
          x == EnergyItemTypeNumber ||
          x == RepairItemTypeNumber;
 }
@@ -212,7 +212,7 @@ bool isZoneType(U8 x)      // Zones a ship could be in
    return
          x == LoadoutZoneTypeNumber || x == GoalZoneTypeNumber   || x == NexusTypeNumber    ||
          x == ZoneTypeNumber        || x == SlipZoneTypeNumber   || x == SafeZoneTypeNumber    ||
-         x == ReloadZoneTypeNumber  || x == FuelZoneTypeNumber;
+         x == ReloadZoneTypeNumber  || x == FuelZoneTypeNumber   || x == RepairZoneTypeNumber;
 }
 
 

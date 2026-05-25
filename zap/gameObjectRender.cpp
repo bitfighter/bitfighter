@@ -2411,6 +2411,38 @@ void renderFuelZone(const Color *color, const Vector<Point> *outline, const Vect
 }
 
 
+void renderRepairZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+{
+   Renderer &r = Renderer::get();
+   r.pushMatrix();
+   r.translate(center);
+   r.rotate(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+
+   // Draw a medical-cross/plus icon to represent armor repair
+   F32 hw = radius * 0.22f;   // half-width of each bar
+   F32 hh = radius * 0.55f;   // half-height of each bar
+
+   // Vertical bar
+   F32 vBar[] = { -hw, -hh,  hw, -hh,  hw, hh,  -hw, hh };
+   r.renderVertexArray(vBar, 4, RenderType::LineLoop);
+
+   // Horizontal bar
+   F32 hBar[] = { -hh, -hw,  hh, -hw,  hh, hw,  -hh, hw };
+   r.renderVertexArray(hBar, 4, RenderType::LineLoop);
+
+   r.popMatrix();
+}
+
+
+void renderRepairZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
+                      const Point &centroid, F32 angleRadians)
+{
+   renderZone(color, outline, fill);
+   Renderer::get().setColor(*color);
+   renderRepairZoneIcon(centroid, 20, angleRadians);
+}
+
+
 void renderProjectile(const Point &pos, U32 style, U32 time)
 {
    Renderer& r = Renderer::get();
