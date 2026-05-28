@@ -92,7 +92,14 @@ This local/full vs remote/mirrored split is a major source of confusion and is i
 
 ### Ghosts
 
-A **ghost** is a client-side copy of a server-side object, managed by TNL's ghost system. The server is the only place where game objects truly exist and run their authoritative simulation. Each connected client receives a subset of those objects as ghosts — lightweight replicas that receive state updates but do not simulate independently (except for client-side interpolation and local-player prediction).
+A **ghost** is a client-side copy of a server-side object, managed by TNL's ghost system. The server is the only place where game objects truly exist and run their authoritative simulation. Each connected client receives a subset of those objects as ghosts — lightweight replicas that receive state updates from the server.
+
+How much independent simulation a ghost performs depends on the object type:
+
+- **Purely server-simulated** (e.g. `Mine`, `SpyBug`): `idle()` returns immediately on the client. The client receives position/state entirely through ghost updates.
+- **Client-predicted + server-authoritative** (e.g. local player `Ship`): client runs physics locally for responsiveness; server corrections trigger a replay of unacknowledged moves (see [Pattern A](#pattern-a-client-prediction--server-authority--replay)).
+- **Parallel simulation with ghost correction** (e.g. `Projectile`/bullets): both client and server run the full flight physics independently each frame. The server is authoritative for damage and lifetime. If the two diverge (e.g., after a shield bounce), the server sends a ghost position correction (`PositionMask`). This gives smooth bullet visuals without waiting for server round-trips.
+- **Server-simulated with client interpolation** (e.g. `Seeker`): movement steering runs server-only; the client receives ghost updates and interpolates between them visually.
 
 The lifecycle:
 1. **Ghost create** — when an object enters a client's scope, TNL calls `packUpdate()` with `isInitialUpdate() == true`. The client constructs a new local ghost instance and calls `onGhostAdd()`.
