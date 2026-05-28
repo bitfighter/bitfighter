@@ -220,6 +220,9 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 // Only used in editor.
 bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point)
 {
+   if(!triangles)
+      return false;
+
    for (S32 i = 0; i + 2 < triangles->size(); i += 3)
    {
       const Point& p0 = (*triangles)[i];
@@ -228,9 +231,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 
       // Cross-product sign test — zero means point is exactly on that edge,
       // which we treat as inside (non-strict / inclusive boundary).
-      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
-      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
-      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
+      F64 d1 = (F64(point.x) - p1.x) * (F64(p0.y) - p1.y) - (F64(p0.x) - p1.x) * (F64(point.y) - p1.y);
+      F64 d2 = (F64(point.x) - p2.x) * (F64(p1.y) - p2.y) - (F64(p1.x) - p2.x) * (F64(point.y) - p2.y);
+      F64 d3 = (F64(point.x) - p0.x) * (F64(p2.y) - p0.y) - (F64(p2.x) - p0.x) * (F64(point.y) - p0.y);
 
       bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
       bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -248,6 +251,9 @@ bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point
 // No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
 bool isConvex(const Vector<Point> *verts)
 {
+   if(!verts || verts->empty())
+      return true;
+
    int n = verts->size();
    if(n < 3)
       return true;
@@ -684,6 +690,9 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 
 bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
 {
+   if(!zone1 || !zone2)
+      return false;
+
    // Check for unlikely but fatal situation: Not enough vertices
    if(zone1->size() < 3 || zone2->size() < 3)
       return false;
@@ -825,12 +834,12 @@ bool Triangulate::InsideTriangle(F64 Ax, F64 Ay,
   F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
   F64 cCROSSap, bCROSScp, aCROSSbp;
 
-  ax = F64(Cx) - Bx;  ay = F64(Cy) - By;
-  bx = F64(Ax) - Cx;  by = F64(Ay) - Cy;
-  cx = F64(Bx) - Ax;  cy = F64(By) - Ay;
-  apx= F64(Px) - Ax;  apy= F64(Py) - Ay;
-  bpx= F64(Px) - Bx;  bpy= F64(Py) - By;
-  cpx= F64(Px) - Cx;  cpy= F64(Py) - Cy;
+  ax = Cx - Bx;  ay = Cy - By;
+  bx = Ax - Cx;  by = Ay - Cy;
+  cx = Bx - Ax;  cy = By - Ay;
+  apx= Px - Ax;  apy= Py - Ay;
+  bpx= Px - Bx;  bpy= Py - By;
+  cpx= Px - Cx;  cpy= Py - Cy;
 
   aCROSSbp = ax*bpy - ay*bpx;
   cCROSSap = cx*apy - cy*apx;
@@ -855,7 +864,7 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   Cx = contour[V[w]].x;
   Cy = contour[V[w]].y;
 
-  if ( (F64)EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
+  if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
 
   for (p=0;p<n;p++)
   {
@@ -1506,6 +1515,9 @@ static void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vec
 void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
       JoinType joinType)
 {
+   if(!inputPoly)
+      return;
+
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
@@ -1724,8 +1736,8 @@ Point mean2d(const Vector<Point> &polyPoints)
 
    S32 size = polyPoints.size();
 
-   F32 x = 0;
-   F32 y = 0;
+   F64 x = 0;
+   F64 y = 0;
    Point p1;
 
    for(S32 i = 0; i < size; i++)
@@ -1737,8 +1749,8 @@ Point mean2d(const Vector<Point> &polyPoints)
       y += p1.y;
    }
 
-   x /= size;
-   y /= size;
+   x /= (F64)size;
+   y /= (F64)size;
 
    return Point(x,y);
 }
