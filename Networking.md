@@ -86,6 +86,58 @@ This local/full vs remote/mirrored split is a major source of confusion and is i
 
 ---
 
+---
+
+## Glossary
+
+### Ghosts
+
+A **ghost** is a client-side copy of a server-side object, managed by TNL's ghost system. The server is the only place where game objects truly exist and run their authoritative simulation. Each connected client receives a subset of those objects as ghosts — lightweight replicas that receive state updates but do not simulate independently (except for client-side interpolation and local-player prediction).
+
+The lifecycle:
+1. **Ghost create** — when an object enters a client's scope, TNL calls `packUpdate()` with `isInitialUpdate() == true`. The client constructs a new local ghost instance and calls `onGhostAdd()`.
+2. **Ghost update** — subsequent changes are sent via `packUpdate()`/`unpackUpdate()` using mask bits to transmit only changed fields.
+3. **Ghost destroy** — when an object leaves scope, TNL calls `onGhostRemove()` and deletes the local copy.
+
+The net effect: clients always see a recent (slightly delayed) reflection of server state.
+
+Objects opt into ghosting by setting `mNetFlags.set(Ghostable)` (see `Ship` constructor). Objects that are not ghostable are server-only.
+
+### Warping
+
+**Warping** is the decision to skip position interpolation and snap a ghost directly to its new location instead of animating smoothly toward it.
+
+Interpolation works well for small, expected movements (normal flight). It breaks down when a ship teleports, respawns, or the server corrects a large divergence — smoothly sliding a ship halfway across the map would look wrong. In those cases, `shipwarped` is set in `unpackUpdate`, which copies `ActualState` directly to `RenderState` and resets the trail. The `WarpPositionMask` bit in `packUpdate` is what signals a large positional change to clients.
+
+The warp-in visual effect (spinning ship) is triggered separately by `mWarpInTimer` after a teleport or spawn.
+
+### ControlState
+
+**ControlState** is a compact server snapshot used to resynchronize the locally-predicted ship when it has drifted from the server's authoritative position.
+
+Every packet from the server includes a CRC of what the server believes the client's state should be. If this CRC does not match, the server sends a ControlState blob: the authoritative position, velocity, cooldown flag, and active weapon. The client:
+
+1. Applies `readControlState()` to jump its ship to the server-authoritative values.
+2. Sets `mNeedReplayMoves = true`.
+3. Replays all still-unacknowledged pending moves (`pendingMoves`) over the corrected base.
+
+This is the correction half of predict-then-correct. The fields in `ControlState` were chosen to be the minimum needed to fully reseed the simulation for replay. (Energy and fast-recharge are currently commented out as an optimization.)
+
+### RPCs
+
+**RPCs** (Remote Procedure Calls) are discrete, typed function calls sent between client and server over the connection. They are declared with `TNL_DECLARE_RPC` and implemented with `TNL_IMPLEMENT_RPC`.
+
+Naming convention:
+- `s2c` — server-to-client (e.g. `s2cAddClient`, `s2cSetAuthenticated`, `s2cDisplayMessage`)
+- `c2s` — client-to-server (e.g. `c2sSendChat`, `c2sRequestLoadout`, `c2sChangeTeams`)
+- `s2r` — server-to-recorder
+
+RPCs are used for discrete, non-continuous events — anything that is not efficiently handled by the ghost update stream. Examples: a player joining or changing teams, a score change, a chat message, a weapon switch request, authentication results, announcement banners.
+
+Ghost updates handle *ongoing state*. RPCs handle *events and control-plane metadata*.
+
+---
+
 ## End-to-end flow: local input -> server -> other clients
 
 ## 1) Input capture on client
@@ -185,13 +237,34 @@ So, if data is identity/role/UI-ish and discrete, it is usually RPC-driven. If i
 
 ## Pattern A: Client prediction + server authority + replay
 
-Used for controlled objects (especially ships):
+Used for controlled objects (especially ships). The goal is to make local input feel instantaneous while the server remains the authority on what actually happened.
 
-- Client predicts immediately from local input.
-- Server remains source of truth.
-- Corrections are merged by replaying unacknowledged moves.
+**How prediction works:**
 
-Use this when responsiveness matters but cheating/divergence must be bounded.
+Each frame, the client applies the new `Move` to its local ship immediately (in `ClientGame::idle`), without waiting for a server round-trip. From the player's perspective, their ship responds instantly.
+
+At the same time, the move is added to `pendingMoves` — a queue of moves the server has not yet acknowledged. The client keeps this queue so it can replay moves if a correction arrives.
+
+**How correction works:**
+
+Every packet from the server contains a CRC of what the server believes the client's ControlState should be. If the client's local state matches, no correction is needed. If there is a mismatch:
+
+1. The server sends the authoritative ControlState (position, velocity, cooldown, active weapon) in the same packet.
+2. The client calls `readControlState()` to overwrite its local ship state with the server's values.
+3. The client sets `mNeedReplayMoves = true`.
+4. After the packet is fully processed, the client iterates over all moves still in `pendingMoves` and calls `controlObject->idle(ClientReplayingPendingMoves)` for each one — re-simulating those inputs on top of the now-correct base.
+
+The result: the ship snaps to the server-authoritative position and then catches up to where it should be based on inputs the server has not yet processed.
+
+**Why corrections are rare in practice:**
+
+The server's simulation and the client's prediction use the same physics code and the same `Move::prepare()` rounding. They diverge only when something unpredictable happens server-side — a collision, a hit, a spawn, a teleport. For straight-line movement in open space, client and server usually agree exactly.
+
+**Why pending moves stay small:**
+
+The time window of unacknowledged moves equals the one-way network latency (roughly half of round-trip time). At 100 ms RTT, the pending queue typically holds ~50 ms worth of moves. Replaying 50 ms of simulation is fast.
+
+Use this pattern when responsiveness matters but cheating and divergence must be bounded.
 
 ## Pattern B: Masked delta ghost replication
 
