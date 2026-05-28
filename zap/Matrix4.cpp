@@ -7,8 +7,6 @@
 // This class stores its data as column-major for interoperability, which means we must access
 // elements as such: mData[col][row].
 
-#ifndef BF_USE_LEGACY_GL
-
 #include "Matrix4.h"
 #include <math.h>
 
@@ -179,5 +177,3 @@ Matrix4 Matrix4::getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F3
 }
 
 }
-
-#endif // BF_USE_LEGACY_GL
