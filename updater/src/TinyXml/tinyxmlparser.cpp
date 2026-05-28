@@ -206,7 +206,7 @@ const char* TiXmlBase::ReadName( const char* p, TIXML_STRING * name )
 		 && ( isalpha( (unsigned char) *p ) || *p == '_' ) )
 	{
 		while(		p && *p
-				&&	(		isalnum( (unsigned char ) *p ) 
+				&&	(		isalnum( (unsigned char ) *p )
 						 || *p == '_'
 						 || *p == '-'
 						 || *p == '.'

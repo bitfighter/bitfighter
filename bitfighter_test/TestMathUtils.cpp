@@ -64,6 +64,28 @@ TEST(MathUtilsTest, RoundUp)
    EXPECT_EQ(10, roundUp(7, -5));
    EXPECT_EQ(10, roundUp(10, -5));
    EXPECT_EQ(-5, roundUp(-7, -5));
+
+   // Test with S32_MIN
+   EXPECT_EQ(0, roundUp(0, S32_MIN));
+   EXPECT_EQ(S32_MIN, roundUp(1, S32_MIN));
+   EXPECT_EQ(0, roundUp(-1, S32_MIN));
+
+   // Additional test cases
+   EXPECT_EQ(100, roundUp(7, 100));
+   EXPECT_EQ(200, roundUp(117, 100));
+   EXPECT_EQ(500, roundUp(477, 100));
+   EXPECT_EQ(1100, roundUp(1077, 100));
+   EXPECT_EQ(60, roundUp(52, 20));
+   EXPECT_EQ(90, roundUp(74, 30));
+   // Test with S32_MIN as multiple
+   // Multiple is 2^31. Multiples are ..., -2^31, 0, 2^31...
+   // For 10, the next multiple is 2^31, which overflows S32 to -2^31
+   EXPECT_EQ(-2147483647 - 1, roundUp(10, -2147483647 - 1));
+   EXPECT_EQ(0, roundUp(-10, -2147483647 - 1));
+
+   // Test with S32_MIN as numToRound
+   // S32_MIN is -2147483648. Next multiple of 3 is -2147483646.
+   EXPECT_EQ(-2147483646, roundUp(-2147483647 - 1, 3));
 }
 
 TEST(MathUtilsTest, FindLowestRootInInterval)
@@ -85,6 +107,76 @@ TEST(MathUtilsTest, FindLowestRootInInterval)
    // Linear case (a=0): -3x + 2 = 0 -> x = 2/3
    EXPECT_TRUE(findLowestRootInInterval(0.0f, -3.0f, 2.0f, 1.0f, root));
    EXPECT_NEAR(0.6666666f, root, 1e-6f);
+
+   // Case: inA = 0, inB = 0 (No solution or all solutions)
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 1.0f, 10.0f, root));
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 0.0f, 10.0f, root));
+
+   // Case: small inA
+   // 1e-10 * x^2 - 3x + 2 = 0
+   // Linear root is 2/3 approx 0.6666666
+   // Other root is approx 3 / 1e-10 = 3e10
+   EXPECT_TRUE(findLowestRootInInterval(1e-10f, -3.0f, 2.0f, 1.0f, root));
+   EXPECT_NEAR(0.6666666f, root, 1e-6f);
+
+   // Case: inB = 0, inA != 0, inC != 0
+   // x^2 - 4 = 0 -> roots are 2 and -2
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, 0.0f, -4.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(2.0f, root);
+
+   // Case: inC = 0
+   // x^2 - 3x = 0 -> roots are 0 and 3
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, -3.0f, 0.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(0.0f, root);
+  
+   // Bug: handle linear equations correctly (currently might return false or crash)
+   // 2x - 4 = 0 -> x = 2
+   EXPECT_TRUE(findLowestRootInInterval(0.0f, 2.0f, -4.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(2.0f, root);
+
+   // Bug: avoid division by zero when q = 0
+   // 0x^2 + 0x + 0 = 0 -> any x is a root, but we should handle it gracefully
+   EXPECT_FALSE(findLowestRootInInterval(0.0f, 0.0f, 0.0f, 5.0f, root));
+
+   // Bug: handle case where q = 0, but inA != 0
+   // x^2 = 0 -> x = 0
+   EXPECT_TRUE(findLowestRootInInterval(1.0f, 0.0f, 0.0f, 5.0f, root));
+   EXPECT_FLOAT_EQ(0.0f, root);
+}
+
+TEST(MathUtilsTest, RoundUpEdgeCases)
+{
+   // Basic cases
+   EXPECT_EQ(10, roundUp(7, 5));
+   EXPECT_EQ(10, roundUp(10, 5));
+
+   // Zero multiple - should return numToRound
+   EXPECT_EQ(7, roundUp(7, 0));
+
+   // Negative numToRound
+   EXPECT_EQ(-5, roundUp(-7, 5));
+   EXPECT_EQ(-10, roundUp(-10, 5));
+
+   // Negative multiple
+   EXPECT_EQ(10, roundUp(7, -5));
+   EXPECT_EQ(-5, roundUp(-7, -5));
+
+   // S32_MIN multiple
+   // std::abs(S32_MIN) is undefined behavior for 32-bit signed ints,
+   // but our fixed roundUp uses S64 to handle it safely.
+   // roundUp(7, S32_MIN) -> 7 % 2147483648 = 7.
+   // Since 7 > 0 and remainder != 0, returns 7 + 2147483648 - 7 = 2147483648.
+   // Wait, 2147483648 is S32_MAX + 1, so it overflows back to S32_MIN when cast to S32.
+   EXPECT_EQ((S32)S32_MIN, roundUp(7, (S32)S32_MIN));
+
+   // S32_MIN numToRound
+   // roundUp(S32_MIN, 1) -> remainder 0, returns S32_MIN
+   EXPECT_EQ((S32)S32_MIN, roundUp((S32)S32_MIN, 1));
+
+   // Potential overflow: roundUp(S32_MAX, 2)
+   // S32_MAX = 2147483647. 2147483647 % 2 = 1.
+   // 2147483647 + 2 - 1 = 2147483648 (overflows to S32_MIN)
+   EXPECT_EQ((S32)S32_MIN, roundUp(2147483647, 2));
 }
 
 } // namespace Zap

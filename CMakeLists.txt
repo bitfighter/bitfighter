@@ -163,10 +163,11 @@ endif()
 add_subdirectory(libtommath)
 
 # libtomcrypt
-find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
+find_with_fallback(TomCrypt TOMCRYPT libtomcrypt)
 if(NOT TOMCRYPT_FOUND)
 	message(STATUS "Using in-tree libtomcrypt")
 	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libtomcrypt/src/headers")
+	set(TOMCRYPT_LIBRARIES tomcrypt)
 	add_subdirectory(libtomcrypt)
 endif()
 

@@ -11,6 +11,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtilsSafety.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestChatHelper.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
@@ -43,7 +44,9 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTnlVector.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTnlVectorBool.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTnlString.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )

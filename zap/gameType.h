@@ -75,6 +75,7 @@ private:
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
    bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;                  // Set to true when an end condition is met
+   bool mWasTied;                   // For testing purposes
 
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
@@ -221,6 +222,7 @@ public:
                          const StringTableEntry &formatString, const Vector<StringTableEntry> &e);
 
    bool isGameOver() const;
+   bool wasTied() const { return mWasTied; }
 
    static const char *getGameTypeName(GameTypeId gameType);       // Return string like "Capture The Flag"
    static const char *getGameTypeClassName(GameTypeId gameType);  // Return string like "CTFGameType"

@@ -62,10 +62,10 @@ string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
   string::size_type pos = path.find_last_of("\\/");
-  if (pos == string::npos)
+  if(pos == string::npos)
      return "";
 
-  if (pos == 0)
+  if(pos == 0)
      return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
@@ -121,14 +121,17 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   if (str.find('.') == string::npos)
-      return str;
+   if (str.find('.') != string::npos)
+   {
+      while(str.length() > 0 && str[str.length() - 1]  == '0')
+         str.erase(str.length() - 1);
 
-   while(str.length() > 0 && str[str.length() - 1]  == '0')
-      str.erase(str.length() - 1);
+      if(str.length() > 0 && str[str.length() - 1] == '.')
+         str.erase(str.length() - 1);
+   }
 
-   if(str.length() > 0 && str[str.length() - 1] == '.')
-      str.erase(str.length() - 1);
+   if(str.empty() || str == "-" || str == "-0" || str == "+0")
+      return "0";
 
    return str;
 }
@@ -143,7 +146,7 @@ string ftos(F32 f, S32 digits)
       digits = 30;
 
    char outString[100];
-   dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
+   dSprintf(outString, sizeof(outString), (string("%.") + itos(digits) + "f").c_str(), f);
 
    return stripZeros(outString);
 }
@@ -209,7 +212,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
         return false;
     }
     for(string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if(tolower(*c1) != tolower(*c2)) {
+        if(toLower(*c1) != toLower(*c2)) {
             return false;
         }
     }
@@ -221,7 +224,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)tolower((unsigned char)strToConvert[i]);
+      strToConvert[i] = toLower(strToConvert[i]);
    return strToConvert;
 }
 
@@ -230,22 +233,28 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 string ucase(string strToConvert)
 {
    for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = (char)toupper((unsigned char)strToConvert[i]);
+      strToConvert[i] = toUpper(strToConvert[i]);
    return strToConvert;
 }
 
 
 // Return true if str looks like a non-negative int
 // Returns false if str is NULL or empty
+// Note: This function trims leading and trailing whitespace
 bool isPositiveInteger(const char *str)
 {
    if(!str || str[0] == 0)
       return false;
 
+   string s = trim(str);
+
+   if(s.empty())
+      return false;
+
    S32 i = 0;
-   while(str[i])
+   while(s[i])
    {
-      if(str[i] < '0' || str[i] > '9')
+      if(s[i] < '0' || s[i] > '9')
          return false;
       i++;
    }
@@ -267,7 +276,7 @@ string sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
       return value;
 
    // If any of the above exist then do some escaping
@@ -298,24 +307,12 @@ string sanitizeForJson(const char *value)
             result += "\\t";
             break;
 
-            // For html markup entities
-         case '&':
-            result += "&amp;";
-            break;
-         case '<':
-            result += "&lt;";
-            break;
-         case '>':
-            result += "&gt;";
-            break;
          default:
             if(isControlCharacter(*c))
             {
-               // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
-               // However, some day we might want to support this, so we'll leave the code in place.
-               //std::ostringstream oss;
-               //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
-               //result += oss.str();
+               char buf[7];
+               dSprintf(buf, sizeof(buf), "\\u%.4X", (U32)*c);
+               result += buf;
             }
             else
                result += *c;
@@ -343,25 +340,42 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
    const char *src = format;
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+      if(src[0] == '%')
       {
-         S32 index = src[2] - '0';
-         switch(src[1])
+         if(src[1] == '%')
          {
-            case 'e':
-               if(index < e.size())
-                  result += e[index].getString();
-               break;
-            case 's':
-               if(index < s.size())
-                  result += s[index].getString();
-               break;
-            case 'i':
-               if(index < i.size())
-                  result += itos(i[index]);
-               break;
+            result += '%';
+            src += 2;
          }
-         src += 3;
+         else if((src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+         {
+            const char *type = src + 1;
+            src += 2;
+            S32 index = 0;
+            while(isDigit(*src))
+            {
+               index = index * 10 + (*src - '0');
+               src++;
+            }
+
+            switch(*type)
+            {
+               case 'e':
+                  if(index < e.size())
+                     result += e[index].getString();
+                  break;
+               case 's':
+                  if(index < s.size())
+                     result += s[index].getString();
+                  break;
+               case 'i':
+                  if(index < i.size())
+                     result += itos(i[index]);
+                  break;
+            }
+         }
+         else
+            result += *src++;
       }
       else
          result += *src++;
@@ -426,7 +440,7 @@ Vector<string> parseString(const string &line)
       }
       else
       {
-         if(isspace((unsigned char)c))
+         if(isSpace(c))
          {
             if(hasToken)
             {
@@ -521,7 +535,7 @@ const char *findPointerOfArg(const char *message, S32 count)
 
    for(S32 i = 0; i < count; i++)
    {
-      if(message[cur] == '\0')
+      if(message[cur] == '\0')    // End of string
          return &message[cur];
 
       // Skip current argument (non-whitespace)
@@ -570,15 +584,13 @@ void s_fprintf(FILE *stream, const char *format, ...)
     va_list args;
     va_start(args, format);
 
-    char buffer[2048];
-    vsnprintf(buffer, sizeof(buffer), format, args);
-
-    va_end(args);
-
-    if(fprintf(stream, "%s", buffer) < 0)     // Uh-oh...
+    if(vfprintf(stream, format, args) < 0)     // Uh-oh...
     {
+       va_end(args);
        throw(SaveException("Error writing to file"));
     }
+
+    va_end(args);
 }
 
 
@@ -872,8 +884,14 @@ string ctos(char c)
 
 string replaceString(const char *in, const char *find, const char *replace)
 {
+   if(!in)
+      return "";
+
    if(!find || find[0] == 0)
       return in;
+
+   if(!replace)
+      replace = "";
 
    string out;
    size_t n = 0;
@@ -895,24 +913,50 @@ string replaceString(const char *in, const char *find, const char *replace)
 }
 
 
-// Strip comments from passed lines.  Comments are denoted with a "#".
+// Strip comments from passed lines.  Comments are denoted with a "#", but '#'
+// characters inside double-quoted strings are ignored. Supports escaped
+// quotes using "".
 string chopComment(const string &line)
 {
-   string copy = line;
-   string::size_type pos = copy.find('#');
+   bool inQuotes = false;
 
-   if(pos == string::npos)    // # not found
-      return line;
+   for(size_t i = 0; i < line.length(); ++i)
+   {
+      char c = line[i];
 
-   return copy.erase(copy.find('#'), string::npos);
+      if(inQuotes)
+      {
+         if(c == '"')
+         {
+            // Check for escaped quote ""
+            if(i + 1 < line.length() && line[i + 1] == '"')
+               i++;
+            else
+               inQuotes = false;
+         }
+      }
+      else
+      {
+         if(c == '"')
+            inQuotes = true;
+         else if(c == '#')
+            return line.substr(0, i);
+      }
+   }
+
+   return line;
 }
 
 
 string writeLevelString(const char *in)
 {
-   int c=0;
-   while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && in[c] != ' ')
+   if(!in)
+      return "";
+
+   int c = 0;
+   while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && !isSpace(in[c]))
       c++;
+
    if(in[c] == 0 && c != 0)
       return string(in);  // string does not need to be changed if not zero length and there is no space or any of: # "
 
@@ -924,6 +968,7 @@ string writeLevelString(const char *in)
 bool writeFile(const string &path, const string &contents, bool append)
 {
    ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
+   mode |= ios_base::binary;
 
    ofstream file(path.c_str(), mode);
 
@@ -962,7 +1007,9 @@ const string readFile(const string &path)
 
    // Remove the UTF-8 BOM if it exists
    // These are the first three bytes:  EF BB BF
-   trim_left_in_place(result, "\357\273\277");
+   static const string bom = "\xEF\xBB\xBF";
+   if (result.compare(0, bom.length(), bom) == 0)
+      result.erase(0, bom.length());
 
    return result;
 }
@@ -1043,34 +1090,6 @@ string toString(DisplayMode displayMode)  { return displayModeToString(displayMo
 string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
 
 
-bool isPrintable(char c)
-{
-   return isprint(static_cast<unsigned char>(c));
-}
-
-
-bool isHex(char c)
-{
-   return isxdigit(static_cast<unsigned char>(c));
-}
-
-
-bool isAlpha(char c)
-{
-   return isalpha(static_cast<unsigned char>(c));
-}
-
-bool isDigit(char c)
-{
-   return isdigit(static_cast<unsigned char>(c));
-}
-
-bool isAlNum(char c)
-{
-   return isalnum(static_cast<unsigned char>(c));
-}
-
-
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
@@ -1078,7 +1097,7 @@ bool isHex(const string &str)
       return false;
 
    for(string::size_type i = 0; i < str.length(); i++)
-      if(!isHex(str[i]))
+      if(!TNL::isHex(str[i]))
          return false;
 
    return true;
@@ -1092,72 +1111,75 @@ bool alphaSort(const string &a, const string &b)
 
 
 // Sort with numbers coming before letters, but if the strings are just numbers, will sort numerically
+// Performs a natural sort, where numbers in strings are compared numerically (e.g. "abc2" < "abc10")
 bool alphaNumberSort(const string &a, const string &b)
 {
-   bool aIsNum = isPositiveInteger(a.c_str());
-   bool bIsNum = isPositiveInteger(b.c_str());
+   size_t ia = 0, ib = 0;
+   size_t size_a = a.size();
+   size_t size_b = b.size();
 
-   // Helper to find the numeric part of a string, skipping leading zeros
-   auto getNumericPart = [](const string &s, size_t &start, size_t &len) {
-      start = 0;
-      while(start < s.length() && s[start] == '0')
-         start++;
-      len = 0;
-      while(start + len < s.length() && isDigit(s[start + len]))
-         len++;
-      if (len == 0 && start > 0 && (start == s.length() || !isDigit(s[start]))) // It was all zeros or zeros followed by non-digits
-      {
-          start--; // Keep one zero
-          len = 1;
-      }
-   };
-
-   if(aIsNum && bIsNum)
+   while(ia < size_a && ib < size_b)
    {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
+      if(isDigit(a[ia]) && isDigit(b[ib]))
       {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
+         // Compare numeric segments
+         size_t start_a = ia;
+         while(ia < size_a && a[ia] == '0')
+            ia++;
+         size_t end_a = ia;
+         while(end_a < size_a && isDigit(a[end_a]))
+            end_a++;
 
-      return alphaSort(a, b);
+         size_t start_b = ib;
+         while(ib < size_b && b[ib] == '0')
+            ib++;
+         size_t end_b = ib;
+         while(end_b < size_b && isDigit(b[end_b]))
+            end_b++;
+
+         size_t len_a = end_a - ia;
+         size_t len_b = end_b - ib;
+
+         // Compare numerically (longer string of digits means larger number, after skipping leading zeros)
+         if(len_a != len_b)
+            return len_a < len_b;
+
+         // Same number of digits, compare them one by one
+         for(size_t i = 0; i < len_a; i++)
+         {
+            if(a[ia + i] != b[ib + i])
+               return a[ia + i] < b[ib + i];
+         }
+
+         // Same numerical value, tie-break by number of leading zeros
+         size_t zeros_a = ia - start_a;
+         size_t zeros_b = ib - start_b;
+         if(zeros_a != zeros_b)
+            return zeros_a < zeros_b; // Fewer zeros before more zeros (e.g. "1" < "01")
+
+         // Completely identical numeric segment, move to next segment
+         ia = end_a;
+         ib = end_b;
+      }
+      else
+      {
+         // Compare non-numeric segments
+         char ca = toLower(a[ia]);
+         char cb = toLower(b[ib]);
+
+         if(ca != cb)
+            return (unsigned char)ca < (unsigned char)cb;
+
+         ia++;
+         ib++;
+      }
    }
 
-   if(aIsNum)
-      return true;
+   // If one string is a prefix of another, the shorter one comes first
+   if(ia == size_a && ib == size_b)
+      return false; // Equal
 
-   if(bIsNum)
-      return false;
-
-   // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
-   // Compare the leading numeric portions numerically. Fall back to alphabetical on a tie.
-   bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
-   bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
-
-   if(aStartsWithDigit && bStartsWithDigit)
-   {
-      size_t aStart, aLen, bStart, bLen;
-      getNumericPart(a, aStart, aLen);
-      getNumericPart(b, bStart, bLen);
-
-      if(aLen != bLen)
-         return aLen < bLen;
-
-      for(size_t i = 0; i < aLen; i++)
-      {
-         if(a[aStart + i] != b[bStart + i])
-            return a[aStart + i] < b[bStart + i];
-      }
-   }
-
-   return alphaSort(a, b);
+   return size_a < size_b;
 }
 
 };

@@ -68,7 +68,7 @@ protected:
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
+   std::vector<U8> innerVector;  // Use U8 to ensure address() returns a 1-byte aligned pointer compatible with bool
 };
 
 

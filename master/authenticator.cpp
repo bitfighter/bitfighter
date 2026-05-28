@@ -149,7 +149,7 @@ bool Authenticator::isSqlSafe(string s){
 			return true;
 		case 2:
 		default:
-			for (unsigned int i=0; i<s.length(); i++) if(!isalnum(s[i])) return false;
+			for (unsigned int i=0; i<s.length(); i++) if(!isAlNum(s[i])) return false;
 			return true;
 	}
 }

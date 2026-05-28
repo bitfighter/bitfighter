@@ -93,7 +93,7 @@ void TextEntryUserInterface::render()
 
    TNLAssert(y == TextEntryYPos, "Something is off here!");
 
-   S32 x = (S32)drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
+   S32 x = drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
    lineEditor.drawCursor(x, y, (S32)fontSizeBig);
    FontManager::popFontContext();
 }
@@ -466,5 +466,4 @@ void LevelChangeOrAdminPasswordEntryUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 };
-
 

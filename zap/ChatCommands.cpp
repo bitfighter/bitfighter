@@ -1164,7 +1164,7 @@ void showObjectOutlinesHandler(ClientGame *game, const Vector<string> &args)
 void showHelpItemHandler(ClientGame *game, const Vector<string> &args)
 {
 	S32 id = -1;
-	if (args.size() > 0)
+	if (args.size() > 1)
 		id = atoi(args[1].c_str());
 
 	game->showHelpItemForced(id);

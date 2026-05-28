@@ -78,12 +78,35 @@ TEST(StringUtilsTest, listToString)
 
 TEST(StringUtilsTest, chopComment)
 {
-   EXPECT_EQ("This is a ",        chopComment("This is a #comment"));
-   EXPECT_EQ("",                  chopComment("# This is a comment"));
-   EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
-   EXPECT_EQ("This is a comment", chopComment("This is a comment"));
-   EXPECT_EQ("",                  chopComment("#"));
+   EXPECT_EQ("This is a ",                  chopComment("This is a #comment"));
+   EXPECT_EQ("",                            chopComment("# This is a comment"));
+   EXPECT_EQ("This is a comment",           chopComment("This is a comment#"));
+   EXPECT_EQ("This is a comment",           chopComment("This is a comment"));
+   EXPECT_EQ("",                            chopComment("#"));
+   EXPECT_EQ("LevelName \"My #1 Level\" ",  chopComment("LevelName \"My #1 Level\" # comment"));
+   EXPECT_EQ("LevelName \"My #1 Level\"",   chopComment("LevelName \"My #1 Level\""));
+   EXPECT_EQ("LevelName \"\"\"#\"\"\"",     chopComment("LevelName \"\"\"#\"\"\""));
+   EXPECT_EQ("No hash here",                chopComment("No hash here"));
+   EXPECT_EQ("Quotes \"but no hash\"",      chopComment("Quotes \"but no hash\""));
+   EXPECT_EQ("\"#HashAtStart\"",            chopComment("\"#HashAtStart\""));
+   EXPECT_EQ("\"HashAtEnd#\"",              chopComment("\"HashAtEnd#\""));
+   EXPECT_EQ("Mix \"#1\" and \"#2\"",       chopComment("Mix \"#1\" and \"#2\""));
+   EXPECT_EQ("Mix \"#1\" and \"#2\" ",      chopComment("Mix \"#1\" and \"#2\" # then comment"));
+   EXPECT_EQ("\"\"\"#\"\"\" \"\"\"#\"\"\"", chopComment("\"\"\"#\"\"\" \"\"\"#\"\"\""));
+   EXPECT_EQ("Escaped \"\"quote\"\" ",      chopComment("Escaped \"\"quote\"\" # comment"));
+}
 
+
+TEST(StringUtilsTest, chopCommentWithQuotes)
+{
+   EXPECT_EQ("\"#not_a_comment\" ", chopComment("\"#not_a_comment\" #comment"));
+   EXPECT_EQ("No comment here \"#\"", chopComment("No comment here \"#\""));
+   EXPECT_EQ("\"A \"\"#\"\" B\" ", chopComment("\"A \"\"#\"\" B\" #comment"));
+   EXPECT_EQ("\"quoted # hashtag\"", chopComment("\"quoted # hashtag\""));
+   EXPECT_EQ("\"quoted # hashtag\" ", chopComment("\"quoted # hashtag\" #comment"));
+   EXPECT_EQ("\"\"", chopComment("\"\"#\"\"")); // "" is an empty quoted string, then # starts a comment
+   EXPECT_EQ("\"escaped \"\" quote\" ", chopComment("\"escaped \"\" quote\" #comment"));
+   EXPECT_EQ("mixed \"#\" and ", chopComment("mixed \"#\" and #comment"));
 }
 
 
@@ -110,7 +133,7 @@ TEST(StringUtilsTest, stripZeros)
    EXPECT_EQ("1.1", stripZeros("1.100"));
    EXPECT_EQ("1", stripZeros("1.000"));
    EXPECT_EQ("0", stripZeros("0"));
-   EXPECT_EQ("", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros(".000"));
 }
 
 
@@ -162,6 +185,12 @@ TEST(StringUtilsTest, isInteger)
    EXPECT_FALSE(isPositiveInteger(NULL));
    EXPECT_FALSE(isPositiveInteger("-123"));
    EXPECT_FALSE(isPositiveInteger(" "));
+
+   // Whitespace tests
+   EXPECT_TRUE(isPositiveInteger("  123  "));
+   EXPECT_TRUE(isPositiveInteger("\t0\n"));
+   EXPECT_TRUE(isPositiveInteger("\v456\v"));
+   EXPECT_FALSE(isPositiveInteger("  "));
 }
 
 
@@ -202,6 +231,14 @@ TEST(StringUtilsTest, ftosBugReproduction)
    // Negative digits value
    // itos(-1) is "-1", format string becomes "%2.-1f"
    EXPECT_EQ("1.23456", ftos(1.23456f, -1));
+
+   // Bug: ftos(1.0f, 0) incorrectly returns " 1" instead of "1"
+   EXPECT_EQ("1", ftos(1.0f, 0));
+   EXPECT_EQ("0", ftos(0.0001f, 2));
+   EXPECT_EQ("0", ftos(-0.0001f, 2));
+   EXPECT_EQ("0", ftos(0.0f));
+   EXPECT_EQ("0", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros("-0"));
 }
 
 
@@ -227,6 +264,34 @@ TEST(StringUtilsTest, replaceStringEmptyFrom)
    // These should return the original string and not hang
    EXPECT_EQ("test", replaceString("test", "", "replacement"));
    EXPECT_EQ("test", replaceString((const char *)"test", "", "replacement"));
+}
+
+
+TEST(StringUtilsTest, replaceStringNULL)
+{
+   // Bug: replaceString(NULL, ...) crashes
+   EXPECT_EQ("", replaceString((const char *)NULL, "find", "replace"));
+   // Bug: replaceString(..., ..., NULL) crashes
+   // If replace is NULL, it's treated as an empty string, so "a" -> ""
+   EXPECT_EQ("", replaceString("a", "a", (const char *)NULL));
+}
+
+
+TEST(StringUtilsTest, replaceStringNullInput)
+{
+    EXPECT_EQ("", replaceString((const char*)NULL, "a", "b"));
+}
+
+
+TEST(StringUtilsTest, replaceStringNullReplace)
+{
+    EXPECT_EQ("foo", replaceString("foo", "a", (const char*)NULL));
+}
+
+
+TEST(StringUtilsTest, replaceStringNullFind)
+{
+    EXPECT_EQ("foo", replaceString("foo", (const char*)NULL, "a"));
 }
 
 
@@ -256,6 +321,48 @@ TEST(StringUtilsTest, alphaNumericChecks)
    EXPECT_TRUE(isAlNum('a'));
    EXPECT_TRUE(isAlNum('1'));
    EXPECT_FALSE(isAlNum('!'));
+}
+
+
+TEST(StringUtilsTest, safeCctypeWrappers)
+{
+   // toLower / toUpper
+   EXPECT_EQ('a', toLower('A'));
+   EXPECT_EQ('a', toLower('a'));
+   EXPECT_EQ('A', toUpper('a'));
+   EXPECT_EQ('A', toUpper('A'));
+   EXPECT_EQ((char)0xFF, toLower((char)0xFF));
+   EXPECT_EQ((char)0xFF, toUpper((char)0xFF));
+
+   // isSpace
+   EXPECT_TRUE(isSpace(' '));
+   EXPECT_TRUE(isSpace('\n'));
+   EXPECT_FALSE(isSpace('a'));
+   EXPECT_FALSE(isSpace((char)0xFF));
+
+   // isAlpha / isDigit / isAlNum
+   EXPECT_TRUE(isAlpha('a'));
+   EXPECT_FALSE(isAlpha('1'));
+   EXPECT_TRUE(isDigit('1'));
+   EXPECT_FALSE(isDigit('a'));
+   EXPECT_TRUE(isAlNum('a'));
+   EXPECT_TRUE(isAlNum('1'));
+   EXPECT_FALSE(isAlNum(' '));
+   EXPECT_FALSE(isAlNum((char)0xFF));
+
+   // isPrint
+   EXPECT_TRUE(isPrintable('a'));
+   EXPECT_FALSE(isPrintable('\1'));
+
+   // isPunct
+   EXPECT_TRUE(isPunct('.'));
+   EXPECT_FALSE(isPunct('a'));
+
+   // isHex
+   EXPECT_TRUE(TNL::isHex('a'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_FALSE(TNL::isHex('g'));
 }
 
 
@@ -387,6 +494,13 @@ TEST(StringUtilsTest, findPointerOfArg)
    EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
    EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
    EXPECT_STREQ("", findPointerOfArg(msg2, 3));
+  
+   // New tests for leading and multiple spaces
+   EXPECT_STREQ("word1 word2", findPointerOfArg("  word1 word2", 0));
+   EXPECT_STREQ("word2", findPointerOfArg("  word1 word2", 1));
+   EXPECT_STREQ("word2", findPointerOfArg("word1  word2", 1));
+   EXPECT_STREQ("word2", findPointerOfArg("word1\tword2", 1));
+   EXPECT_STREQ("word2   ", findPointerOfArg("   word1   word2   ", 1));
 }
 
 
@@ -409,6 +523,62 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
    EXPECT_TRUE(caseInsensitiveStringCompare("AbC", "aBc"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abcd"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abd"));
+}
+
+
+TEST(StringUtilsTest, caseInsensitiveStringCompareNonASCII)
+{
+   // Use characters with the high bit set to ensure we handle them correctly.
+   // On systems where char is signed, passing a char with the high bit set
+   // to tolower() without a cast to unsigned char is undefined behavior.
+   string s1 = "\xFF";
+   string s2 = "\xFF";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+
+   s1 = "A\x80";
+   s2 = "a\x80";
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+}
+
+
+TEST(StringUtilsTest, stricmpNonASCII)
+{
+   EXPECT_EQ(0, stricmp("\xFF", "\xFF"));
+   EXPECT_EQ(0, stricmp("A\x80", "a\x80"));
+   EXPECT_NE(0, stricmp("\xFF", "\xFE"));
+
+   // Bug reproduction: ASCII should come before non-ASCII (high-bit set)
+   // 'a' is 97, '\xFF' is 255 (unsigned) or -1 (signed)
+   // We want stricmp("a", "\xFF") < 0
+   EXPECT_LT(stricmp("a", "\xFF"), 0);
+   EXPECT_GT(stricmp("\xFF", "a"), 0);
+}
+
+
+TEST(StringUtilsTest, strnicmpNonASCII)
+{
+   EXPECT_EQ(0, strnicmp("\xFF", "\xFF", 1));
+   EXPECT_EQ(0, strnicmp("A\x80", "a\x80", 2));
+   EXPECT_NE(0, strnicmp("\xFF", "\xFE", 1));
+   EXPECT_EQ(0, strnicmp("abc\xFF", "ABC\xFF", 3));
+}
+
+
+TEST(StringUtilsTest, stricmpOrderingNonASCII)
+{
+   // 'a' is 0x61, '\xFF' is 0xFF.
+   // Unsigned: 0x61 < 0xFF (stricmp should return negative)
+   // Signed: 97 > -1 (stricmp would incorrectly return positive)
+   EXPECT_LT(stricmp("a", "\xFF"), 0);
+   EXPECT_GT(stricmp("\xFF", "a"), 0);
+}
+
+
+TEST(StringUtilsTest, strnicmpOverRead)
+{
+   // strnicmp should stop at null terminator even if len is larger
+   EXPECT_EQ(0, strnicmp("abc", "abc", 10));
+   EXPECT_LT(strnicmp("abc", "abd", 10), 0);
 }
 
 
@@ -445,8 +615,32 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\"quoted\\\"", sanitizeForJson("\"quoted\""));
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
-   EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("&<>", sanitizeForJson("&<>")); // Should NOT escape HTML entities
    EXPECT_EQ("", sanitizeForJson(NULL));
+
+   // Control characters
+   EXPECT_EQ("a\\u0001b", sanitizeForJson("a\x01""b"));
+   EXPECT_EQ("\\u001F", sanitizeForJson("\x1F"));
+
+   // Verify all control characters (1-31)
+   for(int i = 1; i <= 31; ++i)
+   {
+      char input[2] = {(char)i, 0};
+      string result = sanitizeForJson(input);
+
+      // Some control characters have special short escapes in sanitizeForJson
+      if(i == '\b')      EXPECT_EQ("\\b", result);
+      else if(i == '\f') EXPECT_EQ("\\f", result);
+      else if(i == '\n') EXPECT_EQ("\\n", result);
+      else if(i == '\r') EXPECT_EQ("\\r", result);
+      else if(i == '\t') EXPECT_EQ("\\t", result);
+      else
+      {
+         char expected[8];
+         sprintf(expected, "\\u00%.2X", i);
+         EXPECT_EQ(expected, result) << "Failed for control character " << i;
+      }
+   }
 }
 
 
@@ -454,6 +648,8 @@ TEST(StringUtilsTest, trim)
 {
    EXPECT_EQ("abc", trim("  abc  "));
    EXPECT_EQ("abc", trim("\n\t abc \r\n"));
+   EXPECT_EQ("abc", trim("\v abc \v"));
+   EXPECT_EQ("abc", trim("\vabc\v"));
    EXPECT_EQ("abc  ", trim_left("  abc  "));
    EXPECT_EQ("  abc", trim_right("  abc  "));
 
@@ -536,6 +732,13 @@ TEST(StringUtilsTest, fileUtils)
    ASSERT_TRUE(writeFile(testFile, content));
    EXPECT_TRUE(fileExists(testFile));
    EXPECT_EQ(content, readFile(testFile));
+
+   // Verify consistency of writeFile/readFile with potentially tricky characters
+   // On Windows, text mode would translate \n to \r\n
+   string binaryContent = "Line1\nLine2\r\nLine3";
+   ASSERT_TRUE(writeFile("test_binary.txt", binaryContent));
+   EXPECT_EQ(binaryContent, readFile("test_binary.txt"));
+   remove("test_binary.txt");
 
    string appendContent = " Append";
    ASSERT_TRUE(writeFile(testFile, appendContent, true));
@@ -645,6 +848,13 @@ TEST(StringUtilsTest, writeLevelString)
    EXPECT_EQ("\"String with space\"", writeLevelString("String with space"));
    EXPECT_EQ("\"String with #\"", writeLevelString("String with #"));
    EXPECT_EQ("\"String with \"\"quotes\"\"\"", writeLevelString("String with \"quotes\""));
+
+   // Bug: these should be quoted
+   EXPECT_EQ("\"String with\ttab\"", writeLevelString("String with\ttab"));
+   EXPECT_EQ("\"String with\nnewline\"", writeLevelString("String with\nnewline"));
+
+   // Bug: should not crash
+   EXPECT_EQ("", writeLevelString(NULL));
 }
 
 
@@ -653,10 +863,10 @@ TEST(StringUtilsTest, charTypeChecks)
    EXPECT_TRUE(isPrintable('a'));
    EXPECT_FALSE(isPrintable('\x01'));
 
-   EXPECT_TRUE(isHex('0'));
-   EXPECT_TRUE(isHex('f'));
-   EXPECT_TRUE(isHex('A'));
-   EXPECT_FALSE(isHex('g'));
+   EXPECT_TRUE(TNL::isHex('0'));
+   EXPECT_TRUE(TNL::isHex('f'));
+   EXPECT_TRUE(TNL::isHex('A'));
+   EXPECT_FALSE(TNL::isHex('g'));
 }
 
 
@@ -668,6 +878,10 @@ TEST(StringUtilsTest, sorting)
    EXPECT_TRUE(alphaSort("a", "B"));
    EXPECT_TRUE(alphaSort("A", "B"));
    EXPECT_FALSE(alphaSort("b", "a"));
+
+   // Bug reproduction: alphaSort should sort ASCII before non-ASCII
+   EXPECT_TRUE(alphaSort("a", "\xFF"));
+   EXPECT_FALSE(alphaSort("\xFF", "a"));
 
    EXPECT_TRUE(alphaNumberSort("2", "10"));
    EXPECT_TRUE(alphaNumberSort("10", "a"));
@@ -731,6 +945,28 @@ TEST(StringUtilsTest, sortingLargeNumbers)
    // Mixed strings with large numbers
    EXPECT_TRUE(alphaNumberSort("2abc", "2147483648abc"));
    EXPECT_FALSE(alphaNumberSort("2147483648abc", "2abc"));
+
+   // Natural sort for embedded numbers
+   EXPECT_TRUE(alphaNumberSort("abc2", "abc10"));
+   EXPECT_TRUE(alphaNumberSort("abc1", "abc2"));
+   EXPECT_TRUE(alphaNumberSort("a1b2", "a1b10"));
+   EXPECT_TRUE(alphaNumberSort("123a456", "123a457"));
+
+   // Leading zeros
+   EXPECT_TRUE(alphaNumberSort("1", "01"));
+   EXPECT_TRUE(alphaNumberSort("01", "001"));
+   EXPECT_TRUE(alphaNumberSort("abc1", "abc01"));
+}
+
+
+TEST(StringUtilsTest, alphaNumberSortNonASCII)
+{
+   // 'a' is 0x61, '\xFF' is 0xFF.
+   // Unsigned: 0x61 < 0xFF (true)
+   // Signed: 97 < -1 (false)
+   EXPECT_TRUE(alphaNumberSort("a", "\xFF"));
+   EXPECT_TRUE(alphaNumberSort("A", "\xFF"));
+   EXPECT_FALSE(alphaNumberSort("\xFF", "a"));
 }
 
 
@@ -748,14 +984,23 @@ TEST(StringUtilsTest, formatMessage)
 
    EXPECT_EQ("entry0 and entry1", formatMessage("%e0 and %e1", e, s, i));
    EXPECT_EQ("ptr0 is 42", formatMessage("%s0 is %i0", e, s, i));
+
+   // Bug: formatMessage should support multi-digit indices
+   for(int j = 2; j < 12; ++j) e.push_back("entry");
+   e[10] = "ten";
+   EXPECT_EQ("ten", formatMessage("%e10", e, s, i));
+
+   // Bug: formatMessage should support %% to escape %
+   EXPECT_EQ("%e0", formatMessage("%%e0", e, s, i));
+
    EXPECT_EQ("plain text", formatMessage("plain text", e, s, i));
    EXPECT_EQ("invalid %x9 tokens", formatMessage("invalid %x9 tokens", e, s, i));
-   EXPECT_EQ("out of range ", formatMessage("out of range %e9", e, s, i));
+   EXPECT_EQ("out of range ", formatMessage("out of range %e12", e, s, i));
 
    // Long string test to ensure no overflow
    std::string longStr(500, 'a');
    e.push_back(longStr.c_str());
-   EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+   EXPECT_EQ(longStr, formatMessage("%e12", e, s, i));
 
    // Multiple placeholders and mixed types
    EXPECT_EQ("entry0 entry1 ptr0 42 entry0", formatMessage("%e0 %e1 %s0 %i0 %e0", e, s, i));
@@ -780,7 +1025,7 @@ TEST(StringUtilsTest, formatMessage)
 
 TEST(StringUtilsTest, s_fprintf)
 {
-   string testFile = "test_fprintf.txt";
+   std::string testFile = "test_fprintf.txt";
    FILE *f = fopen(testFile.c_str(), "w");
    ASSERT_TRUE(f != NULL);
 
@@ -791,5 +1036,38 @@ TEST(StringUtilsTest, s_fprintf)
    remove(testFile.c_str());
 }
 
+TEST(StringUtilsTest, readFileBOMBug)
+{
+   std::string testFile = "test_bom_bug.txt";
+   // \xBB is 187 decimal, or \273 octal. It is part of the UTF-8 BOM (\xEF\xBB\xBF).
+   std::string content = "\xBB" "Some content";
+   ASSERT_TRUE(writeFile(testFile, content));
+
+   // Current implementation uses trim_left_in_place(result, "\357\273\277");
+   // which will remove the leading \xBB even if it's not the full BOM.
+   std::string readContent = readFile(testFile);
+   EXPECT_EQ(content, readContent);
+
+   remove(testFile.c_str());
+}
+
+TEST(StringUtilsTest, s_fprintfTruncationBug)
+{
+   std::string testFile = "test_fprintf_truncation.txt";
+   FILE *f = fopen(testFile.c_str(), "w");
+   ASSERT_TRUE(f != NULL);
+
+   // Create a string longer than 2048 characters
+   std::string longString(2500, 'a');
+   s_fprintf(f, "%s", longString.c_str());
+   fclose(f);
+
+   std::string readContent = readFile(testFile);
+   // Current implementation has a 2048 byte buffer
+   EXPECT_EQ(longString.length(), readContent.length());
+   EXPECT_EQ(longString, readContent);
+
+   remove(testFile.c_str());
+}
 
 };

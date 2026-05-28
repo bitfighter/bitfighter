@@ -136,7 +136,7 @@ void drawStringf(F32 x, F32 y, S32 size, const char *format, ...)
 S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   return drawStringc(x, y, (F32)size, buffer);
+   return drawStringc(x, y, size, buffer);
 }
 
 
@@ -295,6 +295,12 @@ S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, co
 }
 
 
+S32 drawCenteredString(S32 y, S32 size, const char *string)
+{
+   return drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, string);
+}
+
+
 F32 drawCenteredString(F32 x, F32 y, S32 size, const char *string)
 {
    return drawCenteredString(x, y, F32(size), string);
@@ -312,7 +318,7 @@ F32 drawCenteredString(F32 x, F32 y, F32 size, const char *string)
 S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   return (S32) drawCenteredString(y, size, buffer);
+   return drawCenteredString(y, size, buffer);
 }
 
 
@@ -762,10 +768,10 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    S32 indent = 0;
    string prefix = "";
 
-   S32 start = 0;
-   S32 potentialBreakPoint = start;
+   string::size_type start = 0;
+   string::size_type potentialBreakPoint = start;
 
-   for(U32 i = 0; i < str.length(); i++)
+   for(string::size_type i = 0; i < str.length(); i++)
    {
       if(str[i] == '\n')
       {
@@ -792,7 +798,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
       }
    }
 
-   if(start != (S32)str.length())
+   if(start != str.length())
       wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
 
    return wrappedLines;
@@ -837,5 +843,4 @@ U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
 
 
 };
-
 

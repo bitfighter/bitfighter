@@ -91,6 +91,9 @@ static inline F64 isLeft(const Point &p1, const Point &p2, const Point &p )
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
 bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &point)
 {
+   if (vertexCount < 3)
+      return false;
+
    S32 counter = 0;    // Winding number counter
 
    // loop through all edges of the polygon
@@ -293,6 +296,9 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
+   if (inNumVertices == 0)
+      return false;
+
    // Check if the center is inside the polygon  ==> now works for all polys
    if(polygonContainsPoint(inVertices, inNumVertices, inCenter))
    {
@@ -308,7 +314,7 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       Point v1_v2 = *v2 - *v1;
       Point v1_center = inCenter - *v1;
       F32 fraction = v1_center.dot(v1_v2);
-      if (fraction < 0.0f)
+      if (fraction <= 0.0f)
       {
          // Closest point is v1
          F32 dist_sq = v1_center.lenSquared();
@@ -323,7 +329,7 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       else
       {
          F32 v1_v2_len_sq = v1_v2.lenSquared();
-         if (fraction <= v1_v2_len_sq)
+         if (v1_v2_len_sq > 0.0f && fraction <= v1_v2_len_sq)
          {
             // Closest point is on line segment
             Point point = *v1 + v1_v2 * (fraction / v1_v2_len_sq);
@@ -346,6 +352,9 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
+   if (points.empty())
+      return false;
+
    const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
 
@@ -365,6 +374,9 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
+   if (p1.empty() || p2.empty())
+      return false;
+
    F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
 
@@ -393,13 +405,16 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
                                       F32 &collisionTime, Point &normal)
 {
+   if (vertexCount == 0)
+      return false;
+
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;
    Point dp = end - start;
 
    S32 inc = format ? 1 : 2;
 
-   F32 currentCollisionTime = 100;
+   F64 currentCollisionTime = 100;
 
    for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
@@ -416,11 +431,16 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
       dv.set(v2 - v1);
 
-      F32 denom = dp.y * dv.x - dp.x * dv.y;
+      F64 dpx = dp.x; F64 dpy = dp.y;
+      F64 dvx = dv.x; F64 dvy = dv.y;
+      F64 sx  = start.x; F64 sy = start.y;
+      F64 v1x = v1.x; F64 v1y = v1.y;
+
+      F64 denom = dpy * dvx - dpx * dvy;
       if(denom != 0) // otherwise, the lines are parallel
       {
-         F32 s = ( (start.x - v1.x) * dv.y + (v1.y - start.y) * dv.x ) / denom;
-         F32 t = ( (start.x - v1.x) * dp.y + (v1.y - start.y) * dp.x ) / denom;
+         F64 s = ( (sx - v1x) * dvy + (v1y - sy) * dvx ) / denom;
+         F64 t = ( (sx - v1x) * dpy + (v1y - sy) * dpx ) / denom;
 
          if(s >= 0 && s <= 1 && t >= 0 && t <= 1 && s < currentCollisionTime)    // Found collision closer than others
          {
@@ -433,7 +453,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
    if(currentCollisionTime <= 1)    // Found intersection
    {
-      collisionTime = currentCollisionTime;
+      collisionTime = (F32)currentCollisionTime;
       return true;
    }
 
@@ -700,6 +720,9 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
 static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
+   if (inNumVertices == 0)
+      return false;
+
    // Loop through edges
    F32 upper_bound = 1.0f;
    bool collision = false;
@@ -778,6 +801,8 @@ static const float EPSILON=0.0000000001f;
 F32 area(const Vector<Point> &contour)
 {
   int n = contour.size();
+  if (n < 3)
+     return 0.0f;
 
   F64 A = 0.0;
 
@@ -791,34 +816,35 @@ F32 area(const Vector<Point> &contour)
      InsideTriangle decides if a point P is Inside of the triangle
      defined by A, B, C.
    */
-bool Triangulate::InsideTriangle(float Ax, float Ay,
-                                 float Bx, float By,
-                                 float Cx, float Cy,
-                                 float Px, float Py)
+bool Triangulate::InsideTriangle(F64 Ax, F64 Ay,
+                                 F64 Bx, F64 By,
+                                 F64 Cx, F64 Cy,
+                                 F64 Px, F64 Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  F64 ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  F64 cCROSSap, bCROSScp, aCROSSbp;
 
-  ax = Cx - Bx;  ay = Cy - By;
-  bx = Ax - Cx;  by = Ay - Cy;
-  cx = Bx - Ax;  cy = By - Ay;
-  apx= Px - Ax;  apy= Py - Ay;
-  bpx= Px - Bx;  bpy= Py - By;
-  cpx= Px - Cx;  cpy= Py - Cy;
+  ax = F64(Cx) - Bx;  ay = F64(Cy) - By;
+  bx = F64(Ax) - Cx;  by = F64(Ay) - Cy;
+  cx = F64(Bx) - Ax;  cy = F64(By) - Ay;
+  apx= F64(Px) - Ax;  apy= F64(Py) - Ay;
+  bpx= F64(Px) - Bx;  bpy= F64(Py) - By;
+  cpx= F64(Px) - Cx;  cpy= F64(Py) - Cy;
 
   aCROSSbp = ax*bpy - ay*bpx;
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0)) ||
+         ((aCROSSbp <= 0.0) && (bCROSScp <= 0.0) && (cCROSSap <= 0.0));
 };
 
 
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  F64 Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
   Ax = contour[V[u]].x;
   Ay = contour[V[u]].y;
@@ -829,14 +855,14 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   Cx = contour[V[w]].x;
   Cy = contour[V[w]].y;
 
-  if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
+  if ( (F64)EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
 
   for (p=0;p<n;p++)
   {
     if( (p == u) || (p == v) || (p == w) ) continue;
     Px = contour[V[p]].x;
     Py = contour[V[p]].y;
-    if (InsideTriangle(Ax,Ay,Bx,By,Cx,Cy,Px,Py)) return false;
+    if (InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py)) return false;
   }
 
   return true;
@@ -1839,22 +1865,27 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime)
 {
-    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+    F64 p1x = p1.x; F64 p1y = p1.y;
+    F64 p2x = p2.x; F64 p2y = p2.y;
+    F64 p3x = p3.x; F64 p3y = p3.y;
+    F64 p4x = p4.x; F64 p4y = p4.y;
 
-    F32 numerator1 = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
-    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+    F64 denom = (p4y - p3y) * (p2x - p1x) - (p4x - p3x) * (p2y - p1y);
+
+    F64 numerator1 = (p4x - p3x) * (p1y - p3y) - (p4y - p3y) * (p1x - p3x);
+    F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
        //if ( numerator1 == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    F32 ua = numerator1 / denom;
-    F32 ub = numerator2 / denom;
+    F64 ua = numerator1 / denom;
+    F64 ub = numerator2 / denom;
 
     if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
     {
-        collisionTime = ua;
+        collisionTime = (F32)ua;
         return true;
     }
 
@@ -1865,22 +1896,27 @@ bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const 
 
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection)
 {
-    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
-    F32 numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
+    F64 p1x = p1.x; F64 p1y = p1.y;
+    F64 p2x = p2.x; F64 p2y = p2.y;
+    F64 p3x = p3.x; F64 p3y = p3.y;
+    F64 p4x = p4.x; F64 p4y = p4.y;
 
-    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+    F64 denom = (p4y - p3y) * (p2x - p1x) - (p4x - p3x) * (p2y - p1y);
+    F64 numerator = (p4x - p3x) * (p1y - p3y) - (p4y - p3y) * (p1x - p3x);
+
+    F64 numerator2 = (p2x - p1x) * (p1y - p3y) - (p2y - p1y) * (p1x - p3x);
 
     if ( denom == 0.0 )
        //if ( numerator == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    F32 ua = numerator / denom;
-    F32 ub = numerator2/ denom;
+    F64 ua = numerator / denom;
+    F64 ub = numerator2/ denom;
 
     if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
     {
-      intersection.set(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
+      intersection.set(p1x + ua * (p2x - p1x), p1y + ua * (p2y - p1y));
       return true;
     }
     else
@@ -1917,6 +1953,8 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
    edges.clear();
+   if (corners.empty())
+      return;
 
    S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
@@ -2146,6 +2184,9 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 // Convert a barrier line into segmented chunks with data about possible mitering
 void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
 {
+   if (inputLine.empty())
+      return;
+
    // Create barriers from line segments, with some pre- and post-
    // information to help with mitering
    //
