@@ -276,7 +276,7 @@ string sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
       return value;
 
    // If any of the above exist then do some escaping
@@ -307,16 +307,6 @@ string sanitizeForJson(const char *value)
             result += "\\t";
             break;
 
-            // For html markup entities
-         case '&':
-            result += "&amp;";
-            break;
-         case '<':
-            result += "&lt;";
-            break;
-         case '>':
-            result += "&gt;";
-            break;
          default:
             if(isControlCharacter(*c))
             {
@@ -534,21 +524,28 @@ const char *findPointerOfArg(const char *message, S32 count)
    if(!message)
       return "";
 
-   S32 spacecount = 0;
+   if(count < 0)
+      return "";
+
    S32 cur = 0;
-   char prevchar = ' ';
 
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
+   // Skip leading whitespace
+   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+      cur++;
+
+   for(S32 i = 0; i < count; i++)
    {
-      if(isSpace(message[cur]) && !isSpace(prevchar))
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
-      cur++;
-   }
+      if(message[cur] == '\0')    // End of string
+         return &message[cur];
 
-   while(message[cur] != '\0' && isSpace(message[cur]))
-      cur++;
+      // Skip current argument (non-whitespace)
+      while(message[cur] != '\0' && !isspace((unsigned char)message[cur]))
+         cur++;
+
+      // Skip whitespace separating this arg from the next
+      while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+         cur++;
+   }
 
    return &message[cur];
 }

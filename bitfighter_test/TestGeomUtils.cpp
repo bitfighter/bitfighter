@@ -2037,7 +2037,6 @@ TEST(GeomUtilsTest, TriangulateInsideTriangleLargeCoords)
    // (1e7, 1e7), (1e7 + 10, 1e7), (1e7, 1e7 + 10)
    // Inside point: (1e7 + 1, 1e7 + 1)
    // Outside point: (1e7 + 11, 1e7 + 1)
-   float offset = 1e7f;
    EXPECT_TRUE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset, offset + 10.0f, offset + 1.0f, offset + 1.0f));
    EXPECT_FALSE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset, offset + 10.0f, offset + 11.0f, offset + 1.0f));
 

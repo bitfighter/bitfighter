@@ -7,6 +7,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBitSet.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameStats.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
@@ -28,6 +29,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMathUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestNonce.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMatrix4.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPoint.cpp
