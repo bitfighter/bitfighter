@@ -240,6 +240,86 @@ So, if data is identity/role/UI-ish and discrete, it is usually RPC-driven. If i
 
 ---
 
+## The `IdleCallPath` enum: who calls `idle()` and why
+
+Every game object's `idle(IdleCallPath path)` is called once per frame. The `path` argument tells the object *why* it is being idled, so it can selectively execute only the logic appropriate for that context. Understanding this enum is essential for reading `Ship::idle()`, `Projectile::idle()`, or any other complex idle method.
+
+### Where each value is dispatched from
+
+| Value | Dispatched by | Objects affected |
+|---|---|---|
+| `ServerIdleMainLoop` | `ServerGame::idle()` — the server's main per-frame loop | All game objects on server |
+| `ServerProcessingUpdatesFromClient` | `ControlObjectConnection::readPacket()` — once per received client `Move` | Control object only (human `Ship`) |
+| `ClientIdlingLocalShip` | `ClientGame::idle()` — for the object that is the local player's ship | Local player's `Ship` only |
+| `ClientIdlingNotLocalShip` | `ClientGame::idle()` — for every other object | All objects except local player's ship |
+| `ClientReplayingPendingMoves` | `ControlObjectConnection::addPendingMove()` (local prediction) and `readPacket()` (correction replay) | Control object only |
+
+### What each value means in practice
+
+**`ServerIdleMainLoop`**
+
+This is the standard server tick. Every world object gets this once per frame tick. For most objects this is the *only* path that triggers consequential server-side logic (damage, lifetime, firing, healing, etc.). The server sets `currentMove.time = timeDelta` for each object before calling `idle`.
+
+For ships with a connected client this path is *not* where movement physics happen — that is done per-`Move` in `ServerProcessingUpdatesFromClient`. However, for ships *without* a controlling client (e.g. level-scripted ships, or briefly after a client disconnects), `ServerIdleMainLoop` also drives movement.
+
+The server also uses this path to advance the ship's `RenderState` (the smooth-interpolated position that projectiles collide against), which lets other clients lead targets correctly.
+
+**`ServerProcessingUpdatesFromClient`**
+
+Called once for each `Move` that arrives from a client in a network packet. A single packet can carry several moves at once (they are batched). The server unpacks and applies them in order, including the anti-cheat time-credit check (`mMoveTimeCredit`).
+
+This is where the authoritative ship movement, weapon fire, module activation, spawn shield management, and statistics accumulation happen on the server. It is strictly for human-controlled ships; `Robot::idle` asserts that this path is never used for bots.
+
+**`ClientIdlingLocalShip`**
+
+Called for the local player's ship during the client's main loop. The ship's `currentMove` is set to the freshly-sampled local input before this call. This path runs client-side prediction physics (weapons, modules, energy) to keep the local ship feeling responsive, but deliberately skips things that only make sense on the server (damage dealing, authoritative stats, etc.) and also skips interpolation (the ship is already at its correct predicted position).
+
+**`ClientIdlingNotLocalShip`**
+
+Called for every object that is *not* the local player's ship — remote ships, bullets, seekers, flags, teleporters, etc. `currentMove.time` is set to the frame delta. On this path objects typically:
+- Run client-side visual effects (sparks, trails)
+- Interpolate smoothly toward the last ghost-updated position
+- Run parallel physics where applicable (e.g. `Projectile` flight)
+- Skip server-only logic
+
+**`ClientReplayingPendingMoves`**
+
+Used in two places:
+1. **Immediate local prediction** (`addPendingMove`): right after the client samples input and queues the move, it calls `idle(ClientReplayingPendingMoves)` on the local ship to apply that move immediately and update the client's prediction.
+2. **Correction replay** (`readPacket`): after receiving a server correction and calling `readControlState()`, the client replays all still-unacknowledged moves with this path to resimulate the ship forward from the corrected base state.
+
+On this path, `Ship::idle` runs physics and weapon/module processing (same as `ClientIdlingLocalShip`) but skips visual/audio effects and interpolation, because replaying physics must be fast and deterministic.
+
+### Typical guard patterns in object idle methods
+
+Most objects guard their logic with one of these patterns:
+
+```cpp
+// Server-only, skip everything on client:
+if(path != ServerIdleMainLoop)
+    return;
+
+// Client visual only:
+if(path == ClientIdlingNotLocalShip) {
+    emitSparks();
+}
+
+// Server authoritative consequence (damage, deletion):
+if(!isGhost()) { /* ... */ }   // isGhost() is true on all client-side copies
+
+// Ship: physics runs on controlled paths only:
+if(path == ServerProcessingUpdatesFromClient ||
+   path == ClientIdlingLocalShip             ||
+   path == ClientReplayingPendingMoves)
+{
+    processMove(ActualState);
+}
+```
+
+The key insight: the same `idle()` method must safely serve very different purposes depending on whether it is being called on a server simulation tick, a client prediction step, or a correction replay. The `IdleCallPath` is the mechanism that distinguishes these cases.
+
+---
+
 ## Major patterns and when they are used
 
 ## Pattern A: Client prediction + server authority + replay
