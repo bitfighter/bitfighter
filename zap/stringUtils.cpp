@@ -535,7 +535,7 @@ const char *findPointerOfArg(const char *message, S32 count)
 
    for(S32 i = 0; i < count; i++)
    {
-      if(message[cur] == '\0')
+      if(message[cur] == '\0')    // End of string
          return &message[cur];
 
       // Skip current argument (non-whitespace)

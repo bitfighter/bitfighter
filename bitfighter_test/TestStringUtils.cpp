@@ -489,6 +489,13 @@ TEST(StringUtilsTest, findPointerOfArg)
    EXPECT_STREQ("", findPointerOfArg(NULL, 0));
 
    // Tests for leading and multiple spaces
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
+  
+   // New tests for leading and multiple spaces
    EXPECT_STREQ("word1 word2", findPointerOfArg("  word1 word2", 0));
    EXPECT_STREQ("word2", findPointerOfArg("  word1 word2", 1));
    EXPECT_STREQ("word2", findPointerOfArg("word1  word2", 1));
