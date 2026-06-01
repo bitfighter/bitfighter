@@ -7,7 +7,7 @@
 #define _GAMEWEAPONS_H_
 
 #include "WeaponInfo.h"
-#include "XtankShape.h"    // for XtankWeapon::Type, XtankWeaponInfo
+#include "VehicleDesign.h"    // for XtankWeapon::Type, XtankWeaponInfo
 #include "SoundSystemEnums.h"
 #include "Color.h"
 #include "Point.h"

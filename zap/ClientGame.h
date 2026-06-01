@@ -18,7 +18,7 @@
 #include "SparkTypesEnum.h"
 #include "gameConnection.h"
 #include "MasterTypes.h"
-#include "XtankShape.h"          // For XtankDesign
+#include "VehicleDesign.h"       // For XtankDesign
 
 #include "SDL_gamecontroller.h"
 

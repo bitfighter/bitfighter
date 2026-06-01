@@ -13,7 +13,7 @@
 //   SIDE_FRONT=0, SIDE_BACK=1, SIDE_LEFT=2, SIDE_RIGHT=3
 
 #include "ship.h"          // Ship::getHitSideFromImpulse
-#include "XtankShape.h"    // VehicleSides
+#include "VehicleDesign.h"    // VehicleSides
 #include "Point.h"
 
 #include "gtest/gtest.h"

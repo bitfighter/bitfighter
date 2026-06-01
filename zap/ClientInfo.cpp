@@ -5,7 +5,7 @@
 
 #include "ClientInfo.h"
 
-#include "XtankShape.h"        // For VehicleDesign
+#include "VehicleDesign.h"        // For VehicleDesign
 #include "gameConnection.h"
 #include "playerInfo.h"
 #include "EngineeredItem.h"   // For EngineerModuleDeployer def

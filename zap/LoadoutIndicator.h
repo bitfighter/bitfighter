@@ -10,7 +10,7 @@
 
 #include "AToBScroller.h"     // Parent
 #include "LoadoutTracker.h"
-#include "XtankShape.h"       // For XtankDesign
+#include "VehicleDesign.h"       // For XtankDesign
 
 using namespace TNL;
 

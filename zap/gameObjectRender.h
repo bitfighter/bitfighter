@@ -16,7 +16,7 @@
 #include "Color.h"
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
-#include "XtankShape.h"          // For XtankBodyTurrets (used by renderXtankTurrets)
+#include "VehicleDesign.h"       // For XtankBodyTurrets (used by renderXtankTurrets)
 
 #include "BfObject.h"            // Need to use BfObject with SafePtr.  Whether this is really needed is a different question.
 

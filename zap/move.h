@@ -31,6 +31,8 @@ public:
 
    bool xtank;	  // True if player is in xtank mode
    F32 speedFraction;   // Xtank cruise-control throttle: -1=full reverse, 0=stop, 1=full forward
+   F32 hullAngle;       // Xtank: desired hull facing angle (radians, standard trig); NO_HULL_ANGLE_REQUESTED = not set
+   bool safety;         // Xtank: safety mode (turn-rate limiter) on/off
 
    F32 x, y;
    F32 angle;

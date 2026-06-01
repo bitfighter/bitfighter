@@ -7,7 +7,7 @@
 #define _UI_VEHICLE_DESIGNER_H_
 
 #include "helperMenu.h"
-#include "XtankShape.h"    // for XtankDesign, XtankBody, XtankWeapon
+#include "VehicleDesign.h"    // for XtankDesign, XtankBody, XtankWeapon
 #include "tnlVector.h"
 #include "Timer.h"
 #include <string>

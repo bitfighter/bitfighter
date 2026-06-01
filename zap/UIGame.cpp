@@ -39,7 +39,7 @@
 #include "GeomUtils.h"
 
 #include "GameRecorderPlayback.h"
-#include "XtankShape.h"     // For xtank vehicle body cycling (Ctrl+Alt+Shift+X)
+#include "VehicleDesign.h"     // For xtank vehicle body cycling (Ctrl+Alt+Shift+X)
 
 #include <cmath>     // Needed to compile under Linux, OSX
 
@@ -945,6 +945,8 @@ void GameUserInterface::onMouseMoved()
    mMousePoint.set(DisplayManager::getScreenInfo()->getMousePos()->x - DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                    DisplayManager::getScreenInfo()->getMousePos()->y - DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
 
+   F32 mouseAngle;
+
    if(mInCommanderMap)     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
       Ship *ship = getGame()->getLocalPlayerShip();
@@ -955,12 +957,25 @@ void GameUserInterface::onMouseMoved()
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
       Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
-      mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y,
-                                 mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
+      mouseAngle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y,
+                         mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
    }
-
    else     // Ship is at center of the screen
-      mCurrentMove.angle = atan2(mMousePoint.y, mMousePoint.x);
+      mouseAngle = atan2(mMousePoint.y, mMousePoint.x);
+
+   // For xtank vehicles: right mouse button aims the hull toward the pointer;
+   // left mouse (or no button) controls the turret as usual.
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(ship && ship->isXtankVehicle() && InputCodeManager::getState(MOUSE_RIGHT))
+   {
+      mCurrentMove.hullAngle = mouseAngle;
+      // Keep turret angle unchanged when only steering the hull
+   }
+   else
+   {
+      mCurrentMove.angle = mouseAngle;
+      mCurrentMove.hullAngle = NO_HULL_ANGLE_REQUESTED;  // No hull-angle override
+   }
 }
 
 
@@ -1477,6 +1492,10 @@ bool GameUserInterface::toggleWeapon(S32 slotIndex)
 
 bool GameUserInterface::checkXtankKeys(InputCode inputCode)
 {
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(!ship)
+      return false;
+
    if(!xTankMode())
       return false;
 
@@ -1492,6 +1511,16 @@ bool GameUserInterface::checkXtankKeys(InputCode inputCode)
       return toggleWeapon(4);
    else if(checkInputCode(BindingNameEnum::BINDING_XT_TOGGLE_WEAP6, inputCode))
       return toggleWeapon(5);
+   else if(inputCode == MOUSE_RIGHT)      // Turn vehicle towards mouse
+   {
+      mCurrentMove.hullAngle = atan2(mMousePoint.y, mMousePoint.x);
+      return true;
+   }
+   else if(inputCode == KEY_U)            // Toggle safety (turn-rate limiter)
+   {
+      ship->mSafety = !ship->mSafety;
+      return true;
+   }
 
    // Speed keys: 0=full forward, 1-9=10%-90%, -=full reverse
    switch(inputCode)
@@ -1936,6 +1965,7 @@ Move *GameUserInterface::getCurrentMove()
       {
          mCurrentMove.xtank = true;
          mCurrentMove.speedFraction = ship->mSpeedFraction;
+         mCurrentMove.safety = ship->mSafety;
       }
    }
    else
@@ -2256,6 +2286,14 @@ void GameUserInterface::renderXtankWeaponStatusOverlay() const
    r.setColor(Colors::gray70);
    drawRect(sbarX, sbarY, sbarX + sbarW, sbarY + sbarH, RenderType::LineLoop);
 
+   // --- Safety indicator: shown to the right of the speed bar ---
+   {
+      const char *safLabel = ship->mSafety ? "SAF: ON" : "SAF: OFF";
+      const Color *safColor = ship->mSafety ? &Colors::green80 : &Colors::gray50;
+      r.setColor(*safColor);
+      drawString(sbarX + sbarW + 10, spdY + 4, 11, safLabel);
+   }
+
    if(weaponCount == 0)
    {
       FontManager::popFontContext();
@@ -2545,7 +2583,7 @@ void GameUserInterface::renderGameNormal()
    r.popMatrix();
 
    // Render current ship's energy
-   if(ship)
+   if(ship && ship->isBitfighterShip())
       UI::GaugeRenderer::render(ship->mEnergy, ship->mHealth);
 
 

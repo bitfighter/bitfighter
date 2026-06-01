@@ -17,7 +17,7 @@
 #include "Renderer.h"
 #include "ScissorsManager.h"
 #include "ship.h"
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 
 #include "stringUtils.h"
 
@@ -528,7 +528,7 @@ void VehicleDesignerUserInterface::buildWeaponItems()
       item.key = KEY_0;
       item.button = KEY_NONE;
       item.showOnMenu = true;
-      item.itemIndex = (U32)XtankWeapon::NONE + 1;  // offset so 0 = None stored safely
+      item.itemIndex = (U32)XtankWeapon::NONE;
       item.name = "None";
       item.itemColor = UNSEL_COLOR;
       item.help = "Empty slot";
@@ -544,7 +544,7 @@ void VehicleDesignerUserInterface::buildWeaponItems()
          continue;
 
       OverlayMenuItem item;
-      item.key = getKeyForIndex(w);  // Use dynamic key assignment
+      item.key = getKeyForIndex(w - 1);   // -1 to compensate for NONE item that has a different key
       item.button = KEY_NONE;
       item.showOnMenu = true;
       item.itemIndex = (U32)w;
@@ -788,7 +788,7 @@ bool VehicleDesignerUserInterface::processInputCode(InputCode inputCode)
          if(inputCode == mWeaponItems[i].key)
          {
             mHighlightedIndex = i;
-            mDesignInProgress.selected(mPhase, mHighlightedIndex, mWeaponSlot);
+            mDesignInProgress.selected(mPhase, mHighlightedIndex + 1, mWeaponSlot);
 
             return true;
          }
@@ -1149,7 +1149,7 @@ S32 VehicleDesignerUserInterface::getHighlightedIndexForPhase() const
       if(mDesignInProgress.weapons[mWeaponSlot] == XtankWeapon::NONE)
          return 0;
       else
-         return (S32)mDesignInProgress.weapons[mWeaponSlot] + 1;		// +1 to accomodate 0th None slot
+         return (S32)mDesignInProgress.weapons[mWeaponSlot];
    }
    TNLAssert(false, "Unhandled phase");
    return 100;	// Suppress warning; unreachable
@@ -2608,7 +2608,7 @@ void WeaponInfo2::fillRows() const
       dSprintf(costBuf[i],         COL_LEN, "%s", cs(comma(wi.cost)));
 
       S32 c = 0;
-      rows[i].cells[c] = InputCodeManager::inputCodeToString(getKeyForIndex(i)); c += 1;
+      rows[i].cells[c] = InputCodeManager::inputCodeToString(getKeyForIndex(i - 1)); c += 1;    // -1 to compensate for 0/None item
       rows[i].cells[c] = wi.name;                                                c += 1;
       rows[i].cells[c] = damageBuf[i];                                           c += 1;
       rows[i].cells[c] = rangeBuf[i];                                            c += 1;

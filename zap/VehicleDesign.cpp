@@ -20,11 +20,11 @@
 //
 // No thruster flames are defined for xtank bodies.
 //
-// See XtankShape.h for the XtankBody and XtankWeapon enums that index the
+// See VehicleDesign.h for the XtankBody and XtankWeapon enums that index the
 // arrays in this file.
 //------------------------------------------------------------------------------
 
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 #include "UIVehicleDesigner.h"
 #include "MathUtils.h"
 #include "TnlBitStream.h"
@@ -560,7 +560,7 @@ XtankTreadInfo xtankTreadInfos[] =
 //   name, damage, max_ammo, reload_time, ammo_speed, weight, space, mount_space,
 //   frames, heat, ammo_cost, cost, refill_time, safety, height, mount,
 //   other_flgs, creat_flgs, disp_flgs, move_flgs, hit_flgs, bfWeapon, style
-XtankWeaponInfo xtankWeaponInfos[] =
+XtankWeaponInfo xtankWeaponInfos[] =      // spd (17) x frames (22) /192 * 256
 {
    /*                             reload*/
    /* name               dam ammo  time  spd  wgt   spc  mspc  fr  ht  a$   cost  refl safety hgt  mount o_flgs  creat_flgs      disp_flgs    move_flgs   hit_flgs       bfWeapon         style */
@@ -568,9 +568,9 @@ XtankWeaponInfo xtankWeaponInfos[] =
    { "Light Machine Gun",  1, 300, 133,   17,   20,  200,  200, 22,  0,  1,   1000,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
    { "Machine Gun",        2, 250, 200,   17,   50,  225,  225, 22,  1,  2,   2200,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
    { "Heavy Machine Gun",  3, 200, 200,   17,  100,  250,  250, 22,  2,  3,   3000,   1,   0, NORM,  M_ALL,  2,      NORM,           F_BL,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankBlue   },
-   { "Light Autocannon",   3, 250, 200,   22,  200,  300,  300, 19,  3,  4,   3000,   1,   3, NORM,  M_ALL,  2,      NORM,           F_OR,         NORM,       NORM,    WeaponBurst,     ProjectileStyleXtankOrange },
-   { "Autocannon",         4, 225, 200,   22,  300,  350,  350, 19,  4,  5,   6000,   1,   3, NORM,  M_ALL,  3,      NORM,           F_OR,         NORM,       NORM,    WeaponBurst,     ProjectileStyleXtankOrange },
-   { "Heavy Autocannon",   5, 200, 200,   22,  500,  400,  400, 19,  5,  6,  10000,   1,   3, NORM,  M_ALL,  4,      NORM,           F_OR,         NORM,       NORM,    WeaponBurst,     ProjectileStyleXtankOrange },
+   { "Light Autocannon",   3, 250, 200,   22,  200,  300,  300, 19,  3,  4,   3000,   1,   3, NORM,  M_ALL,  2,      NORM,           F_OR,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankOrange },
+   { "Autocannon",         4, 225, 200,   22,  300,  350,  350, 19,  4,  5,   6000,   1,   3, NORM,  M_ALL,  3,      NORM,           F_OR,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankOrange },
+   { "Heavy Autocannon",   5, 200, 200,   22,  500,  400,  400, 19,  5,  6,  10000,   1,   3, NORM,  M_ALL,  4,      NORM,           F_OR,         NORM,       NORM,    WeaponPhaser,    ProjectileStyleXtankOrange },
    { "Light Rkt Launcher", 6, 150, 533,   40,  600,  800,  800, 15,  4,  8,   7000,   2,   3, NORM,  M_ALL,  5,      NORM,           F_YE,         NORM,       NORM,    WeaponBounce,    ProjectileStyleXtankYellow },
    { "Rkt Launcher",       7, 125, 533,   40,  900, 1200, 1200, 15,  6, 10,  10000,   2,   3, NORM,  M_ALL,  6,      NORM,           F_YE,         NORM,       NORM,    WeaponBounce,    ProjectileStyleXtankYellow },
    { "Heavy Rkt Launcher", 8, 100, 533,   40,  900, 1600, 1600, 15,  8, 12,  15000,   2,   3, NORM,  M_ALL,  7,      NORM,           F_YE,         NORM,       NORM,    WeaponBounce,    ProjectileStyleXtankYellow },

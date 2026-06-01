@@ -8,7 +8,7 @@
 
 #include "moveObject.h"
 #include "LoadoutTracker.h"
-#include "XtankShape.h"     // For xtank body/design data
+#include "VehicleDesign.h"     // For xtank body/design data
 
 #include "Timer.h"
 
@@ -198,8 +198,10 @@ public:
    // Xtank body index and tank physics state.  Present in all builds because
    // the server must run tank driving physics when an xtank body is active.
    F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
+   F32 mDesiredHeading;       // Where player wants vehicle to head; XT only
    F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
    F32 mSpeedFraction;        // Throttle cap: -1=full reverse, 0=stop, 0.1-0.9=10%-100%, 1=full forward
+   bool mSafety;              // TRUE = turn rate limited by traction at speed (XTank safety mode)
    F32 mFuel;                 // Current fuel level [0, mMaxFuel]
    F32 mMaxFuel;              // Tank capacity from engine's XtankEngineInfo::fcap
    bool mWasInFuelZone;       // True when ship was in a FuelZone last tick
@@ -349,7 +351,7 @@ public:
    void toggleWeapon(S32 slotIndex);
    void toggleWeapon(S32 slotIndex, bool isActive);
 
-       bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
+   bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
@@ -378,9 +380,8 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void unpackLoadout(BitStream *stream);
-
-   void unpackDesign(BitStream *stream);
+   void unpackLoadout(BitStream *stream);    // BF only
+   void unpackDesign(BitStream *stream);     // XT only
 
    void findClientInfoFromName();
    void updateInterpolation();

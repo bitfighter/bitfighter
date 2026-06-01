@@ -15,7 +15,7 @@
 #include "reloadZone.h"
 #include "fuelZone.h"
 #include "repairZone.h"
-#include "XtankShape.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
+#include "VehicleDesign.h"    // For XtankBody enum, body_stat, xtankEngineInfos, xtankTreadInfos, etc.
 
 
 #ifndef ZAP_DEDICATED
@@ -192,8 +192,10 @@ namespace Zap
 	  if(clientInfo)
 		 mVehicleDesign = *clientInfo->getOldDesign();
 	  mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
+	  mDesiredHeading   = NO_HULL_ANGLE_REQUESTED;        // No pending turn request
 	  mTankSpeed = 0;
 	  mSpeedFraction = 0.0f;             // Start stopped
+	  mSafety = false;                   // Safety off by default (matches XTank default)
 
 	  // Xtank ammo/heat runtime state
 	  mHeat = 0.0f;
@@ -496,46 +498,27 @@ namespace Zap
    {
 	  const S32 engineIdx = MAX(0, MIN((S32)mVehicleDesign.engine, XtankEngineCount - 1));
 	  const S32 treadIdx = MAX(0, MIN((S32)mVehicleDesign.tread, XtankTreadCount - 1));
-	  const S32 armorIdx = MAX(0, MIN((S32)mVehicleDesign.armor, XtankArmorCount - 1));
 	  const S32 suspensionIdx = MAX(0, MIN((S32)mVehicleDesign.suspension, XtankSuspensionCount - 1));
 
 	  const XtankBodyInfo2 &body = xTankBodyStats[(S32)mVehicleDesign.body];
 	  const XtankEngineInfo &engine = xtankEngineInfos[engineIdx];
 	  const XtankTreadInfo &tread = xtankTreadInfos[treadIdx];
-	  const XtankArmorInfo &armor = xtankArmorInfos[armorIdx];
 	  const SuspensionStat &suspensionInfo = suspensionStat[suspensionIdx];
 
 	  F32 dt = mCurrentMove.time * 0.001f;
 	  if(dt <= 0)
 		 return 0;
 
-	  // --- Compute total vehicle weight (xtank units) ---
-	  S32 weaponWeight = 0;
-	  for(S32 i = 0; i < WEAPON_SLOTS; i++)
-	  {
-		 XtankWeapon w = mVehicleDesign.weapons[i];
-		 if(w != XtankWeapon::NONE)
-			weaponWeight += xtankWeaponInfos[(S32)w].weight;
-	  }
-	  // Xtank-style armor weight: per-side points scaled by body size.
-	  S32 totalArmorPts = 0;
-	  for(S32 i = 0; i < 6; i++)
-		 totalArmorPts += (S32)mVehicleDesign.armorSides[i];
-	  S32 armorWeight = totalArmorPts * armor.weight * body.size;
-
-	  S32 totalWeight = body.weight + engine.weight + weaponWeight
-		 + armorWeight + heatSinkStat.weight * mVehicleDesign.heatSinks;
-	  if(totalWeight < 1) totalWeight = 1;
+	  S32 totalWeight = mVehicleDesign.getWeight();
 
 	  // --- Xtank derived physics (per-frame units, from vdesign.c compute_vdesc) ---
 	  F32 power = (F32)engine.power;
 	  F32 drag = body.drag;
 	  F32 treadFric = tread.friction;
-	  bool isHover = (mVehicleDesign.tread == XtankTread::HOVER);
 
 	  // max_speed = cbrt(power / drag) / friction   [xtank units/frame]
 	  F32 xt_max_speed = powf(power / drag, 1.0f / 3.0f) / treadFric;
-	  if(isHover)
+	  if(mVehicleDesign.isHover())
 		 xt_max_speed *= 0.5f;
 
 	  // engine_acc = 16 * power / weight   [xtank dv/frame from engine]
@@ -556,6 +539,7 @@ namespace Zap
 	  TNLAssert(suspensionInfo.friction >= -1.0f && suspensionInfo.friction <= 2.0f,
 		 "Unexpected suspension handling modifier");
 	  static const F32 MIN_EFFECTIVE_HANDLING = 1.0f;
+
 	  // body.handling values are currently 3..8; this lower bound keeps turn math stable
 	  // even if future data pushes handling lower.
 	  F32 bodyHandling = (F32)body.handling;
@@ -594,7 +578,13 @@ namespace Zap
 	  F32 moveAngle = (speed > 0.1f) ? atan2f(vel.y, vel.x) : mTankHeadingAngle;
 
 	  // --- Early exit when completely idle ---
-	  if(throttle == 0 && steer == 0 && speed < 0.1f)
+	  // Also update mDesiredHeading and mSafety before the check.
+	  if(mCurrentMove.hullAngle != NO_HULL_ANGLE_REQUESTED)
+		 mDesiredHeading = mCurrentMove.hullAngle;
+
+	  mSafety = mCurrentMove.safety;   // Server adopts client's safety toggle each tick
+
+	  if(throttle == 0 && steer == 0 && speed < 0.1f && mDesiredHeading == NO_HULL_ANGLE_REQUESTED)
 	  {
 		 setVel(stateIndex, Point(0, 0));
 		 mTankSpeed = 0;
@@ -602,15 +592,55 @@ namespace Zap
 			return 0;
 	  }
 
+	  // effectiveTurnRate: start at max, then clamp if safety is on and speed is high.
+	  // xt_tread_acc is in xtank units/frame; convert current speed to same units for comparison.
+	  F32 effectiveTurnRate = maxTurnRate;
+	  if(mSafety && speed > 0.01f)
+	  {
+		 F32 xtSpeed = speed / (XTANK_FPS * BF_SCALE);   // BF units/sec → xtank units/frame
+		 if(xt_tread_acc < xtSpeed)
+		 {
+			effectiveTurnRate = asinf(xt_tread_acc / xtSpeed) * TURN_SCALE;
+			if(effectiveTurnRate > maxTurnRate)
+			   effectiveTurnRate = maxTurnRate;
+		 }
+	  }
+
 	  // --- Steering: rotate the hull ---
-	  // In xtank (safety=FALSE, the default), vehicles always turn at max rate.
-	  // The consequence of turning fast at speed is lateral skid, handled by the
-	  // traction model below.
-	  mTankHeadingAngle += steer * maxTurnRate * dt;
+	  // Right-mouse sets mDesiredHeading; the hull steps toward it at effectiveTurnRate.
+	  // Keyboard steer is used only when no desired heading is pending.
+	  // (mDesiredHeading already updated above, before the early-exit check)
+
+	  if(mDesiredHeading != NO_HULL_ANGLE_REQUESTED)
+	  {
+		 // Compute shortest-arc difference in (-pi, pi)
+		 F32 diff = mDesiredHeading - mTankHeadingAngle;
+		 while(diff > FloatPi)  
+			diff -= Float2Pi;
+		 while(diff < -FloatPi)  
+			diff += Float2Pi;
+
+		 F32 step = effectiveTurnRate * dt;
+		 if(fabsf(diff) <= step)
+		 {
+			mTankHeadingAngle = mDesiredHeading;
+			mDesiredHeading   = NO_HULL_ANGLE_REQUESTED;       // Arrived — clear the request
+		 }
+		 else
+			mTankHeadingAngle += (diff > 0 ? step : -step);
+	  }
+	  else
+	  {
+		 // No desired heading — keyboard steer as usual
+		 mTankHeadingAngle += steer * effectiveTurnRate * dt;
+	  }
 
 	  // Keep heading in [-pi, pi]
-	  while(mTankHeadingAngle > FloatPi)  mTankHeadingAngle -= Float2Pi;
-	  while(mTankHeadingAngle < -FloatPi)  mTankHeadingAngle += Float2Pi;
+	  while(mTankHeadingAngle > FloatPi)  
+		 mTankHeadingAngle -= Float2Pi;
+
+	  while(mTankHeadingAngle < -FloatPi) 
+		 mTankHeadingAngle += Float2Pi;
 
 	  F32 heading = mTankHeadingAngle;
 
@@ -620,7 +650,7 @@ namespace Zap
 
 	  // --- Traction: maximum acceleration the treads can deliver ---
 	  F32 traction = groundFriction * treadAcc;   // BF units/sec^2
-	  if(isHover)
+	  if(mVehicleDesign.isHover())
 	  {
 		 // In xtank, hover treads get a fixed low traction of 1.0 per-frame,
 		 // independent of ground friction.  This makes hovers slide much more.
@@ -636,7 +666,7 @@ namespace Zap
 	  // In xtank (safety=FALSE), when the vehicle is sliding sideways, dynamic
 	  // friction is 70% of static friction.  This is what causes the characteristic
 	  // xtank skid: once you start sliding, it's harder to regain grip.
-	  if(fabsf(slideSpeed) > 0.1f && !isHover)
+	  if(fabsf(slideSpeed) > 0.1f && !mVehicleDesign.isHover())
 		 traction *= 0.7f;
 
 	  // --- Velocity-change limits for this timestep ---
@@ -648,8 +678,7 @@ namespace Zap
 	  // BF's WASD controls a natural feel while keeping reverse slower).
 	  F32 maxForward = maxSpeed;
 	  F32 maxReverse = maxSpeed * 0.4f;
-	  F32 desiredSpeed = (throttle >= 0) ? throttle * maxForward
-		 : throttle * maxReverse;
+	  F32 desiredSpeed = (throttle >= 0) ? throttle * maxForward : throttle * maxReverse;
 
 	  // How much the driver wants to change forward speed
 	  F32 desiredDV = desiredSpeed - rollSpeed;
@@ -1838,13 +1867,13 @@ namespace Zap
 			   if(mModuleSecondaryTimer[i].getCurrent() == 0)
 				  mModuleSecondaryTimer[i].reset();
 
-			setMaskBits(ModuleSecondaryMask);
-		 }
-	  }
-   }
+				 setMaskBits(ModuleSecondaryMask);
+				 }
+			   }
+			}
 
 
-   // Runs on server only, at the request of c2sDeploySpybug
+			// Runs on server only, at the request of c2sDeploySpybug
    void Ship::deploySpybug()
    {
 	  const ModuleInfo *moduleInfo = ModuleInfo::getModuleInfo(ModuleSensor);     // Spybug is attached to this module

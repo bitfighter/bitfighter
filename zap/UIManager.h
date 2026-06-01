@@ -15,7 +15,7 @@
 #include "game.h"
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
-#include "XtankShape.h"          // For XtankDesign
+#include "VehicleDesign.h"       // For XtankDesign
 
 #include "Color.h"
 #include "Point.h"

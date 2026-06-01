@@ -739,7 +739,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       // by now since it's the first line of the file.  If it didn't find it, we are at
       // version 1 and we have to set the old GridSize to 255 as default
       //
-      // This check is performed here because every file should have a game type..  right??
+      // This check is performed here because every file should have a game type...  right??
       if(!mHasLevelFormat)
       {
          mLevelFormat = 1;

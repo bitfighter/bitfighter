@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 //
-// XtankShape.h - Vehicle body shapes derived from the xtank open-source game
+// VehicleDesign.h - Vehicle body shapes derived from the xtank open-source game
 // (https://github.com/lidl/xtank).  These shapes are stored in the same
 // ShipShapeInfo format as the native Bitfighter ship shapes so the existing
 // renderer can draw them without modification.
@@ -44,7 +44,9 @@ namespace Zap
 //using std::array;
 
 static const S32 WEAPON_SLOTS = 6;	   // Max number of weapons a vehicle can carry
-static const S32 XTANK_FPS = 15;       //Xtank runs at 15 frames per second, so we use that to convert to time
+static const S32 XTANK_FPS = 15;       // Xtank runs at 15 frames per second, so we use that to convert to time
+                                       // Value from init.c, initial_settings      
+static const F32 XTANK_TO_BF_SIZE = 255.f / 192.f;    // default BF gridsize 255 / Xtank BOX_WIDTH 
 
 // Starting money for xtank vehicles.  The xtank formula scales with the most-expensive vehicle
 // in the match, but we use a constant here for now.  Revisit when per-match economy is added.
@@ -281,10 +283,22 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
          WeaponType bfWeapon;   // Mapped BF weapon for projectile behavior
          ProjectileStyle style; // Rendering style
 
-         S32 range() const
+         inline S32 range() const
          {
-            return frames * ammo_speed / XTANK_FPS;
+            return S32(frames * ammo_speed );  
          }
+
+
+         inline S32 ttl() const
+         {
+            return frames * 1000 / XTANK_FPS;   // xtank frames → milliseconds
+         }
+
+         inline U32 velocity() const
+         {
+            return (U32)(ammo_speed * XTANK_FPS * XTANK_TO_BF_SIZE);     
+         }
+
    };
 
    // One entry per XtankWeapon value.
@@ -293,18 +307,9 @@ constexpr S32 PhaseCount = (S32)Phase::COUNT;
    // Helper functions to compute BF-compatible values from native xtank fields.
    inline U32 xtankFireDelayMs(const XtankWeaponInfo &wi)
    {
-      return (U32)(wi.reload_time * XTANK_FPS); // frames → milliseconds
+      return wi.reload_time;   // Already stored as milliseconds in the BF weapon table
    }
 
-   inline U32 xtankProjVelocity(const XtankWeaponInfo &wi)
-   {
-      return (U32)(wi.ammo_speed * XTANK_FPS); // xtank units/frame → BF units/sec
-   }
-
-   inline S32 xtankProjLiveTime(const XtankWeaponInfo &wi)
-   {
-      return (S32)(wi.frames * XTANK_FPS); // frames → milliseconds
-   }
 
    // ---------------------------------------------------------------------------
    // Engine types: player-selectable power plant affecting top speed and
@@ -530,6 +535,8 @@ S32 getXtankMountBit(XtankMountLocation mount);
 
 
 const S32 MAX_ARMOR_PER_SIDE = 999;    // Arbitrary cap imported from original -- you could theoretically fit 2082 kevlar armor units on a Panzy
+const F32 NO_HULL_ANGLE_REQUESTED = FLT_MAX;
+
 
 class VehicleDesign : public DesignTracker
 {
@@ -596,6 +603,41 @@ class VehicleDesign : public DesignTracker
          specials = specials ^ (U16)(1u << (U32)s);             // Toggle the sth bit of specials
       }
 
+
+      inline bool isHover()
+      {
+         return tread == XtankTread::HOVER;
+      }
+
+
+      // Compute total vehicle weight (xtank units)
+      inline S32 getWeight()
+      {
+         S32 bodyWeight = xTankBodyStats[(S32)body].weight;
+         S32 bodySize = xTankBodyStats[(S32)body].size;
+         S32 engineWeight = xtankEngineInfos[(S32)engine].weight;
+         S32 armorUnitWeight = xtankArmorInfos[(S32)armor].weight;
+
+         S32 weaponWeight = 0;
+         for(S32 i = 0; i < WEAPON_SLOTS; i++)
+         {
+            XtankWeapon w = weapons[i];
+            if(w != XtankWeapon::NONE)
+               weaponWeight += xtankWeaponInfos[(S32)w].weight;
+         }
+
+         // Xtank-style armor weight: per-side points scaled by body size.
+         S32 totalArmorPts = 0;
+         for(S32 i = 0; i < 6; i++)
+            totalArmorPts += armorSides[i];
+         S32 armorWeight = totalArmorPts * armorUnitWeight * bodySize;
+
+         S32 totalWeight = bodyWeight + engineWeight + weaponWeight + armorWeight + heatSinkStat.weight * heatSinks;
+         if(totalWeight < 1) 
+            totalWeight = 1;
+
+         return totalWeight;
+      }
 
 
       S32 getSpecialsSpace() const;

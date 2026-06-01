@@ -5,7 +5,7 @@
 
 #include "move.h"
 #include "Point.h"
-#include "XtankShape.h"   // For VehicleBodyCount
+#include "VehicleDesign.h" // For VehicleBodyCount
 
 #include "stringUtils.h"
 #include "MathUtils.h"     // For radiansToUnit() def
@@ -19,7 +19,6 @@
 
 namespace Zap
 {
-
    // Constructor
    Move::Move()
    {
@@ -49,6 +48,8 @@ namespace Zap
       angle = 0;
       xtank = false;
       speedFraction = 0.0f;      // Vehicles start not moving
+      hullAngle = NO_HULL_ANGLE_REQUESTED;       // Sentinel: no hull-angle override this move
+      safety = false;
 
       for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       {
@@ -123,7 +124,16 @@ namespace Zap
 
          // Pack xtank speed fraction as a signed 7-bit integer (-10 to 10, mapped from -1.0..1.0 in steps of 0.1)
          if(stream->writeFlag(xtank))
+         {
             stream->writeRangedU32((U32)(S32)roundf(speedFraction * 10.0f) + 10, 0, 20);
+            bool hasHullAngle = (hullAngle != NO_HULL_ANGLE_REQUESTED);
+            if(stream->writeFlag(hasHullAngle))
+            {
+               S32 writeHullAngle = (S32)floor(radiansToUnit(hullAngle) * (1 << AngleBits) + 0.5f);
+               stream->writeSignedInt(writeHullAngle, AngleBits);
+            }
+            stream->writeFlag(safety);
+         }
       }
       if(packTime)
       {
@@ -162,7 +172,14 @@ namespace Zap
 
          xtank = stream->readFlag();
          if(xtank)
+         {
             speedFraction = (F32)((S32)stream->readRangedU32(0, 20) - 10) / 10.0f;
+            if(stream->readFlag())
+               hullAngle = unitToRadians(stream->readSignedInt(AngleBits) / F32(1 << AngleBits)); 
+            else
+               hullAngle = NO_HULL_ANGLE_REQUESTED;
+            safety = stream->readFlag();
+         }
       }
 
       if(unpackTime)

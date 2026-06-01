@@ -13,7 +13,7 @@
 #include "Renderer.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
-#include "XtankShape.h"     // For xtankBodyNames, XtankWeapon
+#include "VehicleDesign.h"     // For xtankBodyNames, XtankWeapon
 
 
 using namespace Zap;
