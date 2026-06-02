@@ -21,12 +21,18 @@
 #include "tnlByteBuffer.h"
 #include "tnlNetBase.h"
 
+#include <cstring>
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE
 #endif
 
 namespace Zap {
+
+// ALURE 2.x static objects (must be initialized before use)
+alure::DeviceManager SoundSystem::mDeviceMgr;
+alure::Device       SoundSystem::mDevice;
+alure::Context      SoundSystem::mContext;
 
 
 // A problem in openAL causes to freeze when doing this: alSource3f(source, AL_POSITION, sqrt(-3.f), 0, 0);
@@ -37,6 +43,86 @@ static Point safePoint(Zap::Point pos)
    if(! (fabs(pos.x) < 1e20f)) pos.x = 0;
    if(! (fabs(pos.y) < 1e20f)) pos.y = 0;
    return pos;
+}
+
+
+// Simple WAV file loader: reads a .wav file and fills an OpenAL buffer.
+// Returns true on success.
+static bool loadWavToBuffer(const string &filename, ALuint buffer)
+{
+   // Read entire file into memory
+   FILE *f = fopen(filename.c_str(), "rb");
+   if(!f) return false;
+
+   fseek(f, 0, SEEK_END);
+   long fileSize = ftell(f);
+   fseek(f, 0, SEEK_SET);
+
+   if(fileSize < 44) { fclose(f); return false; }
+
+   Vector<U8> data;
+   data.resize(fileSize);
+   if(fread(data.address(), 1, fileSize, f) != (size_t)fileSize)
+   {
+      fclose(f);
+      return false;
+   }
+   fclose(f);
+
+   // Parse WAV header
+   // RIFF header
+   if(std::memcmp(data.address(), "RIFF", 4) != 0) return false;
+   // WAVE id
+   if(std::memcmp(data.address() + 8, "WAVE", 4) != 0) return false;
+
+   // Find fmt and data chunks
+   U16 channels = 0;
+   U32 sampleRate = 0;
+   U16 bitsPerSample = 0;
+   const U8 *fmtChunk = nullptr;
+   const U8 *dataChunk = nullptr;
+   U32 dataSize = 0;
+
+   U32 offset = 12;
+   while (offset + 8 <= (U32)fileSize)
+   {
+      U32 chunkSize = *(U32*)(data.address() + offset + 4);
+      if(std::memcmp(data.address() + offset, "fmt ", 4) == 0)
+      {
+         if(chunkSize >= 16)
+         {
+            fmtChunk = data.address() + offset;
+            channels     = *(U16*)(fmtChunk + 10);
+            sampleRate   = *(U32*)(fmtChunk + 12);
+            bitsPerSample = *(U16*)(fmtChunk + 22);
+         }
+      }
+      else if(std::memcmp(data.address() + offset, "data", 4) == 0)
+      {
+         dataChunk = data.address() + offset + 8;
+         dataSize  = chunkSize;
+      }
+      offset += 8 + chunkSize;
+      if(chunkSize % 2) offset++; // padding byte
+   }
+
+   if(!fmtChunk || !dataChunk || dataSize == 0) return false;
+
+   // Determine OpenAL format
+   ALenum format = 0;
+   if(channels == 1 && bitsPerSample == 8)
+      format = AL_FORMAT_MONO8;
+   else if(channels == 1 && bitsPerSample == 16)
+      format = AL_FORMAT_MONO16;
+   else if(channels == 2 && bitsPerSample == 8)
+      format = AL_FORMAT_STEREO8;
+   else if(channels == 2 && bitsPerSample == 16)
+      format = AL_FORMAT_STEREO16;
+   else
+      return false;
+
+   alBufferData(buffer, format, dataChunk, dataSize, sampleRate);
+   return alGetError() == AL_NO_ERROR;
 }
 
 //
@@ -178,13 +264,30 @@ SoundSystem::~SoundSystem()
 
 
 // Initialize the sound sub-system
-// Use ALURE to ease the use of OpenAL
 void SoundSystem::init(const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
-   // Initialize the sound device
-   if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
+   // Initialize ALURE 2.x device and context
+   try
    {
-      logprintf(LogConsumer::LogError, "Failed to open OpenAL device: %s\n", alureGetErrorString());
+      mDeviceMgr = alure::DeviceManager::getInstance();
+      mDevice = mDeviceMgr.openPlayback();
+      if(!mDevice)
+      {
+         logprintf(LogConsumer::LogError, "Failed to open OpenAL device");
+         return;
+      }
+      mContext = mDevice.createContext();
+      if(!mContext)
+      {
+         logprintf(LogConsumer::LogError, "Failed to create OpenAL context");
+         mDevice.close();
+         return;
+      }
+      alure::Context::MakeCurrent(mContext);
+   }
+   catch (std::exception &e)
+   {
+      logprintf(LogConsumer::LogError, "Failed to initialize audio: %s", e.what());
       return;
    }
 
@@ -218,7 +321,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
    // Init the sound set
    gSFXProfiles = sfxProfilesModern;
 
-   // Iterate through all sounds
+   // Iterate through all sounds and load them
    for(U32 i = 0; i < NumSFXBuffers; i++)
    {
       // End when we find a sound sans filename
@@ -228,8 +331,8 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
       // Grab sound file location
       string fileBuffer = joindir(sfxDir, gSFXProfiles[i].fileName);
 
-      // Stick sound into a buffer
-      if(alureBufferDataFromFile(fileBuffer.c_str(), gSfxBuffers[i]) == AL_FALSE)
+      // Load WAV file into OpenAL buffer
+      if(!loadWavToBuffer(fileBuffer, gSfxBuffers[i]))
       {
          logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());
          return;
@@ -312,11 +415,10 @@ void SoundSystem::shutdown()
    // Stop and clean up music
    if(musicSystemValid())
    {
-      alureStopSource(mMusicData.source, AL_FALSE);
+      alSourceStop(mMusicData.source);
 
-      // Clean up the stream here since we aren't calling the callback
-      if(mMusicData.stream)
-         alureDestroyStream(mMusicData.stream, 0, NULL);
+      // Decoder is cleaned up when mMusicData.decoder goes out of scope (SharedPtr)
+      mMusicData.decoder.reset();
 
       alDeleteSources(1, &(mMusicData.source));
    }
@@ -335,8 +437,10 @@ void SoundSystem::shutdown()
       alDeleteBuffers(1, &(gVoiceFreeBuffers[i]));
    gVoiceFreeBuffers.clear();
 
-   // Shutdown device cv9
-   alureShutdownDevice();
+   // Shutdown ALURE 2.x (RAII handles actual teardown)
+   alure::Context::MakeCurrent(nullptr);
+   mContext.destroy();
+   mDevice.close();
 }
 
 
@@ -505,7 +609,8 @@ void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voic
    processMusic(timeDelta, musicVol, musicLocation);
    processVoiceChat();
 
-   alureUpdate();
+   if(mContext)
+      mContext.update();
 }
 
 
@@ -514,7 +619,8 @@ void SoundSystem::processAudio(F32 sfxVol)
 {
    processSoundEffects(sfxVol, 0);
 
-   alureUpdate();
+   if(mContext)
+      mContext.update();
 }
 
 
@@ -638,21 +744,34 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
 
          // Grab the full path
          string fullMusicPath = joindir(mMusicDir, musicFile);
-         mMusicData.stream = alureCreateStreamFromFile(fullMusicPath.c_str(), MusicChunkSize, 0, NULL);
          bool failed = false;
 
-         // Stream failed
-         if(mMusicData.stream == NULL)
+         // Create ALURE 2.x decoder for the music file
+         try
          {
-            logprintf(LogConsumer::LogError, "Failed to create music stream for %s: %s", musicFile.c_str(), alureGetErrorString());
-            failed = true;
+            mMusicData.decoder = mContext.createDecoder(fullMusicPath);
+         }
+         catch(std::exception &)
+         {
+            mMusicData.decoder.reset();
          }
 
-         // Play stream
-         else if(!alurePlaySourceStream(mMusicData.source, mMusicData.stream, NumMusicStreamBuffers, loopcount, music_end_callback, NULL))
+         if(!mMusicData.decoder)
          {
-            logprintf(LogConsumer::LogError, "Failed to play music file %s: %s", musicFile.c_str(), alureGetErrorString());
+            logprintf(LogConsumer::LogError, "Failed to create music decoder for %s", musicFile.c_str());
             failed = true;
+         }
+         else
+         {
+            // Start streaming: queue initial buffers
+            alSourcei(mMusicData.source, AL_BUFFER, 0); // clear old buffers
+            for (S32 i = 0; i < NumMusicStreamBuffers; i++)
+               queueNextMusicBuffer();
+
+            ALint state;
+            alGetSourcei(mMusicData.source, AL_SOURCE_STATE, &state);
+            if (state != AL_PLAYING)
+               alSourcePlay(mMusicData.source);
          }
 
          // If we've failed we will load the next song unless we've failed too
@@ -679,9 +798,6 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
          }
          failedCount = 0;  // Reset if we've made it here
 
-         // Debug
-//         logprintf("Playing: %s", musicFile.c_str());
-
          if(mMusicFadeTimer.getCurrent() != 0)
             mMusicData.state = MusicStateFadingIn;
          else
@@ -694,19 +810,20 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
       }
 
       case MusicStateStopping:
-         alureStopSource(mMusicData.source, AL_TRUE);
+         alSourceStop(mMusicData.source);
+         mMusicData.decoder.reset();
 
          mMusicData.state = MusicStateStopped;
          break;
 
       case MusicStatePausing:
-         alurePauseSource(mMusicData.source);
+         alSourcePause(mMusicData.source);
 
          mMusicData.state = MusicStatePaused;
          break;
 
       case MusicStateResuming:
-         alureResumeSource(mMusicData.source);
+         alSourcePlay(mMusicData.source);
          alSourcef(mMusicData.source, AL_GAIN, mMusicData.volume);
 
          mMusicData.state = MusicStatePlaying;
@@ -738,6 +855,33 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
 
       // No processing needed in these states
       case MusicStatePlaying:
+      {
+         // Refill processed music buffers from the decoder
+         if (mMusicData.decoder)
+         {
+            ALint processed;
+            alGetSourcei(mMusicData.source, AL_BUFFERS_PROCESSED, &processed);
+            while (processed--)
+               queueNextMusicBuffer();
+
+            // Check if the decoder has finished and all buffers are consumed
+            ALint queued;
+            alGetSourcei(mMusicData.source, AL_BUFFERS_QUEUED, &queued);
+            if (!mMusicData.decoder && queued == 0)
+            {
+               // Track finished
+               mMusicData.decoder.reset();
+
+               // If in-game, go to the next track, loop if at the end
+               if(mMusicData.currentLocation == MusicLocationGame)
+                  mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mGameMusicList.size();
+
+               mMusicData.state = MusicStateStopped;
+               mMusicData.command = MusicCommandPlay;
+            }
+         }
+         return;
+      }
       case MusicStateStopped:
       case MusicStatePaused:
       case MusicStateNone:
@@ -950,21 +1094,85 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
       playSoundEffect(effect);
 }
 
-
-// This method is called after a music track finishes playing in-game
-void SoundSystem::music_end_callback(void* userdata, ALuint source)
+// Read decoded audio from the current music decoder and queue it as an OpenAL buffer.
+// Returns true if a buffer was queued, false if the decoder is exhausted.
+bool SoundSystem::queueNextMusicBuffer()
 {
-   // Clean up the stream
-   alureDestroyStream(mMusicData.stream, 0, NULL);
+   if (!mMusicData.decoder)
+      return false;
 
-   // If in-game, go to the next track, loop if at the end
-   if(mMusicData.currentLocation == MusicLocationGame)
-      mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mGameMusicList.size();
+   // Music streaming buffers (reused)
+   static Vector<ALuint> sMusicBufs;
+   static bool sBufsInitialized = false;
+   if (!sBufsInitialized)
+   {
+      sMusicBufs.resize(NumMusicStreamBuffers);
+      alGenBuffers(NumMusicStreamBuffers, sMusicBufs.address());
+      sBufsInitialized = true;
+   }
 
-   mMusicData.state = MusicStateStopped;
+   // Unqueue a processed buffer, or use round-robin
+   ALuint buf = 0;
+   ALint processed;
+   alGetSourcei(mMusicData.source, AL_BUFFERS_PROCESSED, &processed);
+   if(processed > 0)
+   {
+      alSourceUnqueueBuffers(mMusicData.source, 1, &buf);
+   }
+   else
+   {
+      static S32 nextBuf = 0;
+      buf = sMusicBufs[nextBuf];
+      nextBuf = (nextBuf + 1) % NumMusicStreamBuffers;
+   }
 
-   // Send command to start next song
-   mMusicData.command = MusicCommandPlay;
+   if(buf == 0)
+      return false;
+
+   // Read decoded audio from the ALURE decoder
+   const ALuint bufSize = MusicChunkSize;
+   Vector<ALubyte> pcmData;
+   pcmData.resize(bufSize);
+
+   ALsizei totalRead = 0;
+   while (totalRead < (ALsizei)bufSize)
+   {
+      ALsizei chunk = mMusicData.decoder->read(
+         pcmData.address() + totalRead,
+         bufSize - totalRead);
+      if(chunk <= 0) break;
+      totalRead += chunk;
+   }
+
+   if(totalRead == 0)
+   {
+      // Decoder has reached end of stream
+      mMusicData.decoder.reset();
+      return false; // Nothing to play
+   }
+
+   // Map ALURE channel config + sample type to OpenAL format
+   alure::ChannelConfig chans = mMusicData.decoder->getChannelConfig();
+   alure::SampleType smptype = mMusicData.decoder->getSampleType();
+   ALenum format = AL_FORMAT_MONO16;
+   if(chans == alure::ChannelConfig::Mono)
+   {
+      if(smptype == alure::SampleType::UInt8)       format = AL_FORMAT_MONO8;
+      else if(smptype == alure::SampleType::Int16)  format = AL_FORMAT_MONO16;
+      else if(smptype == alure::SampleType::Float32) format = AL_FORMAT_MONO16; // no float fallback
+   }
+   else if(chans == alure::ChannelConfig::Stereo)
+   {
+      if(smptype == alure::SampleType::UInt8)       format = AL_FORMAT_STEREO8;
+      else if(smptype == alure::SampleType::Int16)  format = AL_FORMAT_STEREO16;
+      else if(smptype == alure::SampleType::Float32) format = AL_FORMAT_STEREO16;
+   }
+
+   alBufferData(buf, format, pcmData.address(), totalRead,
+                mMusicData.decoder->getFrequency());
+   alSourceQueueBuffers(mMusicData.source, 1, &buf);
+
+   return true;
 }
 
 
@@ -1039,115 +1247,58 @@ bool SoundSystem::isMusicPlaying()
 
 };
 
-#elif defined (BF_NO_AUDIO)
-
-using namespace TNL;
-
-namespace Zap
-{
-
-
-void SoundSystem::updateGain(SFXHandle& effect, F32 volLevel, F32 voiceVolLevel)
-{
-   // Do nothing
-}
-
-void SoundSystem::updateMovementParams(SFXHandle& effect)
-{
-   // Do nothing
-}
-
-void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
-{
-   // Do nothing
-}
-
-void SoundSystem::setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity)
-{
-   // Do nothing
-}
-
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
-{
-   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
-}
-
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position)
-{
-   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
-}
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain)
-{
-   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
-}
-
-SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
-{
-   return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
-}
-
-void SoundSystem::playSoundEffect(const SFXHandle& effect)
-{
-   // Do nothing
-}
-
-void SoundSystem::stopSoundEffect(SFXHandle& effect)
-{
-   // Do nothing
-}
-
-void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
-{
-   // Do nothing
-}
-
-void SoundSystem::init(const string &sfxDir, const string &musicDir, float musicVol)
-{
-   logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
-}
-
-void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, MusicLocation musicLocation)
-{
-   // Do nothing
-}
-
-void SoundSystem::processAudio(F32 sfxVol)
-{
-   // Do nothing
-}
-
-void SoundSystem::setListenerParams(const Point &position, const Point &velocity)
-{
-   // Do nothing
-}
-
-void SoundSystem::shutdown()
-{
-   // Do nothing
-}
-
-void SoundSystem::playNextTrack()
-{
-   // Do nothing
-}
-
-void SoundSystem::playPrevTrack()
-{
-   // Do nothing
-}
-
-bool SoundSystem::isMusicPlaying()
-{
-   return false;
-}
-
-
-};
 
 #endif // BF_NO_AUDIO
 
 namespace Zap
 {
+
+#ifdef BF_NO_AUDIO
+
+// Stub implementations for dedicated server build
+SoundSystem::SoundSystem() { }
+SoundSystem::~SoundSystem() { }
+
+void SoundSystem::init(const string &, const string &, float) { }
+void SoundSystem::shutdown() { }
+void SoundSystem::setListenerParams(const Point &, const Point &) { }
+void SoundSystem::processAudio(U32, F32, F32, F32, MusicLocation) { }
+void SoundSystem::processAudio(F32) { }
+void SoundSystem::processSoundEffects(F32, F32) { }
+SFXHandle SoundSystem::playSoundEffect(U32, F32) { return SFXHandle(); }
+SFXHandle SoundSystem::playSoundEffect(U32, const Point &) { return SFXHandle(); }
+SFXHandle SoundSystem::playSoundEffect(U32, const Point &, const Point &, F32) { return SFXHandle(); }
+void SoundSystem::playSoundEffect(const SFXHandle &) { }
+SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr, F32) { return SFXHandle(); }
+void SoundSystem::stopSoundEffect(SFXHandle &) { }
+void SoundSystem::unqueueBuffers(S32) { }
+void SoundSystem::setMovementParams(SFXHandle &, const Point &, const Point &) { }
+void SoundSystem::updateMovementParams(SFXHandle &) { }
+void SoundSystem::processVoiceChat() { }
+void SoundSystem::queueVoiceChatBuffer(const SFXHandle &, ByteBufferPtr) { }
+void SoundSystem::processMusic(U32, F32, MusicLocation) { }
+void SoundSystem::playMusic() { }
+void SoundSystem::stopMusic() { }
+void SoundSystem::pauseMusic() { }
+void SoundSystem::resumeMusic() { }
+void SoundSystem::fadeInMusic() { }
+void SoundSystem::fadeOutMusic() { }
+void SoundSystem::playNextTrack() { }
+void SoundSystem::playPrevTrack() { }
+bool SoundSystem::isMusicPlaying() { return false; }
+
+// Private stubs
+void SoundSystem::updateGain(SFXHandle &, F32, F32) { }
+void SoundSystem::playOnSource(SFXHandle &, F32, F32) { }
+bool SoundSystem::queueNextMusicBuffer() { return false; }
+bool SoundSystem::musicSystemValid() { return false; }
+
+// Voice chat stubs (always needed when BF_NO_AUDIO)
+bool SoundSystem::startRecording() { return false; }
+void SoundSystem::captureSamples(ByteBufferPtr) { }
+void SoundSystem::stopRecording() { }
+
+#else // !BF_NO_AUDIO
 
 #if defined(BF_NO_AUDIO) || defined(BF_NO_VOICECHAT)
 
@@ -1191,6 +1342,8 @@ void SoundSystem::stopRecording()
    captureDevice = NULL;
 }
 #endif // BF_NO_AUDIO || BF_NO_VOICECHAT
+
+#endif // !BF_NO_AUDIO (outer block)
 
 };
 

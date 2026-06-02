@@ -254,7 +254,7 @@ DBDriver::set_option(unsigned int o, bool arg)
 	while (n && ((n & 1) == 0)) {
 		n >>= 1;
 	}
-	
+
 	if ((n == 1) &&
 			(o >= CLIENT_LONG_PASSWORD) &&
 #if MYSQL_VERSION_ID > 40000	// highest flag value varies by version
@@ -299,7 +299,7 @@ bool
 DBDriver::set_option_impl(Option* o)
 {
 	std::ostringstream os;
-	std::auto_ptr<Option> cleanup(o);
+	std::unique_ptr<Option> cleanup(o);
 
 	switch (o->set(this)) {
 		case Option::err_NONE:
@@ -348,7 +348,7 @@ DBDriver::thread_aware()
 #else
 	// MySQL++ itself isn't thread-aware, so we don't need to do any
 	// further tests.  All pieces must be thread-aware to return true.
-	return false;	
+	return false;
 #endif
 }
 
