@@ -69,6 +69,9 @@ if(MSVC)
 		string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
 
+	# Ensure __cplusplus correctly reflects the C++ standard in use
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
+
 	# Enable 'Edit and Continue' debugging support
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /ZI")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")

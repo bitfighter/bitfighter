@@ -1,6 +1,6 @@
 #
 # Client OBJECT build - includes resources only compiled into the client
-# 
+#
 
 BF_PLATFORM_SET_EXTRA_SOURCES()
 
@@ -35,6 +35,12 @@ add_dependencies(bitfighter_client
 	tnl
 	${CLIENT_EXTRA_DEPS}
 )
+
+# Propagate usage requirements (compile definitions, include dirs) from
+# alure to this OBJECT library and its consumers.
+if(NOT ALURE_FOUND)
+    target_link_libraries(bitfighter_client PUBLIC alure)
+endif()
 
 if(USE_GLES)
 	get_property(CLIENT_DEFS TARGET bitfighter_client PROPERTY COMPILE_DEFINITIONS)

@@ -22,13 +22,14 @@ option(DISCORD "Integrate Discord RPC calls." YES)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-# Require use c++14 compiler
-set(CMAKE_CXX_STANDARD 14)
+# Require use c++17 compiler
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use compiler extensions like -std=gnu++11
 # set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
+    # Prevent ambiguity between Windows SDK's ::byte and C++17's std::byte
     add_compile_definitions(_HAS_STD_BYTE=0)
 endif()
 
@@ -139,14 +140,15 @@ endfunction()
 # ALURE
 find_with_fallback(ALURE ALURE alure)
 if(NOT ALURE_FOUND)
-	if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
-		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
+	if(NOT OPENAL_FOUND)
+		message(WARNING "OpenAL not found.  Bitfighter will be compiled without audio")
 		add_definitions(-DBF_NO_AUDIO)
 		set(OPENAL_INCLUDE_DIR "")
 	else()
 		message(STATUS "Using in-tree ALURE")
-		add_definitions(-DALURE_STATIC_LIBRARY)
 		add_subdirectory(alure)
+		set(ALURE_LIBRARIES alure)
+		set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure/include")
 	endif()
 endif()
 
@@ -181,6 +183,18 @@ find_with_fallback(Clipper CLIPPER clipper)
 if(NOT CLIPPER_FOUND)
 	message(STATUS "Using in-tree Clipper")
 	add_subdirectory(clipper)
+endif()
+
+# Clipper2
+find_with_fallback(Clipper2 CLIPPER2 Clipper2Lib)
+if(NOT CLIPPER2_FOUND)
+	message(STATUS "Using in-tree Clipper2")
+	add_subdirectory(Clipper2Lib)
+	# find_with_fallback sets LIBRARIES to the dirname string; override
+	# with the actual CMake target name so linking works correctly.
+	set(CLIPPER2_LIBRARIES clipper2)
+	# Headers are under include/, not at the root of the directory.
+	set(CLIPPER2_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Clipper2Lib/include")
 endif()
 
 
