@@ -62,7 +62,7 @@ bool VideoSystem::init()
       return false;
    }
 
-   
+
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
    // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.
@@ -423,6 +423,15 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          windowWidth = (S32) floor((F32)screen->getGameCanvasWidth() * settings->getIniSettings()->winSizeFact + 0.5f);
          windowHeight = (S32) floor((F32)screen->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
 
+         // Reset window position if saved position is off-screen (e.g. after
+         // switching to a smaller monitor or disconnecting an external display)
+         if(settings->getIniSettings()->winXPos + windowWidth > screen->getPhysicalScreenWidth() ||
+            settings->getIniSettings()->winYPos + windowHeight > screen->getPhysicalScreenHeight())
+         {
+            settings->getIniSettings()->winXPos = 0;
+            settings->getIniSettings()->winYPos = 0;
+         }
+
          // Set window position unless it is (0, 0) which can hide the title bar
          if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)
             setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
@@ -493,6 +502,14 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
 
          windowWidth = (S32) floor((F32)screen->getGameCanvasWidth() * settings->getIniSettings()->winSizeFact + 0.5f);
          windowHeight = (S32) floor((F32)screen->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+
+         // Reset window position if saved position is off-screen
+         if(settings->getIniSettings()->winXPos + windowWidth > screen->getPhysicalScreenWidth() ||
+            settings->getIniSettings()->winYPos + windowHeight > screen->getPhysicalScreenHeight())
+         {
+            settings->getIniSettings()->winXPos = 0;
+            settings->getIniSettings()->winYPos = 0;
+         }
 
          // Set window position unless it is (0, 0) which can hide the title bar
          if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)
