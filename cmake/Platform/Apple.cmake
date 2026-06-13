@@ -179,6 +179,14 @@ else()
 endif()
 
 
+# When building natively against Homebrew, the client .app links its dylibs by
+# absolute /opt/homebrew path, so it only runs where Homebrew is installed at the
+# same prefix.  Enable this to copy those dylibs into the bundle and re-point the
+# load commands, producing a relocatable .app (see BF_PLATFORM_BUNDLE_DEPENDENCIES).
+# Off by default since it slows the build and is only needed for distribution.
+option(BUNDLE_DEPENDENCIES "Bundle Homebrew dylibs into the macOS .app for distribution" OFF)
+
+
 ## End Global project configuration
 
 
@@ -344,6 +352,39 @@ function(BF_PLATFORM_INSTALL targetName)
 	# in the post-build section
 	install(TARGETS ${targetName} BUNDLE DESTINATION ./)
 
+endfunction()
+
+
+function(BF_PLATFORM_BUNDLE_DEPENDENCIES targetName)
+	# Only meaningful for native Homebrew builds, whose binaries link dylibs by
+	# absolute /opt/homebrew path.  Opt-in via BUNDLE_DEPENDENCIES (distribution).
+	if(NOT BUNDLE_DEPENDENCIES OR NOT BF_USE_HOMEBREW_LIBS)
+		return()
+	endif()
+
+	find_program(DYLIBBUNDLER_COMMAND dylibbundler)
+	if(NOT DYLIBBUNDLER_COMMAND)
+		message(FATAL_ERROR "BUNDLE_DEPENDENCIES requires dylibbundler.  Install it with: brew install dylibbundler")
+	endif()
+
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
+	set(appDir "${exeDir}/${targetName}.app")
+
+	# dylibbundler walks the binary's (transitive) Homebrew dependencies, copies
+	# them into Contents/Frameworks, and rewrites each load command to
+	# @executable_path/../Frameworks so the bundle resolves them relative to
+	# itself.  -ns skips dylibbundler's own ad-hoc signing; we re-sign the whole
+	# bundle afterwards, since rewriting the binary invalidates the linker's
+	# signature and arm64 requires a valid (here ad-hoc) one to launch.
+	add_custom_command(TARGET ${targetName} POST_BUILD
+		COMMAND ${DYLIBBUNDLER_COMMAND} -of -b -cd -ns
+			-x ${appDir}/Contents/MacOS/${targetName}
+			-d ${appDir}/Contents/Frameworks/
+			-p @executable_path/../Frameworks/
+		COMMAND codesign --force --deep --sign - ${appDir}
+		COMMENT "Bundling Homebrew dylibs into ${targetName}.app and ad-hoc signing"
+		VERBATIM
+	)
 endfunction()
 
 
