@@ -83,18 +83,26 @@ Similar to Linux, but with some additional steps.  In a shell, in the `build` di
 
 #### Apple Silicon (arm64)
 
-The build now targets the host CPU by default, so Apple Silicon Macs build native
-`arm64` binaries (no Rosetta).  The bundled LuaJIT is 2.0.5, which predates Apple
-Silicon, so a native build needs LuaJIT 2.1 from Homebrew:
-* `brew install luajit`
+The build targets the host CPU by default, so Apple Silicon Macs build native
+`arm64` binaries (no Rosetta).  The prebuilt libraries in `lib/` are Intel-only,
+so a native build resolves its dependencies from Homebrew:
+
+* `brew install luajit sdl2 libpng libogg libvorbis speex libmodplug openal-soft`
 * `cmake .. -DLUAJIT_BUILTIN=NO`
-* `make bitfighterd`
+* `make bitfighterd`   &nbsp;# dedicated server &rarr; `exe/bitfighterd`
+* `make Bitfighter`    &nbsp;# client &rarr; `exe/Bitfighter.app`
 
-The binary lands in `exe/bitfighterd` as a native `arm64` executable.
+`-DLUAJIT_BUILTIN=NO` is required because the bundled LuaJIT 2.0.5 predates Apple
+Silicon; the client is built without the Sparkle auto-updater (the bundled
+Sparkle is Intel-only Sparkle 1.x).
 
-The full client (`make Bitfighter`) still depends on the Intel-only prebuilt
-frameworks in `lib/` (SDL2, libpng, OpenAL, Sparkle, ...), so it isn't native yet;
-build it x86_64-under-Rosetta with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
+The native `.app` links its Homebrew dylibs by absolute path and runs in place on
+the build machine — it is not yet a self-contained, distributable bundle.  Run it
+with its resource folder available, e.g.:
+* `exe/Bitfighter.app/Contents/MacOS/Bitfighter -rootdatadir exe`
+
+To build the Intel client under Rosetta instead (using the bundled `lib/`
+frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
 
 ## INSTALLATION AND PACKAGING
 ### Linux
