@@ -78,32 +78,93 @@ endif()
 set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
 set(BF_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/include)
 
-# Set some search paths
-set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libsdl)
-set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libogg)
-set(VORBIS_SEARCH_PATHS     ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
-set(VORBISFILE_SEARCH_PATHS ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
-set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libspeex)
-set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libmodplug)
-set(ALURE_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/alure)
+# The prebuilt frameworks/dylibs in lib/ are Intel-only.  On Apple Silicon we
+# resolve the client dependencies from Homebrew instead.  An x86_64 (Rosetta)
+# build keeps using the bundled libraries, so existing behaviour is unchanged.
+if(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+	set(BF_USE_HOMEBREW_LIBS TRUE)
+endif()
 
-# Directly set include dirs for some libraries
-set(OPENAL_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/openal/include")
-set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
-# libpng needs two for some weird reason
-set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
-set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+if(BF_USE_HOMEBREW_LIBS)
+	find_program(BREW_COMMAND brew)
+	if(NOT BREW_COMMAND)
+		message(FATAL_ERROR "Homebrew is required for a native arm64 build. Install it from https://brew.sh and run: brew install sdl2 libpng libogg libvorbis speex libmodplug openal-soft")
+	endif()
 
-# Directly specify some libs
-set(OPENAL_LIBRARY "${BF_LIB_DIR}/libopenal.1.dylib")
-set(PNG_LIBRARY "${BF_LIB_DIR}/libpng.framework")
+	execute_process(COMMAND ${BREW_COMMAND} --prefix
+		OUTPUT_VARIABLE HOMEBREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+	# openal-soft is keg-only, so it isn't symlinked into the main prefix
+	execute_process(COMMAND ${BREW_COMMAND} --prefix openal-soft
+		OUTPUT_VARIABLE OPENAL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(SPARKLE_SEARCH_PATHS ${BF_LIB_DIR})
-# OSX doesn't use vorbisfile (or it's built-in to normal vorbis, I think)
-set(VORBISFILE_LIBRARIES "")
+	message(STATUS "Resolving client dependencies from Homebrew: ${HOMEBREW_PREFIX}")
+
+	# Let the system find modules (PNG, etc.) search the Homebrew prefix
+	list(APPEND CMAKE_PREFIX_PATH ${HOMEBREW_PREFIX} ${OPENAL_PREFIX})
+
+	# Point our custom Find* modules at Homebrew instead of the bundled libs
+	set(SDL2_SEARCH_PATHS    ${HOMEBREW_PREFIX})
+	set(OGG_SEARCH_PATHS     ${HOMEBREW_PREFIX})
+	set(VORBIS_SEARCH_PATHS  ${HOMEBREW_PREFIX})
+	set(SPEEX_SEARCH_PATHS   ${HOMEBREW_PREFIX})
+	set(MODPLUG_SEARCH_PATHS ${HOMEBREW_PREFIX})
+	# ALURE has no system package on macOS; it is built in-tree against the
+	# Homebrew OpenAL/Vorbis/ModPlug resolved above.
+	set(ALURE_SEARCH_PATHS   ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/alure)
+
+	# openal-soft replaces the bundled (deprecated) OpenAL; specify it directly
+	# since CMake's FindOpenAL otherwise prefers the deprecated system framework.
+	# openal-soft installs its headers under include/AL, but the source uses the
+	# flat <al.h>/<alc.h> include style, so add both the parent and AL dirs.
+	set(OPENAL_INCLUDE_DIR "${OPENAL_PREFIX}/include" "${OPENAL_PREFIX}/include/AL")
+	set(OPENAL_LIBRARY "${OPENAL_PREFIX}/lib/libopenal.dylib")
+	# Homebrew ships vorbisfile as a separate dylib (the bundled Vorbis.framework
+	# had it baked in); ALURE needs it for ogg decoding.  PNG and zlib resolve
+	# through CMAKE_PREFIX_PATH / the system SDK.
+	set(VORBISFILE_LIBRARIES "${HOMEBREW_PREFIX}/lib/libvorbisfile.dylib")
+else()
+	# Set some search paths
+	set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libsdl)
+	set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libogg)
+	set(VORBIS_SEARCH_PATHS     ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+	set(VORBISFILE_SEARCH_PATHS ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+	set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libspeex)
+	set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libmodplug)
+	set(ALURE_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/alure)
+
+	# Directly set include dirs for some libraries
+	set(OPENAL_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/openal/include")
+	set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
+	# libpng needs two for some weird reason
+	set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+	set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+
+	# Directly specify some libs
+	set(OPENAL_LIBRARY "${BF_LIB_DIR}/libopenal.1.dylib")
+	set(PNG_LIBRARY "${BF_LIB_DIR}/libpng.framework")
+
+	set(SPARKLE_SEARCH_PATHS ${BF_LIB_DIR})
+	# OSX doesn't use vorbisfile (or it's built-in to normal vorbis, I think)
+	set(VORBISFILE_LIBRARIES "")
+endif()
 
 
-find_package(Sparkle)
+# Sparkle auto-updater (client only).  The bundled Sparkle is 1.x and Intel-only;
+# a native arm64 build would require migrating to Sparkle 2.x, so default it off
+# there and build the client without the auto-updater for now.
+if(BF_USE_HOMEBREW_LIBS)
+	set(_use_sparkle_default OFF)
+else()
+	set(_use_sparkle_default ON)
+endif()
+option(USE_SPARKLE "Build the macOS client with the Sparkle auto-updater" ${_use_sparkle_default})
+
+if(USE_SPARKLE)
+	find_package(Sparkle)
+else()
+	message(STATUS "Building macOS client without the Sparkle auto-updater")
+	add_definitions(-DBF_NO_SPARKLE)
+endif()
 
 
 ## End Global project configuration
@@ -219,38 +280,48 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 		COMMAND ${COPY_RES_4}
 	)
 	
-	# 64-bit OSX needs to use shared LuaJIT library
-	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	# Copy game resources into the bundle
+	add_custom_command(TARGET ${targetName} POST_BUILD
+		COMMAND ${RES_COPY_CMD}
+	)
+
+	# The prebuilt frameworks in lib/ are Intel-only.  A native (Homebrew) build
+	# links Homebrew dylibs by absolute path and runs in place, so don't bundle
+	# or lipo-thin them here.  Producing a self-contained, relocatable .app for
+	# distribution (e.g. via dylibbundler) is a separate packaging step.
+	if(NOT BF_USE_HOMEBREW_LIBS)
+		# 64-bit OSX needs to use shared LuaJIT library
+		if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+			add_custom_command(TARGET ${targetName} POST_BUILD
+				COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
+			)
+		endif()
+
+		# Copy the bundled frameworks/dylibs into the .app
 		add_custom_command(TARGET ${targetName} POST_BUILD
-			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
+			COMMAND ${LIB_COPY_CMD}
+			COMMAND ${LIB_COPY_CMD_2}
+		)
+
+		# Thin out our installed frameworks by running 'lipo' to clean out the
+		# unwanted architectures and removing any header files
+		if(NOT LIPO_COMMAND)
+			set(LIPO_COMMAND lipo)
+		endif()
+
+		# This can happen when cross-compiling x86_64
+		if(NOT CMAKE_OSX_ARCHITECTURES)
+			set(CMAKE_OSX_ARCHITECTURES "x86_64")
+		endif()
+
+		set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${LIPO_COMMAND} ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
+		set(DO_RPATH_THING ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/" ${exeDir}/${targetName}.app/Contents/MacOS/${targetName})
+
+		add_custom_command(TARGET ${targetName} POST_BUILD
+			COMMAND ${THIN_FRAMEWORKS}
+			COMMAND ${DO_RPATH_THING}
 		)
 	endif()
-	
-	# Copy resources
-	add_custom_command(TARGET ${targetName} POST_BUILD 
-		COMMAND ${RES_COPY_CMD}
-		COMMAND ${LIB_COPY_CMD}
-		COMMAND ${LIB_COPY_CMD_2}
-	)
-	
-	# Thin out our installed frameworks by running 'lipo' to clean out the unwanted 
-	# architectures and removing any header files
-	if(NOT LIPO_COMMAND)
-		set(LIPO_COMMAND lipo)
-	endif()
-	
-	# This can happen when cross-compiling x86_64
-	if(NOT CMAKE_OSX_ARCHITECTURES)
-		set(CMAKE_OSX_ARCHITECTURES "x86_64")
-	endif()
-	
-	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${LIPO_COMMAND} ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
-	set(DO_RPATH_THING ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/" ${exeDir}/${targetName}.app/Contents/MacOS/${targetName})
-	
-	add_custom_command(TARGET ${targetName} POST_BUILD
-		COMMAND ${THIN_FRAMEWORKS}
-		COMMAND ${DO_RPATH_THING}
-	)
 endfunction()
 
 
