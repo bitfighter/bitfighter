@@ -96,9 +96,20 @@ so a native build resolves its dependencies from Homebrew:
 Silicon; the client is built without the Sparkle auto-updater (the bundled
 Sparkle is Intel-only Sparkle 1.x).
 
-`exe/Bitfighter.app` runs in place (`open exe/Bitfighter.app`); it links its
-Homebrew dylibs by absolute path, so it is not yet a self-contained, relocatable
-bundle for distribution to other machines.
+`exe/Bitfighter.app` runs in place (`open exe/Bitfighter.app`); by default it
+links its Homebrew dylibs by absolute path, so that build only runs where
+Homebrew is installed at the same prefix.
+
+To build a **relocatable** `.app` (and a DMG) that runs on Macs without Homebrew,
+add `-DBUNDLE_DEPENDENCIES=YES` (needs `brew install dylibbundler`):
+* `cmake .. -DLUAJIT_BUILTIN=NO -DBUNDLE_DEPENDENCIES=YES`
+* `make Bitfighter` &nbsp;# self-contained, ad-hoc-signed `exe/Bitfighter.app`
+* `make package` &nbsp;&nbsp;&nbsp;# &rarr; `Bitfighter-<version>-OSX-arm64.dmg`
+
+This copies the dependent dylibs into `Contents/Frameworks` (via `dylibbundler`)
+and re-points the load commands.  The bundle is **ad-hoc signed**, so other users
+must right-click &rarr; Open it the first time (Gatekeeper); Developer ID signing
+and notarization are a separate step.
 
 To build the Intel client under Rosetta instead (using the bundled `lib/`
 frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
