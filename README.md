@@ -81,6 +81,21 @@ Similar to Linux, but with some additional steps.  In a shell, in the `build` di
 * `cmake ..`
 * `make Bitfighter`
 
+#### Apple Silicon (arm64)
+
+The build now targets the host CPU by default, so Apple Silicon Macs build native
+`arm64` binaries (no Rosetta).  The bundled LuaJIT is 2.0.5, which predates Apple
+Silicon, so a native build needs LuaJIT 2.1 from Homebrew:
+* `brew install luajit`
+* `cmake .. -DLUAJIT_BUILTIN=NO`
+* `make bitfighterd`
+
+The binary lands in `exe/bitfighterd` as a native `arm64` executable.
+
+The full client (`make Bitfighter`) still depends on the Intel-only prebuilt
+frameworks in `lib/` (SDL2, libpng, OpenAL, Sparkle, ...), so it isn't native yet;
+build it x86_64-under-Rosetta with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
+
 ## INSTALLATION AND PACKAGING
 ### Linux
 After running `make`, the bitfighter executable is put into the directory `exe/`.  Copy everything from the `resources/` directory into the `exe/` directory, keeping the folders intact (like sfx, scripts, etc.).
