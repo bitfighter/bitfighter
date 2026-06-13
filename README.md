@@ -96,10 +96,9 @@ so a native build resolves its dependencies from Homebrew:
 Silicon; the client is built without the Sparkle auto-updater (the bundled
 Sparkle is Intel-only Sparkle 1.x).
 
-The native `.app` links its Homebrew dylibs by absolute path and runs in place on
-the build machine — it is not yet a self-contained, distributable bundle.  Run it
-with its resource folder available, e.g.:
-* `exe/Bitfighter.app/Contents/MacOS/Bitfighter -rootdatadir exe`
+`exe/Bitfighter.app` runs in place (`open exe/Bitfighter.app`); it links its
+Homebrew dylibs by absolute path, so it is not yet a self-contained, relocatable
+bundle for distribution to other machines.
 
 To build the Intel client under Rosetta instead (using the bundled `lib/`
 frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
