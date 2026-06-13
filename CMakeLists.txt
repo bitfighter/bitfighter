@@ -213,6 +213,17 @@ endif()
 
 
 # LuaJIT / Lua
+#
+# The in-tree LuaJIT is 2.0.5, which predates Apple Silicon and cannot target
+# arm64 macOS.  Require a system LuaJIT 2.1 (e.g. `brew install luajit`) there.
+if(APPLE AND LUAJIT_BUILTIN AND CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+	message(FATAL_ERROR
+		"The bundled LuaJIT 2.0.5 cannot be built for arm64 macOS.\n"
+		"Install LuaJIT 2.1 and configure with the system copy:\n"
+		"    brew install luajit\n"
+		"    cmake .. -DLUAJIT_BUILTIN=NO")
+endif()
+
 if(NOT LUAJIT_BUILTIN)
 find_with_fallback(LuaJit LUAJIT lua)
 endif()
