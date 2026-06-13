@@ -769,12 +769,22 @@ string getUserDataDir()
 
 void setDefaultPaths(Vector<string> &argv)
 {
+   // Remember whether the user pointed us at a data root before we add our own
+   // default below, so the read-only asset dirs can honor an explicit -rootdatadir.
+   bool userSpecifiedRootDataDir = argv.contains("-rootdatadir");
+
    // If we don't already have -rootdatadir specified on the command line
-   if(!argv.contains("-rootdatadir"))
+   if(!userSpecifiedRootDataDir)
    {
       argv.push_back("-rootdatadir");
       argv.push_back(getUserDataDir());
    }
+
+   // sfx, fonts, and shaders are read-only engine assets that are never copied
+   // into the (mutable) user data dir, so they load straight from the install
+   // dir.  sfx/fonts always do; shaders follow an explicit -rootdatadir when the
+   // user gives one (resolveDirs derives shaderDir from rootDataDir), and
+   // otherwise default to the install dir too.
 
    // Same with -sfxdir
    if(!argv.contains("-sfxdir"))
@@ -788,6 +798,13 @@ void setDefaultPaths(Vector<string> &argv)
    {
       argv.push_back("-fontsdir");
       argv.push_back(getInstalledDataDir() + getFileSeparator() + "fonts");
+   }
+
+   // And with -shaderdir, unless the user steered us with -rootdatadir
+   if(!userSpecifiedRootDataDir && !argv.contains("-shaderdir"))
+   {
+      argv.push_back("-shaderdir");
+      argv.push_back(getInstalledDataDir() + getFileSeparator() + "shaders");
    }
 
    // iOS needs the INI in an editable location
@@ -810,7 +827,7 @@ void copyResourcesToUserData()
 
    printf("Copying resources\n");
 
-   // Everything but sfx amd fonts (which are loaded from the install dir)
+   // Everything but sfx, fonts, and shaders (which are loaded from the install dir)
    Vector<string> dirArray;
    dirArray.push_back("levels");
    dirArray.push_back("robots");
