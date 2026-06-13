@@ -29,12 +29,18 @@ if(NOT XCOMPILE)
 
 
 	# Make sure the compiling architecture is set
+	#
+	# Honor an explicit -DCMAKE_OSX_ARCHITECTURES=... (e.g. to cross-build x86_64
+	# under Rosetta).  Otherwise default to the host CPU so Apple Silicon Macs
+	# build native arm64 binaries instead of x86_64-under-Rosetta.
 	if(OSX_DEPLOY_TARGET VERSION_LESS "10.5")
 		message(FATAL_ERROR "Bitfighter cannot be compiled on OSX earlier than 10.5")
-	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.6")
-		set(CMAKE_OSX_ARCHITECTURES "i386")
-	else()
-		set(CMAKE_OSX_ARCHITECTURES "x86_64")
+	elseif(NOT CMAKE_OSX_ARCHITECTURES)
+		if(OSX_DEPLOY_TARGET VERSION_LESS "10.6")
+			set(CMAKE_OSX_ARCHITECTURES "i386")
+		else()
+			set(CMAKE_OSX_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+		endif()
 	endif()
 	
 	message(STATUS "CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
@@ -247,6 +253,8 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	
 	if(CMAKE_OSX_ARCHITECTURES STREQUAL "i386")
 		set(DMG_ARCH "32bit-Intel")
+	elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+		set(DMG_ARCH "arm64")
 	else()
 		set(DMG_ARCH "64bit-Intel")
 	endif()
