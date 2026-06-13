@@ -121,7 +121,11 @@ endfunction()
 
 
 function(BF_PLATFORM_SET_EXTRA_LIBS)
-	set(EXTRA_LIBS dl m PARENT_SCOPE)
+	# Directory.mm is a shared source that uses Foundation (NSFileManager,
+	# NSBundle, NSSearchPathForDirectoriesInDomains, ...), so every macOS
+	# target -- including the dedicated server -- must link it.
+	find_library(FOUNDATION_LIBRARY Foundation)
+	set(EXTRA_LIBS dl m ${FOUNDATION_LIBRARY} PARENT_SCOPE)
 endfunction()
 
 
@@ -176,7 +180,20 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-	
+
+	# Non-bundle targets (the dedicated server and the test runner) are plain
+	# executables in exe/.  They locate resources relative to the binary (see
+	# FolderManager::resolveDirs), so just drop resource/* alongside the binary
+	# and skip the .app bundle / framework bundling, which assumes a .app layout
+	# and Intel-only prebuilt frameworks.
+	get_target_property(isBundle ${targetName} MACOSX_BUNDLE)
+	if(NOT isBundle)
+		add_custom_command(TARGET ${targetName} POST_BUILD
+			COMMAND cp -rp ${resDir}* ${exeDir}
+		)
+		return()
+	endif()
+
 	# Create extra dirs in the .app
 	set(frameworksDir "${exeDir}/${targetName}.app/Contents/Frameworks")
 	set(resourcesDir "${exeDir}/${targetName}.app/Contents/Resources")
