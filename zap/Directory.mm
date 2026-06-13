@@ -11,6 +11,8 @@
 #include "tnlVector.h"
 #ifdef TNL_OS_MAC_OSX
 #import <Cocoa/Cocoa.h>
+// Sparkle is a client-only auto-updater; the dedicated server doesn't link it
+#ifndef ZAP_DEDICATED
 #import "SUUpdater.h"
 // Here we add a GET parameter for the different OSX architectures.  This way we
 // can serve up a different download URL dynamically
@@ -24,6 +26,7 @@
       // Default to x86_64 since that is all OSX runs on these days...
 #     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
 #  endif
+#endif // !ZAP_DEDICATED
 #else
 #import <Foundation/Foundation.h>
 #endif
@@ -67,7 +70,7 @@ void prepareFirstLaunchMac()
 
 void checkForUpdates()
 {
-#ifdef TNL_OS_MAC_OSX
+#if defined(TNL_OS_MAC_OSX) && !defined(ZAP_DEDICATED)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SUUpdater* updater = [SUUpdater sharedUpdater];
     [updater setFeedURL:[NSURL URLWithString:SPARKLE_APPCAST_URL]];
