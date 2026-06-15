@@ -14,21 +14,22 @@
 #include "GeomUtils.h"
 #include "IniFile.h"          // For CIniFile
 #include "ServerGame.h"
+#include "gameConnection.h"
 #include "robot.h"
 #include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
 #include "LineEditorFilterEnum.h"
-#include "game.h"
-#include "GameRecorder.h"
 #include "Teleporter.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
 #  include "ClientGame.h"
+#  include "UIManager.h"
 #  include "UIMenus.h"
+#  include "UIGame.h"
 #endif
 
-#include "masterConnection.h"    
+#include "masterConnection.h"
 
 #include "Colors.h"
 
@@ -54,14 +55,15 @@ static const char *gameTypeClassNames[] = {
 
 
 
-////////////////////////////////////////      __              ___           
-////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
-////////////////////////////////////////     \_| (_| | | | (/_ | \/ |_) (/_ 
-////////////////////////////////////////                         /  |       
+////////////////////////////////////////      __              ___
+////////////////////////////////////////     /__  _. ._ _   _  |    ._   _
+////////////////////////////////////////     \_| (_| | | | (/_ | \/ |_) (/_
+////////////////////////////////////////                         /  |
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 const S32 GameType::MaxMenuScore = 1000;
+const F32 GameType::SCOPE_RADIUS = 300.0f;
 
 // Constructor
 GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mGameTimeUpdateTimer(THIRTY_SECONDS)
@@ -92,6 +94,12 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
+
+   mFogOfWarMode = FogOfWar::DEFAULT;
+
+   mTileSize   = 0;
+   mGridWidth  = 0;
+   mGridHeight = 0;
 
    mTotalGamePlay = 0;
    mEndingGamePlay = DefaultGameTime;
@@ -126,7 +134,7 @@ string GameType::toLevelCode() const
    return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + itos(mWinningScore);
 }
 
-// GameType object is the first to be added when a new game starts... 
+// GameType object is the first to be added when a new game starts...
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
 // Server only?
 void GameType::addToGame(Game *game, GridDatabase *database)
@@ -179,7 +187,8 @@ Vector<string> GameType::getGameParameterMenuKeys()
       "Min Players",
       "Max Players",
       "Allow Engr",
-      "Allow Robots"
+      "Allow Robots",
+      "FogOfWar"
    };
 
    return Vector<string> (vals, ARRAYSIZE(vals));
@@ -191,28 +200,28 @@ shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
 {
    if(key == "Level Name")
    {
-      MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.c_str(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
+      MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.c_str(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);
       item->setFilter(allAsciiFilter);
 
       return shared_ptr<MenuItem>(item);
    }
    else if(key == "Level Descr")
-      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:", 
-                                                              mLevelDescription, 
-                                                              "", 
-                                                              "A brief description of the level",                     
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:",
+                                                              mLevelDescription,
+                                                              "",
+                                                              "A brief description of the level",
                                                               MAX_GAME_DESCR_LEN));
    else if(key == "Level Credits")
-      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",       
-                                                              mLevelCredits.getString(), 
-                                                              "", 
-                                                              "Who created this level?",                                  
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",
+                                                              mLevelCredits.getString(),
+                                                              "",
+                                                              "Who created this level?",
                                                               MAX_GAME_DESCR_LEN));
    else if(key == "Levelgen Script")
-      return shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:", 
-                                                              getScriptLine(), 
-                                                              "<None>", 
-                                                              "Levelgen script & args to be run when level is loaded",  
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:",
+                                                              getScriptLine(),
+                                                              "<None>",
+                                                              "Levelgen script & args to be run when level is loaded",
                                                               255));
    else if(key == "Game Time")
    {
@@ -222,16 +231,16 @@ shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    else if(key == "Win Score")
       return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, MaxMenuScore, "points", "", "Game ends when one team gets this score"));
    else if(key == "Min Players")
-      return shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
+      return shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",
                                                              mMinRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
                                                              MAX_PLAYERS,        // max val
                                                              "players",          // units
-                                                             "N/A", 
+                                                             "N/A",
                                                              "Min. players you would recommend for this level (to help server select the next level)"));
    else if(key == "Max Players")
-      return shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",       
+      return shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",
                                                              mMaxRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
@@ -240,13 +249,26 @@ shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
                                                              "N/A",
                                                              "Max. players you would recommend for this level (to help server select the next level)"));
    else if(key == "Allow Engr")
-      return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
+      return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",
                                                            mEngineerEnabled,
                                                            "Allow players to use the Engineer module?"));
    else if(key == "Allow Robots")
          return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Robots:",
                                                               mBotsAllowed,
                                                               "Allow players to add robots?"));
+   else if(key == "FogOfWar")
+   {
+      Vector<string> fowOptions;
+      fowOptions.push_back("Default");
+      fowOptions.push_back("Yes");
+      fowOptions.push_back("No");
+      return shared_ptr<MenuItem>(new ToggleMenuItem("Fog Of War:",
+                                                           fowOptions,
+                                                           static_cast<U32>(mFogOfWarMode),
+                                                           true,
+                                                           NULL,
+                                                           "Fog of War: Yes=enabled, No=disabled, Default=auto based on game"));
+   }
    else
    {
       TNLAssert(false, "Invalid menu key!");
@@ -277,6 +299,8 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       setEngineerEnabled(menuItem->getIntValue());
    else if(key == "Allow Robots")
       setBotsAllowed(menuItem->getIntValue());
+   else if(key == "FogOfWar")
+      setFogOfWarMode(static_cast<FogOfWar>(menuItem->getIntValue()));
    else
       return false;
 
@@ -329,7 +353,7 @@ string GameType::getScriptLine() const
       return "";
 
    str += mScriptName;
-   
+
    if(mScriptArgs.size() > 0)
       str += " " + concatenate(mScriptArgs);
 
@@ -529,15 +553,19 @@ void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
    // Currently only called with path == ClientIdlingNotLocalShip or ServerIdleMainLoop
    TNLAssert(path == BfObject::ServerIdleMainLoop || path == BfObject::ClientIdlingNotLocalShip, "Unexpected path!");
 
-   if(path == BfObject::ClientIdlingNotLocalShip)    
+   if(path == BfObject::ClientIdlingNotLocalShip)
       idle_client(deltaT);
-   else 
+   else
       idle_server(deltaT);
 }
 
 
 void GameType::idle_server(U32 deltaT)
 {
+   // Deliver pending wall tiles to connected clients
+   if(mmapTiles.size() > 0)
+      deliverWallTileTick();
+
    queryItemsOfInterest();
 
    bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
@@ -556,7 +584,7 @@ void GameType::idle_server(U32 deltaT)
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       // Respawn dead players
       if(clientInfo->respawnTimer.update(deltaT))           // Need to respawn?
-         spawnShip(clientInfo); 
+         spawnShip(clientInfo);
 
       if(!clientInfo->isRobot())
       {
@@ -587,7 +615,7 @@ void GameType::idle_server(U32 deltaT)
             }
          }
 
-         conn->addTimeSinceLastMove(deltaT);                // Increment timer       
+         conn->addTimeSinceLastMove(deltaT);                // Increment timer
       }
    }
 
@@ -659,9 +687,9 @@ void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32
 }
 
 
-// Client only -- all objective arrow drawing is funneled through here or the other 
+// Client only -- all objective arrow drawing is funneled through here or the other
 // renderObjectiveArrow() method we have (below)
-void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
+void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
                                     S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    if(!target)
@@ -679,7 +707,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
    // Note that for simpleLine objects, we will point at the origin point; this will usually be correct, but is somewhat moot as
    // we don't currently draw objective arrows towards any simpleLine objects.  If we did, this might fail for TextItems.
    GeomType geomType = target->getGeomType();
-   if(geomType == geomPoint || geomType == geomSimpleLine) 
+   if(geomType == geomPoint || geomType == geomSimpleLine)
    {
       targetPoint = target->getRenderPos();
    }
@@ -701,16 +729,16 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
    Point point = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
 
    // Seems inefficient to do this every time we render an objective arrow, given that all objective arrows on a
-   // given fram will have the same value.  However, performance testing shows this takes less than a microsecond 
+   // given fram will have the same value.  However, performance testing shows this takes less than a microsecond
    // to run, so even when we have 100 objective arrows, that's not very much time!  Usually we have just a handful.
    F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
 
-   drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color, 
+   drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color,
                       canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
 
-void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, 
+void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor,
                                     S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    Ship *ship = getGame()->getLocalPlayerShip();
@@ -719,7 +747,7 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
       return;
 
    F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
-   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor, 
+   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor,
                       canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
@@ -790,8 +818,8 @@ VersionedGameStats GameType::getGameStats()
       {
          ClientInfo *clientInfo = mGame->getClientInfo(j);
 
-         // Find players on the current team 
-         if(clientInfo->getTeamIndex() != i) 
+         // Find players on the current team
+         if(clientInfo->getTeamIndex() != i)
             continue;
 
          // Skip inactive players.  You snooze, you lose!
@@ -802,7 +830,7 @@ VersionedGameStats GameType::getGameStats()
          PlayerStats *playerStats = &teamStats->playerStats.last();
 
          Statistics *statistics = clientInfo->getStatistics();
-            
+
          playerStats->name           = clientInfo->getName().getString();    // TODO: What if this is a bot??  What should go here??
          playerStats->nonce          = *clientInfo->getId();
          playerStats->isRobot        = clientInfo->isRobot();
@@ -933,9 +961,9 @@ public:
 #ifdef BF_WRITE_TO_MYSQL
       if(mSettings->getIniSettings()->mySqlStatsDatabaseServer != "")
       {
-         DatabaseWriter databaseWriter(mSettings->getIniSettings()->mySqlStatsDatabaseServer.c_str(), 
+         DatabaseWriter databaseWriter(mSettings->getIniSettings()->mySqlStatsDatabaseServer.c_str(),
                                        mSettings->getIniSettings()->mySqlStatsDatabaseName.c_str(),
-                                       mSettings->getIniSettings()->mySqlStatsDatabaseUser.c_str(),   
+                                       mSettings->getIniSettings()->mySqlStatsDatabaseUser.c_str(),
                                        mSettings->getIniSettings()->mySqlStatsDatabasePassword.c_str() );
          databaseWriter.insertStats(mStats.gameStats);
       }
@@ -976,7 +1004,7 @@ void GameType::saveGameStats()
       TNLAssert(size == s.getBitPosition(), "Stats not equal size, problem with gameStats.cpp read/write");
    }
 #endif
- 
+
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
 
@@ -1113,7 +1141,7 @@ F32 GameType::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32
 }
 
 
-bool GameType::isTeamGame() const 
+bool GameType::isTeamGame() const
 {
    return mGame->getTeamCount() > 1;
 }
@@ -1138,8 +1166,66 @@ void GameType::onLevelLoaded()
 
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
 
+   // Build tiled wall geometry for this level
+   buildmapTiles();
+
    //--> bots should be started when added to game; with this line, they are started twice!
    //static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up  --> bots should be started when added to game
+}
+
+
+/// Collect all barrier outlines from the game database and build the
+/// tiled wall representation.  The resulting tiles are stored in mmapTiles
+/// for later delivery (Phase 2).
+void GameType::buildmapTiles()
+{
+   mmapTiles.clear();
+
+   Vector<DatabaseObject *> barriers;
+   mGame->getGameObjDatabase()->findObjects((TestFunc)isWallType, barriers);
+
+   if (barriers.size() == 0)
+      return;
+
+   // Determine level bounds from barrier extents
+   Rect levelBounds = mGame->computeBarrierExtents();
+
+   // Pad bounds slightly to avoid edge cases
+   levelBounds.expand(Point(10, 10));
+
+   // Collect all barrier collision polygons and merge them into a unionized
+   // set (via mergePolys).  This eliminates interior edges between adjacent
+   // wall segments (e.g. spline walls), matching what Barrier::unionBarriers
+   // already does for the old rendering system.
+   Vector<const Vector<Point> *> inputPolygons;
+   for (S32 i = 0; i < barriers.size(); i++)
+   {
+      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
+      if (barrier)
+      {
+         const Vector<Point> *poly = barrier->getCollisionPoly();
+         if (poly && poly->size() >= 3)
+            inputPolygons.push_back(poly);
+      }
+   }
+
+   Vector<Vector<Point> > mergedPolys;
+   mergePolys(inputPolygons, mergedPolys);
+
+   MapTileBuilder builder(levelBounds, 200);
+
+   for (S32 i = 0; i < mergedPolys.size(); i++)
+      builder.addWallPolygon(mergedPolys[i]);
+
+   builder.build(mmapTiles);
+
+   // Store tile metadata for use in scope calculations during delivery
+   mTileSize   = builder.getTileSize();
+   mGridWidth  = builder.getGridWidth();
+   mGridHeight = builder.getGridHeight();
+
+   logprintf(LogConsumer::LogInfo, "Built %d wall tiles (tile size=%u, grid=%dx%d)",
+      mmapTiles.size(), mTileSize, mGridWidth, builder.getGridHeight());
 }
 
 
@@ -1217,12 +1303,12 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          Vector<DatabaseObject *> loadoutZones;
          getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
          LoadoutZone *zone;
-         for(S32 i = 0; i < loadoutZones.size(); i++) 
+         for(S32 i = 0; i < loadoutZones.size(); i++)
          {
             zone = static_cast<LoadoutZone*>(loadoutZones.get(i));
             if(newShip->isOnObject(zone))
                zone->collide(newShip);
-         } 
+         }
       }
 
 
@@ -1323,7 +1409,7 @@ void GameType::makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clien
 
 static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 {
-   for(S32 i = 0; i < ship->getMountedItemCount(); i++)  
+   for(S32 i = 0; i < ship->getMountedItemCount(); i++)
    {
       TNLAssert(ship->getMountedItem(i), "When would this item be NULL?  Do we really need to check this?");
       if(ship->getMountedItem(i))
@@ -1403,9 +1489,9 @@ void GameType::performScopeQuery(GhostConnection *connection)
 }
 
 
-// Here is where we determine which objects are visible from player's ships.  Marks items as in-scope so they 
+// Here is where we determine which objects are visible from player's ships.  Marks items as in-scope so they
 // will be sent to client.
-// Only runs on server. 
+// Only runs on server.
 void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    // If this block proves unnecessary, then we can remove the whole itemsOfInterest thing, I think...
@@ -1425,7 +1511,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    //   }
    //}
 
-   // If we're in commander's map mode, then we can see what our teammates can see.  
+   // If we're in commander's map mode, then we can see what our teammates can see.
    // This will also scope what we can see.
 
    GameConnection *connection = clientInfo->getConnection();
@@ -1452,7 +1538,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
          queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
 
          TestFunc testFunc;
-         if(scopeObject == ship)    
+         if(scopeObject == ship)
             testFunc = &isAnyObjectType;
          else
             if(ship && ship->hasModule(ModuleSensor))
@@ -1489,7 +1575,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
       for(S32 i = 0; i < mGame->getBotCount(); i++)
-         connection->objectInScope(mGame->getBot(i));  
+         connection->objectInScope(mGame->getBot(i));
 }
 
 
@@ -1524,7 +1610,7 @@ void GameType::queryItemsOfInterest()
       }
 
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
-      
+
       Point pos = ioi.theItem->getActualPos();
       Point scopeRange(Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
       Rect queryRect(pos, pos);
@@ -1542,9 +1628,9 @@ void GameType::queryItemsOfInterest()
 
          if(
                (theShip->hasModule(ModuleSensor) &&
-                     delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && 
+                     delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL &&
                      delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && 
+               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL &&
                      delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
             )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
@@ -1556,7 +1642,7 @@ void GameType::queryItemsOfInterest()
 // Zero teams will crash, returns true if we had to add a default team.  Server only.
 bool GameType::makeSureTeamCountIsNotZero()
 {
-   if(mGame->getTeamCount() == 0) 
+   if(mGame->getTeamCount() == 0)
    {
       Team *team = new Team;           // Will be deleted by TeamManager
       team->setName("Missing Team");
@@ -1608,7 +1694,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       }
    }
 
-   // Figure out how many players the team with the fewest players has, not including leveling bots, which can be ignored 
+   // Figure out how many players the team with the fewest players has, not including leveling bots, which can be ignored
    // if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
    // to count them)
    Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
@@ -1627,7 +1713,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
       if(minPlayers > playerCount)
          minPlayers = playerCount;
-   } 
+   }
 
    // Of the teams with minPlayers, find the one with the lowest total rating...
    S32 minTeamIndex = NONE;
@@ -1653,7 +1739,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
 
    // Robots may have already been assigned a team number; if so, use it in place of team determined above
-   if(clientInfo->isRobot())                              
+   if(clientInfo->isRobot())
    {
       Ship *robot = clientInfo->getShip();
 
@@ -1669,10 +1755,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    // This clientInfo belongs to the server; has no badge info for client...
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), clientInfo->getGamesPlayed(),
       min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), false,
-                clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), 
+                clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
                 clientInfo->isBusy(), true, true);
 
-   if(clientInfo->getTeamIndex() >= 0) 
+   if(clientInfo->getTeamIndex() >= 0)
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex(), isTeamGame() && !isGameOver());
 
    spawnShip(clientInfo);
@@ -2088,11 +2174,13 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Note that if we add another arg to this, we need to further expand FunctorDecl methods in tnlMethodDispatch.h
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
-                                                StringTableEntry levelCreds, S32 objectCount, 
-                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
+                                                StringTableEntry levelCreds, S32 objectCount,
+                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
+                                                bool fogOfWarEnabled),
                                             (levelName, levelDesc, musicName, teamScoreLimit,
-                                                levelCreds, objectCount,  
-                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
+                                                levelCreds, objectCount,
+                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId,
+                                                fogOfWarEnabled))
 {
 #ifndef ZAP_DEDICATED
    setLevelName(levelName);
@@ -2107,7 +2195,13 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringP
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
-   mLevelHasLoadoutZone = levelHasLoadoutZone;        
+   mLevelHasLoadoutZone = levelHasLoadoutZone;
+
+   // Store fog of war flag so client knows whether it's enabled
+   mFogOfWarMode = fogOfWarEnabled ? FogOfWar::YES : FogOfWar::NO;
+
+   // Clear any wall tiles from the previous level
+   clearTilePolys();
 
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->startLoadingLevel(engineerEnabled);
@@ -2141,8 +2235,8 @@ void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimite
       return;
 
    // Use voting when no level change password and more then 1 players
-   if(!clientInfo->isAdmin() && 
-         getGame()->getSettings()->getLevelChangePassword() == "" && 
+   if(!clientInfo->isAdmin() &&
+         getGame()->getSettings()->getLevelChangePassword() == "" &&
          getGame()->getPlayerCount() > 1)
    {
       if(static_cast<ServerGame *>(getGame())->voteStart(clientInfo, addTime ? ServerGame::VoteAddTime : ServerGame::VoteSetTime, time))     // Returns true if handled
@@ -2189,7 +2283,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    }
 
    // Vote to change team might have different problems than the old way...
-   if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 
+   if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") &&
         getGame()->getPlayerCount() > 1 )
    {
       if(((ServerGame *)getGame())->voteStart(clientInfo, ServerGame::VoteChangeTeam, team))
@@ -2263,8 +2357,8 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    }
 
    // If we have a team, use it, otherwise assign player to the next team
-   S32 teamIndex = team >= 0 ? team : (client->getTeamIndex() + 1) % mGame->getTeamCount();  
-   client->setTeamIndex(teamIndex);                                                  
+   S32 teamIndex = team >= 0 ? team : (client->getTeamIndex() + 1) % mGame->getTeamCount();
+   client->setTeamIndex(teamIndex);
 
    if(client->getTeamIndex() >= 0)                                                     // But if we know the team...
       s2cClientJoinedTeam(client->getName(), client->getTeamIndex(), !isGameOver());   // ...announce the change
@@ -2282,12 +2376,12 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // A player (either us or a remote player) has joined the game.  This will also be called for all players (including us) when changing levels.
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
-GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
+GAMETYPE_RPC_S2C(GameType, s2cAddClient,
                 (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed,
-                 RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak, bool isMyClient, 
-                 RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, 
+                 RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak, bool isMyClient,
+                 RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed,
                  bool isBusy, bool playAlert, bool showMessage),
-                (name, isAuthenticated, badges, gamesPlayed, killStreak, 
+                (name, isAuthenticated, badges, gamesPlayed, killStreak,
                  isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
@@ -2303,7 +2397,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    }
 
    // The new ClientInfo will be deleted in s2cRemoveClient
-   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, gamesPlayed, killStreak, 
+   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, gamesPlayed, killStreak,
                                                 isRobot, (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
@@ -2336,7 +2430,7 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    s2cRemoveClient(clientInfo->getName());            // Tell other clients that this one has departed
 
-   getGame()->removeFromClientList(clientInfo);   
+   getGame()->removeFromClientList(clientInfo);
 
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 
@@ -2427,7 +2521,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam), 
+GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam),
                                        (teamName, r, g, b, score, firstTeam))
 {
    TNLAssert(mGame, "NULL mGame!");
@@ -2451,9 +2545,9 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamI
 
    if(teamIndex >= U32(mGame->getTeamCount()))
       return;
-   
+
    ((Team *)mGame->getTeam(teamIndex))->setScore(score);
-   updateLeadingTeamAndScore();    
+   updateLeadingTeamAndScore();
 }
 
 
@@ -2480,14 +2574,14 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 {
    mWinningScore = winningScore;
 
-   mGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+   mGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */,
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
 }
 
 
 // Announce a new player has joined the team
-GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
-                (StringTableEntry name, RangedU32<0, Game::MAX_TEAMS> teamIndex, bool showMessage), 
+GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
+                (StringTableEntry name, RangedU32<0, Game::MAX_TEAMS> teamIndex, bool showMessage),
                 (name, teamIndex, showMessage))
 {
 #ifndef ZAP_DEDICATED
@@ -2503,7 +2597,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 
    if(showMessage)
    {
-      if(localClientInfo->getName() == name)      
+      if(localClientInfo->getName() == name)
          mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
       else
          mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
@@ -2529,7 +2623,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientChangedRoles, (StringTableEntry name, Ranged
 {
 #ifndef ZAP_DEDICATED
    // Get a RemoteClientInfo representing the client that just became an admin
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      
+   ClientInfo *clientInfo = mGame->findClientInfo(name);
    if(!clientInfo)
       return;
 
@@ -2562,8 +2656,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
-                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
+   s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, mGame->mObjectsLoaded,
+                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId(),
+                   isFogOfWarEnabled());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2590,7 +2685,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       S32 team = clientInfo->getTeamIndex();
 
-      if(team >= 0) 
+      if(team >= 0)
          s2cClientJoinedTeam(clientInfo->getName(), team, false);
    }
 
@@ -2600,17 +2695,31 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    //}
 
-   // Sending an empty list clears the barriers
-   // FIXME:  Why is this the chosen mechanism to do this?
-   Vector<F32> v;
-   s2cAddWalls(v, 0, false);
-
-   for(S32 i = 0; i < mWalls.size(); i++)
+   // If we have tiled wall data, use tile-based delivery instead of the old s2cAddWalls
+   GameConnection *gc = static_cast<GameConnection *>(theConnection);
+   if(mmapTiles.size() > 0)
    {
-      // If players somehow create 0-point walls, don't send them to the client
-      // or it will remove all walls previously added
-      if(mWalls[i].verts.size() != 0)
-         s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+      U16 tileCount = static_cast<U16>(mGridWidth * mGridHeight);
+      gc->mWallDelivery.init(tileCount);
+
+      if(!isFogOfWarEnabled())
+      {
+         // Non-FOW: enqueue all tiles immediately (drained per-tick at NORM rate)
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+            gc->mWallDelivery.pending.push_back(mmapTiles[t].tileId);
+      }
+      // FOW mode: tiles are enqueued per-tick based on player position
+   }
+   else
+   {
+      // Fall back to old wall delivery for levels without tiles
+      Vector<F32> v;
+      s2cAddWalls(v, 0, false);
+      for(S32 i = 0; i < mWalls.size(); i++)
+      {
+         if(mWalls[i].verts.size() != 0)
+            s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+      }
    }
 
    broadcastNewRemainingTime();
@@ -2667,6 +2776,249 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width
 }
 
 
+/// Send one tile's worth of wall polygons to the client.
+/// allVerts / allOutline / polySizes are concatenated data for all polys in the tile.
+/// Client reconstructs polys from polySizes boundaries.
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes), (tileId, polyCount, allVerts, allOutline, polySizes), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+{
+#ifndef ZAP_DEDICATED
+   // First tile received: clear old wall geometry
+   if(smReceivedTilePolys.size() == 0)
+   {
+      mGame->deleteObjects((TestFunc)isWallType);
+      clearTilePolys();
+      // World extents will be rebuilt from tile vertex data below
+   }
+
+   // Parse flat vectors back into WallPoly objects and expand world extents.
+   // Initialize to an inverted rect: min holds the largest possible value,
+   // max holds the smallest, so the first vertex will set both correctly.
+   // NOTE: must set min/max directly — Rect::set(Point, Point) swaps them
+   // to keep min < max, which would produce (-F32_MAX..F32_MAX) and defeat
+   // the sentinel logic below.
+   Rect tileBounds;     // Actual bounds of the data on the tile, not the tile itself
+   tileBounds.min.set(F32_MAX,  F32_MAX);
+   tileBounds.max.set(-F32_MAX, -F32_MAX);
+   bool hasTileData = false;
+
+   U32 vertOff = 0, outlineOff = 0;
+   for(U16 p = 0; p < polyCount; p++)
+   {
+      U32 n = polySizes[p];
+      if(n < 3)
+      {
+         vertOff += n * 2;
+         outlineOff += n;
+         continue;
+      }
+
+      WallPoly wp;
+      wp.verts.reserve(n * 2);
+      wp.outline.reserve(n);
+      for(U32 v = 0; v < n * 2; v++)
+      {
+         F32 val = allVerts[vertOff++];
+         wp.verts.push_back(val);
+      }
+      for(U32 b = 0; b < n; b++)
+         wp.outline.push_back(allOutline[outlineOff++]);
+
+      // Expand tile bounds from this poly's vertices
+      for(U32 v = 0; v < wp.verts.size(); v += 2)
+      {
+         F32 vx = wp.verts[v];
+         F32 vy = wp.verts[v + 1];
+         if(vx < tileBounds.min.x) tileBounds.min.x = vx;
+         if(vy < tileBounds.min.y) tileBounds.min.y = vy;
+         if(vx > tileBounds.max.x) tileBounds.max.x = vx;
+         if(vy > tileBounds.max.y) tileBounds.max.y = vy;
+      }
+      hasTileData = true;
+
+      smReceivedTilePolys.push_back(std::move(wp));
+   }
+
+   // Expand the world extents to include this tile's vertex bounds
+   if(hasTileData)
+   {
+      Rect curExtents = *mGame->getWorldExtents();
+      curExtents.unionRect(tileBounds);
+      mGame->setWorldExtents(curExtents);
+
+      // Also expand the display extents (mDispWorldExtents) so the
+      // commander's map shows the full tiled area immediately.
+      ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+      if(clientGame && clientGame->getUIManager())
+         clientGame->getUIManager()->getUI<GameUserInterface>()->expandDispWorldExtents(tileBounds);
+   }
+
+   logprintf(LogConsumer::LogInfo, "Received wall tile %d with %d polys (%d total polys stored)",
+      tileId, polyCount, smReceivedTilePolys.size());
+#endif
+}
+
+
+#ifndef ZAP_DEDICATED
+Vector<WallPoly> GameType::smReceivedTilePolys;
+
+void GameType::clearTilePolys()
+{
+   smReceivedTilePolys.clear();
+}
+
+const Vector<WallPoly> &GameType::getTilePolys()
+{
+   return smReceivedTilePolys;
+}
+#endif
+
+
+/// Compute squared distance from a point to a tile's center.
+static F32 distSqToTileCenter(const Point &pos, const MapTile &tile)
+{
+   Point center(
+      (tile.bounds.min.x + tile.bounds.max.x) * 0.5f,
+      (tile.bounds.min.y + tile.bounds.max.y) * 0.5f);
+   return (pos - center).lenSquared();
+}
+
+
+/// Per-tick delivery: for each connection, enqueue tiles that are now in
+/// scope (FOW) or drain the pre-filled queue (non-FOW), then send up to
+/// the appropriate rate limit.
+void GameType::deliverWallTileTick()
+{
+   const bool fowEnabled = isFogOfWarEnabled();
+   const U32 tilesPerTick = fowEnabled ? TILES_PER_TICK_FOW : TILES_PER_TICK_NORM;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      if(!clientInfo || clientInfo->isRobot())
+         continue;
+
+      GameConnection *conn = clientInfo->getConnection();
+      if(!conn || !conn->isEstablished())
+         continue;
+
+      GameConnection::WallDeliveryState &wd = conn->mWallDelivery;
+
+      // ---- FOW: enqueue tiles now in scope that haven't been sent yet ----
+      if(fowEnabled)
+      {
+         BfObject *ctrl = conn->getControlObject();
+         if(!ctrl)
+            continue;
+
+         Point shipPos = ctrl->getPos();
+
+         // Scope radius controls how far from the ship tiles are sent.
+         // Smaller = tighter fog of war; tiles outside this radius are withheld.
+         F32 scopeRad = SCOPE_RADIUS;
+         F32 scopeRadSq = scopeRad * scopeRad;
+
+         // Scan all tiles — find un-sent tiles within scope, compute distance
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+         {
+            const MapTile &tile = mmapTiles[t];
+
+            // Quick AABB check: is the ship within scopeRad of the tile bounds?
+            F32 cx = (tile.bounds.min.x + tile.bounds.max.x) * 0.5f;
+            F32 cy = (tile.bounds.min.y + tile.bounds.max.y) * 0.5f;
+            F32 halfW = (tile.bounds.max.x - tile.bounds.min.x) * 0.5f;
+            F32 halfH = (tile.bounds.max.y - tile.bounds.min.y) * 0.5f;
+            F32 dx = max(0.0f, fabs(shipPos.x - cx) - halfW);
+            F32 dy = max(0.0f, fabs(shipPos.y - cy) - halfH);
+            if(dx * dx + dy * dy > scopeRadSq)
+               continue;   // Tile too far
+
+            if(tile.tileId >= wd.sentTiles.size())
+               continue;
+            if(wd.sentTiles[tile.tileId])
+               continue;   // Already sent
+
+            // Mark as sent immediately (prevents re-enqueue)
+            wd.sentTiles[tile.tileId] = true;
+
+            // Insert into pending sorted by distance (closest-first insertion sort)
+            F32 tileDistSq = distSqToTileCenter(shipPos, tile);
+            U32 insertIdx = 0;
+            while(insertIdx < wd.pending.size())
+            {
+               // Compute distance for the tile already in the list
+               const MapTile *cmpTile = NULL;
+               for(S32 tt = 0; tt < mmapTiles.size(); tt++)
+               {
+                  if(mmapTiles[tt].tileId == wd.pending[insertIdx])
+                  {  cmpTile = &mmapTiles[tt]; break; }
+               }
+               F32 cmpDist = cmpTile ? distSqToTileCenter(shipPos, *cmpTile) : F32_MAX;
+               if(tileDistSq <= cmpDist)
+                  break;
+               insertIdx++;
+            }
+            wd.pending.insert(insertIdx, tile.tileId);
+         }
+      }
+
+      // ---- Drain pending queue ----
+      U32 sentThisTick = 0;
+
+      while(sentThisTick < tilesPerTick && wd.pending.size() > 0)
+      {
+         U16 tileId = wd.pending[0];
+         wd.pending.erase(0);
+
+         // Look up the tile data by actual tileId
+         const MapTile *tile = NULL;
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+         {
+            if(mmapTiles[t].tileId == tileId)
+            {
+               tile = &mmapTiles[t];
+               break;
+            }
+         }
+
+         if(!tile || tile->polys.size() == 0)
+            continue;   // No wall data for this tile
+
+         // Concatenate all polys into flat vectors
+         Vector<F32> allVerts;
+         Vector<bool> allOutline;
+         Vector<U32> polySizes;
+
+         for(S32 p = 0; p < tile->polys.size(); p++)
+         {
+            const WallPoly &wp = tile->polys[p];
+            polySizes.push_back(wp.numVerts());
+            for(S32 v = 0; v < wp.verts.size(); v++)
+               allVerts.push_back(wp.verts[v]);
+            for(S32 b = 0; b < wp.outline.size(); b++)
+               allOutline.push_back(wp.outline[b]);
+         }
+
+         // Skip tiles whose polys have no original edges — interior
+         // fills where every edge lies on a tile boundary.
+         bool hasOutline = false;
+         for(U32 b = 0; b < allOutline.size(); b++)
+         {
+            if(allOutline[b]) { hasOutline = true; break; }
+         }
+         if(!hasOutline)
+            continue;
+
+         // Send via RPC directed to this connection
+         NetObject::setRPCDestConnection(conn);
+         s2cSendWallTile(tileId, static_cast<U16>(tile->polys.size()), allVerts, allOutline, polySizes);
+         NetObject::setRPCDestConnection(NULL);
+
+         sentThisTick++;
+      }
+   }
+}
+
+
 extern void writeServerBanList(CIniFile *ini, BanList *banList);
 
 // Runs the server side commands, which the client may or may not know about
@@ -2685,7 +3037,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    else if(stricmp(cmd, "MoreBots") == 0)
    {
       if(canClientAddBots(clientInfo->getConnection()))
-         moreBots(clientInfo);   
+         moreBots(clientInfo);
    }
    else if(stricmp(cmd, "yes") == 0 || stricmp(cmd, "y") == 0)
       serverGame->voteClient(clientInfo, true);
@@ -2912,7 +3264,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   if(getGame()->getBotCount() == 0) 
+   if(getGame()->getBotCount() == 0)
    {
       source->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
@@ -3191,7 +3543,7 @@ GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
    ClientInfo *clientInfo = ((GameConnection *) getRPCSourceConnection())->getClientInfo();
 
    if(!clientInfo->isAdmin())    // Error message handled client-side
-      return;  
+      return;
 
    clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
 }
@@ -3228,7 +3580,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
    if(!sourceClientInfo->isAdmin())
       return;
 
-   ClientInfo *kickee = mGame->findClientInfo(kickeeName);    
+   ClientInfo *kickee = mGame->findClientInfo(kickeeName);
 
    if(!kickee)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
       return;
@@ -3256,12 +3608,12 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
          kickeeConnection->disconnect(NetConnection::ReasonKickedByAdmin, "");
       }
    }
-   
+
    // Get rid of robots that have the to-be-kicked name
    getGame()->deleteBot(kickeeName);
 
    messageVals.clear();
-   messageVals.push_back(kickeeName);                     
+   messageVals.push_back(kickeeName);
    messageVals.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
 
    broadcastMessage(GameConnection::ColorInfo, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", messageVals);
@@ -3272,7 +3624,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
-   processServerCommand(source->getClientInfo(), cmd.getString(), args);     
+   processServerCommand(source->getClientInfo(), cmd.getString(), args);
 }
 
 
@@ -3281,7 +3633,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
-   
+
    if(!sourceClientInfo->isAdmin())
       return;
 
@@ -3417,8 +3769,8 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 
 
 // Server sends message to the client for display using StringPtr
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, 
-                 (StringTableEntry fromName, StringTableEntry toName, StringPtr message), 
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM,
+                 (StringTableEntry fromName, StringTableEntry toName, StringPtr message),
                  (fromName, toName, message))
 {
 #ifndef ZAP_DEDICATED
@@ -3428,8 +3780,8 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM,
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, 
-                 (bool global, StringTableEntry clientName, StringPtr message), 
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage,
+                 (bool global, StringTableEntry clientName, StringPtr message),
                  (global, clientName, message))
 {
 #ifndef ZAP_DEDICATED
@@ -3731,7 +4083,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 
 
 // Server tells clients that another player is idle and will not be joining us for the moment
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle), (name, idle), 
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle), (name, idle),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
@@ -3815,7 +4167,7 @@ void GameType::updateWhichTeamsHaveFlags()
 }
 
 
-// A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can 
+// A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can
 // update their displays to show who has the flag.  Will be overridden in some GameTypes.
 // Server only!
 void GameType::onFlagMounted(S32 teamIndex)
@@ -3867,7 +4219,7 @@ void GameType::setGameTime(F32 timeInMs)
 // Only called by various voting codes, server only
 void GameType::extendGameTime(S32 timeInMs)
 {
-   setTimeRemaining(getRemainingGameTimeInMs() + timeInMs, false); 
+   setTimeRemaining(getRemainingGameTimeInMs() + timeInMs, false);
 }
 
 
@@ -3889,7 +4241,7 @@ U32 GameType::getTotalGamePlayedInMs() const
 }
 
 // Return time remaining in seconds; currently used for Lua on the server, and display purposes on the client
-S32 GameType::getRemainingGameTime() const         
+S32 GameType::getRemainingGameTime() const
 {
    return getRemainingGameTimeInMs() / 1000;
 }
@@ -4021,7 +4373,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
 
 
 // Send a message to all clients (except robots, of course!)
-void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
+void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx,
                                 const StringTableEntry &formatString, const Vector<StringTableEntry> &e)
 {
    if(!isGameOver())  // Avoid flooding messages on game over
@@ -4193,6 +4545,31 @@ void GameType::setBotsAllowed(bool allowed)
 }
 
 
+FogOfWar GameType::getFogOfWarMode() const
+{
+   return mFogOfWarMode;
+}
+
+
+void GameType::setFogOfWarMode(FogOfWar mode)
+{
+   mFogOfWarMode = mode;
+}
+
+
+// Resolves Default mode based on whether this is an xtank game or bitfighter game
+bool GameType::isFogOfWarEnabled() const
+{
+   if(mFogOfWarMode == FogOfWar::YES)
+      return true;
+   if(mFogOfWarMode == FogOfWar::NO)
+      return false;
+
+   // Default: enabled for xtank, disabled for bitfighter
+   return mGame && mGame->isXtankModeGame();
+}
+
+
 string GameType::getScriptName() const
 {
    return mScriptName;
@@ -4219,7 +4596,7 @@ void GameType::addFlag(FlagItem *flag)
 
 // Runs only on server
 void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
-{ 
+{
    TNLAssert(isServer(), "Should not run on client!");
    if(item->getObjectTypeNumber() == FlagTypeNumber)
       updateWhichTeamsHaveFlags();

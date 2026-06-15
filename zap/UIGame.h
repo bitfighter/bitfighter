@@ -202,6 +202,7 @@ private:
 
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
+   void expandDispWorldExtents(const Rect &bounds);  // Expand display extents for tile delivery
 
    void setAnnouncement(const string &announcement);
    void displayMessage(const Color &msgColor, const char *message);
@@ -236,6 +237,7 @@ private:
    void toggleShowingObjectIds();
    void toggleShowingMeshZones();
    void toggleShowDebugBots();
+   void toggleShowingMapTiles();
 
    void addInlineHelpItem(HelpItem item);
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);

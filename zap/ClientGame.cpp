@@ -801,7 +801,11 @@ void ClientGame::idle(U32 timeDelta)
    {
       mConnectionToServer->updateTimers(timeDelta);
 
-      computeWorldObjectExtents();
+      // World extents are set during level loading (doneLoadingLevel) and updated
+      // incrementally when tile data arrives (s2cSendWallTile).  There is no need
+      // to recompute them from the database every frame, and doing so would clobber
+      // the tile-extended bounds once the tile RPC deletes the old wall objects.
+      //computeWorldObjectExtents();
 
       Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
 

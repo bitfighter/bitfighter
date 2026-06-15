@@ -272,6 +272,15 @@ void GameUserInterface::doneLoadingLevel()
 }
 
 
+// Expand mDispWorldExtents to encompass the given bounds.
+// Called by the tile delivery RPC (s2cSendWallTile) so the commander's map
+// shows the full tiled area immediately, without waiting for rectifyExtents().
+void GameUserInterface::expandDispWorldExtents(const Rect &bounds)
+{
+   mDispWorldExtents.unionRect(bounds);
+}
+
+
 // Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
 static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading, U32 timeDelta, Timer &shrinkDelayTimer)
 {
@@ -403,6 +412,7 @@ void GameUserInterface::toggleShowingShipCoords() { mDebugOverlayRenderer.toggle
 void GameUserInterface::toggleShowingObjectIds()  { mDebugOverlayRenderer.toggleShowingObjectIds();  }
 void GameUserInterface::toggleShowingMeshZones()  { mDebugOverlayRenderer.toggleShowingMeshZones();  }
 void GameUserInterface::toggleShowDebugBots()     { mDebugOverlayRenderer.toggleShowDebugBots();     }
+void GameUserInterface::toggleShowingMapTiles()   { mDebugOverlayRenderer.toggleShowingMapTiles();   }
 
 
 bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugOverlayRenderer.isShowingDebugShipCoords(); }
@@ -1478,7 +1488,7 @@ bool GameUserInterface::toggleWeapon(S32 slotIndex)
    TNLAssert(slotIndex >= 0 && slotIndex < MaxXtankWeaponSlots, "Invalid slot");
 
    ship->toggleWeapon(slotIndex);
-   
+
    GameType *gameType = getGame()->getGameType();
    if(gameType)
       gameType->c2sToggleWeapon(slotIndex, ship->getXtankWeaponState(slotIndex).isActive());
@@ -1569,7 +1579,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       EventManager::get()->addSteps(1);
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
-      
+
    else if(checkXtankKeys(inputCode))
       return true;
 
@@ -2553,17 +2563,34 @@ void GameUserInterface::renderGameNormal()
    renderObjects.sort(renderSortCompare);
 
    // Render in three passes, to ensure some objects are drawn above others
+   bool hasTileWalls = (GameType::getTilePolys().size() > 0);
+
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+      if(!hasTileWalls && !mDebugOverlayRenderer.renderingMapTiles())
+         Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
 
       if(mDebugOverlayRenderer.renderingMeshZones())
          mDebugOverlayRenderer.renderMeshZones(i);
 
       for(S32 j = 0; j < renderObjects.size(); j++)
-         renderObjects[j]->renderLayer(i);
+      {
+         // Skip old-style barrier rendering when tile walls are active
+         if(!hasTileWalls || !(renderObjects[j]->getObjectTypeNumber() == BarrierTypeNumber ||
+                               renderObjects[j]->getObjectTypeNumber() == PolyWallTypeNumber))
+            renderObjects[j]->renderLayer(i);
+      }
 
       mFxManager.render(i, getCommanderZoomFraction());
+   }
+
+   // If tiled wall geometry has been received, render it instead of old Barrier objects.
+   // Tile walls are stored as flat WallPoly arrays with per-edge outline flags.
+   if(hasTileWalls)
+   {
+      const Color &fillColor = *getGame()->getSettings()->getWallFillColor();
+      const Color &outlineColor = *getGame()->getSettings()->getWallOutlineColor();
+      renderTilePolys(GameType::getTilePolys(), fillColor, outlineColor);
    }
 
    S32 team = NONE;
@@ -2579,6 +2606,9 @@ void GameUserInterface::renderGameNormal()
    // the result is that we can only see zones on our local server.
    if(mDebugOverlayRenderer.renderingObjectIds())
       mDebugOverlayRenderer.renderObjectIds(getGame());
+
+   if(mDebugOverlayRenderer.renderingMapTiles())
+      mDebugOverlayRenderer.renderMapTiles(getGame());
 
    r.popMatrix();
 
@@ -2782,15 +2812,33 @@ void GameUserInterface::renderGameCommander()
    if(mDebugOverlayRenderer.renderingMeshZones())
       mDebugOverlayRenderer.renderMeshZones(0);
 
+   bool hasTileWalls = (GameType::getTilePolys().size() > 0);
+
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
-      renderObjects[i]->renderLayer(0);
+   {
+      if(!hasTileWalls || !(renderObjects[i]->getObjectTypeNumber() == BarrierTypeNumber ||
+                            renderObjects[i]->getObjectTypeNumber() == PolyWallTypeNumber))
+         renderObjects[i]->renderLayer(0);
+   }
 
    // Second pass
-   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+   if(!hasTileWalls && !mDebugOverlayRenderer.renderingMapTiles())
+      Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+
+   // Render tiled wall geometry if available (replaces old Barrier rendering)
+   if(hasTileWalls)
+   {
+      const Color &fillColor = *getGame()->getSettings()->getWallFillColor();
+      const Color &outlineColor = *getGame()->getSettings()->getWallOutlineColor();
+      renderTilePolys(GameType::getTilePolys(), fillColor, outlineColor);
+   }
 
    if(mDebugOverlayRenderer.renderingMeshZones())
       mDebugOverlayRenderer.renderMeshZones(1);
+
+   if(mDebugOverlayRenderer.renderingMapTiles())
+      mDebugOverlayRenderer.renderMapTiles(getGame());
 
    for(S32 i = 0; i < renderObjects.size(); i++)
    {

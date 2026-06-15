@@ -95,7 +95,7 @@ public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
 
-   U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
+   U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make
    U32 mVoteTime;
 
    U32 mWrongPasswordCount;
@@ -131,9 +131,9 @@ public:
       ServerName,
       ServerDescription,
       ServerWelcomeMessage,
-      LevelDir, 
+      LevelDir,
       // PlaylistFile,     // TODO for 020 uncomment this and handle it!
-      DeleteLevel,  
+      DeleteLevel,
       UndeleteLevel,
       GlobalLevelScript,
 
@@ -219,9 +219,9 @@ public:
    TNL_DECLARE_RPC(c2sSubmitPassword, (StringPtr pass));
 
    // Tell server that the client is (or claims to be) authenticated
-   TNL_DECLARE_RPC(c2sSetAuthenticated, ());       
+   TNL_DECLARE_RPC(c2sSetAuthenticated, ());
    // Tell clients a player is authenticated, and pass on some badge info while we're on the phone
-   TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed));   
+   TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed));
 
    TNL_DECLARE_RPC(c2sSetVoteMapParam, (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength,
                                         bool voteEnable, bool allowGetMap, bool allowMapUpload, bool randomLevels));
@@ -256,8 +256,8 @@ public:
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
 
    // These could be consolidated
-   TNL_DECLARE_RPC(s2cDisplaySuccessMessage, (StringTableEntry formatString));    
-   TNL_DECLARE_RPC(s2cDisplayErrorMessage,   (StringTableEntry formatString));    
+   TNL_DECLARE_RPC(s2cDisplaySuccessMessage, (StringTableEntry formatString));
+   TNL_DECLARE_RPC(s2cDisplayErrorMessage,   (StringTableEntry formatString));
    TNL_DECLARE_RPC(s2cDisplayConsoleMessage, (StringTableEntry formatString));
 
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
@@ -346,6 +346,23 @@ public:
    void onConnectionEstablished();
    void onConnectionEstablished_client();
    void onConnectionEstablished_server();
+
+   // Per-connection state for tile-based wall delivery
+   struct WallDeliveryState {
+      Vector<U16> pending;           // tileIds queued for delivery (closest-first)
+      Vector<bool> sentTiles;        // sentTiles[tileId] == true once delivered
+      U32 totalTiles;                // Total number of tiles in the grid (for sentTiles sizing)
+
+      void init(U32 tileCount) {
+         pending.clear();
+         sentTiles.clear();
+         sentTiles.resize(tileCount);
+         for(U32 i = 0; i < tileCount; i++)
+            sentTiles[i] = false;
+         totalTiles = tileCount;
+      }
+   };
+   WallDeliveryState mWallDelivery;
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);
    void onConnectionTerminated(TerminationReason r, const char *string);

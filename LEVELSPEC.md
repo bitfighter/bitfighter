@@ -177,6 +177,22 @@ Recommended minimum number of players. Omit the number to leave unspecified.
 
 Recommended maximum number of players. Omit the number to leave unspecified.
 
+### `FogOfWar [Default|Yes|No]`
+
+Controls whether Fog of War is enabled for the level. When Fog of War is on, wall tiles are only sent to clients as they come within the player's scope radius, reducing network traffic on large maps.
+
+- `FogOfWar Yes` — Fog of War is enabled. Wall tiles are delivered closest-first within a scope radius around each player.
+- `FogOfWar No` — Fog of War is disabled. All wall tiles are delivered immediately on level load.
+- `FogOfWar Default` (or line omitted) — Fog of War is enabled for xtank vehicle games and disabled for bitfighter ship games.
+
+The keyword is case-insensitive.
+
+```
+FogOfWar Yes
+FogOfWar No
+FogOfWar Default
+```
+
 ---
 
 ## Coordinate System

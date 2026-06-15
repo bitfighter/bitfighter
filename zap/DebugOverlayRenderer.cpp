@@ -11,12 +11,14 @@
 #include "Colors.h"
 #include "DisplayManager.h"
 #include "EventManager.h"
+#include "MapTile.h"
 #include "Rect.h"
 #include "RenderUtils.h"
 #include "Renderer.h"
 #include "ServerGame.h"
 #include "UI.h"
 #include "game.h"
+#include "gameType.h"
 #include "robot.h"
 
 namespace Zap
@@ -26,11 +28,13 @@ void DebugOverlayRenderer::toggleShowingShipCoords() { mDebugShowShipCoords = !m
 void DebugOverlayRenderer::toggleShowingObjectIds()  { mDebugShowObjectIds  = !mDebugShowObjectIds;  }
 void DebugOverlayRenderer::toggleShowingMeshZones()  { mDebugShowMeshZones  = !mDebugShowMeshZones;  }
 void DebugOverlayRenderer::toggleShowDebugBots()     { mShowDebugBots       = !mShowDebugBots;       }
+void DebugOverlayRenderer::toggleShowingMapTiles()   { mDebugShowMapTiles   = !mDebugShowMapTiles;   }
 
 bool DebugOverlayRenderer::isShowingDebugShipCoords() const { return mDebugShowShipCoords; }
 bool DebugOverlayRenderer::renderingObjectIds() const    { return mDebugShowObjectIds; }
 bool DebugOverlayRenderer::renderingMeshZones() const    { return mDebugShowMeshZones; }
 bool DebugOverlayRenderer::renderingBotPaths() const     { return mShowDebugBots; }
+bool DebugOverlayRenderer::renderingMapTiles() const     { return mDebugShowMapTiles; }
 
 
 void DebugOverlayRenderer::appendBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects) const
@@ -129,6 +133,106 @@ void DebugOverlayRenderer::renderMeshZones(S32 layer) const
 {
    for(S32 i = 0; i < mRenderZones.size(); i++)
       mRenderZones[i]->renderLayer(layer);
+}
+
+
+void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
+{
+   // Access the server's GameType directly (local test server only)
+   ServerGame *serverGame = game->getServerGame();
+   if(!serverGame)
+      return;
+   GameType *gt = serverGame->getGameType();
+   if(!gt)
+      return;
+
+   const Vector<MapTile> &tiles = gt->getmapTiles();
+   if(tiles.size() == 0)
+      return;
+
+   Renderer &r = Renderer::get();
+
+   // Collect unique grid coordinates from all tile bounds.
+   // All tiles are the same size, so sorting and deduping gives the grid lines.
+   Vector<F32> gridX, gridY;
+   for(S32 i = 0; i < tiles.size(); i++)
+   {
+      gridX.push_back(tiles[i].bounds.min.x);
+      gridX.push_back(tiles[i].bounds.max.x);
+      gridY.push_back(tiles[i].bounds.min.y);
+      gridY.push_back(tiles[i].bounds.max.y);
+   }
+   gridX.sort([](const F32 &a, const F32 &b) { return a < b; });
+   gridY.sort([](const F32 &a, const F32 &b) { return a < b; });
+   // Dedup within a small epsilon
+   Vector<F32> uniqX, uniqY;
+   for(S32 i = 0; i < gridX.size(); i++)
+      if(i == 0 || gridX[i] > gridX[i-1] + 0.1f)
+         uniqX.push_back(gridX[i]);
+   for(S32 i = 0; i < gridY.size(); i++)
+      if(i == 0 || gridY[i] > gridY[i-1] + 0.1f)
+         uniqY.push_back(gridY[i]);
+
+   // Draw the grid as horizontal and vertical lines (each edge once)
+   r.setColor(Colors::cyan, 0.35f);
+   r.setLineWidth(1);
+   for(S32 i = 0; i < uniqX.size(); i++)
+   {
+      Vector<Point> line;
+      line.push_back(Point(uniqX[i], uniqY[0]));
+      line.push_back(Point(uniqX[i], uniqY[uniqY.size()-1]));
+      r.renderPointVector(&line, RenderType::Lines);
+   }
+   for(S32 i = 0; i < uniqY.size(); i++)
+   {
+      Vector<Point> line;
+      line.push_back(Point(uniqX[0], uniqY[i]));
+      line.push_back(Point(uniqX[uniqX.size()-1], uniqY[i]));
+      r.renderPointVector(&line, RenderType::Lines);
+   }
+
+   // Draw wall poly edges within each tile:
+   //   green  = original wall edge (outline == true)
+   //   red    = clip-introduced edge (outline == false, normally hidden)
+   // Batch all edges into two vectors for fewer draw calls
+   Vector<Point> origEdges, clipEdges;
+   for(S32 i = 0; i < tiles.size(); i++)
+   {
+      const MapTile &tile = tiles[i];
+      for(S32 p = 0; p < tile.polys.size(); p++)
+      {
+         const WallPoly &wp = tile.polys[p];
+         const U32 n = wp.numVerts();
+         if(n < 3)
+            continue;
+
+         for(U32 v = 0; v < n; v++)
+         {
+            const U32 v0 = v * 2;
+            const U32 v1 = ((v + 1) % n) * 2;
+            const bool isOrig = (v < wp.outline.size() && wp.outline[v]);
+            Vector<Point> &batch = isOrig ? origEdges : clipEdges;
+            batch.push_back(Point(wp.verts[v0], wp.verts[v0 + 1]));
+            batch.push_back(Point(wp.verts[v1], wp.verts[v1 + 1]));
+         }
+      }
+   }
+   r.setColor(Colors::green, 0.8f);
+   if(origEdges.size() > 0)
+      r.renderPointVector(&origEdges, RenderType::Lines);
+   r.setColor(Colors::red, 0.6f);
+   if(clipEdges.size() > 0)
+      r.renderPointVector(&clipEdges, RenderType::Lines);
+
+   // Draw tile ID labels centered in each tile
+   for(S32 i = 0; i < tiles.size(); i++)
+   {
+      const MapTile &tile = tiles[i];
+      F32 cx = (tile.bounds.min.x + tile.bounds.max.x) / 2;
+      F32 cy = (tile.bounds.min.y + tile.bounds.max.y) / 2;
+      r.setColor(Colors::white);
+      drawStringf(cx, cy, 12, "%d", tile.tileId);
+   }
 }
 
 }

@@ -297,7 +297,7 @@ void kickPlayerHandler(ClientGame *game, const Vector<string> &words)
       {
          // Did user provide a valid, known name?
          string name = words[1];
-         
+
          if(!game->checkName(name))
          {
             game->displayErrorMessage("!!! Could not find player: %s", words[1].c_str());
@@ -329,7 +329,7 @@ static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
 {
    if(game->isTestServer())
       return true;
-   
+
    game->displayErrorMessage(failureMessage);
    return false;
 }
@@ -358,6 +358,13 @@ void showZonesHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+void showMapTilesHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(isLocalTestServer(game, "!!! Map tiles can only be displayed on a test server"))
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMapTiles();
+}
+
+
 // Will work on any server, but offers advantage of being able to see out-of-scope bots; increases network traffic somewhat
 void showBotsHandler(ClientGame *game, const Vector<string> &words)
 {
@@ -371,7 +378,7 @@ void showBotsHandler(ClientGame *game, const Vector<string> &words)
 
 void showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(isLocalTestServer(game, "!!! Robots can only be shown on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be shown on a test server"))
       game->getUIManager()->getUI<GameUserInterface>()->toggleShowDebugBots();
 }
 
@@ -379,7 +386,7 @@ void showPathsHandler(ClientGame *game, const Vector<string> &words)
 // Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void pauseBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(isLocalTestServer(game, "!!! Robots can only be frozen on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be frozen on a test server"))
       EventManager::get()->togglePauseStatus();
 }
 
@@ -387,7 +394,7 @@ void pauseBotsHandler(ClientGame *game, const Vector<string> &words)
 // Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void stepBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(isLocalTestServer(game, "!!! Robots can only be stepped on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be stepped on a test server"))
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
       EventManager::get()->addSteps(steps);
@@ -767,7 +774,7 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
    }
 
    bool firstArgIsNumeric = args.size() >= 1 && isPositiveInteger(args[0].getString());
-   
+
    if(firstArgIsNumeric)          // If first arg is numeric, hope user entered a team index first, and do not switch the args.
       return true;
 
@@ -800,9 +807,9 @@ void announceHandler(ClientGame *game, const Vector<string> &words)
 
          message = message + words[i];
       }
-   
+
       GameType* gt = game->getGameType();
-               
+
       if(gt)
          gt->c2sSendAnnouncement(message);
    }
@@ -819,7 +826,7 @@ void addBotHandler(ClientGame *game, const Vector<string> &words)
          args.push_back(StringTableEntry(words[i]));
 
       if(!fixupArgs(game, args))    // Reorder args for c2sAddBot, translate team names to indices, and do a little checking
-         return;     
+         return;
 
       if(game->getGameType())
          game->getGameType()->c2sAddBot(args);
@@ -856,7 +863,7 @@ void addBotsHandler(ClientGame *game, const Vector<string> &words)
 
       if(game->getGameType())
          game->getGameType()->c2sAddBots(count, args);
-         
+
       // Player has demonstrated ability to add bots... no need to show help item
       game->getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(AddBotsItem, true);
    }
@@ -1095,7 +1102,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
          }
 
    if(ratingEnum == LevelDatabaseRateThread::UnknownRating)      // Error
-   {  
+   {
       string msg = "!!! You must specify a rating (";
 
       // Enumerate all valid ratings strings
@@ -1109,7 +1116,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
       }
 
       msg += ")";
- 
+
       game->displayErrorMessage(msg.c_str());
    }
    else                    // Args look ok; release the kraken!

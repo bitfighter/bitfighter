@@ -45,7 +45,7 @@ enum HelpCategories {
 class ClientGame;
 
 
-struct CommandInfo 
+struct CommandInfo
 {
    string cmdName;
    void (*cmdCallback)(ClientGame *game, const Vector<string> &args);
@@ -63,12 +63,12 @@ struct CommandInfo
 using namespace Zap;
 
 
-namespace ChatCommands 
+namespace ChatCommands
 {
 
 void announceHandler           (ClientGame *game, const Vector<string> &args);
-void mVolHandler               (ClientGame *game, const Vector<string> &args);    
-void sVolHandler               (ClientGame *game, const Vector<string> &args);    
+void mVolHandler               (ClientGame *game, const Vector<string> &args);
+void sVolHandler               (ClientGame *game, const Vector<string> &args);
 void vVolHandler               (ClientGame *game, const Vector<string> &args);
 void servVolHandler            (ClientGame *game, const Vector<string> &args);
 void mNextHandler              (ClientGame *game, const Vector<string> &args);
@@ -88,6 +88,7 @@ void showCoordsHandler         (ClientGame *game, const Vector<string> &args);
 void showIdsHandler            (ClientGame *game, const Vector<string> &args);
 void showZonesHandler          (ClientGame *game, const Vector<string> &args);
 void showPathsHandler          (ClientGame *game, const Vector<string> &args);
+void showMapTilesHandler       (ClientGame *game, const Vector<string> &args);
 void pauseBotsHandler          (ClientGame *game, const Vector<string> &args);
 void stepBotsHandler           (ClientGame *game, const Vector<string> &args);
 void setAdminPassHandler       (ClientGame *game, const Vector<string> &args);

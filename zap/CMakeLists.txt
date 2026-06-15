@@ -103,6 +103,7 @@ set(SHARED_SOURCES
 	TextItem.cpp
 	Timer.cpp
 	WallSegmentManager.cpp
+	MapTile.cpp
 	WeaponInfo.cpp
 	VehicleDesign.cpp
 	Zone.cpp
@@ -297,8 +298,8 @@ endif()
 
 # Defaults for bitfighterd
 set(INCLUDE_DIRS
-	${OPENAL_INCLUDE_DIR}
 	${ALURE_INCLUDE_DIR}
+	${OPENAL_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${TOMCRYPT_INCLUDE_DIR}
 	${CLIPPER_INCLUDE_DIR}
