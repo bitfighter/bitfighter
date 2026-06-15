@@ -12,8 +12,9 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtilsSafety.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestChatHelper.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestClipper2.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
