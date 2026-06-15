@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "UIXtankHelper.h"   // nextEnum, prevEnum
-#include "XtankShape.h"      // XtankDesign, XtankBody, XtankWeapon, XtankArmor,
+#include "VehicleDesign.h"   // XtankDesign, XtankBody, XtankWeapon, XtankArmor,
                              // XtankMountLocation, VehicleSides, MAX_ARMOR_PER_SIDE
 
 #include "gtest/gtest.h"

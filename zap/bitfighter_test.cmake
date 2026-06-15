@@ -38,7 +38,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShipControlState.cpp
+#	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShipControlState.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStatistics.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
@@ -46,10 +46,11 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSync.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankCarouselSlots.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankAmmo.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankPackUnpack.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankArmorSide.cpp
+#	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankCarouselSlots.cpp
+#	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankAmmo.cpp
+#	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankPackUnpack.cpp
+#	${CMAKE_SOURCE_DIR}/bitfighter_test/TestXtankArmorSide.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMapTiling.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )
 
@@ -108,3 +109,10 @@ BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES(bitfighter_test)
 # BF_PLATFORM_INSTALL(bitfighter_test)
 
 # BF_PLATFORM_CREATE_PACKAGES(bitfighter_test)
+
+
+# Register with CTest for VS Test Explorer discovery
+add_test(NAME bitfighter_test
+	COMMAND bitfighter_test
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
+)

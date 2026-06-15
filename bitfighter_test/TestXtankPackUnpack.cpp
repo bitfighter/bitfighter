@@ -20,7 +20,7 @@
 //   7. A non-xtank (Bitfighter ship) round-trip does not corrupt weapon states.
 
 #include "ship.h"
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 #include "gameConnection.h"
 #include "tnlBitStream.h"
 

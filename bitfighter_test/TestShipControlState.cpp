@@ -8,7 +8,7 @@
 // the identical ship state that was written.
 
 #include "ship.h"
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 #include "tnlBitStream.h"
 
 #include "gtest/gtest.h"

@@ -8,7 +8,7 @@
 // XtankWeaponState struct helpers (hasAmmo, isOn).
 
 #include "ship.h"
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 
 #include "gtest/gtest.h"
 

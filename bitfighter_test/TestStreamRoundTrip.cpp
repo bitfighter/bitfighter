@@ -7,7 +7,7 @@
 // VehicleDesign::writeToStream/readFromStream.
 
 #include "LoadoutTracker.h"
-#include "XtankShape.h"
+#include "VehicleDesign.h"
 #include "shipItems.h"
 
 #include "tnlBitStream.h"
