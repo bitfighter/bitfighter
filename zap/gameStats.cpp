@@ -171,11 +171,13 @@ void logGameStats(VersionedGameStats *stats)
 {
    processStatsResults(&stats->gameStats);
 
+#ifndef BITFIGHTER_TEST
    string databasePath = gSqlite + ".db";
 
    DatabaseWriter databaseWriter(databasePath.c_str());
 
    databaseWriter.insertStats(stats->gameStats);
+#endif
 }
 
 }

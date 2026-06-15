@@ -62,10 +62,10 @@ string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
   string::size_type pos = path.find_last_of("\\/");
-  if (pos == string::npos)
+  if(pos == string::npos)
      return "";
 
-  if (pos == 0)
+  if(pos == 0)
      return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
@@ -121,14 +121,17 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   if (str.find('.') == string::npos)
-      return str;
+   if (str.find('.') != string::npos)
+   {
+      while(str.length() > 0 && str[str.length() - 1]  == '0')
+         str.erase(str.length() - 1);
 
-   while(str.length() > 0 && str[str.length() - 1]  == '0')
-      str.erase(str.length() - 1);
+      if(str.length() > 0 && str[str.length() - 1] == '.')
+         str.erase(str.length() - 1);
+   }
 
-   if(str.length() > 0 && str[str.length() - 1] == '.')
-      str.erase(str.length() - 1);
+   if(str.empty() || str == "-" || str == "-0" || str == "+0")
+      return "0";
 
    return str;
 }
@@ -273,7 +276,7 @@ string sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
       return value;
 
    // If any of the above exist then do some escaping
@@ -304,16 +307,6 @@ string sanitizeForJson(const char *value)
             result += "\\t";
             break;
 
-            // For html markup entities
-         case '&':
-            result += "&amp;";
-            break;
-         case '<':
-            result += "&lt;";
-            break;
-         case '>':
-            result += "&gt;";
-            break;
          default:
             if(isControlCharacter(*c))
             {
@@ -531,21 +524,28 @@ const char *findPointerOfArg(const char *message, S32 count)
    if(!message)
       return "";
 
-   S32 spacecount = 0;
+   if(count < 0)
+      return "";
+
    S32 cur = 0;
-   char prevchar = ' ';
 
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
+   // Skip leading whitespace
+   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+      cur++;
+
+   for(S32 i = 0; i < count; i++)
    {
-      if(isSpace(message[cur]) && !isSpace(prevchar))
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
-      cur++;
-   }
+      if(message[cur] == '\0')    // End of string
+         return &message[cur];
 
-   while(message[cur] != '\0' && isSpace(message[cur]))
-      cur++;
+      // Skip current argument (non-whitespace)
+      while(message[cur] != '\0' && !isspace((unsigned char)message[cur]))
+         cur++;
+
+      // Skip whitespace separating this arg from the next
+      while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+         cur++;
+   }
 
    return &message[cur];
 }
@@ -968,6 +968,7 @@ string writeLevelString(const char *in)
 bool writeFile(const string &path, const string &contents, bool append)
 {
    ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
+   mode |= ios_base::binary;
 
    ofstream file(path.c_str(), mode);
 

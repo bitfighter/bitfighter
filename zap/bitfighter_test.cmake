@@ -7,10 +7,13 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBitSet.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameStats.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomPrecision.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtilsSafety.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestChatHelper.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestClipper2.cpp
@@ -27,6 +30,8 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMathUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMatrix4.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestNonce.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPoint.cpp
@@ -49,6 +54,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTnlString.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestVoiceCodec.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 )
 

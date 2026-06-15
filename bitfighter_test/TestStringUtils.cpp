@@ -133,7 +133,7 @@ TEST(StringUtilsTest, stripZeros)
    EXPECT_EQ("1.1", stripZeros("1.100"));
    EXPECT_EQ("1", stripZeros("1.000"));
    EXPECT_EQ("0", stripZeros("0"));
-   EXPECT_EQ("", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros(".000"));
 }
 
 
@@ -189,6 +189,7 @@ TEST(StringUtilsTest, isInteger)
    // Whitespace tests
    EXPECT_TRUE(isPositiveInteger("  123  "));
    EXPECT_TRUE(isPositiveInteger("\t0\n"));
+   EXPECT_TRUE(isPositiveInteger("\v456\v"));
    EXPECT_FALSE(isPositiveInteger("  "));
 }
 
@@ -233,6 +234,11 @@ TEST(StringUtilsTest, ftosBugReproduction)
 
    // Bug: ftos(1.0f, 0) incorrectly returns " 1" instead of "1"
    EXPECT_EQ("1", ftos(1.0f, 0));
+   EXPECT_EQ("0", ftos(0.0001f, 2));
+   EXPECT_EQ("0", ftos(-0.0001f, 2));
+   EXPECT_EQ("0", ftos(0.0f));
+   EXPECT_EQ("0", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros("-0"));
 }
 
 
@@ -482,12 +488,26 @@ TEST(StringUtilsTest, findPointerOfArg)
    // Bug fix: NULL input
    EXPECT_STREQ("", findPointerOfArg(NULL, 0));
 
+   // Tests for leading and multiple spaces
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
+  
    // New tests for leading and multiple spaces
    EXPECT_STREQ("word1 word2", findPointerOfArg("  word1 word2", 0));
    EXPECT_STREQ("word2", findPointerOfArg("  word1 word2", 1));
    EXPECT_STREQ("word2", findPointerOfArg("word1  word2", 1));
    EXPECT_STREQ("word2", findPointerOfArg("word1\tword2", 1));
    EXPECT_STREQ("word2   ", findPointerOfArg("   word1   word2   ", 1));
+
+   // Tests with multiple args and varied spacing
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
 }
 
 
@@ -602,7 +622,7 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\"quoted\\\"", sanitizeForJson("\"quoted\""));
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
-   EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("&<>", sanitizeForJson("&<>")); // Should NOT escape HTML entities
    EXPECT_EQ("", sanitizeForJson(NULL));
 
    // Control characters
@@ -635,6 +655,8 @@ TEST(StringUtilsTest, trim)
 {
    EXPECT_EQ("abc", trim("  abc  "));
    EXPECT_EQ("abc", trim("\n\t abc \r\n"));
+   EXPECT_EQ("abc", trim("\v abc \v"));
+   EXPECT_EQ("abc", trim("\vabc\v"));
    EXPECT_EQ("abc  ", trim_left("  abc  "));
    EXPECT_EQ("  abc", trim_right("  abc  "));
 
@@ -717,6 +739,13 @@ TEST(StringUtilsTest, fileUtils)
    ASSERT_TRUE(writeFile(testFile, content));
    EXPECT_TRUE(fileExists(testFile));
    EXPECT_EQ(content, readFile(testFile));
+
+   // Verify consistency of writeFile/readFile with potentially tricky characters
+   // On Windows, text mode would translate \n to \r\n
+   string binaryContent = "Line1\nLine2\r\nLine3";
+   ASSERT_TRUE(writeFile("test_binary.txt", binaryContent));
+   EXPECT_EQ(binaryContent, readFile("test_binary.txt"));
+   remove("test_binary.txt");
 
    string appendContent = " Append";
    ASSERT_TRUE(writeFile(testFile, appendContent, true));

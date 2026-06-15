@@ -52,6 +52,7 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
+	Matrix4.cpp
 	LevelDatabase.cpp
 	LevelSource.cpp
 	LineItem.cpp
@@ -152,7 +153,6 @@ set(CLIENT_SOURCES
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
 	LevelListDisplayer.cpp
-	Matrix4.cpp
 	oglconsole.cpp
 	quickChatHelper.cpp
     Renderer.cpp
