@@ -10,6 +10,7 @@
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
 #include "barrier.h"             // For WallRec def
+#include "MapTile.h"            // For MapTile
 
 #include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum
@@ -45,11 +46,20 @@ class Zone;
 ////////////////////////////////////////
 
 
+enum class FogOfWar
+{
+   DEFAULT = 0,
+   YES,
+   NO,
+};
+
+
 class GameType : public NetObject
 {
    typedef NetObject Parent;
 
    static const S32 TeamNotSpecified = -99999;
+
 
 private:
    Game *mGame;
@@ -63,6 +73,22 @@ private:
    bool mShowAllBots;
 
    Vector<WallRec> mWalls;
+   Vector<MapTile> mmapTiles;
+   U32   mTileSize;             // Tile grid cell size (from MapTileBuilder)
+   S32   mGridWidth;            // Number of tile columns (from MapTileBuilder)
+   S32   mGridHeight;           // Number of tile rows (from MapTileBuilder)
+   void buildmapTiles();
+   void deliverWallTileTick();         // Called per-tick to send pending wall tiles to clients
+
+   // Tile delivery rate limits
+   static const U32 TILES_PER_TICK_FOW  = 1;   // Slow rate for fog-of-war
+   static const U32 TILES_PER_TICK_NORM = 5;   // Faster for non-FOW levels
+   static const F32 SCOPE_RADIUS;              // Tile scope radius, defined in gameType.cpp
+
+#ifndef ZAP_DEDICATED
+   // Client-side storage for tiled wall polygons received via s2cSendWallTile
+   static Vector<WallPoly> smReceivedTilePolys;
+#endif
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
@@ -80,6 +106,9 @@ private:
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
+
+   // Fog of war mode as specified in the level file
+   FogOfWar mFogOfWarMode;
 
    // Info about current level
    string mLevelName;
@@ -134,6 +163,9 @@ public:
 
    const char *getGameTypeName() const;
 
+   static void clearTilePolys();
+   static const Vector<WallPoly> &getTilePolys();
+
    virtual GameTypeId getGameTypeId() const;
    virtual const char *getShortName() const;          // Will be overridden by other games
    virtual const char **getInstructionString() const; //          -- ditto --
@@ -179,6 +211,7 @@ public:
    S32 getSecondLeadingPlayer() const;
 
    bool addWall(const WallRec &barrier, Game *game);
+   const Vector<MapTile> &getmapTiles() const { return mmapTiles; }
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
@@ -308,6 +341,10 @@ public:
    bool areBotsAllowed() const;
    void setBotsAllowed(bool allowed);
 
+   FogOfWar getFogOfWarMode() const;
+   void setFogOfWarMode(FogOfWar mode);
+   bool isFogOfWarEnabled() const;       // Resolves Default based on game mode
+
    string getScriptLine() const;
    void setScript(const Vector<string> &args);
 
@@ -388,8 +425,10 @@ public:
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount,
-                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
+                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
+                                     bool fogOfWarEnabled));
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
+   TNL_DECLARE_RPC(s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges,
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,

@@ -18,6 +18,7 @@ class BfObject;
 class BotNavMeshZone;
 class DatabaseObject;
 class Rect;
+struct MapTile;
 
 class DebugOverlayRenderer
 {
@@ -26,6 +27,7 @@ private:
    bool mDebugShowObjectIds = false;
    bool mDebugShowMeshZones = false;
    bool mShowDebugBots = false;
+   bool mDebugShowMapTiles = false;
 
    Vector<DatabaseObject *> mRawRenderObjects;
    Vector<BotNavMeshZone *> mRenderZones;
@@ -35,11 +37,13 @@ public:
    void toggleShowingObjectIds();
    void toggleShowingMeshZones();
    void toggleShowDebugBots();
+   void toggleShowingMapTiles();
 
    bool isShowingDebugShipCoords() const;
    bool renderingObjectIds() const;
    bool renderingMeshZones() const;
    bool renderingBotPaths() const;
+   bool renderingMapTiles() const;
 
    void appendBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects) const;
    void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL);
@@ -47,6 +51,7 @@ public:
    void renderDebugStatus() const;
    void renderObjectIds(const ClientGame *game) const;
    void renderMeshZones(S32 layer) const;
+   void renderMapTiles(const ClientGame *game) const;
 };
 
 }

@@ -106,6 +106,7 @@ namespace Zap
 #ifdef TNL_DEBUG
    { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },     0, DEVELOPER_COMMANDS, 1, 1, { },                 "Show HelpItem object outlines on all objects" },
    { "showhelpitem",       &ChatCommands::showHelpItemHandler,       { xINT }, 0, DEVELOPER_COMMANDS, 1, 1, {"<help item id>" }, "Show specified help item" },
+   { "showtiles",          &ChatCommands::showMapTilesHandler,       {  },     0, DEVELOPER_COMMANDS, 0, 1, { },                "Show map tile grid and data" },
 #endif
 };
 

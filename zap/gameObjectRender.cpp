@@ -2577,6 +2577,83 @@ void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Colo
 }
 
 
+/// Render tiled wall geometry received via s2cSendWallTile.
+/// Each poly is filled, then only edges with outline[i]==true are drawn
+/// (edges introduced by tile clipping have outline[i]==false and are skipped).
+/// Objects must be in rendering order (behind objects).
+void renderTilePolys(const Vector<WallPoly> &tilePolys, const Color &fillColor, const Color &outlineColor)
+{
+   if(tilePolys.size() == 0)
+      return;
+
+   Renderer &r = Renderer::get();
+
+   // Pass 1: fill all polys.  Merged wall polygons can be concave,
+   // so we triangulate instead of using TriangleFan.
+   r.setColor(fillColor);
+   for(S32 i = 0; i < tilePolys.size(); i++)
+   {
+      const WallPoly &wp = tilePolys[i];
+      U32 n = wp.numVerts();
+      if(n < 3)
+         continue;
+
+      Vector<Point> contour;
+      contour.reserve(n);
+      for(U32 v = 0; v < n; v++)
+         contour.push_back(Point(wp.verts[v * 2], wp.verts[v * 2 + 1]));
+
+      // Strip colinear vertices (introduced by tile-boundary clipping)
+      // so ear-clipping triangulation doesn't fail on them.
+      {
+         Vector<Point> cleaned;
+         S32 cn = contour.size();
+         for(S32 c = 0; c < cn; c++)
+         {
+            const Point &prev = contour[(c + cn - 1) % cn];
+            const Point &curr = contour[c];
+            const Point &next = contour[(c + 1) % cn];
+            F32 cross = (curr.x - prev.x) * (next.y - curr.y)
+                      - (curr.y - prev.y) * (next.x - curr.x);
+            if(fabs(cross) > 0.000001f)  // not colinear
+               cleaned.push_back(curr);
+         }
+         if(cleaned.size() >= 3)
+            contour = cleaned;
+      }
+
+      Vector<Point> triPts;
+      if(Triangulate::Process(contour, triPts))
+         r.renderPointVector(&triPts, RenderType::Triangles);
+   }
+
+   // Pass 2: draw outline edges (only where outline[i] == true)
+   r.setColor(outlineColor);
+   for(S32 i = 0; i < tilePolys.size(); i++)
+   {
+      const WallPoly &wp = tilePolys[i];
+      U32 n = wp.numVerts();
+      if(n < 3)
+         continue;
+
+      Vector<Point> visibleEdges;
+      for(U32 v = 0; v < n; v++)
+      {
+         // Only draw edges marked as original (not clip-introduced)
+         if(v < wp.outline.size() && wp.outline[v])
+         {
+            U32 v0 = v * 2;
+            U32 v1 = ((v + 1) % n) * 2;
+            visibleEdges.push_back(Point(wp.verts[v0], wp.verts[v0 + 1]));
+            visibleEdges.push_back(Point(wp.verts[v1], wp.verts[v1 + 1]));
+         }
+      }
+      if(visibleEdges.size() > 0)
+         r.renderPointVector(&visibleEdges, RenderType::Lines);
+   }
+}
+
+
 void renderSpeedZone(const Vector<Point> &points, U32 time)
 {
    Renderer& r = Renderer::get();

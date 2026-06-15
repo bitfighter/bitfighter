@@ -14,18 +14,19 @@
 #include "GeomUtils.h"
 #include "IniFile.h"          // For CIniFile
 #include "ServerGame.h"
+#include "gameConnection.h"
 #include "robot.h"
 #include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
 #include "LineEditorFilterEnum.h"
-#include "game.h"
-#include "GameRecorder.h"
 #include "Teleporter.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
 #  include "ClientGame.h"
+#  include "UIManager.h"
 #  include "UIMenus.h"
+#  include "UIGame.h"
 #endif
 
 #include "masterConnection.h"
@@ -61,6 +62,7 @@ static const char *gameTypeClassNames[] = {
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 const S32 GameType::MaxMenuScore = 1000;
+const F32 GameType::SCOPE_RADIUS = 300.0f;
 
 // Constructor
 GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mGameTimeUpdateTimer(THIRTY_SECONDS)
@@ -92,6 +94,12 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
+
+   mFogOfWarMode = FogOfWar::DEFAULT;
+
+   mTileSize   = 0;
+   mGridWidth  = 0;
+   mGridHeight = 0;
 
    mTotalGamePlay = 0;
    mEndingGamePlay = DefaultGameTime;
@@ -179,7 +187,8 @@ Vector<string> GameType::getGameParameterMenuKeys()
       "Min Players",
       "Max Players",
       "Allow Engr",
-      "Allow Robots"
+      "Allow Robots",
+      "FogOfWar"
    };
 
    return Vector<string> (vals, ARRAYSIZE(vals));
@@ -247,6 +256,19 @@ shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
          return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Robots:",
                                                               mBotsAllowed,
                                                               "Allow players to add robots?"));
+   else if(key == "FogOfWar")
+   {
+      Vector<string> fowOptions;
+      fowOptions.push_back("Default");
+      fowOptions.push_back("Yes");
+      fowOptions.push_back("No");
+      return shared_ptr<MenuItem>(new ToggleMenuItem("Fog Of War:",
+                                                           fowOptions,
+                                                           static_cast<U32>(mFogOfWarMode),
+                                                           true,
+                                                           NULL,
+                                                           "Fog of War: Yes=enabled, No=disabled, Default=auto based on game"));
+   }
    else
    {
       TNLAssert(false, "Invalid menu key!");
@@ -277,6 +299,8 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       setEngineerEnabled(menuItem->getIntValue());
    else if(key == "Allow Robots")
       setBotsAllowed(menuItem->getIntValue());
+   else if(key == "FogOfWar")
+      setFogOfWarMode(static_cast<FogOfWar>(menuItem->getIntValue()));
    else
       return false;
 
@@ -538,6 +562,10 @@ void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 
 void GameType::idle_server(U32 deltaT)
 {
+   // Deliver pending wall tiles to connected clients
+   if(mmapTiles.size() > 0)
+      deliverWallTileTick();
+
    queryItemsOfInterest();
 
    bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
@@ -1143,8 +1171,66 @@ void GameType::onLevelLoaded()
 
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
 
+   // Build tiled wall geometry for this level
+   buildmapTiles();
+
    //--> bots should be started when added to game; with this line, they are started twice!
    //static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up  --> bots should be started when added to game
+}
+
+
+/// Collect all barrier outlines from the game database and build the
+/// tiled wall representation.  The resulting tiles are stored in mmapTiles
+/// for later delivery (Phase 2).
+void GameType::buildmapTiles()
+{
+   mmapTiles.clear();
+
+   Vector<DatabaseObject *> barriers;
+   mGame->getGameObjDatabase()->findObjects((TestFunc)isWallType, barriers);
+
+   if (barriers.size() == 0)
+      return;
+
+   // Determine level bounds from barrier extents
+   Rect levelBounds = mGame->computeBarrierExtents();
+
+   // Pad bounds slightly to avoid edge cases
+   levelBounds.expand(Point(10, 10));
+
+   // Collect all barrier collision polygons and merge them into a unionized
+   // set (via mergePolys).  This eliminates interior edges between adjacent
+   // wall segments (e.g. spline walls), matching what Barrier::unionBarriers
+   // already does for the old rendering system.
+   Vector<const Vector<Point> *> inputPolygons;
+   for (S32 i = 0; i < barriers.size(); i++)
+   {
+      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
+      if (barrier)
+      {
+         const Vector<Point> *poly = barrier->getCollisionPoly();
+         if (poly && poly->size() >= 3)
+            inputPolygons.push_back(poly);
+      }
+   }
+
+   Vector<Vector<Point> > mergedPolys;
+   mergePolys(inputPolygons, mergedPolys);
+
+   MapTileBuilder builder(levelBounds, 200);
+
+   for (S32 i = 0; i < mergedPolys.size(); i++)
+      builder.addWallPolygon(mergedPolys[i]);
+
+   builder.build(mmapTiles);
+
+   // Store tile metadata for use in scope calculations during delivery
+   mTileSize   = builder.getTileSize();
+   mGridWidth  = builder.getGridWidth();
+   mGridHeight = builder.getGridHeight();
+
+   logprintf(LogConsumer::LogInfo, "Built %d wall tiles (tile size=%u, grid=%dx%d)",
+      mmapTiles.size(), mTileSize, mGridWidth, builder.getGridHeight());
 }
 
 
@@ -2094,10 +2180,12 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                                 StringTableEntry levelCreds, S32 objectCount,
-                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
+                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
+                                                bool fogOfWarEnabled),
                                             (levelName, levelDesc, musicName, teamScoreLimit,
                                                 levelCreds, objectCount,
-                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
+                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId,
+                                                fogOfWarEnabled))
 {
 #ifndef ZAP_DEDICATED
    setLevelName(levelName);
@@ -2113,6 +2201,12 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringP
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;
+
+   // Store fog of war flag so client knows whether it's enabled
+   mFogOfWarMode = fogOfWarEnabled ? FogOfWar::YES : FogOfWar::NO;
+
+   // Clear any wall tiles from the previous level
+   clearTilePolys();
 
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->startLoadingLevel(engineerEnabled);
@@ -2568,7 +2662,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
    s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, mGame->mObjectsLoaded,
-                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
+                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId(),
+                   isFogOfWarEnabled());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2605,17 +2700,31 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    //}
 
-   // Sending an empty list clears the barriers
-   // FIXME:  Why is this the chosen mechanism to do this?
-   Vector<F32> v;
-   s2cAddWalls(v, 0, false);
-
-   for(S32 i = 0; i < mWalls.size(); i++)
+   // If we have tiled wall data, use tile-based delivery instead of the old s2cAddWalls
+   GameConnection *gc = static_cast<GameConnection *>(theConnection);
+   if(mmapTiles.size() > 0)
    {
-      // If players somehow create 0-point walls, don't send them to the client
-      // or it will remove all walls previously added
-      if(mWalls[i].verts.size() != 0)
-         s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+      U16 tileCount = static_cast<U16>(mGridWidth * mGridHeight);
+      gc->mWallDelivery.init(tileCount);
+
+      if(!isFogOfWarEnabled())
+      {
+         // Non-FOW: enqueue all tiles immediately (drained per-tick at NORM rate)
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+            gc->mWallDelivery.pending.push_back(mmapTiles[t].tileId);
+      }
+      // FOW mode: tiles are enqueued per-tick based on player position
+   }
+   else
+   {
+      // Fall back to old wall delivery for levels without tiles
+      Vector<F32> v;
+      s2cAddWalls(v, 0, false);
+      for(S32 i = 0; i < mWalls.size(); i++)
+      {
+         if(mWalls[i].verts.size() != 0)
+            s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+      }
    }
 
    broadcastNewRemainingTime();
@@ -2668,6 +2777,249 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width
    {
       WallRec wall(width, solid, verts);
       wall.constructWalls(mGame);
+   }
+}
+
+
+/// Send one tile's worth of wall polygons to the client.
+/// allVerts / allOutline / polySizes are concatenated data for all polys in the tile.
+/// Client reconstructs polys from polySizes boundaries.
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes), (tileId, polyCount, allVerts, allOutline, polySizes), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+{
+#ifndef ZAP_DEDICATED
+   // First tile received: clear old wall geometry
+   if(smReceivedTilePolys.size() == 0)
+   {
+      mGame->deleteObjects((TestFunc)isWallType);
+      clearTilePolys();
+      // World extents will be rebuilt from tile vertex data below
+   }
+
+   // Parse flat vectors back into WallPoly objects and expand world extents.
+   // Initialize to an inverted rect: min holds the largest possible value,
+   // max holds the smallest, so the first vertex will set both correctly.
+   // NOTE: must set min/max directly — Rect::set(Point, Point) swaps them
+   // to keep min < max, which would produce (-F32_MAX..F32_MAX) and defeat
+   // the sentinel logic below.
+   Rect tileBounds;     // Actual bounds of the data on the tile, not the tile itself
+   tileBounds.min.set(F32_MAX,  F32_MAX);
+   tileBounds.max.set(-F32_MAX, -F32_MAX);
+   bool hasTileData = false;
+
+   U32 vertOff = 0, outlineOff = 0;
+   for(U16 p = 0; p < polyCount; p++)
+   {
+      U32 n = polySizes[p];
+      if(n < 3)
+      {
+         vertOff += n * 2;
+         outlineOff += n;
+         continue;
+      }
+
+      WallPoly wp;
+      wp.verts.reserve(n * 2);
+      wp.outline.reserve(n);
+      for(U32 v = 0; v < n * 2; v++)
+      {
+         F32 val = allVerts[vertOff++];
+         wp.verts.push_back(val);
+      }
+      for(U32 b = 0; b < n; b++)
+         wp.outline.push_back(allOutline[outlineOff++]);
+
+      // Expand tile bounds from this poly's vertices
+      for(U32 v = 0; v < wp.verts.size(); v += 2)
+      {
+         F32 vx = wp.verts[v];
+         F32 vy = wp.verts[v + 1];
+         if(vx < tileBounds.min.x) tileBounds.min.x = vx;
+         if(vy < tileBounds.min.y) tileBounds.min.y = vy;
+         if(vx > tileBounds.max.x) tileBounds.max.x = vx;
+         if(vy > tileBounds.max.y) tileBounds.max.y = vy;
+      }
+      hasTileData = true;
+
+      smReceivedTilePolys.push_back(std::move(wp));
+   }
+
+   // Expand the world extents to include this tile's vertex bounds
+   if(hasTileData)
+   {
+      Rect curExtents = *mGame->getWorldExtents();
+      curExtents.unionRect(tileBounds);
+      mGame->setWorldExtents(curExtents);
+
+      // Also expand the display extents (mDispWorldExtents) so the
+      // commander's map shows the full tiled area immediately.
+      ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+      if(clientGame && clientGame->getUIManager())
+         clientGame->getUIManager()->getUI<GameUserInterface>()->expandDispWorldExtents(tileBounds);
+   }
+
+   logprintf(LogConsumer::LogInfo, "Received wall tile %d with %d polys (%d total polys stored)",
+      tileId, polyCount, smReceivedTilePolys.size());
+#endif
+}
+
+
+#ifndef ZAP_DEDICATED
+Vector<WallPoly> GameType::smReceivedTilePolys;
+
+void GameType::clearTilePolys()
+{
+   smReceivedTilePolys.clear();
+}
+
+const Vector<WallPoly> &GameType::getTilePolys()
+{
+   return smReceivedTilePolys;
+}
+#endif
+
+
+/// Compute squared distance from a point to a tile's center.
+static F32 distSqToTileCenter(const Point &pos, const MapTile &tile)
+{
+   Point center(
+      (tile.bounds.min.x + tile.bounds.max.x) * 0.5f,
+      (tile.bounds.min.y + tile.bounds.max.y) * 0.5f);
+   return (pos - center).lenSquared();
+}
+
+
+/// Per-tick delivery: for each connection, enqueue tiles that are now in
+/// scope (FOW) or drain the pre-filled queue (non-FOW), then send up to
+/// the appropriate rate limit.
+void GameType::deliverWallTileTick()
+{
+   const bool fowEnabled = isFogOfWarEnabled();
+   const U32 tilesPerTick = fowEnabled ? TILES_PER_TICK_FOW : TILES_PER_TICK_NORM;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      if(!clientInfo || clientInfo->isRobot())
+         continue;
+
+      GameConnection *conn = clientInfo->getConnection();
+      if(!conn || !conn->isEstablished())
+         continue;
+
+      GameConnection::WallDeliveryState &wd = conn->mWallDelivery;
+
+      // ---- FOW: enqueue tiles now in scope that haven't been sent yet ----
+      if(fowEnabled)
+      {
+         BfObject *ctrl = conn->getControlObject();
+         if(!ctrl)
+            continue;
+
+         Point shipPos = ctrl->getPos();
+
+         // Scope radius controls how far from the ship tiles are sent.
+         // Smaller = tighter fog of war; tiles outside this radius are withheld.
+         F32 scopeRad = SCOPE_RADIUS;
+         F32 scopeRadSq = scopeRad * scopeRad;
+
+         // Scan all tiles — find un-sent tiles within scope, compute distance
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+         {
+            const MapTile &tile = mmapTiles[t];
+
+            // Quick AABB check: is the ship within scopeRad of the tile bounds?
+            F32 cx = (tile.bounds.min.x + tile.bounds.max.x) * 0.5f;
+            F32 cy = (tile.bounds.min.y + tile.bounds.max.y) * 0.5f;
+            F32 halfW = (tile.bounds.max.x - tile.bounds.min.x) * 0.5f;
+            F32 halfH = (tile.bounds.max.y - tile.bounds.min.y) * 0.5f;
+            F32 dx = max(0.0f, fabs(shipPos.x - cx) - halfW);
+            F32 dy = max(0.0f, fabs(shipPos.y - cy) - halfH);
+            if(dx * dx + dy * dy > scopeRadSq)
+               continue;   // Tile too far
+
+            if(tile.tileId >= wd.sentTiles.size())
+               continue;
+            if(wd.sentTiles[tile.tileId])
+               continue;   // Already sent
+
+            // Mark as sent immediately (prevents re-enqueue)
+            wd.sentTiles[tile.tileId] = true;
+
+            // Insert into pending sorted by distance (closest-first insertion sort)
+            F32 tileDistSq = distSqToTileCenter(shipPos, tile);
+            U32 insertIdx = 0;
+            while(insertIdx < wd.pending.size())
+            {
+               // Compute distance for the tile already in the list
+               const MapTile *cmpTile = NULL;
+               for(S32 tt = 0; tt < mmapTiles.size(); tt++)
+               {
+                  if(mmapTiles[tt].tileId == wd.pending[insertIdx])
+                  {  cmpTile = &mmapTiles[tt]; break; }
+               }
+               F32 cmpDist = cmpTile ? distSqToTileCenter(shipPos, *cmpTile) : F32_MAX;
+               if(tileDistSq <= cmpDist)
+                  break;
+               insertIdx++;
+            }
+            wd.pending.insert(insertIdx, tile.tileId);
+         }
+      }
+
+      // ---- Drain pending queue ----
+      U32 sentThisTick = 0;
+
+      while(sentThisTick < tilesPerTick && wd.pending.size() > 0)
+      {
+         U16 tileId = wd.pending[0];
+         wd.pending.erase(0);
+
+         // Look up the tile data by actual tileId
+         const MapTile *tile = NULL;
+         for(S32 t = 0; t < mmapTiles.size(); t++)
+         {
+            if(mmapTiles[t].tileId == tileId)
+            {
+               tile = &mmapTiles[t];
+               break;
+            }
+         }
+
+         if(!tile || tile->polys.size() == 0)
+            continue;   // No wall data for this tile
+
+         // Concatenate all polys into flat vectors
+         Vector<F32> allVerts;
+         Vector<bool> allOutline;
+         Vector<U32> polySizes;
+
+         for(S32 p = 0; p < tile->polys.size(); p++)
+         {
+            const WallPoly &wp = tile->polys[p];
+            polySizes.push_back(wp.numVerts());
+            for(S32 v = 0; v < wp.verts.size(); v++)
+               allVerts.push_back(wp.verts[v]);
+            for(S32 b = 0; b < wp.outline.size(); b++)
+               allOutline.push_back(wp.outline[b]);
+         }
+
+         // Skip tiles whose polys have no original edges — interior
+         // fills where every edge lies on a tile boundary.
+         bool hasOutline = false;
+         for(U32 b = 0; b < allOutline.size(); b++)
+         {
+            if(allOutline[b]) { hasOutline = true; break; }
+         }
+         if(!hasOutline)
+            continue;
+
+         // Send via RPC directed to this connection
+         NetObject::setRPCDestConnection(conn);
+         s2cSendWallTile(tileId, static_cast<U16>(tile->polys.size()), allVerts, allOutline, polySizes);
+         NetObject::setRPCDestConnection(NULL);
+
+         sentThisTick++;
+      }
    }
 }
 
@@ -4184,6 +4536,31 @@ bool GameType::areBotsAllowed() const
 void GameType::setBotsAllowed(bool allowed)
 {
    mBotsAllowed = allowed;
+}
+
+
+FogOfWar GameType::getFogOfWarMode() const
+{
+   return mFogOfWarMode;
+}
+
+
+void GameType::setFogOfWarMode(FogOfWar mode)
+{
+   mFogOfWarMode = mode;
+}
+
+
+// Resolves Default mode based on whether this is an xtank game or bitfighter game
+bool GameType::isFogOfWarEnabled() const
+{
+   if(mFogOfWarMode == FogOfWar::YES)
+      return true;
+   if(mFogOfWarMode == FogOfWar::NO)
+      return false;
+
+   // Default: enabled for xtank, disabled for bitfighter
+   return mGame && mGame->isXtankModeGame();
 }
 
 

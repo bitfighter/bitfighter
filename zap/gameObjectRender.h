@@ -12,6 +12,7 @@
 
 #include "Geometry.h"
 
+#include "MapTile.h"    // For WallPoly
 #include "Rect.h"
 #include "Color.h"
 #include "SharedConstants.h"     // For MeritBadges enum
@@ -229,6 +230,9 @@ extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);  // Another s
 // Wall rendering
 void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha = 1.0);
 void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
+
+// Tiled wall rendering
+void renderTilePolys(const Vector<WallPoly> &tilePolys, const Color &fillColor, const Color &outlineColor);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(const Vector<Point> &pts, U32 time);

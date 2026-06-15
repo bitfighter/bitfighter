@@ -345,6 +345,23 @@ public:
    void onConnectionEstablished_client();
    void onConnectionEstablished_server();
 
+   // Per-connection state for tile-based wall delivery
+   struct WallDeliveryState {
+      Vector<U16> pending;           // tileIds queued for delivery (closest-first)
+      Vector<bool> sentTiles;        // sentTiles[tileId] == true once delivered
+      U32 totalTiles;                // Total number of tiles in the grid (for sentTiles sizing)
+
+      void init(U32 tileCount) {
+         pending.clear();
+         sentTiles.clear();
+         sentTiles.resize(tileCount);
+         for(U32 i = 0; i < tileCount; i++)
+            sentTiles[i] = false;
+         totalTiles = tileCount;
+      }
+   };
+   WallDeliveryState mWallDelivery;
+
    void onConnectTerminated(TerminationReason r, const char *notUsed);
    void onConnectionTerminated(TerminationReason r, const char *string);
    void disconnect(TerminationReason r, const char *reason);

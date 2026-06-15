@@ -315,6 +315,7 @@ public:
    virtual void setPreviousLevelName(const string &name);
 
    void computeWorldObjectExtents();
+   void setWorldExtents(const Rect &extents) { mWorldExtents = extents; }
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;

@@ -358,6 +358,13 @@ void showZonesHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+void showMapTilesHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(isLocalTestServer(game, "!!! Map tiles can only be displayed on a test server"))
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMapTiles();
+}
+
+
 // Will work on any server, but offers advantage of being able to see out-of-scope bots; increases network traffic somewhat
 void showBotsHandler(ClientGame *game, const Vector<string> &words)
 {

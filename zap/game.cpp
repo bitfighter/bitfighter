@@ -884,6 +884,20 @@ bool Game::processLevelParam(S32 argc, const char **argv, S32 lineNum)
       if(argc > 1)
          getGameType()->setMaxRecPlayers(atoi(argv[1]));
    }
+   else if(!stricmp(argv[0], "FogOfWar"))
+   {
+      if(argc > 1)
+      {
+         if(!stricmp(argv[1], "Yes"))
+            getGameType()->setFogOfWarMode(FogOfWar::YES);
+         else if(!stricmp(argv[1], "No"))
+            getGameType()->setFogOfWarMode(FogOfWar::NO);
+         else
+            getGameType()->setFogOfWarMode(FogOfWar::DEFAULT);
+      }
+      else
+         getGameType()->setFogOfWarMode(FogOfWar::DEFAULT);
+   }
    else
       return false;     // Line not processed; perhaps the caller can handle it?
 
@@ -919,6 +933,17 @@ string Game::toLevelCode() const
 
    str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
+
+   // Write FogOfWar line
+   {
+      FogOfWar fow = gameType->getFogOfWarMode();
+      if(fow == FogOfWar::YES)
+         str += "FogOfWar Yes\n";
+      else if(fow == FogOfWar::NO)
+         str += "FogOfWar No\n";
+      else
+         str += "FogOfWar Default\n";
+   }
 
    return str;
 }
