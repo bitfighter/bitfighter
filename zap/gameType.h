@@ -213,6 +213,11 @@ public:
    bool addWall(const WallRec &barrier, Game *game);
    const Vector<MapTile> &getmapTiles() const { return mmapTiles; }
 
+   /// Rebuild tiled wall geometry from the current barrier database and
+   /// reset per-connection delivery state so tiles are re-sent to all clients.
+   /// Call this after adding/removing walls at runtime.
+   void rebuildWallTiles();
+
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
 
@@ -427,8 +432,7 @@ public:
                                      StringTableEntry levelCreds, S32 objectCount,
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
                                      bool fogOfWarEnabled));
-   TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
-   TNL_DECLARE_RPC(s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes));
+   TNL_DECLARE_RPC(s2cSendWallTile, (U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges,
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,

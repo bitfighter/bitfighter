@@ -1234,6 +1234,106 @@ void GameType::buildmapTiles()
 }
 
 
+/// Compare two WallPoly objects for identical vertex/outline data.
+static bool wallPolyEqual(const WallPoly &a, const WallPoly &b)
+{
+   if(a.verts.size() != b.verts.size())
+      return false;
+   if(a.outline.size() != b.outline.size())
+      return false;
+   for(S32 v = 0; v < a.verts.size(); v++)
+      if(a.verts[v] != b.verts[v])
+         return false;
+   for(S32 o = 0; o < a.outline.size(); o++)
+      if(a.outline[o] != b.outline[o])
+         return false;
+   return true;
+}
+
+
+/// Compare two MapTile objects for identical geometry.
+static bool mapTilePolyEqual(const MapTile &a, const MapTile &b)
+{
+   if(a.polys.size() != b.polys.size())
+      return false;
+   for(S32 p = 0; p < a.polys.size(); p++)
+      if(!wallPolyEqual(a.polys[p], b.polys[p]))
+         return false;
+   return true;
+}
+
+
+/// Find the old tile whose absolute grid position matches the new tile's.
+/// gridX/gridY are anchored to world (0,0) so they stay stable across
+/// rebuilds even if level bounds shift — unlike tileId which depends on
+/// the grid origin (levelBounds.min).
+static const MapTile *findOldTileByGridPos(const MapTile &newTile,
+                                           const Vector<MapTile> &oldTiles)
+{
+   for(S32 o = 0; o < oldTiles.size(); o++)
+      if(oldTiles[o].gridX == newTile.gridX &&
+         oldTiles[o].gridY == newTile.gridY)
+         return &oldTiles[o];
+   return NULL;
+}
+
+
+/// Rebuild tiled wall geometry from the current barrier database and reset
+/// per-connection delivery state so only changed tiles are re-sent.
+/// Call this after adding/removing walls at runtime.
+void GameType::rebuildWallTiles()
+{
+   // Snapshot old tiles for change detection
+   Vector<MapTile> oldTiles = mmapTiles;
+
+   buildmapTiles();
+
+   // Collect tileIds of new/changed tiles by comparing with old snapshots.
+   // Only these will be queued for re-delivery.
+   //
+   // We match by the absolute grid position (gridX/gridY) rather than
+   // tileId because buildmapTiles() recomputes the tile grid from current
+   // barrier extents.  If adds/removes shift the level bounds, the grid
+   // origin may move and tileId changes — but gridX/gridY are anchored to
+   // world (0,0) and stay stable.
+   Vector<U16> changedTileIds;
+   for(S32 t = 0; t < mmapTiles.size(); t++)
+   {
+      const MapTile &newTile = mmapTiles[t];
+
+      const MapTile *oldTile = findOldTileByGridPos(newTile, oldTiles);
+
+      // Truly new tile, or geometry changed → queue for re-delivery
+      if(!oldTile || !mapTilePolyEqual(newTile, *oldTile))
+         changedTileIds.push_back(newTile.tileId);
+   }
+
+   // Reset delivery state for all non-robot connections
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      if(!clientInfo || clientInfo->isRobot())
+         continue;
+
+      GameConnection *conn = clientInfo->getConnection();
+      if(!conn || !conn->isEstablished())
+         continue;
+
+      // Re-initialize delivery state with current tile grid dimensions
+      U16 tileCount = static_cast<U16>(mGridWidth * mGridHeight);
+      conn->mWallDelivery.init(tileCount);
+
+      // In non-FOW mode, enqueue only the changed tiles
+      if(!isFogOfWarEnabled())
+      {
+         for(S32 c = 0; c < changedTileIds.size(); c++)
+            conn->mWallDelivery.pending.push_back(changedTileIds[c]);
+      }
+      // In FOW mode, tiles will be enqueued per-tick based on player position
+   }
+}
+
+
 bool GameType::hasFlagSpawns() const       {   return mLevelHasFlagSpawns;         }
 bool GameType::hasPredeployedFlags() const {   return mLevelHasPredeployedFlags;   }
 
@@ -2700,7 +2800,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    //}
 
-   // If we have tiled wall data, use tile-based delivery instead of the old s2cAddWalls
+   // Use tile-based wall delivery
    GameConnection *gc = static_cast<GameConnection *>(theConnection);
    if(mmapTiles.size() > 0)
    {
@@ -2714,17 +2814,6 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
             gc->mWallDelivery.pending.push_back(mmapTiles[t].tileId);
       }
       // FOW mode: tiles are enqueued per-tick based on player position
-   }
-   else
-   {
-      // Fall back to old wall delivery for levels without tiles
-      Vector<F32> v;
-      s2cAddWalls(v, 0, false);
-      for(S32 i = 0; i < mWalls.size(); i++)
-      {
-         if(mWalls[i].verts.size() != 0)
-            s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
-      }
    }
 
    broadcastNewRemainingTime();
@@ -2766,25 +2855,10 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 }
 
 
-// Gets called multiple times as barriers are added
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
-{
-   // Empty wall deletes all existing walls, called by the server at the beginning
-   // of a level to remove all walls from the ClientGame
-   if(!verts.size())
-      mGame->deleteObjects((TestFunc)isWallType);
-   else
-   {
-      WallRec wall(width, solid, verts);
-      wall.constructWalls(mGame);
-   }
-}
-
-
 /// Send one tile's worth of wall polygons to the client.
 /// allVerts / allOutline / polySizes are concatenated data for all polys in the tile.
 /// Client reconstructs polys from polySizes boundaries.
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes), (tileId, polyCount, allVerts, allOutline, polySizes), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes), (polyCount, allVerts, allOutline, polySizes), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
    // First tile received: clear old wall geometry
@@ -2857,8 +2931,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
          clientGame->getUIManager()->getUI<GameUserInterface>()->expandDispWorldExtents(tileBounds);
    }
 
-   logprintf(LogConsumer::LogInfo, "Received wall tile %d with %d polys (%d total polys stored)",
-      tileId, polyCount, smReceivedTilePolys.size());
+   logprintf(LogConsumer::LogInfo, "Received wall tile with %d polys (%d total polys stored)",
+      polyCount, smReceivedTilePolys.size());
 #endif
 }
 
@@ -3015,7 +3089,7 @@ void GameType::deliverWallTileTick()
 
          // Send via RPC directed to this connection
          NetObject::setRPCDestConnection(conn);
-         s2cSendWallTile(tileId, static_cast<U16>(tile->polys.size()), allVerts, allOutline, polySizes);
+         s2cSendWallTile(static_cast<U16>(tile->polys.size()), allVerts, allOutline, polySizes);
          NetObject::setRPCDestConnection(NULL);
 
          sentThisTick++;
@@ -4559,8 +4633,8 @@ bool GameType::isFogOfWarEnabled() const
    if(mFogOfWarMode == FogOfWar::NO)
       return false;
 
-   // Default: enabled for xtank, disabled for bitfighter
-   return mGame && mGame->isXtankModeGame();
+   // Default: disabled
+   return false;
 }
 
 

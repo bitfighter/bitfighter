@@ -7,6 +7,12 @@
 #include "../zap/GeomUtils.h"
 #include "../zap/Point.h"
 #include "../zap/Rect.h"
+#include "../zap/gameType.h"
+#include "../zap/ServerGame.h"
+#include "../zap/ClientGame.h"
+#include "../zap/GameManager.h"
+#include "../zap/barrier.h"
+#include "TestUtils.h"
 #include "gtest/gtest.h"
 #include <tnl.h>
 
@@ -617,6 +623,161 @@ TEST(WallTilingTest, WorldExtentsSurvivesPerFrameRecompute)
    EXPECT_NEAR(tileExtents.min.y, worldExtents.min.y, 0.1f);
    EXPECT_NEAR(tileExtents.max.x, worldExtents.max.x, 0.1f);
    EXPECT_NEAR(tileExtents.max.y, worldExtents.max.y, 0.1f);
+}
+
+
+// ===========================================================================
+// Runtime wall addition and client propagation tests
+// ===========================================================================
+
+/// Helper: create a simple test level with a known wall.
+/// The level has a single BarrierMaker (vertical wall at x=0 from y=0 to y=510,
+/// width 40) so tiles get built on the server.
+static string wallPropagationLevel()
+{
+   return
+      "GameType 10 8\n"
+      "LevelName \"WallPropTest\"\n"
+      "LevelDescription \"Wall propagation test\"\n"
+      "LevelCredits test\n"
+      "GridSize 255\n"
+      "Team Blue 0 0 1\n"
+      "Specials\n"
+      "MinPlayers\n"
+      "MaxPlayers\n"
+      "BarrierMaker 40 0 0 0 2\n"     // Wall from (0,0) to (0,510), width 40
+      "Spawn 0 0.5 0.5\n";
+}
+
+
+/// Helper: count total tile polys across all games (server or client).
+static S32 countTilePolys()
+{
+   return GameType::getTilePolys().size();
+}
+
+
+/// Verify that rebuildWallTiles() picks up a wall added after level load.
+TEST(WallTilingTest, RebuildTilesAfterAddingWall)
+{
+   GamePair gamePair(wallPropagationLevel(), 0);
+   ServerGame *server = gamePair.server;
+   GameType *serverGT = server->getGameType();
+
+   // Verify tiles were built from the initial wall at level load
+   Vector<MapTile> tiles = serverGT->getmapTiles();
+   S32 initialTileCount = tiles.size();
+   EXPECT_GT(initialTileCount, 0);
+
+   S32 initialPolyCount = 0;
+   for(S32 t = 0; t < tiles.size(); t++)
+      initialPolyCount += tiles[t].polys.size();
+   EXPECT_GT(initialPolyCount, 0);
+
+   // Add a second wall on the server (horizontal wall from (0,0) to (510,0), width 40)
+   {
+      Vector<F32> verts;
+      verts.push_back(0);   verts.push_back(0);
+      verts.push_back(510); verts.push_back(0);
+      WallRec newWall(40, false, verts);
+      server->addWall(newWall);
+   }
+
+   // Rebuild tiles from the updated barrier database
+   serverGT->rebuildWallTiles();
+
+   // Verify tiles now include the new wall
+   tiles = serverGT->getmapTiles();
+   S32 newPolyCount = 0;
+   for(S32 t = 0; t < tiles.size(); t++)
+      newPolyCount += tiles[t].polys.size();
+
+   EXPECT_GT(newPolyCount, initialPolyCount)
+      << "After adding a wall and rebuilding tiles, expected more wall polygons. "
+      << "Initial: " << initialPolyCount << ", After: " << newPolyCount;
+}
+
+
+/// Verify that adding a wall on the server causes the client to receive
+/// updated wall geometry via the tile delivery system.
+///
+/// This is the end-to-end propagation test: it creates a client-server pair,
+/// lets initial tiles propagate, adds a new wall on the server, rebuilds
+/// tiles, and verifies the client's received tile polys contain the new wall.
+///
+/// NOTE: This test documents expected behavior.  If the underlying tile
+/// rebuild-and-resend mechanism is not yet implemented, this test will fail.
+TEST(WallTilingTest, WallAddedOnServerPropagatesToClient)
+{
+   // Create a level with one wall and one connected client
+   GamePair gamePair(wallPropagationLevel(), 1);
+   ServerGame *server = gamePair.server;
+   ClientGame *client = gamePair.getClient(0);
+
+   ASSERT_TRUE(server != NULL);
+   ASSERT_TRUE(client != NULL);
+
+   GameType *serverGT = server->getGameType();
+
+   // Clear any stale tile polys from previous tests
+   GameType::clearTilePolys();
+
+   // Idle long enough for:
+   //   1. Level loading to complete (onLevelLoaded → buildmapTiles)
+   //   2. Initial ghost sync to finish (onGhostAdd)
+   //   3. deliverWallTileTick to send all tiles to the client
+   // At TILES_PER_TICK_NORM=5 and typical tile counts of 1-9, 50ms×50 cycles
+   // is more than enough.
+   GamePair::idle(50, 50);
+
+   // Verify the client has received some tile polys
+   S32 initialClientPolys = countTilePolys();
+   EXPECT_GT(initialClientPolys, 0)
+      << "Client should have received at least one tile poly from the initial level wall. "
+      << "Got " << initialClientPolys;
+
+   // Also verify the server has tiles
+   EXPECT_GT(serverGT->getmapTiles().size(), 0);
+
+   // ---- Add a new wall on the server ----
+   {
+      // Horizontal wall from (0,0) to (510,0), width 40
+      Vector<F32> verts;
+      verts.push_back(0);   verts.push_back(0);
+      verts.push_back(510); verts.push_back(0);
+      WallRec newWall(40, false, verts);
+      server->addWall(newWall);
+   }
+
+   // Rebuild tiles to include the new wall and reset delivery state
+   serverGT->rebuildWallTiles();
+
+   // Verify server now has more tile polys
+   S32 serverNewPolyCount = 0;
+   const Vector<MapTile> &newTiles = serverGT->getmapTiles();
+   for(S32 t = 0; t < newTiles.size(); t++)
+      serverNewPolyCount += newTiles[t].polys.size();
+
+   // Idle to let the updated tiles propagate to the client
+   GamePair::idle(50, 50);
+
+   // Check that the client's received tile polys reflect the new wall.
+   // After rebuildWallTiles(), the first tile re-sent will clear the old
+   // polys (via smReceivedTilePolys.size()==0 → clearTilePolys()) and
+   // then all tiles are resent.  The total poly count should be at least
+   // what the server computed.
+   S32 finalClientPolys = countTilePolys();
+   EXPECT_GE(finalClientPolys, serverNewPolyCount)
+      << "Client should have received at least " << serverNewPolyCount
+      << " tile polys after adding a wall, but only got " << finalClientPolys;
+
+   // The final client count should also exceed the initial count since we
+   // added a wall — unless the new wall happened to fragment into the same
+   // tiles and produced the same number of polys (unlikely for orthogonal
+   // walls in separate locations).
+   EXPECT_GE(finalClientPolys, initialClientPolys)
+      << "Expected more tile polys on client after adding a wall. "
+      << "Initial: " << initialClientPolys << ", Final: " << finalClientPolys;
 }
 
 

@@ -30,7 +30,9 @@ struct WallPoly
 /// A tile containing zero or more wall polygon fragments.
 struct MapTile
 {
-   U16 tileId;
+   U16 tileId = 0;
+   S32 gridX  = 0;        // Absolute grid column (tiles to right of world-origin)
+   S32 gridY  = 0;        // Absolute grid row    (tiles above world-origin)
    Rect bounds;           // World-space bounding rect
    Vector<WallPoly> polys;
 };

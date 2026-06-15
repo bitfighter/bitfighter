@@ -82,7 +82,7 @@ void MapTileBuilder::computeTileGrid()
 
    // Adaptive tile size: target ~ MAX_TILES tiles
    static const U32 MAX_TILES   = 2048;
-   static const U32 MIN_TILE_SZ = 5;
+   static const U32 MIN_TILE_SZ = 256;
 
    // sqrt(area / MAX_TILES) gives approximate tile size, rounded up to power-of-2
    F32 tileSizeF = std::sqrt(levelArea / static_cast<F32>(MAX_TILES));
@@ -318,6 +318,13 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
                   MapTile newTile;
                   newTile.tileId = tid;
                   newTile.bounds = tileRect(tid);
+                  // Absolute grid coordinates anchored to world (0,0).
+                  // These are stable across rebuilds even if levelBounds.min
+                  // shifts, enabling tileId-independent change detection.
+                  newTile.gridX = static_cast<S32>(std::floor(
+                     newTile.bounds.min.x / static_cast<F32>(mTileSize)));
+                  newTile.gridY = static_cast<S32>(std::floor(
+                     newTile.bounds.min.y / static_cast<F32>(mTileSize)));
                   outTiles.push_back(newTile);
                   tile = &outTiles[outTiles.size() - 1];
                }

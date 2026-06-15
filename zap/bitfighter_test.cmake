@@ -28,6 +28,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMapTiling.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMathUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMatrix4.cpp
