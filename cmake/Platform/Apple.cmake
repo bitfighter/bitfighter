@@ -92,10 +92,22 @@ if(BF_USE_HOMEBREW_LIBS)
 	endif()
 
 	execute_process(COMMAND ${BREW_COMMAND} --prefix
-		OUTPUT_VARIABLE HOMEBREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+		OUTPUT_VARIABLE HOMEBREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE
+		RESULT_VARIABLE BREW_PREFIX_RESULT)
 	# openal-soft is keg-only, so it isn't symlinked into the main prefix
 	execute_process(COMMAND ${BREW_COMMAND} --prefix openal-soft
-		OUTPUT_VARIABLE OPENAL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+		OUTPUT_VARIABLE OPENAL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE
+		RESULT_VARIABLE OPENAL_PREFIX_RESULT)
+
+	# Without these checks an uninstalled formula leaves the prefix empty and
+	# paths like ${OPENAL_PREFIX}/lib/libopenal.dylib silently resolve to
+	# /lib/..., which fails much later with a confusing message.
+	if(NOT BREW_PREFIX_RESULT EQUAL 0 OR NOT HOMEBREW_PREFIX)
+		message(FATAL_ERROR "Could not determine the Homebrew prefix from `brew --prefix`.")
+	endif()
+	if(NOT OPENAL_PREFIX_RESULT EQUAL 0 OR NOT OPENAL_PREFIX)
+		message(FATAL_ERROR "openal-soft is not installed. Install it with: brew install openal-soft")
+	endif()
 
 	message(STATUS "Resolving client dependencies from Homebrew: ${HOMEBREW_PREFIX}")
 
