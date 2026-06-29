@@ -247,6 +247,11 @@ function(BF_PLATFORM_INSTALL targetName)
 endfunction()
 
 
+function(BF_PLATFORM_BUNDLE_DEPENDENCIES targetName)
+	# macOS-only (.app bundling); nothing to do here
+endfunction()
+
+
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_PACKAGE_NAME "Bitfighter")
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2-D multi-player space combat game")

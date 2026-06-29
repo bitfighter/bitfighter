@@ -213,6 +213,20 @@ endif()
 
 
 # LuaJIT / Lua
+#
+# The in-tree LuaJIT is 2.0.5, which predates Apple Silicon and cannot target
+# arm64 macOS.  Require a system LuaJIT 2.1 (e.g. `brew install luajit`) there.
+# CMAKE_OSX_ARCHITECTURES may be a list (e.g. a universal "arm64;x86_64"), so test
+# for membership rather than equality -- the bundled LuaJIT can't build an arm64
+# slice in that case either.
+if(APPLE AND LUAJIT_BUILTIN AND "arm64" IN_LIST CMAKE_OSX_ARCHITECTURES)
+	message(FATAL_ERROR
+		"The bundled LuaJIT 2.0.5 cannot be built for arm64 macOS.\n"
+		"Install LuaJIT 2.1 and configure with the system copy:\n"
+		"    brew install luajit\n"
+		"    cmake .. -DLUAJIT_BUILTIN=NO")
+endif()
+
 if(NOT LUAJIT_BUILTIN)
 find_with_fallback(LuaJit LUAJIT lua)
 endif()
