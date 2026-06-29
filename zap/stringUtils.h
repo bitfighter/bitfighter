@@ -148,6 +148,24 @@ bool isHex(const string &str);
 bool alphaSort(const string &a, const string &b);
 bool alphaNumberSort(const string &a, const string &b);
 
+
+template <std::size_t N>
+static void safecopy(const char *src, char(&dest)[N])
+{
+   if(!src)
+   {
+      dest[0] = '\0';
+      return;
+   }
+
+   std::string_view sv(src);
+   const std::size_t len = (sv.size() < N - 1) ? sv.size() : (N - 1);
+
+   std::memcpy(dest, sv.data(), len);
+   dest[len] = '\0';
+}
+
+
 };
 
 #endif

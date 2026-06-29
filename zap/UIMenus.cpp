@@ -995,8 +995,7 @@ void MainMenuUserInterface::onActivate()
 // Set the MOTD we received from the master
 void MainMenuUserInterface::setMOTD(const char *motd)
 {
-   strncpy(mMOTD, motd, MOTD_LEN);
-
+   safecopy(motd, mMOTD);
    motdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
 

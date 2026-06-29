@@ -217,7 +217,7 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::check
    RefPtr<Auth_Stats> auth = new Auth_Stats(mMaster->getSettings());
    auth->client = this;
    auth->playerName = mPlayerOrServerName.getString();
-   strncpy(auth->password, password, sizeof(auth->password));
+   safecopy(password, auth->password);
    auth->stat = UnknownStatus;
    mMaster->getDatabaseAccessThread()->addEntry(auth);
 

@@ -63,20 +63,6 @@ DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *pas
 }
 
 
-template <std::size_t N>
-static void safecopy(const char *src, char (&dest)[N])
-{
-   if(!src)
-   {
-      dest[0] = '\0';
-      return;
-   }
-
-   std::strncpy(dest, src, N - 1);
-   dest[N - 1] = '\0'; // ensure null termination
-}
-
-
  // Sqlite Constructor
 DatabaseWriter::DatabaseWriter(const char *db)
 {
