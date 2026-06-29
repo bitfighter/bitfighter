@@ -61,7 +61,7 @@ public:
       LogFatalError = BIT(0), // Log fatal errors; should be left on
       LogError = BIT(1),      // Log serious errors; should be left on
       LogWarning = BIT(2),    // Log less serious errors
-	   LogInfo = BIT(3),       // Log informational messages
+	  LogInfo = BIT(3),       // Log informational messages
 
       LogConnection = BIT(4), // High level logging connections with remote machines
 
