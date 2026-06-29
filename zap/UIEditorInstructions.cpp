@@ -561,6 +561,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
    // F1 has dual use... advance page, then quit out of help when done
    else if(checkInputCode(BINDING_HELP, inputCode))
    {
+      playBoop();
       if(mCurPage < getPageCount())
          nextPage();
       else

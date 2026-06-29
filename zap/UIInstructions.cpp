@@ -1152,7 +1152,10 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
    }
 
    else if(checkInputCode(BINDING_HELP, inputCode))
+   {
+      playBoop();
       nextPage();
+   }
    else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
    else
