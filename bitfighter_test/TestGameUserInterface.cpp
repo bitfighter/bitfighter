@@ -35,11 +35,15 @@ TEST(GameUserInterfaceTest, Engineer)
    GamePair::idle(10, 5);
 
    // Verify that engineer is enabled
+   ASSERT_NE(nullptr, serverGame->getGameType());
    ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
 
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       SCOPED_TRACE("i = " + itos(i));
+      // Null-safe: a missing GameType means ghosting failed (see issue #821)
+      ASSERT_NE(nullptr, clientGames->get(i)->getGameType())
+            << "Client never received GameType ghost";
       ASSERT_TRUE(clientGames->get(i)->getGameType()->isEngineerEnabled());
    }
 
