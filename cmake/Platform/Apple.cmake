@@ -376,11 +376,41 @@ function(BF_PLATFORM_BUNDLE_DEPENDENCIES targetName)
 	# itself.  -ns skips dylibbundler's own ad-hoc signing; we re-sign the whole
 	# bundle afterwards, since rewriting the binary invalidates the linker's
 	# signature and arm64 requires a valid (here ad-hoc) one to launch.
+	#
+	# Homebrew's "sdl2" package is now sdl2-compat: an SDL2 ABI shim that
+	# dlopen()s libSDL3 at runtime.  dylibbundler cannot see that dependency
+	# (no LC_LOAD_DYLIB), so the .app fails with "Failed loading SDL3 library"
+	# unless we also copy SDL3 next to the shim.  sdl2-compat looks for
+	# @loader_path/libSDL3.dylib first (loader = Frameworks/).
+	set(frameworksDir "${appDir}/Contents/Frameworks")
+	find_library(BF_SDL3_DYLIB NAMES SDL3 libSDL3
+		PATHS ${HOMEBREW_PREFIX}/lib ${HOMEBREW_PREFIX}/opt/sdl3/lib
+		NO_DEFAULT_PATH)
+	if(NOT BF_SDL3_DYLIB)
+		# Soft-fail: classic SDL2 (no compat shim) needs no SDL3.  Fail only if
+		# the bundled libSDL2 is actually sdl2-compat — checked at build time.
+		message(STATUS "SDL3 not found under Homebrew; assuming classic SDL2 (no runtime SDL3 dlopen)")
+		set(_bundle_sdl3_cmds "")
+	else()
+		# Resolve symlinks (libSDL3.dylib -> libSDL3.0.dylib) so we copy real file
+		get_filename_component(BF_SDL3_REAL "${BF_SDL3_DYLIB}" REALPATH)
+		get_filename_component(BF_SDL3_REAL_NAME "${BF_SDL3_REAL}" NAME)
+		set(_bundle_sdl3_cmds
+			COMMAND ${CMAKE_COMMAND} -E copy "${BF_SDL3_REAL}" "${frameworksDir}/${BF_SDL3_REAL_NAME}"
+			COMMAND ${CMAKE_COMMAND} -E create_symlink "${BF_SDL3_REAL_NAME}" "${frameworksDir}/libSDL3.dylib"
+			COMMAND ${CMAKE_INSTALL_NAME_TOOL} -id
+				"@executable_path/../Frameworks/${BF_SDL3_REAL_NAME}"
+				"${frameworksDir}/${BF_SDL3_REAL_NAME}"
+		)
+		message(STATUS "Will bundle runtime SDL3 for sdl2-compat: ${BF_SDL3_REAL}")
+	endif()
+
 	add_custom_command(TARGET ${targetName} POST_BUILD
 		COMMAND ${DYLIBBUNDLER_COMMAND} -of -b -cd -ns
 			-x ${appDir}/Contents/MacOS/${targetName}
-			-d ${appDir}/Contents/Frameworks/
+			-d ${frameworksDir}/
 			-p @executable_path/../Frameworks/
+		${_bundle_sdl3_cmds}
 		COMMAND codesign --force --deep --sign - ${appDir}
 		COMMENT "Bundling Homebrew dylibs into ${targetName}.app and ad-hoc signing"
 		VERBATIM
