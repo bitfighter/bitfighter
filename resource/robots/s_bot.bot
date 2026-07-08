@@ -119,7 +119,7 @@ end
 
 
 function angleDifference(angleA, angleB)
-    return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
+    return (math.fmod(math.fmod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
 end
 
 
@@ -361,7 +361,7 @@ end
 function dodgeIfNeeded(needToShield)
     -- Save shielding determination and update current index
     averageArray[averageIndex] = needToShield
-    averageIndex = math.mod(averageIndex,averageMax) + 1
+    averageIndex = math.fmod(averageIndex,averageMax) + 1
 
     -- Calculate the percentage of time that was shielded
     local shieldPercent = 0
@@ -519,7 +519,7 @@ function getObjective(objType, team, onTeam)
                 listMax = listMax + 1
             end
         end
-        local targetNum = math.mod(myObjective, listMax) + 1
+        local targetNum = math.fmod(myObjective, listMax) + 1
         return(itemsOnMyTeam[targetNum])
     else
         return(nil)
