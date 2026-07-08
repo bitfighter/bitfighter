@@ -1070,4 +1070,26 @@ TEST(StringUtilsTest, s_fprintfTruncationBug)
    remove(testFile.c_str());
 }
 
+
+// Regression for #820/#824: getExecutableDir must be a directory, not the
+// binary path. On macOS it used to return .../bitfighter_test, so luaDir became
+// .../bitfighter_test/scripts and LuaScriptRunner::startLua failed (L=null).
+TEST(StringUtilsTest, getExecutableDirIsContainingDirectory)
+{
+   string dir = getExecutableDir();
+   ASSERT_FALSE(dir.empty());
+
+   // Must not end with the test binary name (the old macOS bug)
+   string base = dir;
+   string::size_type slash = base.find_last_of("/\\");
+   if(slash != string::npos)
+      base = base.substr(slash + 1);
+   EXPECT_NE("bitfighter_test", base)
+         << "getExecutableDir() returned the binary path, not its parent: " << dir;
+
+   // Loose test runner is always launched from exe/ with scripts/ beside it
+   EXPECT_TRUE(fileExists(joindir(dir, "scripts")))
+         << "Expected scripts/ next to getExecutableDir() (" << dir << ")";
+}
+
 };
