@@ -18,3 +18,19 @@ jobs:
           name: Bitfighter-Linux
           path: |
             exe/
+  Build-macOS-arm64:
+    runs-on: macos-14                 # Apple Silicon (arm64) runner
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install luajit sdl2 libpng libogg libvorbis speex libmodplug openal-soft dylibbundler
+      # -DLUAJIT_BUILTIN=NO: bundled LuaJIT 2.0.5 has no arm64; use Homebrew 2.1.
+      # -DBUNDLE_DEPENDENCIES=YES: copy Homebrew dylibs into the .app and re-point
+      # their load commands (via dylibbundler), then ad-hoc sign, producing a
+      # relocatable, distributable bundle -> DMG (see cmake/Platform/Apple.cmake).
+      - run: cd build && cmake .. -DLUAJIT_BUILTIN=NO -DBUNDLE_DEPENDENCIES=YES && make Bitfighter && make package
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Bitfighter-macOS-arm64
+          path: |
+            build/*.dmg
+          if-no-files-found: error
