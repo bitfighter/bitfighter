@@ -1046,7 +1046,6 @@ TEST(WallTilingTest, ShipDestroysDestructibleWall)
 
    // Start firing the Phaser (default weapon, 0.19 dmg, 100ms fire delay).
    // Need ceil(10/0.19) ≈ 53 hits.
-   InputCode fireKey = client->getSettings()->getInputCodeManager()->getBinding(BINDING_FIRE, InputModeKeyboard);
    gameUI->onKeyDown(fireKey);
    GamePair::idle(20, 500);    // 10,000ms of sustained auto-fire
    gameUI->onKeyUp(fireKey);
