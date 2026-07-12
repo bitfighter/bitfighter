@@ -616,7 +616,11 @@ void createClientGame(GameSettingsPtr settings)
 void setupLogging(const string &logDir)
 {
    // Specify which events each logging destination will record
-   S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection;
+#ifdef TNL_DEBUG     // This doesn't seem to trigger for some reason...
+   S32 stdoutEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection | LogConsumer::LogInfo;
+#else
+   S32 stdoutEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection | LogConsumer::LogInfo;
+#endif
    S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::ConsoleMsg;
    S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter     | LogConsumer::StatisticsFilter;
    // logfileEvents  ==> set from INI settings     See setupLogging(IniSettings *iniSettings)

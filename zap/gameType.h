@@ -18,6 +18,7 @@
 #include "DismountModesEnum.h"
 
 #include "Timer.h"
+#include "Rect.h"
 
 #include <string>
 
@@ -73,11 +74,12 @@ private:
    bool mShowAllBots;
 
    Vector<WallRec> mWalls;
-   Vector<MapTile> mmapTiles;
-   U32   mTileSize;             // Tile grid cell size (from MapTileBuilder)
-   S32   mGridWidth;            // Number of tile columns (from MapTileBuilder)
-   S32   mGridHeight;           // Number of tile rows (from MapTileBuilder)
-   void buildmapTiles();
+   Vector<MapTile> mMapTiles;
+   U32 mTileSize;                // Tile grid cell size (from MapTileBuilder)
+   S32 mGridWidth;               // Number of tile columns (from MapTileBuilder)
+   S32 mGridHeight;              // Number of tile rows (from MapTileBuilder)
+   Rect mTileGridBounds;
+   void buildMapTiles(const Rect *fixedLevelBounds = nullptr);
    void deliverWallTileTick();         // Called per-tick to send pending wall tiles to clients
 
    // Tile delivery rate limits
@@ -88,6 +90,7 @@ private:
 #ifndef ZAP_DEDICATED
    // Client-side storage for tiled wall polygons received via s2cSendWallTile
    static Vector<WallPoly> smReceivedTilePolys;
+   static Vector<U16>      smReceivedTileIds;
 #endif
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
@@ -165,6 +168,9 @@ public:
 
    static void clearTilePolys();
    static const Vector<WallPoly> &getTilePolys();
+   static bool findTileWallLOS(const Point &rayStart, const Point &rayEnd, bool format, F32 &collisionTime, Point &surfaceNormal);
+   static bool findTileWallSweptCircle(const Point &pos, const Point &delta, F32 radius, F32 &collisionTime, Point &collisionPoint);
+   static bool findTileWallAnchorPointAndNormal(const Point &pos, F32 snapDist, bool format, Point &anchor, Point &normal);
 
    virtual GameTypeId getGameTypeId() const;
    virtual const char *getShortName() const;          // Will be overridden by other games
@@ -211,7 +217,7 @@ public:
    S32 getSecondLeadingPlayer() const;
 
    bool addWall(const WallRec &barrier, Game *game);
-   const Vector<MapTile> &getmapTiles() const { return mmapTiles; }
+   const Vector<MapTile> &getMapTiles() const { return mMapTiles; }
 
    /// Rebuild tiled wall geometry from the current barrier database and
    /// reset per-connection delivery state so tiles are re-sent to all clients.
@@ -432,7 +438,7 @@ public:
                                      StringTableEntry levelCreds, S32 objectCount,
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
                                      bool fogOfWarEnabled));
-   TNL_DECLARE_RPC(s2cSendWallTile, (U16 polyCount, Vector<F32> allVerts, Vector<bool> allOutline, Vector<U32> polySizes));
+   TNL_DECLARE_RPC(s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<U8> allStyles, Vector<U32> polySizes));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges,
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,

@@ -5,9 +5,11 @@
 
 #include "MapTile.h"
 
+
 #include <clipper2/clipper.h>          // Clipper2
 #include <clipper2/clipper.rectclip.h> // RectClip64
 #include <cmath>
+#include <vector>
 
 namespace Zap
 {
@@ -43,25 +45,15 @@ static Path64 pointsToPath64(const Vector<Point> &pts)
 {
    Path64 path;
    path.reserve(pts.size());
-   for (S32 i = 0; i < pts.size(); ++i)
+   for(S32 i = 0; i < pts.size(); ++i)
       path.push_back(pointToC2(pts[i]));
    return path;
-}
-
-/// Convert a flat list of int64_t (x,y pairs) back to a Vector<Point>.
-static Vector<Point> int64ToPoints(const Vector<int64_t> &flat)
-{
-   Vector<Point> pts;
-   pts.reserve(flat.size() / 2);
-   for (S32 i = 0; i < flat.size(); i += 2)
-      pts.push_back(c2ToPoint(Point64(flat[i], flat[i + 1])));
-   return pts;
 }
 
 /// Compute next power of two (for unsigned values)
 static U32 nextPow2(U32 v)
 {
-   if (v == 0) return 1;
+   if(v == 0) return 1;
    v--;
    v |= v >> 1;
    v |= v >> 2;
@@ -87,13 +79,13 @@ void MapTileBuilder::computeTileGrid()
    // sqrt(area / MAX_TILES) gives approximate tile size, rounded up to power-of-2
    F32 tileSizeF = std::sqrt(levelArea / static_cast<F32>(MAX_TILES));
    U32 tileSize = nextPow2(static_cast<U32>(tileSizeF));
-   if (tileSize < MIN_TILE_SZ)
+   if(tileSize < MIN_TILE_SZ)
       tileSize = MIN_TILE_SZ;
 
    mTileSize = tileSize;
 
    // Guard against degenerate level bounds
-   if (levelW <= 0 || levelH <= 0 || mTileSize == 0)
+   if(levelW <= 0 || levelH <= 0 || mTileSize == 0)
    {
       mGridWidth  = 1;
       mGridHeight = 1;
@@ -104,8 +96,11 @@ void MapTileBuilder::computeTileGrid()
    mGridHeight = static_cast<S32>(std::ceil(levelH / static_cast<F32>(mTileSize)));
 
    // Clamp to prevent overflow
-   if (mGridWidth  > 256) mGridWidth  = 256;
-   if (mGridHeight > 256) mGridHeight = 256;
+   if(mGridWidth  > 256) 
+      mGridWidth  = 256;
+
+   if(mGridHeight > 256) 
+      mGridHeight = 256;
 }
 
 // ---------------------------------------------------------------------------
@@ -129,80 +124,86 @@ Rect MapTileBuilder::tileRect(U16 id) const
 }
 
 // ---------------------------------------------------------------------------
-// Determine which edges are original versus clip-introduced.
-//
-// An edge is considered "clip-introduced" (outline = false) if both of its
-// endpoints lie on the tile boundary and the entire edge runs along that
-// boundary.  All other edges are original edges that survived clipping
-// (outline = true).
-//
-// Coordinates are in Clipper2 int64_t space so comparisons are exact.
-// ---------------------------------------------------------------------------
-void MapTileBuilder::computeOutlineFlags(
-   const Vector<int64_t> &clippedVerts,
-   const Vector<int64_t> &origVerts,
-   int64_t tileLeft, int64_t tileTop,
-   int64_t tileRight, int64_t tileBottom,
-   Vector<bool> &outline)
-{
-   const U32 n = clippedVerts.size() / 2;   // number of vertices
-   outline.clear();
-   outline.reserve(n);
-
-   if (n == 0)
-      return;
-
-   for (U32 i = 0; i < n; ++i)
-   {
-      const U32 i0 = i * 2;
-      const U32 i1 = ((i + 1) % n) * 2;
-
-      const int64_t x1 = clippedVerts[i0];
-      const int64_t y1 = clippedVerts[i0 + 1];
-      const int64_t x2 = clippedVerts[i1];
-      const int64_t y2 = clippedVerts[i1 + 1];
-
-      // Check if both endpoints lie on the same tile boundary line
-      // Use a small tolerance (1 Clipper2 unit = 1/1000 game unit) to handle
-      // any internal Clipper2 precision variances
-      const int64_t tol = 1;
-      const bool onLeft   = (abs(x1 - tileLeft)  <= tol && abs(x2 - tileLeft)  <= tol);
-      const bool onRight  = (abs(x1 - tileRight) <= tol && abs(x2 - tileRight) <= tol);
-      const bool onTop    = (abs(y1 - tileTop)   <= tol && abs(y2 - tileTop)   <= tol);
-      const bool onBottom = (abs(y1 - tileBottom)<= tol && abs(y2 - tileBottom)<= tol);
-
-      // If the edge runs along any tile boundary, it's clip-introduced
-      outline.push_back(!(onLeft || onRight || onTop || onBottom));
-   }
-}
-
-// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 MapTileBuilder::MapTileBuilder(const Rect &levelBounds, U32 tileSizeOverride)
    : mLevelBounds(levelBounds)
 {
-   if (tileSizeOverride > 0)
+   if(tileSizeOverride > 0)
    {
       mTileSize   = tileSizeOverride;
       const F32 levelW = mLevelBounds.getWidth();
       const F32 levelH = mLevelBounds.getHeight();
       mGridWidth  = static_cast<S32>(std::ceil(levelW  / static_cast<F32>(mTileSize)));
       mGridHeight = static_cast<S32>(std::ceil(levelH / static_cast<F32>(mTileSize)));
-      if (mGridWidth  < 1) mGridWidth  = 1;
-      if (mGridHeight < 1) mGridHeight = 1;
+      if(mGridWidth  < 1) 
+         mGridWidth  = 1;
+      if(mGridHeight < 1) 
+         mGridHeight = 1;
    }
    else
-   {
       computeTileGrid();
+}
+
+
+void MapTileBuilder::addWallPolygon(const Vector<Point> &polygon, bool destructible)
+{
+   mWallPolygons.push_back(polygon);
+   mWallDestructible.push_back(destructible);
+}
+
+
+/// Mark edges that lie on tile boundaries as EdgeStyle::None so the renderer
+/// skips them (they were introduced by clipping, not present in the original wall).
+static void classifyEdges(WallPoly &wallPoly, const Rect &tileBounds)
+{
+   Point64 tmin = pointToC2(Point(tileBounds.min.x, tileBounds.min.y));
+   Point64 tmax = pointToC2(Point(tileBounds.max.x, tileBounds.max.y));
+   const int64_t tol = 1;
+   
+   U32 numVerts = wallPoly.numVerts();
+
+   for(U32 i = 0; i < numVerts; i++)
+   {
+      const F32 x1 = wallPoly.verts[i * 2];
+      const F32 y1 = wallPoly.verts[i * 2 + 1];
+      const F32 x2 = wallPoly.verts[((i + 1) % numVerts) * 2];
+      const F32 y2 = wallPoly.verts[((i + 1) % numVerts) * 2 + 1];
+
+      Point64 p1 = pointToC2(Point(x1, y1));
+      Point64 p2 = pointToC2(Point(x2, y2));
+
+      if((abs(p1.x - tmin.x) <= tol && abs(p2.x - tmin.x) <= tol) ||
+         (abs(p1.x - tmax.x) <= tol && abs(p2.x - tmax.x) <= tol) ||
+         (abs(p1.y - tmin.y) <= tol && abs(p2.y - tmin.y) <= tol) ||
+         (abs(p1.y - tmax.y) <= tol && abs(p2.y - tmax.y) <= tol)
+      )
+         wallPoly.edges[i] = EdgeStyle::None;
    }
 }
 
 
-void MapTileBuilder::addWallPolygon(const Vector<Point> &polygon)
+/// Convert clipped Paths64 into WallPoly objects, classify tile-boundary edges,
+/// and append the results to the given MapTile.
+static void appendClippedPaths(MapTile &mt, const Rect &tileBounds, const Paths64 &paths, EdgeStyle style)
 {
-   mWallPolygons.push_back(polygon);
+   for(S32 i = 0; i < paths.size(); i++)
+   {
+      if(paths[i].size() < 3) 
+         continue;
+
+      WallPoly wallPoly;
+
+      for(const auto &pt : paths[i])
+      {
+         wallPoly.verts.push_back(static_cast<F32>(pt.x * CLIPPER2_INV_SCALE));
+         wallPoly.verts.push_back(static_cast<F32>(pt.y * CLIPPER2_INV_SCALE));
+         wallPoly.edges.push_back(style);
+      }
+      classifyEdges(wallPoly, tileBounds);
+      mt.polys.push_back(move(wallPoly));
+   }
 }
 
 
@@ -213,39 +214,47 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
    if(mWallPolygons.size() == 0)
       return;
 
-   // Pre-convert all wall polygons to Clipper2 Path64 and store their
-   // vertex data for outline-flag computation later.
-   struct C2Wall {
-      Path64          path;
-      Vector<int64_t> flatVerts; // flat x,y pairs
+   // Pre-convert all wall polygons to Clipper2 Path64.
+   struct ClipperWall 
+   {
+      Path64 path;
    };
-   Vector<C2Wall> c2Walls;
-   c2Walls.reserve(mWallPolygons.size());
+
+   Vector<ClipperWall> clipperWalls;
+   clipperWalls.reserve(mWallPolygons.size());
 
    for(S32 w = 0; w < mWallPolygons.size(); w++)
    {
-      C2Wall cw;
+      ClipperWall cw;
       cw.path = pointsToPath64(mWallPolygons[w]);
-      cw.flatVerts.reserve(cw.path.size() * 2);
-      for(const auto &pt : cw.path)
-      {
-         cw.flatVerts.push_back(pt.x);
-         cw.flatVerts.push_back(pt.y);
-      }
-      c2Walls.push_back(std::move(cw));
+      clipperWalls.push_back(move(cw));
    }
 
    // Use a simple approach: iterate over walls × tiles, clip each intersecting pair.
    // For small to moderate map sizes this is fast enough.  Could be optimised later
    // with a spatial index if profiling shows it's needed.
-   for(S32 w = 0; w < c2Walls.size(); w++)
+   //
+   // We store clipped paths per tile in a temporary structure; the second pass
+   // Unions all paths per tile and computes per-edge rendering styles.
+   struct TilePaths 
    {
-      const Path64 &wallPath = c2Walls[w].path;
-      const Vector<int64_t> &origFlat = c2Walls[w].flatVerts;
+      Paths64 nonDest;
+      Paths64 dest;
+   };
+
+   Vector<TilePaths> tilePaths;
+   tilePaths.resize(outTiles.size());
+
+   // Direct tileId → index lookup table (tileId = gy * mGridWidth + gx)
+   vector<S32> tileLookup(mGridWidth * mGridHeight, -1);
+
+   for(S32 i = 0; i < clipperWalls.size(); i++)
+   {
+      const Path64 &wallPath = clipperWalls[i].path;
 
       // Quick AABB check to narrow down candidate tiles.
       // Compute the wall's bounding box in game coordinates.
-      Rect wallBounds(mWallPolygons[w]);
+      Rect wallBounds(mWallPolygons[i]);
       const S32 tileMinGX = static_cast<S32>(std::floor(
          (wallBounds.min.x - mLevelBounds.min.x) / static_cast<F32>(mTileSize)));
       const S32 tileMaxGX = static_cast<S32>(std::floor(
@@ -274,117 +283,90 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
             RectClip64 clipper(tileRectC2);
             Paths64 clipped = clipper.Execute(Paths64{wallPath});
 
+            // Find index in outTiles matching this tileId (O(1) lookup table)
+            S32 tileIdx = tileLookup[tid];
+            if(tileIdx < 0)
+            {
+               MapTile newTile;
+               newTile.tileId = tid;
+               newTile.bounds = tileRect(tid);
+               newTile.gridX = static_cast<S32>(std::floor(
+                  newTile.bounds.min.x / static_cast<F32>(mTileSize)));
+               newTile.gridY = static_cast<S32>(std::floor(
+                  newTile.bounds.min.y / static_cast<F32>(mTileSize)));
+               outTiles.push_back(newTile);
+               tileIdx = outTiles.size() - 1;
+               tileLookup[tid] = tileIdx;
+               tilePaths.resize(outTiles.size());
+            }
+
+            // Store clipped paths by type
             for(const auto &resultPath : clipped)
             {
                if(resultPath.size() < 3)
-                  continue; // degenerate
+                  continue;
 
-               // Build flat verts for the clipped result
-               Vector<int64_t> clippedFlat;
-               clippedFlat.reserve(resultPath.size() * 2);
-               for(const auto &pt : resultPath)
-               {
-                  clippedFlat.push_back(pt.x);
-                  clippedFlat.push_back(pt.y);
-               }
-
-               // Compute outline flags (use the tile rect in int64_t space)
-               Vector<bool> outline;
-               computeOutlineFlags(clippedFlat, origFlat,
-                  tileRectC2.left, tileRectC2.top,
-                  tileRectC2.right, tileRectC2.bottom,
-                  outline);
-
-               // Convert to WallPoly
-               WallPoly wp;
-               wp.verts.reserve(clippedFlat.size());
-               for(S32 k = 0; k < clippedFlat.size(); k++)
-                  wp.verts.push_back(static_cast<F32>(clippedFlat[k] * CLIPPER2_INV_SCALE));
-
-               wp.outline = outline;
-
-               // Find or create the MapTile
-               MapTile *tile = nullptr;
-               for(S32 t = 0; t < outTiles.size(); ++t)
-               {
-                  if(outTiles[t].tileId == tid)
-                  {
-                     tile = &outTiles[t];
-                     break;
-                  }
-               }
-               if(!tile)
-               {
-                  MapTile newTile;
-                  newTile.tileId = tid;
-                  newTile.bounds = tileRect(tid);
-                  // Absolute grid coordinates anchored to world (0,0).
-                  // These are stable across rebuilds even if levelBounds.min
-                  // shifts, enabling tileId-independent change detection.
-                  newTile.gridX = static_cast<S32>(std::floor(
-                     newTile.bounds.min.x / static_cast<F32>(mTileSize)));
-                  newTile.gridY = static_cast<S32>(std::floor(
-                     newTile.bounds.min.y / static_cast<F32>(mTileSize)));
-                  outTiles.push_back(newTile);
-                  tile = &outTiles[outTiles.size() - 1];
-               }
-               tile->polys.push_back(std::move(wp));
+               if(mWallDestructible[i])
+                  tilePaths[tileIdx].dest.push_back(resultPath);
+               else
+                  tilePaths[tileIdx].nonDest.push_back(resultPath);
             }
          }
       }
    }
 
-   // Cleanup: for each tile, Union all its polys with Clipper2 to
-   // resolve winding-based holes from merged donut-shaped polygons.
-   for(S32 t = 0; t < outTiles.size(); t++)
+   // Second pass: for each tile, compute separate geometry for permanent
+   // and destructible walls.  Destructible areas that overlap permanent walls
+   // are removed via Difference, so they render with the permanent (blue) fill.
+   // This avoids the merged-Union Z-callback complexity entirely.
+
+   for(S32 i = 0; i < outTiles.size(); i++)
    {
-      MapTile &mt = outTiles[t];
-      Paths64 tilePolys;
-      for(S32 p = 0; p < mt.polys.size(); p++)
+      MapTile &tile = outTiles[i];
+      TilePaths &tilePath = tilePaths[i];
+
+      if(tilePath.nonDest.empty() && tilePath.dest.empty())
+         continue;
+
+      const Rect &tileBounds = tile.bounds;
+
+      // Union permanent paths → all edges Solid
+      Paths64 permResult;
+      if(!tilePath.nonDest.empty())
       {
-         Path64 path;
-         for(U32 v = 0; v < mt.polys[p].numVerts(); v++)
-            path.push_back(Point64(
-               static_cast<int64_t>(mt.polys[p].verts[v * 2] * CLIPPER2_SCALE),
-               static_cast<int64_t>(mt.polys[p].verts[v * 2 + 1] * CLIPPER2_SCALE)));
-         if(path.size() >= 3)
-            tilePolys.push_back(std::move(path));
+         Clipper64 clipper;
+         clipper.PreserveCollinear(true);
+         clipper.AddSubject(tilePath.nonDest);
+         clipper.Execute(ClipType::Union, FillRule::NonZero, permResult);
       }
 
-      Paths64 unioned = Union(tilePolys, FillRule::NonZero);
-
-      const Rect tileRectF = mt.bounds;
-      const Point64 tileMinC2 = pointToC2(Point(tileRectF.min.x, tileRectF.min.y));
-      const Point64 tileMaxC2 = pointToC2(Point(tileRectF.max.x, tileRectF.max.y));
-
-      mt.polys.clear();
-      for(const auto &up : unioned)
+      // Union destructible paths, then subtract permanent areas
+      Paths64 destOnly;
+      if(!tilePath.dest.empty())
       {
-         if(up.size() < 3) continue;
-
-         U32 nv = up.size();
-         WallPoly wp;
-         wp.verts.reserve(nv * 2);
-         wp.outline.reserve(nv);
-         for(U32 v = 0; v < nv; v++)
+         Paths64 destUnion;
          {
-            wp.verts.push_back(static_cast<F32>(up[v].x * CLIPPER2_INV_SCALE));
-            wp.verts.push_back(static_cast<F32>(up[v].y * CLIPPER2_INV_SCALE));
-
-            const Point64 &p2 = up[(v + 1) % nv];
-            const int64_t x1 = up[v].x, y1 = up[v].y;
-            const int64_t x2 = p2.x, y2 = p2.y;
-            const int64_t tL = tileMinC2.x, tT = tileMinC2.y;
-            const int64_t tR = tileMaxC2.x, tB = tileMaxC2.y;
-            const int64_t tol = 1;
-            wp.outline.push_back(!(
-               (abs(x1 - tL) <= tol && abs(x2 - tL) <= tol) ||
-               (abs(x1 - tR) <= tol && abs(x2 - tR) <= tol) ||
-               (abs(y1 - tT) <= tol && abs(y2 - tT) <= tol) ||
-               (abs(y1 - tB) <= tol && abs(y2 - tB) <= tol)));
+            Clipper64 clipper;
+            clipper.PreserveCollinear(true);
+            clipper.AddSubject(tilePath.dest);
+            clipper.Execute(ClipType::Union, FillRule::NonZero, destUnion);
          }
-         mt.polys.push_back(std::move(wp));
+         if(!permResult.empty())
+         {
+            Clipper64 clipper;
+            clipper.PreserveCollinear(true);
+            clipper.AddSubject(destUnion);
+            clipper.AddClip(permResult);
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, destOnly);
+         }
+         else
+            destOnly = std::move(destUnion);
       }
+
+      tile.polys.clear();
+
+      appendClippedPaths(tile, tileBounds, permResult, EdgeStyle::Normal);
+      appendClippedPaths(tile, tileBounds, destOnly,   EdgeStyle::Destructible);
    }
 }
 

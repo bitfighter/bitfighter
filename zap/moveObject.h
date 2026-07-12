@@ -154,6 +154,7 @@ public:
    virtual TestFunc collideTypes();
 
    BfObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
+   bool checkTileCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);

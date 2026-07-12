@@ -101,8 +101,14 @@ bool EngineerModuleDeployer::findDeployPoint(const Ship *ship, U32 objectType, P
          // Computes collisionTime and deployNormal -- deployNormal will have been normalized to length of 1
          BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
                                                      collisionTime, deployNormal);
+         bool hitWall = (hitObject != NULL);
 
-         if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
+#ifndef ZAP_DEDICATED
+         if(!hitObject && GameType::findTileWallLOS(startPoint, endPoint, true, collisionTime, deployNormal))
+            hitWall = true;
+#endif
+
+         if(!hitWall)    // No appropriate walls found, can't deploy, sorry!
             return false;
 
 
@@ -1035,6 +1041,17 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
    // Anchor objects to the correct point
    if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
+#ifndef ZAP_DEDICATED
+      if(GameType::findTileWallAnchorPointAndNormal(pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+      {
+         setPos(anchor + normal);
+         mAnchorNormal.set(normal);
+         computeObjectGeometry();
+         computeExtent();
+         return;
+      }
+#endif
+
       setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
    }

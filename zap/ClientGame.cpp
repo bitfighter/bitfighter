@@ -268,7 +268,6 @@ void ClientGame::startLoadingLevel(bool engineerEnabled)
 void ClientGame::doneLoadingLevel()
 {
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
-   Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
 
    getUIManager()->doneLoadingLevel();
 }
@@ -1738,10 +1737,19 @@ Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 ca
 }
 
 
+// A "pseudoItem" is a non-object item that is part of the level, such as a BarrierMaker or PolyWall.  
+// These are not real objects, but they are used to create real objects when the level is loaded.  
+// This function processes a pseudoItem and adds it to the database if necessary.
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {
+      if(database == getGameObjDatabase())
+      {
+         mObjectsLoaded++;
+         return true;
+      }
+
       if(argc >= 2)
       {
          WallItem *wallItem = new WallItem();
@@ -1758,6 +1766,12 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
+      if(database == getGameObjDatabase())
+      {
+         mObjectsLoaded++;
+         return true;
+      }
+
       //if(width)      // BarrierMakerS still width, though we ignore it
       //   barrier.width = F32(atof(argv[1]));
       //else           // PolyWall does not have width specified

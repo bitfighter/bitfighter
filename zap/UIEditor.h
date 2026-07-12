@@ -413,6 +413,7 @@ public:
    void flipSelectionHorizontal();               // Flip selection along horizontal axis
    void flipSelectionVertical();                 // Flip selection along vertical axis
    void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
+   void toggleDestructibleWallSegment();         // Toggle destructibility of a wall segment between two selected vertices
 
    void scaleSelection(F32 scale);               // Scale selection by scale
    void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle

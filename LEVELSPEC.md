@@ -230,7 +230,7 @@ Many objects use trailing `x y` pairs to describe their shape. When noted below 
 
 Walls are solid obstacles that block movement and line-of-sight.
 
-### `BarrierMaker <width> <x1> <y1> <x2> <y2> [<x3> <y3> ...]`
+### `BarrierMaker <width> <x1> <y1> <x2> <y2> [<x3> <y3> ...] [D <seg0> <seg1> ...]`
 
 A **line-based wall** — a polyline extruded to the given width. Minimum 2 points.
 
@@ -238,19 +238,22 @@ A **line-based wall** — a polyline extruded to the given width. Minimum 2 poin
 - The wall is centered on the polyline; actual world thickness = `width` units.
 - Multiple consecutive segments are joined smoothly.
 
-```
+**Destructible walls:** A `D` flag right after the keyword (before width) marks the entire wall as destructible. Destructible walls can be destroyed by weapon fire; destroyed segments are removed and the gap is visible to all clients. All segments of a destructible wall are destructible — no mixing of types per wall.
+
+```                                              # 2 segments: vertex 0→1, vertex 1→2
 BarrierMaker 50 -5 0 5 0
 BarrierMaker 50 0 0 2 0 4 2 4 6
 BarrierMaker 200 -1.5 -1.5 1.5 1.5
+BarrierMaker D 40 0 0 2 0 4 2 4 6           # Wall segments are destructible
 ```
 
-### `PolyWall <x1> <y1> <x2> <y2> <x3> <y3> [...]`
+### `PolyWall [{D}] <x1> <y1> <x2> <y2> <x3> <y3> [...]`
 
-A **solid polygon wall**. Minimum 3 vertices, maximum 64.
+A **solid polygon wall**. Minimum 3 vertices, maximum 64. Optional `D` flag marks the entire polygon as destructible.
 
-```
-PolyWall 0 0  4 0  4 3  0 3
-PolyWall 3.5 2.7  3.7 3  3.3 3
+```                                              # Destructible:
+PolyWall D 0 0  4 0  4 3  0 3                  # Polywall can be destroyed
+PolyWall 3.5 2.7  3.7 3  3.3 3                 # Permanent wall
 ```
 
 ---

@@ -2158,7 +2158,8 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : *settings->getWallOutlineColor();
 
    renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), outlineColor,
-               fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode,
+               fillColor, Colors::EDITOR_DEST_WALL_FILL, database,
+               mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode,
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
 
@@ -2526,8 +2527,6 @@ bool EditorUserInterface::canRotate() const
 }
 
 
-
-
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
@@ -2727,7 +2726,6 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    Point min, max;
    database->computeSelectionMinMax(min, max);
-//   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
@@ -2754,6 +2752,56 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    setNeedToSave(true);
    autoSave();
+}
+
+
+void EditorUserInterface::toggleDestructibleWallSegment()
+{
+   if(!canRotate())
+      return;
+
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   bool modifiedWalls = false;
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected())
+      {
+         if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         {
+            WallItem *wall = dynamic_cast<WallItem *>(static_cast<BfObject *>(obj));
+            TNLAssert(wall, "Expected a WallItem!");
+
+            if(!modifiedWalls)
+               saveUndoState();
+
+            wall->mDestructible = !wall->mDestructible;
+            modifiedWalls = true;
+         }
+         else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+         {
+            PolyWall *wall = dynamic_cast<PolyWall *>(static_cast<BfObject *>(obj));
+            TNLAssert(wall, "Expected a PolyWall!");
+
+            if(!modifiedWalls)
+               saveUndoState();
+
+            wall->mDestructible = !wall->mDestructible;
+            modifiedWalls = true;
+            continue;
+         }
+      }
+   }
+
+   if(modifiedWalls)
+   {
+      mLastUndoStateWasBarrierWidthChange = false;
+      setNeedToSave(true);
+      autoSave();
+   }
 }
 
 
@@ -3963,11 +4011,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       onMouseClicked_left();
 
    // Neither mouse button, let's try some keys
-   else if(inputString == "D" || inputString == "Shift+D")                                  // Pan right
+   else if(inputString == "D" || inputString == "Shift+D")                                   // Pan right
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))          // Flip horizontal
+   else if(inputString == getEditorBindingString(settings, BINDING_TOGGLE_WALL_DESTRUCTIBILITY))   // Make wall destructible (or not)
+      toggleDestructibleWallSegment();
+   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))              // Flip horizontal
       flipSelectionHorizontal();
 	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))     // Paste selection
       pasteSelection();

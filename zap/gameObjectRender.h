@@ -278,7 +278,8 @@ extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
 extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints,
                         const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor,
-                        const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                        const Color &fillColor, const Color &destFillColor, const GridDatabase *editorDb,
+                        F32 currentScale, bool dragMode, bool drawSelected,
                         const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
 
 

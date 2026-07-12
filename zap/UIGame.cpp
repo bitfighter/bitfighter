@@ -135,8 +135,6 @@ void GameUserInterface::onActivate()
 
    clearDisplayers();
 
-   // Clear out any walls we were using in a previous run
-   Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
    mLevelInfoDisplayer.clearDisplayTimer();
 
    mLoadoutIndicator.reset();
@@ -181,7 +179,6 @@ void GameUserInterface::onReactivate()
 void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
-   Barrier::clearRenderItems();
    mHasShipPos = false;
 
    mHelpItemManager.addStartingHelpItemsToQueue(getGame());      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
@@ -2083,19 +2080,11 @@ void GameUserInterface::renderGameNormal()
 
    for(S32 i = -1; i < 2; i++)
    {
-      if(!hasTileWalls && !mDebugOverlayRenderer.renderingMapTiles())
-         Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
-
       if(mDebugOverlayRenderer.renderingMeshZones())
          mDebugOverlayRenderer.renderMeshZones(i);
 
       for(S32 j = 0; j < renderObjects.size(); j++)
-      {
-         // Skip old-style barrier rendering when tile walls are active
-         if(!hasTileWalls || !(renderObjects[j]->getObjectTypeNumber() == BarrierTypeNumber ||
-                               renderObjects[j]->getObjectTypeNumber() == PolyWallTypeNumber))
-            renderObjects[j]->renderLayer(i);
-      }
+         renderObjects[j]->renderLayer(i);
 
       mFxManager.render(i, getCommanderZoomFraction());
    }
@@ -2332,17 +2321,9 @@ void GameUserInterface::renderGameCommander()
 
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
-   {
-      if(!hasTileWalls || !(renderObjects[i]->getObjectTypeNumber() == BarrierTypeNumber ||
-                            renderObjects[i]->getObjectTypeNumber() == PolyWallTypeNumber))
-         renderObjects[i]->renderLayer(0);
-   }
+      renderObjects[i]->renderLayer(0);
 
-   // Second pass
-   if(!hasTileWalls && !mDebugOverlayRenderer.renderingMapTiles())
-      Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
-
-   // Render tiled wall geometry if available (replaces old Barrier rendering)
+   // Render tiled wall geometry
    if(hasTileWalls)
    {
       const Color &fillColor = *getGame()->getSettings()->getWallFillColor();

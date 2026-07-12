@@ -265,6 +265,7 @@ public:
    GridDatabase *getBotZoneDatabase() const;
    const Vector<BotNavMeshZone *> *getBotZones() const;
    U16 findZoneContaining(const Point &p) const;
+   void rebuildBotZones();
 
    void setGameType(GameType *gameType);
    void onObjectAdded(BfObject *obj);

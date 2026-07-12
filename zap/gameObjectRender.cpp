@@ -20,6 +20,7 @@
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
 #include "Asteroid.h"
+#include "barrier.h"             // WallItem, PolyWall for destructibility check
 
 #include "Colors.h"
 
@@ -2580,76 +2581,53 @@ void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Colo
 /// Render tiled wall geometry received via s2cSendWallTile.
 /// Each poly is filled, then only edges with outline[i]==true are drawn
 /// (edges introduced by tile clipping have outline[i]==false and are skipped).
-/// Objects must be in rendering order (behind objects).
-void renderTilePolys(const Vector<WallPoly> &tilePolys, const Color &fillColor, const Color &outlineColor)
+/// Triangulation and edge classification are precomputed in WallPoly::cached*
+/// by buildTilePolyCache() when tile data arrives, so this function only does
+/// the actual rendering calls.
+void renderTilePolys(const Vector<WallPoly> &wallPolys, const Color &fillColor, const Color &outlineColor)
 {
-   if(tilePolys.size() == 0)
+   if(wallPolys.size() == 0)
       return;
 
    Renderer &r = Renderer::get();
 
-   // Pass 1: fill all polys.  Merged wall polygons can be concave,
-   // so we triangulate instead of using TriangleFan.
+   // Pass 1: fill all polys using precomputed triangulation
+   static const Color DEST_FILL(0.04f, 0.15f, 0.06f);  // green = destructible fill
    r.setColor(fillColor);
-   for(S32 i = 0; i < tilePolys.size(); i++)
+   for(S32 i = 0; i < wallPolys.size(); i++)
    {
-      const WallPoly &wp = tilePolys[i];
-      U32 n = wp.numVerts();
-      if(n < 3)
+      const WallPoly &wallPoly = wallPolys[i];
+      if(wallPoly.cachedFill.size() < 3)
          continue;
 
-      Vector<Point> contour;
-      contour.reserve(n);
-      for(U32 v = 0; v < n; v++)
-         contour.push_back(Point(wp.verts[v * 2], wp.verts[v * 2 + 1]));
+      if(wallPoly.cachedDestructible)
+         r.setColor(DEST_FILL);
 
-      // Strip colinear vertices (introduced by tile-boundary clipping)
-      // so ear-clipping triangulation doesn't fail on them.
-      {
-         Vector<Point> cleaned;
-         S32 cn = contour.size();
-         for(S32 c = 0; c < cn; c++)
-         {
-            const Point &prev = contour[(c + cn - 1) % cn];
-            const Point &curr = contour[c];
-            const Point &next = contour[(c + 1) % cn];
-            F32 cross = (curr.x - prev.x) * (next.y - curr.y)
-                      - (curr.y - prev.y) * (next.x - curr.x);
-            if(fabs(cross) > 0.000001f)  // not colinear
-               cleaned.push_back(curr);
-         }
-         if(cleaned.size() >= 3)
-            contour = cleaned;
-      }
+      r.renderPointVector(&wallPoly.cachedFill, RenderType::Triangles);
 
-      Vector<Point> triPts;
-      if(Triangulate::Process(contour, triPts))
-         r.renderPointVector(&triPts, RenderType::Triangles);
+      if(wallPoly.cachedDestructible)
+         r.setColor(fillColor);
    }
 
-   // Pass 2: draw outline edges (only where outline[i] == true)
+   // Pass 2: draw outline edges — normal edges in outlineColor,
+   // destructible edges in DEST_COLOR (green)
+   static const Color DEST_COLOR(0.0f, 1.0f, 0.0f);  // green = destructible outline
    r.setColor(outlineColor);
-   for(S32 i = 0; i < tilePolys.size(); i++)
+   for(S32 i = 0; i < wallPolys.size(); i++)
    {
-      const WallPoly &wp = tilePolys[i];
-      U32 n = wp.numVerts();
-      if(n < 3)
+      const WallPoly &wallPoly = wallPolys[i];
+      if(wallPoly.numVerts() < 3)
          continue;
 
-      Vector<Point> visibleEdges;
-      for(U32 v = 0; v < n; v++)
+      if(wallPoly.cachedNormalEdges.size() > 0)
+         r.renderPointVector(&wallPoly.cachedNormalEdges, RenderType::Lines);
+
+      if(wallPoly.cachedDestructibleEdges.size() > 0)
       {
-         // Only draw edges marked as original (not clip-introduced)
-         if(v < wp.outline.size() && wp.outline[v])
-         {
-            U32 v0 = v * 2;
-            U32 v1 = ((v + 1) % n) * 2;
-            visibleEdges.push_back(Point(wp.verts[v0], wp.verts[v0 + 1]));
-            visibleEdges.push_back(Point(wp.verts[v1], wp.verts[v1 + 1]));
-         }
+         r.setColor(DEST_COLOR);
+         r.renderPointVector(&wallPoly.cachedDestructibleEdges, RenderType::Lines);
+         r.setColor(outlineColor);
       }
-      if(visibleEdges.size() > 0)
-         r.renderPointVector(&visibleEdges, RenderType::Lines);
    }
 }
 
@@ -3911,7 +3889,8 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 
 void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints,
                  const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor,
-                 const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                 const Color &fillColor, const Color &destFillColor, const GridDatabase *editorDb,
+                 F32 currentScale, bool dragMode, bool drawSelected,
                  const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
@@ -3930,18 +3909,41 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
          }
       }
 
-      // hack for now
-      Color color;
-      if(alpha < 1)
-         color = Colors::gray67;
-      else
-         color = fillColor * alpha;
-
       for(S32 i = 0; i < count; i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(!moved || !wallSegment->isSelected())
-            wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
+         {
+            // Determine fill color based on owner wall's destructibility
+            Color color;
+            if(alpha < 1)
+               color = Colors::gray67;
+            else
+               color = fillColor * alpha;
+
+            if(editorDb)
+            {
+               S32 ownerId = wallSegment->getOwner();
+               const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
+               for(S32 o = 0; o < objs->size(); o++)
+               {
+                  BfObject *obj = static_cast<BfObject *>(objs->get(o));
+                  if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
+                  {
+                     bool dest = false;
+                     if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+                        dest = static_cast<WallItem *>(obj)->mDestructible;
+                     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+                        dest = static_cast<PolyWall *>(obj)->mDestructible;
+                     if(dest)
+                        color = destFillColor * alpha;
+                     break;
+                  }
+               }
+            }
+
+            wallSegment->renderFill(selectedItemOffset, color);
+         }
       }
 
       renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
@@ -3952,7 +3954,31 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(wallSegment->isSelected())
-            wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
+         {
+            // Determine fill color based on owner wall's destructibility
+            Color color = fillColor * alpha;
+            if(editorDb)
+            {
+               S32 ownerId = wallSegment->getOwner();
+               const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
+               for(S32 o = 0; o < objs->size(); o++)
+               {
+                  BfObject *obj = static_cast<BfObject *>(objs->get(o));
+                  if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
+                  {
+                     bool dest = false;
+                     if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+                        dest = static_cast<WallItem *>(obj)->mDestructible;
+                     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+                        dest = static_cast<PolyWall *>(obj)->mDestructible;
+                     if(dest)
+                        color = destFillColor * alpha;
+                     break;
+                  }
+               }
+            }
+            wallSegment->renderFill(selectedItemOffset, color);
+         }
       }
 
       // Render wall outlines for selected walls only

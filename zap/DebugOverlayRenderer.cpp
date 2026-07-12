@@ -146,7 +146,7 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
    if(!gt)
       return;
 
-   const Vector<MapTile> &tiles = gt->getmapTiles();
+   const Vector<MapTile> &tiles = gt->getMapTiles();
    if(tiles.size() == 0)
       return;
 
@@ -164,11 +164,13 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
    }
    gridX.sort([](const F32 &a, const F32 &b) { return a < b; });
    gridY.sort([](const F32 &a, const F32 &b) { return a < b; });
+
    // Dedup within a small epsilon
    Vector<F32> uniqX, uniqY;
    for(S32 i = 0; i < gridX.size(); i++)
       if(i == 0 || gridX[i] > gridX[i-1] + 0.1f)
          uniqX.push_back(gridX[i]);
+
    for(S32 i = 0; i < gridY.size(); i++)
       if(i == 0 || gridY[i] > gridY[i-1] + 0.1f)
          uniqY.push_back(gridY[i]);
@@ -199,19 +201,21 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
    for(S32 i = 0; i < tiles.size(); i++)
    {
       const MapTile &tile = tiles[i];
-      for(S32 p = 0; p < tile.polys.size(); p++)
+      for(S32 j = 0; j < tile.polys.size(); j++)
       {
-         const WallPoly &wp = tile.polys[p];
-         const U32 n = wp.numVerts();
-         if(n < 3)
+         const WallPoly &wp = tile.polys[j];
+         const U32 numVerts = wp.numVerts();
+         if(numVerts < 3)
             continue;
 
-         for(U32 v = 0; v < n; v++)
+         for(U32 k = 0; k < numVerts; k++)
          {
-            const U32 v0 = v * 2;
-            const U32 v1 = ((v + 1) % n) * 2;
-            const bool isOrig = (v < wp.outline.size() && wp.outline[v]);
+            const U32 v0 = k * 2;
+            const U32 v1 = ((k + 1) % numVerts) * 2;
+            const bool isOrig = (k < wp.edges.size() && wp.edges[k] != EdgeStyle::None);
+
             Vector<Point> &batch = isOrig ? origEdges : clipEdges;
+
             batch.push_back(Point(wp.verts[v0], wp.verts[v0 + 1]));
             batch.push_back(Point(wp.verts[v1], wp.verts[v1 + 1]));
          }

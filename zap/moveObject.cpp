@@ -10,11 +10,11 @@
 
 #include "game.h"
 #include "gameConnection.h"
+#include "gameType.h"       // For tile poly collision checking
 #include "ship.h"
 #include "Zone.h"
 #include "Asteroid.h"
 
-#include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "MathUtils.h"     // For findLowestRootIninterval()
@@ -355,6 +355,16 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
       BfObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
+         // Check tile wall polys for collision (barrier ghosts may not be on client)
+         if(checkTileCollision(stateIndex, collisionTime, collisionPoint))
+         {
+            newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;
+            setPos(stateIndex, newPos);
+            computeCollisionResponseBarrier(stateIndex, collisionPoint);
+            moveTime -= collisionTime;
+            continue;
+         }
+
          newPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;   // Move to desired destination
          setPos(stateIndex, newPos);
          break;
@@ -451,6 +461,20 @@ TestFunc MoveObject::collideTypes()
 static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
 {
    return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
+}
+
+
+/// Check if the moving object's swept circle collides with any tile wall poly.
+/// Returns true and sets collisionTime/collisionPoint if a hit is found.
+/// This provides client-side wall collision when barrier ghosts are absent.
+bool MoveObject::checkTileCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
+{
+#ifndef ZAP_DEDICATED
+   return GameType::findTileWallSweptCircle(getPos(stateIndex), getVel(stateIndex) * collisionTime,
+                                            mRadius, collisionTime, collisionPoint);
+#else
+   return false;
+#endif
 }
 
 
@@ -563,6 +587,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
          }
       }
    }
+
    return collisionObject;
 }
 

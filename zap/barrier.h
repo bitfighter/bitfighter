@@ -41,41 +41,42 @@ public:
 
    bool mSolid;            // True if this represents a polywall
 
-   // By precomputing and storing, we should ease the rendering cost
-   Vector<Point> mRenderFillGeometry;        // Actual geometry used for rendering fill
 
    F32 mWidth;
+
+   // Destructible wall segment support
+   bool mDestructible = false;
+   F32 mHitPoints = 0;
+   F32 mMaxHitPoints = 0;
 
    static const S32 MIN_BARRIER_WIDTH = 1;         // Clipper doesn't much like 0 width walls
    static const S32 MAX_BARRIER_WIDTH = 2500;      // Geowar has walls at least 350 units wide, so going lower will break at least one level
 
    static const S32 DEFAULT_BARRIER_WIDTH = 50;    // The default width of the barrier in game units
 
-   static Vector<Point> mRenderLineSegments;       // The clipped line segments representing this barrier
    Vector<Point> mBotZoneBufferLineSegments;       // The line segments representing a buffered barrier
-
-   void renderLayer(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
-   static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
-
-   // Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
-   S32 getRenderSortValue();
 
    // Returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment
    const Vector<Point> *getCollisionPoly() const;
 
    // Collide always returns true for Barrier objects
-   bool collide(BfObject *otherObject);
+   bool collide(BfObject *otherObject) override;
+
+   // Handle damage for destructible barriers
+   void damageObject(DamageInfo *damageInfo) override;
+
+   // Reconstruct this barrier's outline, optionally forcing butt end caps
+   // at the start (pre) and/or end (post) by setting those to dummy (NAN,NAN).
+   void reconstructOutline(bool makePreDummy, bool makePostDummy);
+
+   // After a barrier is destroyed, find any remaining barriers that shared a
+   // joint point and rebuild their outlines with a butt end cap at that joint.
+   static void fixAdjacentBarrierOutlines(Game *game, const Barrier *destroyedBarrier);
 
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
-   // Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints
-   static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
-
    // Combine multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
-
-   static void prepareRenderingGeometry(Game *game);
-   static void clearRenderItems();
 };
 
 
@@ -94,9 +95,10 @@ struct WallRec
    Vector<F32> verts;
    F32 width;
    bool solid;
+   bool destructible = false;
 
 public:
-   WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
+   WallRec(F32 width, bool solid, const Vector<F32> &verts);            // Constructor
    explicit WallRec(const WallItem *wallItem);                          // Constructor
    explicit WallRec(const PolyWall *polyWall);                          // Constructor
 
@@ -117,6 +119,8 @@ private:
    void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
+   bool mDestructible = false;
+
    explicit WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
    virtual ~WallItem();                      // Destructor
    WallItem *clone() const;
@@ -192,6 +196,8 @@ public:
    virtual ~PolyWall();                         // Destructor
 
    PolyWall *clone() const;
+
+   bool mDestructible = false;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 

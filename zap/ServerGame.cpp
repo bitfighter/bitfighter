@@ -1972,6 +1972,29 @@ U16 ServerGame::findZoneContaining(const Point &p) const
 }
 
 
+/// Rebuild bot navigation zones from scratch.  Called after wall geometry
+/// changes (e.g. destructible wall destroyed) so bots can navigate the
+/// updated barriers.
+void ServerGame::rebuildBotZones()
+{
+   // Clear old zones — they reference deleted barrier geometry
+   mAllZones.clear();
+   mBotZoneDatabase->removeEverythingFromDatabase();
+
+   // Rebuild with current barrier geometry
+   bool triangulate;
+#ifdef ZAP_DEDICATED
+   triangulate = false;
+#else
+   triangulate = !isDedicated();
+#endif
+
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(
+      mBotZoneDatabase, getGameObjDatabase(), &mAllZones,
+      getWorldExtents(), triangulate);
+}
+
+
 void ServerGame::setGameType(GameType *gameType)
 {
    Parent::setGameType(gameType);

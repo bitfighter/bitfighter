@@ -14,16 +14,36 @@
 namespace Zap
 {
 
+/// Per-edge rendering style for wall tile polygons.
+enum class EdgeStyle : U8
+{
+   None   = 0,		  // Do not render this edge (tile boundary, not rendered)
+   Normal  = 1,		  // Render as blue line
+   Destructible = 2,  // Render as green line
+};
+
 /// A single wall polygon fragment within a tile.
 /// verts: flattened x,y pairs [x0, y0, x1, y1, ..., xN, yN]
-/// outline[i] == true  -> render edge from vert[i] to vert[(i+1) % N]
-/// outline[i] == false -> edge was introduced by clipping (tile boundary), do not render
+/// edges[i] determines how edge from vert[i] to vert[(i+1) % N] is rendered:
+///   None   — edge was introduced by clipping (tile boundary), do not render
+///   Normal  — edge came from a non-destructible barrier (or both types)
+///   Destructible — edge came from a destructible barrier only
 struct WallPoly
 {
    Vector<F32> verts;
-   Vector<bool> outline;
+   Vector<EdgeStyle> edges;
 
    U32 numVerts() const { return verts.size() / 2; }
+
+   // Precomputed render cache — filled once when tile data arrives.
+   // Triangulated fill triangles
+   Vector<Point> cachedFill;
+   // Normal (non-destructible) wall outline edges as point pairs.
+   Vector<Point> cachedNormalEdges;
+   // Destructible wall outline edges as point pairs.
+   Vector<Point> cachedDestructibleEdges;
+   /// true if any edge is EdgeStyle::Destructible
+   bool cachedDestructible = false;
 };
 
 
@@ -50,7 +70,9 @@ public:
 
    /// Add a wall polygon (outline) to be tiled.
    /// polygon vertices should form a closed CCW polygon (e.g. from Barrier::getCollisionPoly()).
-   void addWallPolygon(const Vector<Point> &polygon);
+   /// Add a wall polygon (outline) to be tiled.
+   /// @param destructible  Set to true if this wall is destructible
+   void addWallPolygon(const Vector<Point> &polygon, bool destructible = false);
 
    /// Build all tiles.  Clears outTiles before populating.
    void build(Vector<MapTile> &outTiles);
@@ -68,6 +90,7 @@ private:
    S32    mGridHeight;
 
    Vector<Vector<Point> > mWallPolygons;
+   Vector<bool> mWallDestructible;            // Parallel to mWallPolygons: true if the wall is destructible
 
    void computeTileGrid();
 
@@ -76,18 +99,6 @@ private:
 
    /// Return the world-space Rect for the given tile.
    Rect tileRect(U16 tileId) const;
-
-   /// Determine which edges in clipped are original vs clip-introduced.
-   /// clippedVerts: int64_t coords of the clipped polygon (flattened x,y pairs).
-   /// origVerts:    int64_t coords of the original polygon (flattened x,y pairs).
-   /// tileLeft/Top/Right/Bottom: the tile rect in int64_t coordinate space.
-   /// outline:      output bool vector, one per edge.
-   static void computeOutlineFlags(
-      const Vector<int64_t> &clippedVerts,
-      const Vector<int64_t> &origVerts,
-      int64_t tileLeft, int64_t tileTop,
-      int64_t tileRight, int64_t tileBottom,
-      Vector<bool> &outline);
 };
 
 } // namespace Zap
