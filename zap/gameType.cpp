@@ -1294,7 +1294,7 @@ static bool mapTilePolyEqual(const MapTile &a, const MapTile &b)
 /// position before and after the rebuild.  This enables direct tileId-based
 /// comparison to detect which tiles actually changed, without being fooled
 /// by grid shifts caused by changes to barrier extents at the level edge.
-void GameType::rebuildWallTiles()
+void GameType::rebuildWallTilesAndBotZones()
 {
    // Snapshot old tiles for change detection
    Vector<MapTile> oldTiles = mMapTiles;
@@ -1447,7 +1447,7 @@ void GameType::rebuildWallTiles()
       }
    }
 
-   // Rebuild bot navigation zones so bots can navigate the updated barriers
+   // Rebuild bot navigation zones
    static_cast<ServerGame *>(mGame)->rebuildBotZones();
 }
 

@@ -1497,6 +1497,18 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
+Barrier *ForceFieldProjector::getTerminatingBarrier() const
+{
+   return mTerminatingBarrier;
+}
+
+
+void ForceFieldProjector::setTerminatingBarrier(Barrier *b)
+{
+   mTerminatingBarrier = b;
+}
+
+
 WallSegment *ForceFieldProjector::getEndSegment()
 {
    return mForceFieldEndSegment;
@@ -1534,6 +1546,13 @@ void ForceFieldProjector::onEnabled()
 
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+
+      // Remember which wall segment this beam terminates at
+      setEndSegment(dynamic_cast<WallSegment *>(collObj));
+
+      // Remember which barrier this beam terminates at (server-side), used for
+      // targeted recalculation when a barrier is destroyed.
+      setTerminatingBarrier(dynamic_cast<Barrier *>(collObj));
    }
 }
 
@@ -1625,6 +1644,35 @@ void ForceFieldProjector::onGeomChanged()
       findForceFieldEnd();
 
    Parent::onGeomChanged();
+}
+
+
+// Called when the barrier this forcefield terminates at is destroyed.
+// Recompute the forcefield beam to extend to the next wall (or max length).
+// Uses the same pattern as lua_setPos() which updates forcefield endpoints.
+void ForceFieldProjector::recomputeFieldGeometry()
+{
+   if(!getDatabase() || !isEnabled())
+      return;
+
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   DatabaseObject *collObj;
+
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+   // Update the stored end segment with the new terminating wall
+   setEndSegment(dynamic_cast<WallSegment *>(collObj));
+
+   // Update which barrier this beam terminates at (server-side)
+   setTerminatingBarrier(dynamic_cast<Barrier *>(collObj));
+
+   // Update existing forcefield endpoints if we have an active one
+   if(mField.isValid())
+   {
+      mField->setEndPoints(start, end);
+      mField->setMaskBits(ForceField::InitialMask);
+   }
 }
 
 

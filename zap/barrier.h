@@ -65,6 +65,10 @@ public:
    // Handle damage for destructible barriers
    void damageObject(DamageInfo *damageInfo) override;
 
+    // Remove any turrets or forcefield projectors mounted on this barrier
+    void removeMountedItems(Game *game);
+
+
    // Reconstruct this barrier's outline, optionally forcing butt end caps
    // at the start (pre) and/or end (post) by setting those to dummy (NAN,NAN).
    void reconstructOutline(bool makePreDummy, bool makePostDummy);

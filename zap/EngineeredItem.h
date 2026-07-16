@@ -225,9 +225,10 @@ class ForceFieldProjector : public EngineeredItem
    typedef EngineeredItem Parent;
 
 private:
-   SafePtr<ForceField> mField;
-   WallSegment *mForceFieldEndSegment;
-   Point forceFieldEnd;
+    SafePtr<ForceField> mField;
+    SafePtr<class Barrier> mTerminatingBarrier;   // The barrier this beam terminates at (server-side)
+    WallSegment *mForceFieldEndSegment;           // WallSegment version for the editor
+    Point forceFieldEnd;
 
    void initialize();
 
@@ -252,8 +253,14 @@ public:
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
-   WallSegment *getEndSegment();
-   void setEndSegment(WallSegment *endSegment);
+    WallSegment *getEndSegment();
+    void setEndSegment(WallSegment *endSegment);
+
+    // The Barrier this projector's beam terminates at (server-side).
+    // Used to optimize barrier-destruction updates so we only recompute
+    // projectors whose terminating wall was actually destroyed.
+    Barrier *getTerminatingBarrier() const;
+    void setTerminatingBarrier(Barrier *b);
 
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
@@ -280,9 +287,10 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    void onGeomChanged();
-   void findForceFieldEnd();                      // Find end of forcefield in editor
+    void findForceFieldEnd();                      // Find end of forcefield in editor
+    void recomputeFieldGeometry();                 // Recompute field after wall destruction
 
-   ///// Lua interface
+    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
 
    static const char *luaClassName;

@@ -734,7 +734,7 @@ TEST(WallTilingTest, RebuildTilesAfterAddingWall)
    }
 
    // Rebuild tiles from the updated barrier database
-   serverGT->rebuildWallTiles();
+   serverGT->rebuildWallTilesAndBotZones();
 
    // Verify tiles now include the new wall
    tiles = serverGT->getMapTiles();
@@ -800,7 +800,7 @@ TEST(WallTilingTest, WallAddedOnServerPropagatesToClient)
    }
 
    // Rebuild tiles to include the new wall and reset delivery state
-   serverGT->rebuildWallTiles();
+   serverGT->rebuildWallTilesAndBotZones();
 
    // Verify server now has more tile polys
    S32 serverNewPolyCount = 0;

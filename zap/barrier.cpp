@@ -12,6 +12,7 @@
 #include "Colors.h"
 #include "stringUtils.h"
 #include "GeomUtils.h"
+#include "EngineeredItem.h"
 
 #include <cmath>
 #include <math.h>
@@ -245,12 +246,129 @@ namespace Zap
          Game *game = mGame;
          fixAdjacentBarrierOutlines(game, this);
 
-         // Barrier is destroyed — remove it from the game and rebuild tiles
+          // Remove any turrets or forcefield projectors mounted on this barrier
+          removeMountedItems(game);
+
+          // Save mSolid before this object is deleted
+          bool solid = mSolid;
+
+          // Collect forcefield projectors whose beams terminate at this
+          // barrier BEFORE the barrier is deleted.  After deletion, both
+          // 'this' becomes a dangling pointer and the SafePtr references
+          // are auto-nullified, so we must capture the list now.
+          Vector<ForceFieldProjector *> affectedProjectors;
+          if(!solid)
+          {
+             Vector<DatabaseObject *> ffps;
+             game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, ffps);
+             for(S32 i = 0; i < ffps.size(); i++)
+             {
+                ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(ffps[i]);
+                if(ffp && ffp->isEnabled() && ffp->getTerminatingBarrier() == this)
+                   affectedProjectors.push_back(ffp);
+             }
+          }
+
+          // Barrier is destroyed — remove it from the game
          GameType *gt = game->getGameType();
-         removeFromGame(true);   // deletes the object
-         gt->rebuildWallTiles();
+         removeFromGame(true);   // deletes the object, nullifies SafePtrs
+
+          // Recompute forcefield projectors BEFORE rebuilding wall tiles
+          // and bot zones.  The barrier is gone from the database, so LOS
+          // sweeps will reach through the gap to the next wall.  Rebuilding
+          // bot zones reads forcefield endpoints, so they must be updated
+          // first to avoid stale geometry in the nav mesh.
+          for(S32 i = 0; i < affectedProjectors.size(); i++)
+             affectedProjectors[i]->recomputeFieldGeometry();
+
+          // Now rebuild wall tiles and bot zones with current forcefields
+          gt->rebuildWallTilesAndBotZones();
       }
    }
+
+
+    // Find and remove any EngineeredItems (turrets, forcefield projectors) that
+    // are mounted on this barrier.  Uses spatial proximity: the item's anchor
+    // point (getPos()) sits on the barrier's centerline (spine), offset by a
+    // small amount along the mount normal.  We check whether the anchor is within
+    // the barrier's width-extruded region plus a small margin.
+    void Barrier::removeMountedItems(Game *game)
+    {
+       if(!game || !game->isServer())
+          return;
+
+       // Collect all turrets and forcefield projectors in the game
+       Vector<DatabaseObject *> mountedItems;
+       game->getGameObjDatabase()->findObjects(TurretTypeNumber, mountedItems);
+       game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, mountedItems);
+
+       // Tolerance: items sit on the barrier centerline with a ~1 unit offset
+       // along the anchor normal, so include half the wall width plus margin.
+       // For polywalls (solid), the polygon IS the centerline.
+       static const F32 MOUNT_MARGIN = 5.0f;
+       F32 tolerance_squared = sq((mSolid ? 0.0f : mWidth / 2.0f) + MOUNT_MARGIN);
+
+       for(S32 i = 0; i < mountedItems.size(); i++)
+       {
+          EngineeredItem *item = dynamic_cast<EngineeredItem *>(mountedItems[i]);
+          if(!item)
+             continue;
+
+          const Point &anchor = item->getPos();
+          bool mounted = false;
+
+          if(mSolid)  // Polywall — check each edge of the polygon (mPoints == outline == centerline)
+          {
+             for(S32 j = 0; j < mPoints.size(); j++)
+             {
+                const Point &a = mPoints[j];
+                const Point &b = mPoints[(j + 1) % mPoints.size()];
+
+                Point closest;
+                F32 dist_squared;
+                if(findNormalPoint(anchor, a, b, closest))
+                   dist_squared = anchor.distSquared(closest);
+                else
+                   dist_squared = min(anchor.distSquared(a), anchor.distSquared(b));
+
+                if(dist_squared <= tolerance_squared)
+                {
+                   mounted = true;
+                   break;
+                }
+             }
+          }
+          else        // Normal barrier — check spine segment mPoints[1]→mPoints[2]
+          {
+             if(mPoints.size() >= 3)
+             {
+                const Point &start = mPoints[1];
+                const Point &end   = mPoints[2];
+
+                Point closest;
+                F32 dist_squared;
+                if(findNormalPoint(anchor, start, end, closest))
+                   dist_squared = anchor.distSquared(closest);
+                else
+                   dist_squared = min(anchor.distSquared(start), anchor.distSquared(end));
+
+                if(dist_squared <= tolerance_squared)
+                   mounted = true;
+             }
+          }
+
+          if(mounted)
+          {
+             // Disable the forcefield if this is a projector, then remove the item
+             ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(item);
+             if(ffp)
+                ffp->onDisabled();
+
+             item->deleteObject(0);
+          }
+       }
+    }
+
 
 
    // Reconstruct this barrier's outline from its stored mPoints data.

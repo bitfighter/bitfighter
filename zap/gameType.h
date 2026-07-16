@@ -222,7 +222,7 @@ public:
    /// Rebuild tiled wall geometry from the current barrier database and
    /// reset per-connection delivery state so tiles are re-sent to all clients.
    /// Call this after adding/removing walls at runtime.
-   void rebuildWallTiles();
+   void rebuildWallTilesAndBotZones();
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
