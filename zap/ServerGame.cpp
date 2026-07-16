@@ -469,10 +469,9 @@ void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
 {
    Parent::addWallItem(wallItem, getGameObjDatabase());
 
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and
-   // is convenient to transmit to the clients
-   //WallRec wallRec(wallItem);
-   //getGameType()->addWall(wallRec, this);
+   // Rebuild wall tiles and bot zones so the nav mesh reflects the new wall
+   if(getGameType())
+      getGameType()->rebuildWallTilesAndBotZones();
 }
 
 
