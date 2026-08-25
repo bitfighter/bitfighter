@@ -364,8 +364,8 @@ void MenuUserInterface::render()
          drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact            + highlightVertOffset,
                                canvasWidth, y + textsize + gap / 2 - shrinkfact + highlightVertOffset);
 
-      S32 indx = i + offset;
-      mMenuItems[indx]->render(y, textsize, selectedIndex == indx);
+      S32 index = i + offset;
+      mMenuItems[index]->render(y, textsize, selectedIndex == index);
 
       y += textsize + gap;
    }

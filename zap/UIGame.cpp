@@ -1086,11 +1086,11 @@ void GameUserInterface::choosePrevWeapon()
 
 
 // Select a weapon by its index
-void GameUserInterface::selectWeapon(U32 indx)
+void GameUserInterface::selectWeapon(U32 index)
 {
    GameType *gameType = getGame()->getGameType();
    if(gameType)
-      gameType->c2sSelectWeapon(indx);
+      gameType->c2sSelectWeapon(index);
 
    mHelpItemManager.removeInlineHelpItem(ChangeWeaponsItem, true);      // User has demonstrated this skill
 }

@@ -4349,13 +4349,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 
 
 // Client tells server that they chose the specified weapon
-GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
+GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index), (index))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    BfObject *controlObject = source->getControlObject();
 
    if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
-      static_cast<Ship *>(controlObject)->selectWeapon(indx);
+      static_cast<Ship *>(controlObject)->selectWeapon(index);
 }
 
 
