@@ -173,7 +173,7 @@ string ChatMessageDisplayer::substituteVars(const string &str)
 }
 
 
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha) const
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool announcementActive, F32 alpha) const
 {
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
 
@@ -208,7 +208,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    }
 
    U32 last = mLast;
-   if(anouncementActive)
+   if(announcementActive)
    {
       if(!mExpire && mFirst >= (U32)mMessages.size() - 1)
          last++;

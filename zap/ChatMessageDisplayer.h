@@ -57,7 +57,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;
+   void render(S32 ypos, bool helperVisible, bool announcementActive, F32 alpha) const;
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    string substituteVars(const string &str);
