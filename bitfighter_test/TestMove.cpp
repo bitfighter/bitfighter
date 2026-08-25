@@ -125,7 +125,7 @@ TEST_F(MoveTest, PackWithPreviousEqualMove)
 
 // The Move angle should always be between -pi and pi.  This conforms with
 // the output of the arc-tangent of a triangles coordinates and atan2()
-// We neeed to verify that prepare() keeps this output consistent, even
+// We need to verify that prepare() keeps this output consistent, even
 // with angles of greater magnitude in either direction
 TEST_F(MoveTest, Simple)
 {

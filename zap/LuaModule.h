@@ -51,7 +51,7 @@ LuaStaticFunctionProfile name##_profile = { #name, {profiles, profileCount }, lu
 /**
  * Generates a description class for the module, and declares a global static
  * LuaModuleRegistrar<T> instance, which causes the registration to occur
- * before main (when the instance is consructed).
+ * before main (when the instance is constructed).
  */
 #define GENERATE_LUA_STATIC_METHODS_TABLE(modname, table_)                                                                \
 struct modname##_Profiles                                                                                                 \

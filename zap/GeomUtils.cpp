@@ -1299,7 +1299,7 @@ static void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<P
       }
    }
 
-   // if no subdivision occured, return the input
+   // if no subdivision occurred, return the input
    if(!polyWasSplit)
       result.push_back(input);
 }
@@ -1978,7 +1978,7 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 }
 
 
-// Given the points in points, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
+// Given the points in points, figure out where the ends of the walls should be (they'll need to be extended slightly in some cases
 // for better rendering).  Set extendAmt to 0 to see why it's needed.
 // Populates barrierEnds with the results.
 void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Point> &barrierEnds)
@@ -2291,12 +2291,12 @@ static void pushPolyNode(lua_State *L, const PolyNode *node)
    lua_setfield(L, -2, "points");                 // -- node
 
    // set the children
-   lua_createtable(L, (int)node->Childs.size(), 0);    // -- node, childs
+   lua_createtable(L, (int)node->Childs.size(), 0);    // -- node, children
    for(U32 i = 1; i <= node->Childs.size(); i++)
    {
-      lua_pushnumber(L, i);                       // -- node, childs, i
-      pushPolyNode(L, node->Childs[i-1]);         // -- node, childs, i, child
-      lua_settable(L, -3);                        // -- node, childs
+      lua_pushnumber(L, i);                       // -- node, children, i
+      pushPolyNode(L, node->Childs[i-1]);         // -- node, children, i, child
+      lua_settable(L, -3);                        // -- node, children
    }
    lua_setfield(L, -2, "children");               // -- node
 }

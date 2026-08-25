@@ -25,7 +25,7 @@ namespace Zap
 ////////////////////////////////////////
 
 
-// Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
+// Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any arbitrary and unique token
 
 /*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
 /*                                                            Saved    BindingSet        Def. kb           Def. js           */

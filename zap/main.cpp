@@ -32,7 +32,7 @@
 // Enemy FF: Lets enemy ships pass - destroy by shooting the base
 // Neutral FF: Claim it for your team by repairing with the repair module
 // Friendly Turret: Targets enemies, but won't hurt you (on purpose)
-// Enemy Turret: Defends enemy teritory.  Destroy with multiple shots
+// Enemy Turret: Defends enemy territory.  Destroy with multiple shots
 // Neutral turret: Claim it for your team by repairing with the repair module
 // Timer shows time left in game
 // Heatlh indicator shows health left
@@ -492,7 +492,7 @@ void shutdownBitfighter()
       // Save current window position if in windowed mode
       if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
       {
-         VideoSystem::saveWindowPostion(settings);
+         VideoSystem::saveWindowPosition(settings);
       }
 
       FontManager::cleanup();
@@ -564,7 +564,7 @@ void createClientGame(GameSettingsPtr settings)
 
       //gClientGames.push_back(new ClientGame(Address(), settings));   //  !!! 2-player split-screen game in same game.
 
-      // Set the intial UI
+      // Set the initial UI
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
@@ -999,7 +999,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Remove option that is no longer used, added in 019
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
 
-      // Remove item_select.lua plugin, it was superceded by filter.lua
+      // Remove item_select.lua plugin, it was superseded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
       string offendingFile = joindir(folderManager->pluginDir, "item_select.lua");
 

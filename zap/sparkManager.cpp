@@ -70,8 +70,8 @@ void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color
    if(firstFreeIndex[sparkType] >= MAX_SPARKS - slotsNeeded)           // Spark list is full... need to overwrite an older spark
    {
       // Out of room for new sparks.  We'll jump elsewhere in our array and overwrite some older spark.
-      // Overwrite every nth spark to avoid noticable artifacts by grabbing too many sparks from one place.
-      // But make sure we grab a multiple of 2 to avoid wierdness with SparkTypeLine sparks, wich require proper byte alignment.
+      // Overwrite every nth spark to avoid noticeable artifacts by grabbing too many sparks from one place.
+      // But make sure we grab a multiple of 2 to avoid weirdness with SparkTypeLine sparks, which require proper byte alignment.
       // This doesn't matter for point sparks, but neither does it hurt.
       sparkIndex = ((lastOverwrittenIndex[sparkType] + 100) % (MAX_SPARKS / 2 - 1)) * 2;
       lastOverwrittenIndex[sparkType] = sparkIndex;
@@ -616,6 +616,6 @@ void FxTrail::renderTrails()
    }
 }
 
-} } // Nexted namespace
+} } // Nested namespace
 
 

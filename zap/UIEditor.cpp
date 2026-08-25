@@ -84,7 +84,7 @@ static void backToMainMenuCallback(ClientGame *game)
 {
    UIManager *uiManager = game->getUIManager();
 
-   uiManager->getUI<EditorUserInterface>()->onQuitted();
+   uiManager->getUI<EditorUserInterface>()->onQuit();
    uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
 }
 
@@ -181,7 +181,7 @@ void EditorUserInterface::setDatabase(shared_ptr<GridDatabase> database)
 
 
 // Really quitting... no going back!
-void EditorUserInterface::onQuitted()
+void EditorUserInterface::onQuit()
 {
    cleanUp(false);
    getGame()->clearAddTarget();
@@ -906,7 +906,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
    saveUndoState();
 
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
-   // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
+   // provides some protection against the script being changed while Bitfighter is running.  Probably not really
    // necessary, but we can afford it here.
    string key = getPluginSignature();
 
@@ -1051,7 +1051,7 @@ void EditorUserInterface::validateLevel()
    bool foundTeamFlags      = hasTeamFlags (gridDatabase);
    bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
 
-   // "Unversal errors" -- levelgens can't (yet) change gametype
+   // "Universal errors" -- levelgens can't (yet) change gametype
 
    GameType *gameType = getGame()->getGameType();
 
@@ -1848,7 +1848,7 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 void EditorUserInterface::renderItemInfoPanel()
 {
    Renderer& r = Renderer::get();
-   string itemName;     // All intialized to ""
+   string itemName;     // All initialized to ""
 
    S32 hitCount = 0;
    bool multipleKindsOfObjectsSelected = false;
@@ -2009,7 +2009,7 @@ void EditorUserInterface::render()
       r.scale(getCurrentScale());
 
       // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
-      // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rahter obvoius fact
+      // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rather obvious fact
       // that walls that are not being dragged should be rendered in place.
       static Point delta;
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
@@ -3692,7 +3692,7 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
             i--;
          }
 
-         // First vertex conincides with final vertex 3 2 1 | 5 4 3
+         // First vertex coincides with final vertex 3 2 1 | 5 4 3
          else if(firstItem->getVert(0).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)
          {
             if(!joinedObj)
@@ -3707,7 +3707,7 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
             i--;
          }
 
-         // Last vertex conincides with first 1 2 3 | 3 4 5
+         // Last vertex coincides with first 1 2 3 | 3 4 5
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(0)) < .0001)
          {
             if(!joinedObj)
@@ -3768,7 +3768,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 
 
 // After deleting a bunch of items, clean up
-void EditorUserInterface::doneDeleteingWalls()
+void EditorUserInterface::doneDeletingWalls()
 {
    WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
@@ -4043,7 +4043,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset veiw
+	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset view
       centerView();
 	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))       // Run levelgen script, or clear last results
    {
@@ -4847,7 +4847,7 @@ void EditorUserInterface::onFinishedDragging()
       // If our snap vertex has moved then all selected items have moved
       bool itemsMoved = mDragCopying || (mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
 
-      if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+      if(itemsMoved)    // Move consummated... update any moved items, and save our autosave
       {
          bool wallMoved = false;
 

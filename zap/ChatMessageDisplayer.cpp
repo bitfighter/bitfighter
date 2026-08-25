@@ -119,7 +119,7 @@ void ChatMessageDisplayer::advanceLast()
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
    FontManager::pushFontContext(ChatMessageContext);
-   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
+   Vector<string> lines = wrapString(substituteVars(msg), mWrapWidth, mFontSize, "      ");
    FontManager::popFontContext();
 
    for(S32 i = 0; i < lines.size(); i++)
@@ -137,7 +137,7 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
 }
 
 
-string ChatMessageDisplayer::substitueVars(const string &str)
+string ChatMessageDisplayer::substituteVars(const string &str)
 {
    string s = str;
 

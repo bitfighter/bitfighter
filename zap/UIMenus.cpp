@@ -182,7 +182,7 @@ void MenuUserInterface::idle(U32 timeDelta)
 }
 
 
-// Return index offset to account for scrolling menus; basically caluclates index of topmost visible item
+// Return index offset to account for scrolling menus; basically calculates index of topmost visible item
 S32 MenuUserInterface::getOffset()
 {
    S32 offset = 0;

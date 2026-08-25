@@ -695,12 +695,12 @@ void GameUserInterface::renderShutdownMessage() const
       char timemsg[255];
       dSprintf(timemsg, sizeof(timemsg), "Server is shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
 
-      if(mShutdownInitiator)     // Local client intitiated the shutdown
+      if(mShutdownInitiator)     // Local client initiated the shutdown
       {
-         string msg = string(timemsg) + "\n\nShutdown sequence intitated by you.\n\n" + mShutdownReason.getString();
+         string msg = string(timemsg) + "\n\nShutdown sequence initiated by you.\n\n" + mShutdownReason.getString();
          renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [[Esc]] to cancel shutdown", msg, 7);
       }
-      else                       // Remote user intiated the shutdown
+      else                       // Remote user initiated the shutdown
       {
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
@@ -875,7 +875,7 @@ void GameUserInterface::renderReticle() const
 #define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b
 
    static F32 colors[] = {
-   //    R,G,B   aplha
+   //    R,G,B   alpha
       COLOR_RGB, 0.7f,
       COLOR_RGB, 0.7f,
       COLOR_RGB, 0.7f,
@@ -1275,7 +1275,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl+M, for now, to cycle through message dispaly modes
+   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl+M, for now, to cycle through message display modes
    {
       toggleChatDisplayMode();
       return true;
@@ -1800,7 +1800,7 @@ Move *GameUserInterface::getCurrentMove()
    }
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
-   // we need to udate the move a little
+   // we need to update the move a little
    if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
@@ -1891,7 +1891,7 @@ void GameUserInterface::renderLevelInfo()
    if(shouldRenderLevelInfo())
    {
       mLevelInfoDisplayer.render();
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Suppress mode change alert if this message is displayed...
    }
 }
 

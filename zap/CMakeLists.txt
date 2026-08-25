@@ -260,7 +260,7 @@ BF_PLATFORM_ADD_DEFINITIONS()
 # Targets
 #
 
-# Disable compiling of client and test suite if certain dependencies arent met
+# Disable compiling of client and test suite if certain dependencies aren't met
 set(COMPILE_CLIENT YES)
 if(NOT SDL2_FOUND AND NOT SDL_FOUND)
 	set(COMPILE_CLIENT NO)

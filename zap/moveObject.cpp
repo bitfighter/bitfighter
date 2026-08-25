@@ -270,8 +270,8 @@ void MoveObject::setMass(F32 mass)
 //    }
 //    else
 //    {
-//       computeMinimumSeperationTime(ObjHit);
-//       displaceObject(ObjHit, seperationTime);
+//       computeMinimumSeparationTime(ObjHit);
+//       displaceObject(ObjHit, separationTime);
 //    }
 // }
 //
@@ -288,15 +288,15 @@ void MoveObject::setMass(F32 mass)
 //       }
 //       else
 //       {
-//          computeMinimumSeperationTime(ObjHit);
-//          displaceObject(ObjHit, seperationTime);
+//          computeMinimumSeparationTime(ObjHit);
+//          displaceObject(ObjHit, separationTime);
 //       }
 //    }
 // }
 
 
 // See http://flipcode.com/archives/Theory_Practice-Issue_01_Collision_Detection.shtml --> Example 1  May or may not be relevant
-F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
+F32 MoveObject::computeMinSeparationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
 {
    F32 myRadius;
    F32 contactShipRadius;
@@ -411,7 +411,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
             Point intendedPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;    // x = x + vt
 
             F32 displaceEpsilon = 0.002f;
-            F32 t = computeMinSeperationTime(stateIndex, moveObjectThatWasHit, intendedPos);
+            F32 t = computeMinSeparationTime(stateIndex, moveObjectThatWasHit, intendedPos);
             if(t <= 0)
                break;   // Some kind of math error, couldn't find result: stop simulating this ship
 
@@ -1096,7 +1096,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    U32 retMask = 0;
    if(stream->writeFlag(updateMask & InitialMask))
-      stream->writeRangedU32(getItemId(), 0, U16_MAX);      // Send id in inital packet
+      stream->writeRangedU32(getItemId(), 0, U16_MAX);      // Send id in initial packet
 
    if(stream->writeFlag(updateMask & PositionMask))
    {
@@ -1458,7 +1458,7 @@ VelocityItem::VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass) : 
 {
    mInherentSpeed = speed;
 
-   // Give the objects some intial motion in a random direction
+   // Give the objects some initial motion in a random direction
    setPosAng(pos, TNL::Random::readF() * FloatTau);
 }
 

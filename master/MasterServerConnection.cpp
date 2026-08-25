@@ -700,7 +700,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
    logprintf(LogConsumer::LogConnectionManager, "Server: %s accepted connection request from %s", buffer,
                                                       req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
-   // If we still know about the requestor, tell him his connection was accepted...
+   // If we still know about the requester, tell him his connection was accepted...
    if(req->initiator.isValid())
       req->initiator->m2cArrangedConnectionAccepted(req->initiatorQueryId, possibleAddresses, connectionData);
 
@@ -1060,7 +1060,7 @@ struct PlayerLevelRatingsReader : public MasterThreadEntry
 
       TNLAssert(playerRating, "playerRating should not be NULL!");
 
-      // If this rating item was updated by the client while we were retrieving data fom the database,
+      // If this rating item was updated by the client while we were retrieving data from the database,
       // we'll treat that as authoritative and not overwrite it with (likely) stale data from the database.
       if(!playerRating->receivedUpdateByClientWhileBusy)
          playerRating->setRating(rating);
@@ -1360,7 +1360,7 @@ S16 LevelRating::getRating()
 
 void LevelRating::setRating(S16 rating)
 {
-   mRating = MAX(rating, MinumumLegitimateRating);
+   mRating = MAX(rating, MinimumLegitimateRating);
 }
 
 
@@ -1616,7 +1616,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                return false;
             }
 
-         // Start the authentication by reading database on seperate thread
+         // Start the authentication by reading database on separate thread
          // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
          // so we pause waiting for database instead of fully connecting yet.
 

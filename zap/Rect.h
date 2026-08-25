@@ -40,12 +40,12 @@ public:
    typedef float member_type;
    Point min, max;
 
-   Rect();                                      // Constuctor
-   Rect(const Point &p1, const Point &p2);      // Constuctor
-   Rect(F32 x1, F32 y1, F32 x2, F32 y2);        // Constuctor
+   Rect();                                      // Constructor
+   Rect(const Point &p1, const Point &p2);      // Constructor
+   Rect(F32 x1, F32 y1, F32 x2, F32 y2);        // Constructor
    // Try a templatized constructor as an alternative to casting casting casting
    template <typename T>
-   Rect(const Point &p, T radius)             // Constuctor, takes centerpoint and "radius"
+   Rect(const Point &p, T radius)             // Constructor, takes centerpoint and "radius"
    {
       set(p, (F32)radius);
    }

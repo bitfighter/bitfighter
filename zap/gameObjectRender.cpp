@@ -2028,7 +2028,7 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
-// Render a circle with gaps at the specfied angles.  Currently hardwired for 4, could be generalized.
+// Render a circle with gaps at the specified angles.  Currently hardwired for 4, could be generalized.
 // Pass in a sorted list, with all angles between 0 and Tau.
 static void drawInterruptedCircle(const Point &center, F32 radius, const F32 angles[4], F32 halfGap)
 {
@@ -2063,7 +2063,7 @@ void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 
    static const F32 BAR_HALF_WIDTH_RATIO = .08f;      // <<< This controls how thick the bars are
 
-   // No user servicable parts below!
+   // No user serviceable parts below!
    Renderer& r = Renderer::get();
    static const F32 SQRT3_OVER_2 = sqrt(3) / 2;
    const F32 outerR = (F32)radius;
@@ -3161,7 +3161,7 @@ void renderBitfighterLogo(U32 mask)
 }
 
 
-// Draw logo centered on screen horzontally, and on yPos vertically, scaled and rotated according to parameters
+// Draw logo centered on screen horizontally, and on yPos vertically, scaled and rotated according to parameters
 void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 {
    Renderer& r = Renderer::get();
@@ -4046,7 +4046,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
    if(dist < 50)
       alpha *= dist * 0.02f;
 
-   // Scale arrow accorging to distance from objective --> doesn't look very nice
+   // Scale arrow according to distance from objective --> doesn't look very nice
    //F32 scale = max(1 - (min(max(dist,100),1000) - 100) / 900, .5);
    F32 scale = 1.0;
 

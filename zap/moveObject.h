@@ -157,7 +157,7 @@ public:
    bool checkTileCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
-   F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
+   F32 computeMinSeparationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
    void checkForZones();                                       // See if object entered or left any zones
 

@@ -52,7 +52,7 @@ void Console::initialize()
 #ifndef BF_NO_CONSOLE
 
    TNLAssert(DisplayManager::getScreenInfo()->isActualized(), "Must run VideoSystem::updateDisplayState() before initializing console!");
-   TNLAssert(!mConsole,                  "Only intialize once!");
+   TNLAssert(!mConsole,                  "Only initialize once!");
 
    mConsole = OGLCONSOLE_Create();
 

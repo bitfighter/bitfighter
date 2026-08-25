@@ -60,7 +60,7 @@ public:
    void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
-   string substitueVars(const string &str);
+   string substituteVars(const string &str);
 };
 
 }

@@ -197,7 +197,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 
    setSize((F32)atof(argv[5]));
 
-   // Assemble any remainin args into a string
+   // Assemble any remaining args into a string
    mText = "";
    for(S32 i = 6; i < argc; i++)
    {
@@ -274,8 +274,8 @@ Rect TextItem::calcExtents()
 #else
 
    //F32 len = getStringWidth(mSize, mText.c_str());  // Somehow can't use this or else running with -dedicated will crash...
-   F32 len = getVert(0).distanceTo(getVert(1));       // This will work, assuming all Text never go past the verticies.
-   //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
+   F32 len = getVert(0).distanceTo(getVert(1));       // This will work, assuming all Text never go past the vertices.
+   //F32 buf = mSize / 2;     // Provides some room to accommodate descenders on letters like j and g.
 
    F32 angle =  getVert(0).angleTo(getVert(1));
    F32 sinang = sin(angle);

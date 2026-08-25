@@ -135,7 +135,7 @@ void HttpRequest::parseResponse(string response)
    std::size_t seperatorIndex = response.find("\r\n\r\n");
    if(seperatorIndex == string::npos || response == "")
    {
-      // seperator not found, this response isn't valid
+      // separator not found, this response isn't valid
       return;
    }
 
@@ -295,7 +295,7 @@ bool HttpRequest::sendRequest(string request)
          return true;
       }
 
-      // an error occured
+      // an error occurred
       return false;
    }
    return false;

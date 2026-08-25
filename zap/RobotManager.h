@@ -33,7 +33,7 @@ private:
    ServerGame *mGame;
 
 public:
-   RobotManager(ServerGame *game, GameSettingsPtr settings);     // Contsructor
+   RobotManager(ServerGame *game, GameSettingsPtr settings);     // Constructor
    virtual ~RobotManager();                                      // Destructor
 
    void onLevelChanged();        // Called when level changes or is reset

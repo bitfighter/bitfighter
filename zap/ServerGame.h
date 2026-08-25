@@ -186,7 +186,7 @@ public:
 
    /////
    // Bot related
-   void startAllBots();                            // Loop through all our bots and run thier main() functions
+   void startAllBots();                            // Loop through all our bots and run their main() functions
 
    S32 getBotCount() const;
 

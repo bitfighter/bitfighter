@@ -71,10 +71,10 @@ if(SDL2_FOUND)
 	set(SDL_LIBRARY ${SDL2_LIBRARY})
 endif()
 
-# Searches for OpenGL and enables GLES if GL isnt found in the system
+# Searches for OpenGL and enables GLES if GL isn't found in the system
 message(STATUS "Determining system GL provider")
 if(NOT USE_GLES)
-	message(STATUS "Atempting to use standard OpenGL")
+	message(STATUS "Attempting to use standard OpenGL")
 	find_package(OpenGL)
 	set(USE_STANDARD_GL 1)
 	set(GL_LIBRARY ${OPENGL_LIBRARY})
@@ -82,7 +82,7 @@ if(NOT USE_GLES)
 endif()
 
 if(USE_GLES OR NOT USE_STANDARD_GL)
-	message(STATUS "Atempting to use OpenGL ES")
+	message(STATUS "Attempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
 

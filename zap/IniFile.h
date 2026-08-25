@@ -12,7 +12,7 @@
 // Rewritten by: Shane Hill
 // Date:         21/08/2001
 // Email:        Shane.Hill@dsto.defence.gov.au
-// Reason:       Remove dependancy on MFC. Code should compile on any
+// Reason:       Remove dependency on MFC. Code should compile on any
 //               platform. Tested on Windows/Linux/Irix
 //////////////////////////////////////////////////////////////////////
 
@@ -156,7 +156,7 @@ public:
             void *v13 = 0, void *v14 = 0, void *v15 = 0, void *v16 = 0);
     */
    // Sets value of [keyname] valuename =.
-   // Specify the optional paramter as false (0) if you do not want it to create
+   // Specify the optional parameter as false (0) if you do not want it to create
    // the key if it doesn't exist. Returns true if data entered, false otherwise.
    // Overloaded to accept string, int, and double.
    bool SetValue(const string &section, const string &key, const string &value, bool const create = true);
