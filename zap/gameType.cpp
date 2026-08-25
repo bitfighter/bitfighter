@@ -5017,7 +5017,7 @@ void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
 void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
-void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
+void GameType::majorScoringEventOccurred(S32 team)       { /* Do nothing */ }
 
 };
 
