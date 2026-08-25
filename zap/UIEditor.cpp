@@ -3460,7 +3460,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
 
    if(deletedWall)
-      doneDeleteingWalls();
+      doneDeletingWalls();
 
    if(deleted)
    {
@@ -3757,7 +3757,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
       database->removeFromDatabase(obj, true);
 
       if(!batchMode)
-         doneDeleteingWalls();
+         doneDeletingWalls();
    }
    else
       database->removeFromDatabase(obj, true);
@@ -4828,7 +4828,7 @@ void EditorUserInterface::onFinishedDragging()
          if(deletedSomething)
          {
             if(deletedWall)
-               doneDeleteingWalls();
+               doneDeletingWalls();
 
             doneDeleting();
 
