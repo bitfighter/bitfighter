@@ -132,16 +132,16 @@ S32 HttpRequest::getResponseCode()
 
 void HttpRequest::parseResponse(string response)
 {
-   std::size_t seperatorIndex = response.find("\r\n\r\n");
-   if(seperatorIndex == string::npos || response == "")
+   std::size_t separatorIndex = response.find("\r\n\r\n");
+   if(separatorIndex == string::npos || response == "")
    {
       // separator not found, this response isn't valid
       return;
    }
 
-   mResponseHead = response.substr(0, seperatorIndex);
+   mResponseHead = response.substr(0, separatorIndex);
 
-   size_t bodyIndex = seperatorIndex + 4;
+   size_t bodyIndex = separatorIndex + 4;
    mResponseBody = response.substr(bodyIndex, response.length());
 
    std::size_t responseCodeStart = mResponseHead.find(" ") + 1;
