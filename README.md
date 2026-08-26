@@ -135,6 +135,6 @@ This will build a self-extracting installer for Bitfighter. You will need to bui
 Run `make package` to build a distributable DMG.
 
 ## CRASHES & PROBLEMS
-If you are building off of the `master` branch, then expect crashes and problems. Feel free to report them via the Issues tab, but consider joining the Discord and checking in the dev_irc channel to ask a developer about it- we probably are already aware.
+If you are building from the `master` branch, then expect crashes and problems. Feel free to report them via the Issues tab, but consider joining the Discord and checking in the dev_irc channel to ask a developer about it -- we probably are already aware.
 
-If you are building off of a release version, please make sure you can consistently reproduce the problem, then post it, with the steps to reproduce, on the Issues tab.
+If you are building from a release version, please make sure you can consistently reproduce the problem, then post it, with the steps to reproduce, on the Issues tab.
