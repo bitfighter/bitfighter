@@ -97,8 +97,12 @@ S32 roundUp(S32 numToRound, S32 multiple)
    S64 numToRound64 = numToRound;
    S64 remainder = numToRound64 % multiple64;
 
-   if(remainder == 0)
-      return numToRound;
+   if(numToRound >= 0)
+   {
+      U32 remainder = (U32)numToRound % absMultiple;
+
+      if(remainder == 0)
+         return numToRound;
 
    if(numToRound64 < 0)
       return (S32)(numToRound64 - remainder);

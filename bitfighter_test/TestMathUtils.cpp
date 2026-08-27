@@ -67,6 +67,10 @@ TEST(MathUtilsTest, RoundUp)
 
    // Test with S32_MIN
    EXPECT_EQ(0, roundUp(0, S32_MIN));
+   EXPECT_EQ(S32_MIN, roundUp(S32_MIN, S32_MIN));
+   EXPECT_EQ(0, roundUp(-1, S32_MIN));
+   EXPECT_EQ(S32_MIN, roundUp(1, S32_MIN));
+   EXPECT_EQ(S32_MIN, roundUp(S32_MAX, S32_MIN));
    EXPECT_EQ(S32_MIN, roundUp(1, S32_MIN));
    EXPECT_EQ(0, roundUp(-1, S32_MIN));
 
