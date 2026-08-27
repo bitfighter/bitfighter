@@ -165,12 +165,18 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Poin
       F32 offset = halfWidth * 2 * i - (i * 4);
 
       // Red chevron -- iterate twice to generate pair
-      points[index++] = start + parallel *  (chevronThickness + offset);  // 0
-      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);   // 1                      //  1   2
-      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 2    //    0    3
-      points[index++] = start + parallel *  (chevronDepth + chevronThickness + inset + offset);  // 3                      //  5    4
-      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 4
-      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);  // 5
+      points[index] = start + parallel *  (chevronThickness + offset);  // 0
+      ++index;
+      points[index] = start + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);   // 1                      //  1   2
+      ++index;
+      points[index] = start + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 2    //    0    3
+      ++index;
+      points[index] = start + parallel *  (chevronDepth + chevronThickness + inset + offset);  // 3                      //  5    4
+      ++index;
+      points[index] = start - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 4
+      ++index;
+      points[index] = start - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);  // 5
+      ++index;
    }
 
    // Pick a few selected points from those generated above to create an outline shape -- note that we need to reverse the winding

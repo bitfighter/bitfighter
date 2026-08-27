@@ -388,7 +388,7 @@ void ClientInfo::endOfGameScoringHandler()
 }
 
 
-void ClientInfo::incrementKillStreak() { mCurrentKillStreak++;   }
+void ClientInfo::incrementKillStreak() { ++mCurrentKillStreak;   }
 void ClientInfo::clearKillStreak()     { mCurrentKillStreak = 0; }
 
 

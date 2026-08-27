@@ -1423,13 +1423,17 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 
       for(S32 j = 1; j < sol_sz; ++j)
       {
-         lineSegmentPoints[index++] = solution[i][j - 1];
-         lineSegmentPoints[index++] = solution[i][j];
+         lineSegmentPoints[index] = solution[i][j - 1];
+         ++index;
+         lineSegmentPoints[index] = solution[i][j];
+         ++index;
       }
 
       // Close the loop
-      lineSegmentPoints[index++] = solution[i][sol_sz - 1];
-      lineSegmentPoints[index++] = solution[i][0];
+      lineSegmentPoints[index] = solution[i][sol_sz - 1];
+      ++index;
+      lineSegmentPoints[index] = solution[i][0];
+      ++index;
    }
 }
 
