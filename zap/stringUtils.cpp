@@ -1025,7 +1025,8 @@ string getExecutableDir()
    path = extractDirectory(string(buffer));
 
 #elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getExecutablePath(path);  // Directory.h
+   getExecutablePath(path);        // Directory.h -- returns the full path to the binary
+   path = extractDirectory(path);  // ...so reduce to its containing directory, as on Linux/Win32
 
 #elif defined(TNL_OS_WIN32)
    char buffer[MAX_PATH] = {0};

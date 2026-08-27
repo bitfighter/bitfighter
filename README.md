@@ -107,9 +107,11 @@ add `-DBUNDLE_DEPENDENCIES=YES` (needs `brew install dylibbundler`):
 * `make package` &nbsp;&nbsp;&nbsp;# &rarr; `Bitfighter-<version>-OSX-arm64.dmg`
 
 This copies the dependent dylibs into `Contents/Frameworks` (via `dylibbundler`)
-and re-points the load commands.  The bundle is **ad-hoc signed**, so other users
-must right-click &rarr; Open it the first time (Gatekeeper); Developer ID signing
-and notarization are a separate step.
+and re-points the load commands.  Homebrew currently ships SDL2 as **sdl2-compat**,
+which `dlopen`s `libSDL3` at runtime; that library is also copied into
+`Frameworks` (dylibbundler cannot see dlopen deps).  The bundle is **ad-hoc
+signed**, so other users must right-click &rarr; Open it the first time
+(Gatekeeper); Developer ID signing and notarization are a separate step.
 
 To build the Intel client under Rosetta instead (using the bundled `lib/`
 frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
