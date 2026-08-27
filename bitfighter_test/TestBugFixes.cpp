@@ -2,7 +2,6 @@
 #include "GeomUtils.h"
 #include "tnlPlatform.h"
 #include "tnlVector.h"
-#include <unistd.h>
 
 namespace Zap {
 
