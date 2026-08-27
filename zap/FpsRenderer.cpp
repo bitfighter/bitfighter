@@ -112,7 +112,8 @@ void FpsRenderer::render(S32 canvasWidth) const
       // Count wall vertices visible on screen as a measure of geometry complexity.
       // On the client, walls arrive as tiled WallPoly fragments, not Barrier objects.
       const Vector<WallPoly> &tilePolys = GameType::getTilePolys();
-      for(S32 i = 0; i < tilePolys.size(); ++i)
+      S32 tilePolys_sz = tilePolys.size();
+      for (S32 i = 0; i < tilePolys_sz; ++i)
       {
          const WallPoly &wp = tilePolys[i];
          U32 nv = wp.numVerts();

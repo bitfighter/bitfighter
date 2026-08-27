@@ -242,7 +242,8 @@ void ScoreboardRenderer::renderTeamScoreboard(S32 index, S32 teams, bool isTeamG
    S32 colIndexWidths[ColIndexCount];
    S32 maxColIndexWidths[ColIndexCount] = {0};
 
-   for(S32 i = 0; i < playerInfos.size(); ++i)
+   S32 playerInfos_sz = playerInfos.size();
+   for (S32 i = 0; i < playerInfos_sz; ++i)
    {
       renderScoreboardLine(playerInfos, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
       curRowY += lineHeight;

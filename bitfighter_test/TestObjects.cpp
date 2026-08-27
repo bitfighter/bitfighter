@@ -176,7 +176,8 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
-   for(S32 i = 0; i < objects->size(); ++i)
+   S32 objects_sz = objects->size();
+   for (S32 i = 0; i < objects_sz; ++i)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
       if(bfobj && bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable...
@@ -304,7 +305,8 @@ string pointsToLuaList(const Vector<Point> &points, bool asTable)
    if(asTable)
       pointList += "{ ";
 
-   for(S32 i = 0; i < points.size(); ++i)
+   S32 points_sz = points.size();
+   for (S32 i = 0; i < points_sz; ++i)
    {
       pointList += "point.new(" + points[i].toString() + ")";
       if(i < points.size() - 1)

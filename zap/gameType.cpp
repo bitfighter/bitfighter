@@ -367,7 +367,8 @@ void GameType::setScript(const Vector<string> &args)
    mScriptName = args.size() > 0 ? args[0] : "";
 
    mScriptArgs.clear();       // Clear out any args from a previous Script line
-   for(S32 i = 1; i < args.size(); ++i)
+   S32 args_sz = args.size();
+   for (S32 i = 1; i < args_sz; ++i)
       mScriptArgs.push_back(args[i]);
 }
 
@@ -885,7 +886,8 @@ VersionedGameStats GameType::getGameStats()
          Vector<U32> shots = statistics->getShotsVector();
          Vector<U32> hits = statistics->getHitsVector();
 
-         for(S32 k = 0; k < shots.size(); ++k)
+         S32 shots_sz = shots.size();
+         for (S32 k = 0; k < shots_sz; ++k)
          {
             WeaponStats weaponStats;
             weaponStats.weaponType = WeaponType(k);
@@ -909,7 +911,8 @@ VersionedGameStats GameType::getGameStats()
 
          Vector<U32> loadouts = statistics->getLoadouts();
 
-         for(S32 i = 0; i < loadouts.size(); ++i)
+         S32 loadouts_sz = loadouts.size();
+         for (S32 i = 0; i < loadouts_sz; ++i)
          {
             LoadoutStats loadoutStats;
             loadoutStats.loadoutHash = loadouts[i];
@@ -1219,7 +1222,8 @@ void GameType::buildMapTiles(const Rect *fixedLevelBounds)
    // per-edge style classification.
    Vector<const Vector<Point> *> inputPolygons;
    Vector<bool> inputDestructible;       // Parallel: which input polygons are destructible
-   for(S32 i = 0; i < barriers.size(); ++i)
+   S32 barriers_sz = barriers.size();
+   for (S32 i = 0; i < barriers_sz; ++i)
    {
       Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
       if(barrier)
@@ -1235,7 +1239,8 @@ void GameType::buildMapTiles(const Rect *fixedLevelBounds)
 
    MapTileBuilder builder(levelBounds, 200);
 
-   for(S32 i = 0; i < inputPolygons.size(); ++i)
+   S32 inputPolygons_sz = inputPolygons.size();
+   for (S32 i = 0; i < inputPolygons_sz; ++i)
       builder.addWallPolygon(*inputPolygons[i], inputDestructible[i]);
 
    builder.build(mMapTiles);
@@ -1321,13 +1326,15 @@ void GameType::rebuildWallTilesAndBotZones()
    // the same.  Therefore tileId maps to the same world position in both
    // oldTiles and mMapTiles, and we can use a simple O(n²) lookup.
    Vector<U16> changedTileIds;
-   for(S32 t = 0; t < mMapTiles.size(); ++t)
+   S32 mMapTiles_sz = mMapTiles.size();
+   for (S32 t = 0; t < mMapTiles_sz; ++t)
    {
       const MapTile &newTile = mMapTiles[t];
 
       // Find matching old tile by tileId
       const MapTile *oldTile = NULL;
-      for(S32 i = 0; i < oldTiles.size(); ++i)
+      S32 oldTiles_sz = oldTiles.size();
+      for (S32 i = 0; i < oldTiles_sz; ++i)
          if(oldTiles[i].tileId == newTile.tileId)
          {
             oldTile = &oldTiles[i];
@@ -1341,10 +1348,12 @@ void GameType::rebuildWallTilesAndBotZones()
    // Find tiles that existed in the old set but no longer exist in the new
    // set — these need to be sent as empty tiles so the client erases them.
    Vector<U16> removedTileIds;
-   for(S32 i = 0; i < oldTiles.size(); ++i)
+   S32 oldTiles_sz = oldTiles.size();
+   for (S32 i = 0; i < oldTiles_sz; ++i)
    {
       bool found = false;
-      for(S32 j = 0; j < mMapTiles.size(); ++j)
+      S32 mMapTiles_sz = mMapTiles.size();
+      for (S32 j = 0; j < mMapTiles_sz; ++j)
          if(mMapTiles[j].tileId == oldTiles[i].tileId)
          {
             found = true;
@@ -1377,7 +1386,8 @@ void GameType::rebuildWallTilesAndBotZones()
       conn->mWallDelivery.init(tileCount);
 
       // Enqueue changed tiles
-      for(S32 i = 0; i < changedTileIds.size(); ++i)
+      S32 changedTileIds_sz = changedTileIds.size();
+      for (S32 i = 0; i < changedTileIds_sz; ++i)
       {
          // In FOW mode, let the per-tick scope enqueue handle changed tiles;
          // sentTiles is reset so they'll be picked up when in range.
@@ -1388,7 +1398,8 @@ void GameType::rebuildWallTilesAndBotZones()
       // Enqueue removed tiles that the client may have already seen.
       // In FOW mode, these tiles are no longer in mMapTiles so the scope
       // enqueue won't find them — we must explicitly send empty tiles.
-      for(S32 i = 0; i < removedTileIds.size(); ++i)
+      S32 removedTileIds_sz = removedTileIds.size();
+      for (S32 i = 0; i < removedTileIds_sz; ++i)
       {
          if(!isFogOfWarEnabled() || (removedTileIds[i] < wasSent.size() && wasSent[removedTileIds[i]]))
             conn->mWallDelivery.pending.push_back(removedTileIds[i]);
@@ -1412,7 +1423,8 @@ void GameType::rebuildWallTilesAndBotZones()
             {
                U16 tid = conn->mWallDelivery.pending[p];
                bool found = false;
-               for(S32 t = 0; t < mMapTiles.size(); ++t)
+               S32 mMapTiles_sz = mMapTiles.size();
+               for (S32 t = 0; t < mMapTiles_sz; ++t)
                {
                   if(mMapTiles[t].tileId == tid)
                   {
@@ -1430,7 +1442,8 @@ void GameType::rebuildWallTilesAndBotZones()
 
             // Insertion sort: reorder pending and dists together by ascending distance
             Vector<U16> &pending = conn->mWallDelivery.pending;
-            for(S32 i = 1; i < pending.size(); ++i)
+            S32 pending_sz = pending.size();
+            for (S32 i = 1; i < pending_sz; ++i)
             {
                U16 keyTid = pending[i];
                F32 keyDist = dists[i];
@@ -1528,7 +1541,8 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          Vector<DatabaseObject *> loadoutZones;
          getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
          LoadoutZone *zone;
-         for(S32 i = 0; i < loadoutZones.size(); ++i)
+         S32 loadoutZones_sz = loadoutZones.size();
+         for (S32 i = 0; i < loadoutZones_sz; ++i)
          {
             zone = static_cast<LoadoutZone*>(loadoutZones.get(i));
             if(newShip->isOnObject(zone))
@@ -1571,7 +1585,8 @@ Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 team
 
    const Vector<DatabaseObject *> *objects = getGame()->getGameObjDatabase()->findObjects_fast();
 
-   for(S32 i = 0; i < objects->size(); ++i)
+   S32 objects_sz = objects->size();
+   for (S32 i = 0; i < objects_sz; ++i)
    {
       if(objects->get(i)->getObjectTypeNumber() == typeNumber)
       {
@@ -1661,7 +1676,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
    const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
    // Make sure the "always-in-scope" objects are actually in scope
-   for(S32 i = 0; i < scopeAlwaysList.size(); ++i)
+   S32 scopeAlwaysList_sz = scopeAlwaysList.size();
+   for (S32 i = 0; i < scopeAlwaysList_sz; ++i)
       if(!scopeAlwaysList[i].isNull())
          if(scopeAlwaysList[i]->getObjectTypeNumber() != FlagTypeNumber || !((MountableItem*)(((SafePtr<BfObject> *)&scopeAlwaysList[i])->getPointer()))->isMounted())
             conn->objectInScope(scopeAlwaysList[i]);
@@ -1696,7 +1712,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
          mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, sameQuery);
          sameQuery = true;
 
-         for(S32 j = 0; j < fillVector.size(); ++j)
+         S32 fillVector_sz = fillVector.size();
+         for (S32 j = 0; j < fillVector_sz; ++j)
          {
             // Some objects don't have geometry (ForceFields).  Is this a bug?
             if(!fillVector[j]->hasGeometry())
@@ -1790,7 +1807,8 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    }
 
    // Set object-in-scope for all objects found above
-   for(S32 i = 0; i < fillVector.size(); ++i)
+   S32 fillVector_sz = fillVector.size();
+   for (S32 i = 0; i < fillVector_sz; ++i)
    {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
@@ -1808,7 +1826,8 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
 void GameType::addItemOfInterest(MoveItem *item)
 {
 #ifdef TNL_DEBUG
-   for(S32 i = 0; i < mItemsOfInterest.size(); ++i)
+   S32 mItemsOfInterest_sz = mItemsOfInterest.size();
+   for (S32 i = 0; i < mItemsOfInterest_sz; ++i)
       TNLAssert(mItemsOfInterest[i].theItem.getPointer() != item, "Item already exists in ItemOfInterest!");
 #endif
 
@@ -1823,7 +1842,8 @@ void GameType::addItemOfInterest(MoveItem *item)
 // to those teams with ships close enough to see it, if any.  Called from idle()
 void GameType::queryItemsOfInterest()
 {
-   for(S32 i = 0; i < mItemsOfInterest.size(); ++i)
+   S32 mItemsOfInterest_sz = mItemsOfInterest.size();
+   for (S32 i = 0; i < mItemsOfInterest_sz; ++i)
    {
       ItemOfInterest &ioi = mItemsOfInterest[i];
       if(ioi.theItem.isNull())
@@ -1844,7 +1864,8 @@ void GameType::queryItemsOfInterest()
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
 
-      for(S32 j = 0; j < fillVector.size(); ++j)
+      S32 fillVector_sz = fillVector.size();
+      for (S32 j = 0; j < fillVector_sz; ++j)
       {
          Ship *theShip = static_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
          Point delta = theShip->getActualPos() - pos;
@@ -2565,7 +2586,8 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
-      for(S32 i = 0; i < fillVector.size(); ++i)
+      S32 fillVector_sz = fillVector.size();
+      for (S32 i = 0; i < fillVector_sz; ++i)
       {
          BfObject *obj = static_cast<BfObject *>(fillVector[i]);
 
@@ -2836,7 +2858,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
-      for(S32 i = 0; i < fillVector.size(); ++i)
+      S32 fillVector_sz = fillVector.size();
+      for (S32 i = 0; i < fillVector_sz; ++i)
          static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
    }
 #endif
@@ -2930,7 +2953,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       if(!isFogOfWarEnabled())
       {
          // Non-FOW: enqueue all tiles immediately (drained per-tick at NORM rate)
-         for(S32 t = 0; t < mMapTiles.size(); ++t)
+         S32 mMapTiles_sz = mMapTiles.size();
+         for (S32 t = 0; t < mMapTiles_sz; ++t)
             gc->mWallDelivery.pending.push_back(mMapTiles[t].tileId);
       }
       // FOW mode: tiles are enqueued per-tick based on player position
@@ -3190,7 +3214,8 @@ bool GameType::findTileWallLOS(const Point &rayStart, const Point &rayEnd, bool 
    Point bestNormal;
    static Vector<Point> polyPoints;
 
-   for(S32 i = 0; i < smReceivedTilePolys.size(); ++i)
+   S32 smReceivedTilePolys_sz = smReceivedTilePolys.size();
+   for (S32 i = 0; i < smReceivedTilePolys_sz; ++i)
    {
       const WallPoly &wp = smReceivedTilePolys[i];
       if(wp.numVerts() < 3)
@@ -3228,7 +3253,8 @@ bool GameType::findTileWallSweptCircle(const Point &pos, const Point &delta, F32
    Point bestCp;
    static Vector<Point> polyPoints;
 
-   for(S32 i = 0; i < smReceivedTilePolys.size(); ++i)
+   S32 smReceivedTilePolys_sz = smReceivedTilePolys.size();
+   for (S32 i = 0; i < smReceivedTilePolys_sz; ++i)
    {
       const WallPoly &wp = smReceivedTilePolys[i];
       if(wp.numVerts() < 3)
@@ -3344,7 +3370,8 @@ void GameType::deliverWallTileTick()
          F32 scopeRadSq = scopeRad * scopeRad;
 
          // Scan all tiles — find un-sent tiles within scope, compute distance
-         for(S32 t = 0; t < mMapTiles.size(); ++t)
+         S32 mMapTiles_sz = mMapTiles.size();
+         for (S32 t = 0; t < mMapTiles_sz; ++t)
          {
             const MapTile &tile = mMapTiles[t];
 
@@ -3376,7 +3403,8 @@ void GameType::deliverWallTileTick()
             {
                // Compute distance for the tile already in the list
                const MapTile *cmpTile = NULL;
-               for(S32 tt = 0; tt < mMapTiles.size(); ++tt)
+               S32 mMapTiles_sz = mMapTiles.size();
+               for (S32 tt = 0; tt < mMapTiles_sz; ++tt)
                {
                   if(mMapTiles[tt].tileId == deliveryState.pending[insertIdx])
                      cmpTile = &mMapTiles[tt]; break;
@@ -3404,7 +3432,8 @@ void GameType::deliverWallTileTick()
          // in that case we send an empty tile (polyCount == 0) so the
          // client erases the old geometry.
          const MapTile *tile = NULL;
-         for(S32 t = 0; t < mMapTiles.size(); ++t)
+         S32 mMapTiles_sz = mMapTiles.size();
+         for (S32 t = 0; t < mMapTiles_sz; ++t)
          {
             if(mMapTiles[t].tileId == tileId)
             {
@@ -3537,7 +3566,8 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       Vector<const char *> args_char(args.size());
 
       // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-      for(S32 i = 0; i < args.size(); ++i)
+      S32 args_sz = args.size();
+      for (S32 i = 0; i < args_sz; ++i)
          args_char.push_back(args[i].getString());
 
       string errorMessage = getGame()->addBot(args_char, ClientInfo::ClassRobotAddedByAddbots);
@@ -4289,7 +4319,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
    fillVector.clear();
    mGame->getGameObjDatabase()->findObjects(fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); ++i)
+   S32 fillVector_sz = fillVector.size();
+   for (S32 i = 0; i < fillVector_sz; ++i)
    {
       MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);
       if(item && item->getItemId() == itemId)
@@ -4571,7 +4602,8 @@ void GameType::updateWhichTeamsHaveFlags()
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); ++i)
+   S32 flags_sz = flags->size();
+   for (S32 i = 0; i < flags_sz; ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(flag->isMounted() && flag->getMount())
