@@ -110,17 +110,17 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
       S32 i = 1;
 
       if(profile >= 1) {
-         setPos(L, ++i);
-         setTeam(L, ++i);
+         setPos(L, i++);
+         setTeam(L, i++);
       }
 
       if(profile == 2)
       {
-         mScriptName = GameSettings::getFolderManager()->findBotFile(getString(L, ++i));
+         mScriptName = GameSettings::getFolderManager()->findBotFile(getString(L, i++));
 
          while(i <= lua_gettop(L))
          {
-            mScriptArgs.push_back(getString(L, ++i));
+            mScriptArgs.push_back(getString(L, i++));
          }
       }
 
