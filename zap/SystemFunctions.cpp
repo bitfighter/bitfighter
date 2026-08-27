@@ -78,7 +78,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
 #ifndef ZAP_DEDICATED
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
       clientGames->get(i)->getUIManager()->enableLevelLoadDisplay();
 #endif
 }
@@ -102,7 +102,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
 #ifndef ZAP_DEDICATED
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
-   for(S32 i = 0; i < clientGames->size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
+   for(S32 i = 0; i < clientGames->size(); ++i)    // <<=== Should probably only display this message on the clientGame that initiated hosting
    {
       UIManager *uiManager = clientGames->get(i)->getUIManager();
 

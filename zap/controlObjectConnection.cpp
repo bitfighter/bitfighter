@@ -59,7 +59,7 @@ void ControlObjectConnection::packetReceived(PacketNotify *notify)
 {
    if(isConnectionToServer())  // only client needs to handle this
    {
-      for(/* empty */; S8(firstMoveIndex - ((Zap::ControlObjectConnection::GamePacketNotify *) notify)->firstUnsentMoveIndex) < 0; firstMoveIndex++)
+      for(/* empty */; S8(firstMoveIndex - ((Zap::ControlObjectConnection::GamePacketNotify *) notify)->firstUnsentMoveIndex) < 0; ++firstMoveIndex)
          pendingMoves.erase(U32(0));
    }
    mServerPosition = ((GamePacketNotify *) notify)->lastControlObjectPosition;
@@ -152,7 +152,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       // The first time through this loop, we'll be comparing the move to be packed with our empty move, and
       // so pack() only really has an effect when our move is actually doing something, either moving,
       // firing, or activating a module.  See the Move constructor and the pack() fn for more details.
-      for(S32 i = skipCount; i < pendingMoves.size(); i++)
+      for(S32 i = skipCount; i < pendingMoves.size(); ++i)
       {
          pendingMoves[i].pack(bstream, lastMove, true);
          lastMove = &pendingMoves[i];
@@ -210,13 +210,14 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
       Move theMove;
 
-      for(/* empty */; S8(firstMove - firstMoveIndex) < 0 && count > 0; firstMove++)
+      for(/* empty */; S8(firstMove - firstMoveIndex) < 0 && count > 0; ++firstMove)
       {
          // Looks like we'll be ignoring these moves
-         count--;
+         --count;
+
          theMove.unpack(bstream, true);
       }
-      for(/* empty */; count > 0; count--)
+      for(/* empty */; count > 0; --count)
       {
          theMove.unpack(bstream, true);
          // Process the move, including crediting time to the client and all that joy.
@@ -230,7 +231,8 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             onGotNewMove(theMove);
          }
 
-         firstMoveIndex++;
+         ++firstMoveIndex;
+
       }
    }
    else     // Is connection to server (i.e. we're on the client, I think)
@@ -272,7 +274,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
    if(mNeedReplayMoves && controlObject.isValid())
    {
-      for(S32 i = 0; i < pendingMoves.size(); i++)
+      for(S32 i = 0; i < pendingMoves.size(); ++i)
       {
          if(controlObject.isValid() && controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
             ((Ship*)controlObject.getPointer())->getState(&pendingMoves[i]);

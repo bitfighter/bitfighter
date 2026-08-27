@@ -238,14 +238,16 @@ S32 Team::getPlayerBotCount() const
 
 void Team::incrementPlayerCount()
 {
-   mPlayerCount++;
+   ++mPlayerCount;
+
 }
 
 
 // This should definitely NOT be a public method...
 void Team::incrementBotCount()
 {
-   mBotCount++;
+   ++mBotCount;
+
 }
 
 
@@ -362,14 +364,14 @@ S32 Team::lua_getPlayers(lua_State *L)
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < game->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = game->getClientInfo(i);
 
       if(clientInfo->getTeamIndex() == mTeamIndex)
       {
          clientInfo->getPlayerInfo()->push(L);
-         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
          lua_rawseti(L, 1, pushed);
       }
    }
@@ -379,7 +381,7 @@ S32 Team::lua_getPlayers(lua_State *L)
       if(game->getBot(i)->getTeam() == mTeamIndex)
       {
          game->getBot(i)->getPlayerInfo()->push(L);
-         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
          lua_rawseti(L, 1, pushed);
       }
    }
@@ -514,7 +516,7 @@ void TeamManager::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 
 void TeamManager::clearTeamHasFlagList()
 {
-   for(S32 i = 0; i < mTeamHasFlagList.size(); i++)
+   for(S32 i = 0; i < mTeamHasFlagList.size(); ++i)
       mTeamHasFlagList[i] = 0;
 }
 
@@ -539,7 +541,7 @@ S32 TeamManager::getBotCount() const
 {
    S32 bots = 0;
 
-   for(S32 i = 0; i < mTeams.size(); i++)
+   for(S32 i = 0; i < mTeams.size(); ++i)
       bots += mTeams[i]->getBotCount();
 
    return bots;

@@ -172,7 +172,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
 
    Vector<SymbolShapePtr> message(wrappedLines.size());
 
-   for(S32 i = 0; i < wrappedLines.size(); i++)
+   for(S32 i = 0; i < wrappedLines.size(); ++i)
       message.push_back(SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextSize, true)));
 
    renderMessageBox(title, instr, message.address(), message.size(), vertOffset, style);
@@ -210,13 +210,13 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    S32 boxHeight = vertMargin + titleHeight + instrHeight + vertMargin;
 
    // Don't include a linespacing gap after the final line
-   for(S32 i = 0; i < msgLines; i++ )
+   for(S32 i = 0; i < msgLines; ++i )
       boxHeight += S32(message[i]->getHeight() * LinespacingFactor);
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
    S32 maxLen = 0;
-   for(S32 i = 0; i < msgLines; i++)
+   for(S32 i = 0; i < msgLines; ++i)
    {
       static const S32 HorizBoxPadding = 20;
       S32 len = message[i]->getWidth() + HorizBoxPadding * 2;
@@ -240,7 +240,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    // the first message so that it will be drawn in the correct location
    S32 y = boxTop + vertMargin + titleHeight + message[0]->getHeight();
 
-   for(S32 i = 0; i < msgLines; i++)
+   for(S32 i = 0; i < msgLines; ++i)
    {
       message[i]->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, AlignmentCenter);
       y += S32(message[i]->getHeight() * LinespacingFactor);
@@ -409,7 +409,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
      r.setColor(Colors::white);
 
      // Key states
-     for (U32 i = 0; i < MAX_INPUT_CODES; i++)
+     for (U32 i = 0; i < MAX_INPUT_CODES; ++i)
         if(InputCodeManager::getState((InputCode) i))
            hpos += drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
 
@@ -417,7 +417,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
       hpos = horizMargin;
       r.setColor(Colors::magenta);
 
-      for(U32 i = 0; i < CHAR_BIT * sizeof(Joystick::ButtonMask); i++)
+      for(U32 i = 0; i < CHAR_BIT * sizeof(Joystick::ButtonMask); ++i)
          if(Joystick::ButtonMask & (1 << i))
          {
             drawStringf( hpos, vpos, 18, "RawBut [%d]", i );

@@ -752,7 +752,7 @@ void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext cont
    Vector<string> wrapped = wrapString(str, wrapWidth, fontSize);
    FontManager::popFontContext();
 
-   for(S32 i = 0; i < wrapped.size(); i++)
+   for(S32 i = 0; i < wrapped.size(); ++i)
       lines.push_back(wrapped[i]);
 }
 
@@ -771,7 +771,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    string::size_type start = 0;
    string::size_type potentialBreakPoint = start;
 
-   for(string::size_type i = 0; i < str.length(); i++)
+   for(string::size_type i = 0; i < str.length(); ++i)
    {
       if(str[i] == '\n')
       {
@@ -792,7 +792,8 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
          else
          {
             wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
-            potentialBreakPoint++;
+            ++potentialBreakPoint;
+
             start = potentialBreakPoint;
          }
       }
@@ -826,14 +827,15 @@ U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
    ypos -= lines.size() * lineHeight;     // Align according to number of wrapped lines
 
    // Draw lines that need to wrap
-   for(S32 i = 0; i < lines.size(); i++)
+   for(S32 i = 0; i < lines.size(); ++i)
    {
       if(ypos >= ypos_end)      // If there is room to draw some lines at top when aligned bottom
       {
          if(draw)
             drawString(xpos, ypos, fontSize, lines[i].c_str());
 
-         linesDrawn++;
+         ++linesDrawn;
+
       }
       ypos += lineHeight;
    }

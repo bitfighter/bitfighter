@@ -65,7 +65,7 @@ bool SafeZone::processArguments(S32 rawArgc, const char **rawArgv, Game *game)
    const S32 MAX_ARGV_SIZE = Geometry::MAX_POLY_POINTS * 2 + 1;
    S32 argc = 0;
    const char *argv[MAX_ARGV_SIZE];
-   for(S32 i = 0; i < rawArgc; i++)
+   for(S32 i = 0; i < rawArgc; ++i)
    {
       char c = rawArgv[i][0];
       // Ignore optional alphabetic tokens so newer level params remain backward-compatible.
@@ -74,7 +74,8 @@ bool SafeZone::processArguments(S32 rawArgc, const char **rawArgv, Game *game)
          if(argc < MAX_ARGV_SIZE)
          {
             argv[argc] = rawArgv[i];
-            argc++;
+            ++argc;
+
          }
       }
    }

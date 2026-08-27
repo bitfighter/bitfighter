@@ -125,7 +125,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
    // See if this zone already has a flag in it.  If so, do nothing.
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
       if(static_cast<FlagItem *>(flags->get(i))->getZone() == z)
          return;
 
@@ -170,18 +170,19 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
 
       U32 teamZoneCount = 0;
-      for(S32 i = 0; i < goalZones->size(); i++)
+      for(S32 i = 0; i < goalZones->size(); ++i)
       {
          GoalZone *thisZone = static_cast<GoalZone *>(goalZones->get(i));
 
          // If zone is same team as the ship, count it
          if(thisZone->getTeam() == s->getTeam())
-            teamZoneCount++;
+            ++teamZoneCount;
+
       }
 
       U32 teamZoneFlagCount = 0;
       U32 teamPossibleFlagCount = 0;
-      for(S32 i = 0; i < flags->size(); i++)
+      for(S32 i = 0; i < flags->size(); ++i)
       {
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -192,11 +193,13 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
          if(canBeOurFlag)
          {
             // Keep track of possibles for later
-            teamPossibleFlagCount++;
+            ++teamPossibleFlagCount;
+
 
             // If it's in a zone and the zone is our team's, count it
             if(flag->getZone() && (flag->getZone()->getTeam() == s->getTeam()))
-               teamZoneFlagCount++;
+               ++teamZoneFlagCount;
+
          }
       }
 
@@ -213,7 +216,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
          static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
          e[0] = getGame()->getTeamName(s->getTeam());
 
-         for(S32 i = 0; i < getGame()->getClientCount(); i++)
+         for(S32 i = 0; i < getGame()->getClientCount(); ++i)
             if(!getGame()->getClientInfo(i)->isRobot())
             {
                if(isGameOver())  // Avoid flooding messages on game over. (empty formatString)
@@ -224,7 +227,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       }
 
       // Return all the flags to their starting locations if need be
-      for(S32 i = 0; i < flags->size(); i++)
+      for(S32 i = 0; i < flags->size(); ++i)
       {
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -263,7 +266,7 @@ void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo 
    S32 uTeam = scopeObject->getTeam();
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -300,11 +303,11 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
    const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       if(static_cast<FlagItem *>(flags->get(i))->getMount() == ship)
       {
-         for(S32 j = 0; j < goalZones->size(); j++)
+         for(S32 j = 0; j < goalZones->size(); ++j)
          {
             GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(j));
 
@@ -313,7 +316,7 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
                continue;
 
             bool found = false;
-            for(S32 k = 0; k < flags->size(); k++)
+            for(S32 k = 0; k < flags->size(); ++k)
                if(static_cast<FlagItem *>(flags->get(k))->getZone() == goalZone)
                {
                   found = true;
@@ -328,7 +331,7 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
       }
    }
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(!flag->isMounted() && !uFlag)

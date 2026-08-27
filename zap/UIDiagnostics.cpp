@@ -90,7 +90,8 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 {
    if(checkInputCode(BINDING_DIAG, inputCode))
    {
-      mCurPage++;
+      ++mCurPage;
+
       if(mCurPage >= NUM_PAGES)
          quit();
    }
@@ -117,7 +118,7 @@ S32 findLongestString(F32 size, const Vector<const char *> *strings)
    F32 maxLen = 0;
    S32 longest = 0;
 
-   for(S32 i = 0; i < strings->size(); i++)
+   for(S32 i = 0; i < strings->size(); ++i)
    {
       F32 len = getStringWidth(size, strings->get(i));
       if(len > maxLen)
@@ -196,7 +197,7 @@ static S32 showFoldersBlock(FolderManager *folderManager, F32 textsize, S32 ypos
    if(names.size() == 0)      // Lazy init
       initFoldersBlock(folderManager, (S32)textsize);
 
-   for(S32 i = 0; i < names.size(); i++)
+   for(S32 i = 0; i < names.size(); ++i)
    {
       S32 xpos = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - totLen) / 2;
       r.setColor(Colors::cyan);
@@ -424,7 +425,7 @@ void DiagnosticUserInterface::render()
 
          y += 25;
 
-         for(S32 i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++)
+         for(S32 i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i)
          {
             F32 a = (F32)Joystick::rawAxesValues[i] / (F32)S16_MAX;    // Range: -1 to 1
             if(fabs(a) > .1f)
@@ -450,7 +451,7 @@ void DiagnosticUserInterface::render()
       hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Keys down: ");
 
       r.setColor(Colors::red);
-      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
+      for(U32 i = 0; i < MAX_INPUT_CODES; ++i)
       {
          InputCode inputCode = InputCode(i);
          if(InputCodeManager::getState(inputCode))
@@ -476,7 +477,7 @@ void DiagnosticUserInterface::render()
       r.setColor(Colors::magenta);
 
       InputCode inputCode;
-      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
+      for(U32 i = 0; i < MAX_INPUT_CODES; ++i)
       {
          inputCode = InputCode(i);
          if(InputCodeManager::getState(inputCode))
@@ -525,7 +526,7 @@ void DiagnosticUserInterface::render()
          hpos += 55;
 
          // Render controller buttons
-         for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
+         for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; ++i)
          {
             InputCode code = InputCode(i);
             const Color *color = InputCodeManager::getState(code) ? &Colors::red : NULL;
@@ -541,7 +542,7 @@ void DiagnosticUserInterface::render()
          symbols.push_back(UI::SymbolShapePtr(new UI::SymbolString("SymbolStrings:   ", NULL, HelpContext, 16, false)));
 
          S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
-         for(S32 i = 0; i < buttonCount; i++)
+         for(S32 i = 0; i < buttonCount; ++i)
          {
             symbols.push_back(UI::SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
             if(i < buttonCount - 1)
@@ -647,18 +648,19 @@ void DiagnosticUserInterface::render()
       if(!GameManager::getServerGame())
          allLevels += " >>> Level list won't be resolved until you start hosting <<<";
       else
-         for(S32 i = 0; i < GameManager::getServerGame()->getLevelCount(); i++)
+         for(S32 i = 0; i < GameManager::getServerGame()->getLevelCount(); ++i)
             allLevels += string(GameManager::getServerGame()->getLevelNameFromIndex(i).getString()) + "; ";
 
       U32 i, j, k;
       i = j = k = 0;
 
-      for(j = 0; j < 4 && i < allLevels.length(); j++)
+      for(j = 0; j < 4 && i < allLevels.length(); ++j)
       {
          while(getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) <
                DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length())
          {
-            i++;
+            ++i;
+
          }
 
          drawString(horizMargin, ypos, textsize - 6, allLevels.substr(k, i - k).c_str());
@@ -675,7 +677,7 @@ void DiagnosticUserInterface::render()
       //drawDivetedTriangle(20,9);
       //drawGear(8,20,15,10,8, 5);
 
-      for(S32 i = 0; i < 2; i++)
+      for(S32 i = 0; i < 2; ++i)
       {
          F32 x = (F32)horizMargin + 10;
          F32 y = 500.0f + 20.0f * i;

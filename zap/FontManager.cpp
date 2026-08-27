@@ -70,7 +70,7 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       return;
    }
 
-   for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
+   for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; ++i) {
       string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
       mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
    }
@@ -130,7 +130,7 @@ bool FontManager::mUsingExternalFonts = true;
 
 FontManager::FontManager()
 {
-   for(S32 i = 0; i < FontCount; i++)
+   for(S32 i = 0; i < FontCount; ++i)
       fontList[i] = NULL;
 }
 
@@ -176,7 +176,7 @@ void FontManager::reinitialize(GameSettings *settings)
 
 void FontManager::cleanup()
 {
-   for(S32 i = 0; i < FontCount; i++)
+   for(S32 i = 0; i < FontCount; ++i)
    {
       delete fontList[i];
       fontList[i] = NULL;
@@ -253,7 +253,7 @@ void FontManager::getStrokeCharacterPoints(const SFG_StrokeChar *schar, F32 xOff
    const SFG_StrokeStrip *strip = schar->Strips;
    U32 arrayOffset = 0;
 
-   for(S32 i = 0; i < schar->Number; i++, strip++)
+   for(S32 i = 0; i < schar->Number; ++i, ++strip)
    {
       // Get first point
       F32 lastX = strip->Vertices[0].X;
@@ -261,7 +261,7 @@ void FontManager::getStrokeCharacterPoints(const SFG_StrokeChar *schar, F32 xOff
 
       // Construct individual lines from the strip. This allows us to render the character using a
       // single GL call with GL_LINES.
-      for(S32 j = 1; j < strip->Number; j++)
+      for(S32 j = 1; j < strip->Number; ++j)
       {
          U32 arrayIndex = arrayOffset + (j - 1) * 4;
 
@@ -304,7 +304,7 @@ void FontManager::renderStrokedString(F32 size, const char *string)
    U32 totalPointCount = 0;
    F32 nextXOffset = 0;
 
-   for(S32 i = 0; (string[i] != 0) && (i < MAX_STRING_LENGTH); i++)
+   for(S32 i = 0; (string[i] != 0) && (i < MAX_STRING_LENGTH); ++i)
    {
       if(!(string[i] > 0))
          continue;

@@ -58,7 +58,7 @@ TNL_IMPLEMENT_RPC(SimpleEventConnection, rpcPrintString,
    (StringPtr theString, messageCount), (theString, messageCount),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   for(U32 i = 0; i < messageCount; i++)
+   for(U32 i = 0; i < messageCount; ++i)
       printf("%s", theString.getString());
 }
  

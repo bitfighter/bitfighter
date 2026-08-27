@@ -36,7 +36,7 @@ namespace Zap
 // Constructor
 UserSettings::UserSettings()
 {
-   for(S32 i = 0; i < LevelCount; i++)
+   for(S32 i = 0; i < LevelCount; ++i)
       levelupItemsAlreadySeen[i] = false;
 }
 
@@ -194,7 +194,7 @@ IniSettings::~IniSettings()
 // Set all bits in items[] to false
 void IniSettings::clearbits(bool *bitArray, S32 itemCount)
 {
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
       bitArray[i] = false;
 }
 
@@ -205,7 +205,7 @@ string IniSettings::bitArrayToIniString(const bool *bitArray, S32 itemCount)
 {
    string s = "";
 
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
       s += bitArray[i] ? "Y" : "N";
 
    return s;
@@ -219,7 +219,7 @@ void IniSettings::iniStringToBitArray(const string &vals, bool *bitArray, S32 it
 
    S32 count = MIN((S32)vals.size(), itemCount);
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       if(vals.at(i) == 'Y')
          bitArray[i] = true;
 }
@@ -236,7 +236,7 @@ Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
    Vector<string> words;
 
    // Parse the retrieved strings.  They'll be in the form "Key Script Help"
-   for(S32 i = 0; i < plugins.size(); i++)
+   for(S32 i = 0; i < plugins.size(); ++i)
    {
       parseString(trim(plugins[i]), words, '|');
 
@@ -312,7 +312,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       addComment("----------------");
    }
 
-   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; ++i)
    {
       string presetStr = settings->getLoadoutPreset(i).toString(true);
 
@@ -344,7 +344,7 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
 
    Vector<string> plugins;
    PluginBinding binding;
-   for(S32 i = 0; i < iniSettings->pluginBindings.size(); i++)
+   for(S32 i = 0; i < iniSettings->pluginBindings.size(); ++i)
    {
       binding = iniSettings->pluginBindings[i];
       plugins.push_back(string(binding.key + "|" + binding.script + "|" + binding.help));
@@ -399,13 +399,13 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
       S32 numLevels = ini->GetNumEntries("Levels");
       Vector<string> levelValNames;
 
-      for(S32 i = 0; i < numLevels; i++)
+      for(S32 i = 0; i < numLevels; ++i)
          levelValNames.push_back(ini->ValueName("Levels", i));
 
       levelValNames.sort(alphaSort);
 
       string level;
-      for(S32 i = 0; i < numLevels; i++)
+      for(S32 i = 0; i < numLevels; ++i)
       {
          level = ini->GetValue("Levels", levelValNames[i], "");
          if (level != "")
@@ -436,7 +436,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    // Read all settings defined in the new modern manner
    Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
+   for(S32 i = 0; i < settings.size(); ++i)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 
    // Now read the settings still defined all old school
@@ -494,7 +494,7 @@ static void loadEditorSettings(CIniFile *ini, IniSettings *iniSettings)
 
    // Read all settings defined in the new modern manner
    Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
+   for(S32 i = 0; i < settings.size(); ++i)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 }
 
@@ -542,10 +542,10 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 {
    Vector<string> rawPresets(GameSettings::LoadoutPresetCount);
 
-   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; ++i)
       rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
 
-   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; ++i)
    {
       LoadoutTracker loadout(rawPresets[i]);
       if(loadout.isValid())
@@ -562,7 +562,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
    ini->GetAllValues("EditorPlugins", values);
 
    // Parse the retrieved strings.  They'll be in the form "Key Script Help"
-   for(S32 i = 0; i < values.size(); i++)
+   for(S32 i = 0; i < values.size(); ++i)
    {
       parseString(trim(values[i]), words, '|');
 
@@ -890,7 +890,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    // Next, read any top-level messages
    Vector<string> messages;
-   for(S32 i = 0; i < keys; i++)
+   for(S32 i = 0; i < keys; ++i)
    {
       string keyName = ini->getSectionName(i);
       if(keyName.substr(0, 17) == "QuickChat_Message")   // Found message group
@@ -899,7 +899,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    messages.sort(alphaSort);
 
-   for(S32 i = messages.size() - 1; i >= 0; i--)
+   for(S32 i = messages.size() - 1; i >= 0; --i)
    {
       QuickChatNode node;
       node.depth = 1;   // This is a top-level message node
@@ -914,7 +914,7 @@ static void loadQuickChatMessages(CIniFile *ini)
       QuickChatHelper::nodeTree.push_back(node);
    }
 
-   for(S32 i = 0; i < keys; i++)
+   for(S32 i = 0; i < keys; ++i)
    {
       string keyName = ini->getSectionName(i);
       if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)   // Found message group
@@ -927,10 +927,10 @@ static void loadQuickChatMessages(CIniFile *ini)
    // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
    // reenigneer those, let's just iterate backwards and leave the render functions alone.
 
-   for(S32 i = groups.size()-1; i >= 0; i--)
+   for(S32 i = groups.size()-1; i >= 0; --i)
    {
       Vector<string> messages;
-      for(S32 j = 0; j < keys; j++)
+      for(S32 j = 0; j < keys; ++j)
       {
          string keyName = ini->getSectionName(j);
          if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
@@ -951,7 +951,7 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.isMsgItem = false;
       QuickChatHelper::nodeTree.push_back(node);
 
-      for(S32 j = messages.size()-1; j >= 0; j--)
+      for(S32 j = messages.size()-1; j >= 0; --j)
       {
          node.depth = 2;   // This is a message node
          node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
@@ -1018,7 +1018,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
    S32 keys = ini->GetNumSections();
 
-   for(S32 i = 0; i < keys; i++)
+   for(S32 i = 0; i < keys; ++i)
    {
       string keyName = ini->getSectionName(i);
       if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
@@ -1354,32 +1354,32 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 //void readJoystick()
 //{
 //   gJoystickMapping.enable = ini->GetValueYN("Joystick", "Enable", false);
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
+//   for(U32 i=0; i<MaxJoystickAxes*2; ++i)
 //   {
 //      Vector<string> buttonList;
 //      parseString(ini->GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : ""), buttonList, ',');
 //      gJoystickMapping.axes[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
+//      for(S32 j=0; j<buttonList.size(); ++j)
 //      {
 //         gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
 //      }
 //   }
-//   for(U32 i=0; i<32; i++)
+//   for(U32 i=0; i<32; ++i)
 //   {
 //      Vector<string> buttonList;
 //      parseString(ini->GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : ""), buttonList, ',');
 //      gJoystickMapping.button[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
+//      for(S32 j=0; j<buttonList.size(); ++j)
 //      {
 //         gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
 //      }
 //   }
-//   for(U32 i=0; i<4; i++)
+//   for(U32 i=0; i<4; ++i)
 //   {
 //      Vector<string> buttonList;
 //      parseString(ini->GetValue("Joystick", "Pov" + itos(i), itos(i+10)), buttonList, ',');
 //      gJoystickMapping.pov[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
+//      for(S32 j=0; j<buttonList.size(); ++j)
 //      {
 //         gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
 //      }
@@ -1390,30 +1390,30 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 //{
 //   ini->setValueYN("Joystick", "Enable", gJoystickMapping.enable);
 //   ///for(listToString(alwaysPingList, ',')
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
+//   for(U32 i=0; i<MaxJoystickAxes*2; ++i)
 //   {
 //      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
+//      for(U32 j=0; j<32; ++j)
 //      {
 //         if(gJoystickMapping.axes[i] & (1 << j))
 //            buttonList.push_back(itos(j));
 //      }
 //      ini->SetValue("Joystick", "Axes" + itos(i), listToString(buttonList, ','));
 //   }
-//   for(U32 i=0; i<32; i++)
+//   for(U32 i=0; i<32; ++i)
 //   {
 //      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
+//      for(U32 j=0; j<32; ++j)
 //      {
 //         if(gJoystickMapping.button[i] & (1 << j))
 //            buttonList.push_back(itos(j));
 //      }
 //      ini->SetValue("Joystick", "Button" + itos(i), listToString(buttonList, ','));
 //   }
-//   for(U32 i=0; i<4; i++)
+//   for(U32 i=0; i<4; ++i)
 //   {
 //      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
+//      for(U32 j=0; j<32; ++j)
 //      {
 //         if(gJoystickMapping.pov[i] & (1 << j))
 //            buttonList.push_back(itos(j));
@@ -1517,7 +1517,7 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
    // Get a list of sections... we should have one per user
    S32 sections = ini->GetNumSections();
 
-   for(S32 i = 0; i < sections; i++)
+   for(S32 i = 0; i < sections; ++i)
    {
       userSettings.name = ini->getSectionName(i);
 
@@ -1641,7 +1641,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " Settings entries contain a number of different options");
 
       // Write all our section comments for items defined in the new manner
-      for(S32 i = 0; i < settings.size(); i++)
+      for(S32 i = 0; i < settings.size(); ++i)
          ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
 
 
@@ -1666,7 +1666,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    }
 
    // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
+   for(S32 i = 0; i < settings.size(); ++i)
       ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
 
 
@@ -1717,14 +1717,14 @@ static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " EditorSettings entries relate to items in the editor");
 
       // Write all our section comments for items defined in the new manner
-      for(S32 i = 0; i < settings.size(); i++)
+      for(S32 i = 0; i < settings.size(); ++i)
          ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
 
       ini->sectionComment(section, "----------------");
    }
 
    // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
+   for(S32 i = 0; i < settings.size(); ++i)
       ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
 }
 
@@ -1996,7 +1996,7 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 
    Vector<string> normalizedSkipList;
 
-   for(S32 i = 0; i < levelSkipList->size(); i++)
+   for(S32 i = 0; i < levelSkipList->size(); ++i)
    {
       // "Normalize" the name a little before writing it
       string filename = lcase(levelSkipList->get(i));
@@ -2238,12 +2238,13 @@ static string checkName(const string &filename, const Vector<string> &folders, c
    string name;
    if(filename.find('.') != string::npos)       // filename has an extension
    {
-      for(S32 i = 0; i < folders.size(); i++)
+      for(S32 i = 0; i < folders.size(); ++i)
       {
          name = strictjoindir(folders[i], filename);
          if(fileExists(name))
             return name;
-         i++;
+         ++i;
+
       }
    }
    else
@@ -2251,13 +2252,14 @@ static string checkName(const string &filename, const Vector<string> &folders, c
       S32 i = 0;
       while(strcmp(extensions[i], ""))
       {
-         for(S32 j = 0; j < folders.size(); j++)
+         for(S32 j = 0; j < folders.size(); ++j)
          {
             name = strictjoindir(folders[j], filename + extensions[i]);
             if(fileExists(name))
                return name;
          }
-         i++;
+         ++i;
+
       }
    }
 

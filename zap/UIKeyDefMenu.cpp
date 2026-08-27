@@ -178,7 +178,7 @@ void KeyDefMenuUserInterface::onActivate()
 
    S32 itemCount[] = { 0, 0 };
 
-   for(S32 i = 0; i < menuItems.size(); i++)
+   for(S32 i = 0; i < menuItems.size(); ++i)
       itemCount[menuItems[i].column - 1]++;
 
    maxMenuItemsInAnyCol = MAX(itemCount[0], itemCount[1]);
@@ -202,9 +202,10 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
    InputCode targetInputCode = getInputCode(settings, menuItems[key].primaryControl);
 
-   for(S32 i = 0; i < size && count < 2; i++)
+   for(S32 i = 0; i < size && count < 2; ++i)
       if(getInputCode(settings, menuItems[i].primaryControl) == targetInputCode)
-         count++;
+         ++count;
+
 
    return count >= 2;
 }
@@ -234,7 +235,7 @@ void KeyDefMenuUserInterface::render()
 
    S32 size = menuItems.size();
 
-   for(S32 i = 0; i < size; i++)
+   for(S32 i = 0; i < size; ++i)
    {
       S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
@@ -360,7 +361,8 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
       {
          selectedIndex -= firstItemInCol2;
          while(menuItems[selectedIndex].column == 2)
-            selectedIndex--;
+            --selectedIndex;
+
       }
 
       Cursor::disableCursor();                    // Turn off cursor
@@ -376,7 +378,8 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
 
-      selectedIndex--;
+      --selectedIndex;
+
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
 
@@ -386,7 +389,8 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
 
-      selectedIndex++;
+      ++selectedIndex;
+
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
 
@@ -421,10 +425,12 @@ void KeyDefMenuUserInterface::onMouseMoved()
    // section of the controls.
    if(col == 0)
       while(menuItems[selectedIndex].column == 2)
-         selectedIndex--;
+         --selectedIndex;
+
    else
       while(menuItems[selectedIndex].column == 1)
-         selectedIndex++;
+         ++selectedIndex;
+
 }
 
 

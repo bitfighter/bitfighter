@@ -173,7 +173,7 @@ void Semaphore::wait()
 
 void Semaphore::increment(U32 count)
 {
-   for(U32 i = 0; i < count; i++)
+   for(U32 i = 0; i < count; ++i)
       sem_post(&mSemaphore);
 }
 
@@ -278,7 +278,7 @@ U32 ThreadQueue::ThreadQueueThread::run()
 ThreadQueue::ThreadQueue(U32 threadCount)
 {
    mStorage.set((void *) 1);
-   for(U32 i = 0; i < threadCount; i++)
+   for(U32 i = 0; i < threadCount; ++i)
    {
       Thread *theThread = new ThreadQueueThread(this);
       mThreads.push_back(theThread);
@@ -325,7 +325,7 @@ void ThreadQueue::postCall(Functor *theCall)
 void ThreadQueue::dispatchResponseCalls()
 {
    lock();
-   for(S32 i = 0; i < mResponseCalls.size(); i++)
+   for(S32 i = 0; i < mResponseCalls.size(); ++i)
    {
       Functor *c = mResponseCalls[i];
       c->dispatch(this);

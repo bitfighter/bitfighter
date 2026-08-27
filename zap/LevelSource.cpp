@@ -156,7 +156,7 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
                string levelName = list[1];
 
                // Append additional words to levelName
-               for(S32 i = 2; i < list.size(); i++)
+               for(S32 i = 2; i < list.size(); ++i)
                   levelName += " " + list[i];
 
                levelInfo.mLevelName = levelName;
@@ -181,7 +181,8 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
          }
          startingCur = cur + 1;
       }
-      cur++;
+      ++cur;
+
    }
 
    levelInfo.ensureLevelInfoHasValidName();
@@ -192,7 +193,7 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
 pair<S32, bool> LevelSource::addLevel(LevelInfo levelInfo)
 {
    // Check if we already have this one -- matches by filename and folder
-   for(S32 i = 0; i < mLevelInfos.size(); i++)
+   for(S32 i = 0; i < mLevelInfos.size(); ++i)
    {
       if(mLevelInfos[i].filename == levelInfo.filename && mLevelInfos[i].folder == levelInfo.folder)
          return pair<S32, bool>(i, false);
@@ -295,7 +296,7 @@ bool MultiLevelSource::loadLevels(FolderManager *folderManager)
 {
    bool anyLoaded = false;
 
-   for(S32 i = 0; i < mLevelInfos.size(); i++)
+   for(S32 i = 0; i < mLevelInfos.size(); ++i)
    {
       string filename = folderManager->findLevelFile(mLevelInfos[i].folder, mLevelInfos[i].filename);
 
@@ -304,7 +305,8 @@ bool MultiLevelSource::loadLevels(FolderManager *folderManager)
       else
       {
          mLevelInfos.erase(i);
-         i--;
+         --i;
+
       }
    }
 
@@ -383,7 +385,7 @@ bool MultiLevelSource::isEmptyLevelDirOk() const
 // Constructor -- pass in a list of level names and a folder; create LevelInfos for each
 FolderLevelSource::FolderLevelSource(const Vector<string> &levelList, const string &folder)
 {
-   for(S32 i = 0; i < levelList.size(); i++)
+   for(S32 i = 0; i < levelList.size(); ++i)
       mLevelInfos.push_back(LevelInfo(levelList[i], folder));
 }
 
@@ -401,7 +403,7 @@ FolderLevelSource::~FolderLevelSource()
 // Constructor -- pass in a list of level names and a file; create LevelInfos for each
 FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &folder)
 {
-   for(S32 i = 0; i < levelList.size(); i++)
+   for(S32 i = 0; i < levelList.size(); ++i)
       mLevelInfos.push_back(LevelInfo(levelList[i], folder));
 }
 
@@ -444,7 +446,7 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
    Vector<string> levels;
    Vector<string> lines = parseString(readFile(fileName));
 
-   for(S32 i = 0; i < lines.size(); i++)
+   for(S32 i = 0; i < lines.size(); ++i)
    {
       string filename = trim(chopComment(lines[i]));
       if(filename == "")    // Probably a comment or blank line

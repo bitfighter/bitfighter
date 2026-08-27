@@ -122,7 +122,8 @@ U32 QueryServersUserInterface::ServerRef::getNextId()
 {
    static U32 nextId = 0;
 
-   nextId++;
+   ++nextId;
+
    return nextId;
 }
 
@@ -225,7 +226,7 @@ void QueryServersUserInterface::onActivate()
 
 #if 0
    // Populate server list with dummy data to see how it looks
-   for(U32 i = 0; i < 512; i++)
+   for(U32 i = 0; i < 512; ++i)
    {
       char name[128];
       dSprintf(name, MaxServerNameLen, "Dummy Svr%8x", Random::readI());
@@ -268,7 +269,7 @@ void QueryServersUserInterface::contactEveryone()
    // Always ping these servers -- typically a local server
    Vector<string> *pingList = &getGame()->getSettings()->getIniSettings()->alwaysPingList;
 
-   for(S32 i = 0; i < pingList->size(); i++)
+   for(S32 i = 0; i < pingList->size(); ++i)
    {
       Address address(pingList->get(i).c_str());
       getGame()->getNetInterface()->sendPing(address, mLocalServerNonce);
@@ -279,7 +280,7 @@ void QueryServersUserInterface::contactEveryone()
    {
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
-      for(S32 i = 0; i < serverList->size(); i++)
+      for(S32 i = 0; i < serverList->size(); ++i)
          getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mRemoteServerNonce);
 
       mGivenUpOnMaster = true;
@@ -309,7 +310,7 @@ void QueryServersUserInterface::contactEveryone()
 // Returns index of found server, -1 if it found none
 static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Address &address)
 {
-   for(S32 i = 0; i < serverList.size(); i++)
+   for(S32 i = 0; i < serverList.size(); ++i)
       if(Address(serverList[i].ipAddress) == address)
          return i;
 
@@ -321,7 +322,7 @@ static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Addre
 static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList,
                                    const Address &address, S32 serverId)
 {
-   for(S32 i = 0; i < serverList.size(); i++)
+   for(S32 i = 0; i < serverList.size(); ++i)
       if(serverList[i].serverAddress == address || (serverId != 0 && serverList[i].serverId == serverId))
          return i;
 
@@ -333,7 +334,7 @@ static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::Serve
 static S32 findServerByServerId(const Vector<QueryServersUserInterface::ServerRef> &serverList, S32 serverId)
 {
    if(serverId != 0)
-      for(S32 i = 0; i < serverList.size(); i++)
+      for(S32 i = 0; i < serverList.size(); ++i)
          if(serverList[i].serverId == serverId)
             return i;
 
@@ -345,7 +346,7 @@ static S32 findServerByServerId(const Vector<QueryServersUserInterface::ServerRe
 static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address,
                                          const Nonce &nonce, QueryServersUserInterface::ServerRef::State state)
 {
-   for(S32 i = 0; i < serverList.size(); i++)
+   for(S32 i = 0; i < serverList.size(); ++i)
       if(serverList[i].serverAddress == address && serverList[i].sendNonce == nonce && serverList[i].state == state)
          return i;
 
@@ -357,7 +358,7 @@ static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface:
 // not on the updated list from the master.  These will be servers that were alive, but have now disappeared.
 void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster)
 {
-   for(S32 i = servers.size() - 1; i >= 0; i--)
+   for(S32 i = servers.size() - 1; i >= 0; --i)
    {
       if(servers[i].isLocalServer)  // Skip local servers
          continue;
@@ -378,7 +379,7 @@ static void saveServerListToIni(GameSettings *settings, const Vector<ServerAddr>
       Vector<string> &prevServerList = settings->getIniSettings()->prevServerListFromMaster;
       prevServerList.clear();    // Only clear the saved list if we have something to add...
 
-      for(S32 i = 0; i < serverListFromMaster.size(); i++)
+      for(S32 i = 0; i < serverListFromMaster.size(); ++i)
          prevServerList.push_back(Address(serverListFromMaster[i].ipAddress).toString());
    }
 }
@@ -401,7 +402,7 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
    forgetServersNoLongerOnList(serverList);
 
    // Add any new servers to the server display
-   for(S32 i = 0; i < serverList.size(); i++)
+   for(S32 i = 0; i < serverList.size(); ++i)
    {
       // Is this server already in our list?
       S32 index = findServerByAddressOrId(servers, Address(serverList[i].ipAddress), serverList[i].id);
@@ -471,7 +472,8 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
          s.identityToken = clientIdentityToken;
          s.state = ServerRef::ReceivedPing;
 
-         pendingPings--;
+         --pendingPings;
+
       }
    }
 
@@ -483,7 +485,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
                                                  const char *serverName, const char *serverDescr, U32 playerCount,
                                                  U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   for(S32 i = 0; i < servers.size(); i++)
+   for(S32 i = 0; i < servers.size(); ++i)
    {
       ServerRef &s = servers[i];
       if(s.sendNonce == clientNonce && s.serverAddress == address && s.state == ServerRef::SentQuery)
@@ -525,7 +527,8 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          if(s.state == ServerRef::SentQuery)
          {
             s.state = ServerRef::ReceivedQuery;
-            pendingQueries--;
+            --pendingQueries;
+
          }
       }
    }
@@ -543,24 +546,26 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    mouseScrollTimer.update(timeDelta);
 
    // Timeout old pings and queries
-   for(S32 i = 0; i < servers.size(); i++)
+   for(S32 i = 0; i < servers.size(); ++i)
    {
       ServerRef &s = servers[i];
 
       if(s.state == ServerRef::SentPing && (time - s.lastSendTime) > PingQueryTimeout)
       {
          s.state = ServerRef::Start;
-         pendingPings--;
+         --pendingPings;
+
       }
       else if(s.state == ServerRef::SentQuery && (time - s.lastSendTime) > PingQueryTimeout)
       {
          s.state = ServerRef::ReceivedPing;
-         pendingQueries--;
+         --pendingQueries;
+
       }
    }
 
    // Send new pings
-   for(S32 i = 0; i < servers.size() ; i++)
+   for(S32 i = 0; i < servers.size() ; ++i)
    {
       if(pendingPings < MaxPendingPings)
       {
@@ -568,7 +573,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
          if(s.state == ServerRef::Start)     // This server is at the beginning of the process
          {
             s.pingTimedOut = false;
-            s.sendCount++;
+            ++s.sendCount;
+
             if(s.sendCount > PingQueryRetryCount)     // Ping has timed out, sadly
             {
                s.setDescr("No information: Server not responding to pings", Colors::red);
@@ -586,7 +592,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.lastSendTime = time;
                s.sendNonce.getRandom();
                getGame()->getNetInterface()->sendPing(s.serverAddress, s.sendNonce);
-               pendingPings++;
+               ++pendingPings;
+
 
                if(pendingPings >= MaxPendingPings)
                   break;
@@ -597,14 +604,15 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // When all pings have been answered or have timed out, send out server status queries ... too slow
    // Want to start query immediately, to display server name / current players faster
-   for(S32 i = servers.size() - 1; i >= 0; i--)
+   for(S32 i = servers.size() - 1; i >= 0; --i)
    {
       if(pendingQueries < MaxPendingQueries)
       {
          ServerRef &s = servers[i];
          if(s.state == ServerRef::ReceivedPing)
          {
-            s.sendCount++;
+            ++s.sendCount;
+
             if(s.sendCount > PingQueryRetryCount)
             {
                // If this is a local server, remove it from the list if the query times out...
@@ -626,7 +634,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.state = ServerRef::SentQuery;
                s.lastSendTime = time;
                getGame()->getNetInterface()->sendQuery(s.serverAddress, s.sendNonce, s.identityToken);
-               pendingQueries++;
+               ++pendingQueries;
+
 
                if(pendingQueries >= MaxPendingQueries)
                   break;
@@ -636,7 +645,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    }
 
    // Every so often, send out a new batch of queries
-   for(S32 i = 0; i < servers.size(); i++)
+   for(S32 i = 0; i < servers.size(); ++i)
    {
       ServerRef &s = servers[i];
       if(s.state == ServerRef::ReceivedQuery && time - s.lastSendTime > RequeryTime)
@@ -657,7 +666,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // Go to previous page if a server has gone away and the last server has disappeared from the current screen
    while(getFirstServerIndexOnCurrentPage() >= servers.size() && mPage > 0)
-       mPage--;
+       --mPage;
+
 
    if(mShouldSort)
    {
@@ -711,7 +721,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
    }
    else
    {
-      for(S32 i = 0; i < servers.size(); i++)
+      for(S32 i = 0; i < servers.size(); ++i)
          if(servers[i].id == selectedId)
             return i;
       return -1;                 // Can't find selected server; return dummy
@@ -812,7 +822,7 @@ void QueryServersUserInterface::render()
    // Render buttons
    const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
-   for(S32 i = 0; i < buttons.size(); i++)
+   for(S32 i = 0; i < buttons.size(); ++i)
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
    MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
@@ -874,7 +884,7 @@ void QueryServersUserInterface::render()
       // Color background of local servers
       S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
 
-      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
+      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; ++i)
       {
          U32 y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 1;
          ServerRef &s = servers[i];
@@ -895,7 +905,7 @@ void QueryServersUserInterface::render()
       drawMenuItemHighlight(0, y + highlightVertAdjustment, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4 + highlightVertAdjustment, disabled);
 
 
-      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
+      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; ++i)
       {
          y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 2;
          ServerRef &s = servers[i];
@@ -915,7 +925,7 @@ void QueryServersUserInterface::render()
          if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName.c_str()) < colwidth)
             sname = s.serverName;
          else
-            for(std::size_t j = 0; j < s.serverName.length(); j++)
+            for(std::size_t j = 0; j < s.serverName.length(); ++j)
                if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName.substr(j, 1)).c_str() ) < colwidth)
                   sname += s.serverName[j];
                else
@@ -1021,7 +1031,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    // Draw vertical dividing lines
    r.setColor(0.7f);
 
-   for(S32 i = 1; i < columns.size(); i++)
+   for(S32 i = 1; i < columns.size(); ++i)
       drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
 
    // Horizontal lines under column headers
@@ -1039,7 +1049,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Colors::gray20, Colors::white);
 
    // And now the column header text itself
-   for(S32 i = 0; i < columns.size(); i++)
+   for(S32 i = 0; i < columns.size(); ++i)
       drawString(columns[i].xStart, COLUMN_HEADER_TOP + 3, COLUMN_HEADER_TEXTSIZE, columns[i].name);
 
    // Highlight selected column
@@ -1173,7 +1183,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       else if(inputCode == MOUSE_LEFT && mousePos->y < COLUMN_HEADER_TOP)
       {
          // Check buttons -- they're all up here for the moment
-         for(S32 i = 0; i < buttons.size(); i++)
+         for(S32 i = 0; i < buttons.size(); ++i)
             buttons[i].onClick(mousePos->x, mousePos->y);
       }
       else if(inputCode == MOUSE_LEFT && isMouseOverDivider())
@@ -1221,7 +1231,8 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputCode == KEY_LEFT)
    {
-      mHighlightColumn--;
+      --mHighlightColumn;
+
       if(mHighlightColumn < 0)
          mHighlightColumn = 0;
 
@@ -1230,7 +1241,8 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputCode == KEY_RIGHT)
    {
-      mHighlightColumn++;
+      ++mHighlightColumn;
+
       if(mHighlightColumn >= columns.size())
          mHighlightColumn = columns.size() - 1;
 
@@ -1292,7 +1304,8 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
 void QueryServersUserInterface::backPage()
 {
-   mPage--;
+   --mPage;
+
 
    if(mPage < 0)
       mPage = getLastPage();      // Last page
@@ -1303,7 +1316,8 @@ void QueryServersUserInterface::backPage()
 
 void QueryServersUserInterface::advancePage()
 {
-   mPage++;
+   ++mPage;
+
    if(mPage > getLastPage())
       mPage = 0;                 // First page
 
@@ -1394,7 +1408,7 @@ void QueryServersUserInterface::onMouseMoved()
    if(mouseInHeaderRow(mousePos))
    {
       mHighlightColumn = 0;
-      for(S32 i = columns.size()-1; i >= 0; i--)
+      for(S32 i = columns.size()-1; i >= 0; --i)
          if(mousePos->x > columns[i].xStart)
          {
             mHighlightColumn = i;
@@ -1543,7 +1557,7 @@ void QueryServersUserInterface::sort()
       S32 size = servers.size() / 2;
       S32 totalSize = servers.size();
 
-      for(S32 i = 0; i < size; i++)
+      for(S32 i = 0; i < size; ++i)
       {
          ServerRef temp = servers[i];
          servers[i] = servers[totalSize - i - 1];

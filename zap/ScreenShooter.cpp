@@ -175,7 +175,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
       restoreViewportToWindow(settings);
 
    // Convert Data
-   for (S32 i = 0; i < height; i++)
+   for (S32 i = 0; i < height; ++i)
       rows[i] = &screenBuffer[(height - i - 1) * (BytesPerPixel * width)];  // Backwards!
 
    // Write the PNG!

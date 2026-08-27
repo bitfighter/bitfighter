@@ -127,7 +127,7 @@ S32 QuickChatHelper::getWidthOfItems() const
 {
    S32 maxWidth = 0;
 
-   for(S32 i = 0; i < nodeTree.size(); i++)
+   for(S32 i = 0; i < nodeTree.size(); ++i)
    {
       S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
 
@@ -146,7 +146,7 @@ S32 QuickChatHelper::getWidthOfButtons() const
 
    S32 maxWidth = 0;
 
-   for(S32 i = 0; i < nodeTree.size(); i++)
+   for(S32 i = 0; i < nodeTree.size(); ++i)
    {
       InputCode code = (inputMode == InputModeJoystick) ? nodeTree[i].buttonCode : nodeTree[i].inputCode;
       S32 width = JoystickRender::getControllerButtonRenderedSize(code);
@@ -171,7 +171,8 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    S32 walk = mCurNode;
    U32 matchLevel = nodeTree[walk].depth + 1;
-   walk++;
+   ++walk;
+
 
    mMenuItems1IsCurrent = !mMenuItems1IsCurrent;
 
@@ -184,7 +185,8 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    // First get to the end...
    while(nodeTree[walk].depth >= matchLevel)
-      walk++;
+      ++walk;
+
 
    // Then draw bottom up...
    while(walk != mCurNode)
@@ -203,7 +205,8 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
          menuItems->push_back(item);
       }
-      walk--;
+      --walk;
+
    }
 }
 
@@ -224,7 +227,8 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
    // Set up walk...
    S32 walk = mCurNode;
    U32 matchLevel = nodeTree[walk].depth + 1;
-   walk++;
+   ++walk;
+
 
    // Iterate over anything at our desired depth or lower
    while(nodeTree[walk].depth >= matchLevel)
@@ -241,7 +245,8 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
          UserInterface::playBoop();
 
          // If we're at a leaf (ie, next child down is higher or equal to us), then issue the chat and call it good
-         walk++;
+         ++walk;
+
          if(nodeTree[mCurNode].depth >= nodeTree[walk].depth)
          {
             exitHelper();
@@ -261,7 +266,8 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
          }
          return true;
       }
-      walk++;
+      ++walk;
+
    }
 
    return false;

@@ -70,7 +70,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       else     // Flag is at home
       {
          // Check if this client has an enemy flag mounted
-         for(S32 i = 0; i < theShip->getMountedItemCount(); i++)
+         for(S32 i = 0; i < theShip->getMountedItemCount(); ++i)
          {
             MountableItem *mountedItem = theShip->getMountedItem(i);
 
@@ -140,7 +140,7 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -174,7 +174,7 @@ void CTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -303,7 +303,7 @@ void CTFGameType::onGameOver()
       bool tiedGame = false;
       bool secondPlaceIsMinusOne = false;
 
-      for(S32 i = 1; i < getGame()->getTeamCount(); i++)
+      for(S32 i = 1; i < getGame()->getTeamCount(); ++i)
       {
          // Skip ourselves
          if(i == mPossibleLastWinBadgeAchiever->getTeamIndex())

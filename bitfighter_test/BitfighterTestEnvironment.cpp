@@ -21,7 +21,7 @@ bool checkResources()
 {
     const string dirs[] = { "editor_plugins", "fonts", "levels", "music", "robots", "scripts", "sfx", "testing" };
 
-    for(S32 i = 0; i < ARRAYSIZE(dirs); i++)
+    for(S32 i = 0; i < ARRAYSIZE(dirs); ++i)
         if(!fileExists(dirs[i]))
             return false;
 

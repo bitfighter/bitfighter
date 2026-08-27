@@ -60,7 +60,7 @@ void Event::inputCodeUp(UserInterface *currentUI, InputCode inputCode)
       currentUI->onKeyUp(inputCode);
 
    const Vector<UserInterface *> *uis = currentUI->getUIManager()->getPrevUIs();
-   for(S32 i = 0; i < uis->size(); i++)
+   for(S32 i = 0; i < uis->size(); ++i)
       uis->get(i)->onKeyUp(inputCode);
 }
 

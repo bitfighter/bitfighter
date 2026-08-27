@@ -47,7 +47,7 @@ void Move::initialize()
    y = 0;
    angle = 0;
 
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); ++i)
    {
       modulePrimary[i]   = false;
       moduleSecondary[i] = false;
@@ -69,7 +69,7 @@ void Move::set(F32 x, F32 y, F32 angle)
 
 bool Move::isAnyModActive() const
 {
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); ++i)
       if(modulePrimary[i] || moduleSecondary[i])
          return true;
 
@@ -79,7 +79,7 @@ bool Move::isAnyModActive() const
 
 bool Move::isEqualMove(const Move *move) const
 {
-   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); ++i)
       if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
          return false;
 
@@ -111,7 +111,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeSignedInt(writeAngle, AngleBits);
       stream->writeFlag(fire);
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
       {
          stream->writeFlag(modulePrimary[i]);
          stream->writeFlag(moduleSecondary[i]);
@@ -146,7 +146,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       angle = unitToRadians(stream->readSignedInt(AngleBits) / F32(1 << AngleBits));
       fire = stream->readFlag();
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
       {
          modulePrimary[i] = stream->readFlag();
          moduleSecondary[i] = stream->readFlag();
@@ -181,7 +181,7 @@ string Move::toString()
 
    Point p(x,y);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       modpstr += modulePrimary[i]   ? "1" : "0";
       modsstr += moduleSecondary[i] ? "1" : "0";

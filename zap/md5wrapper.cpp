@@ -60,7 +60,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 	char asciihash[33];
 
 	int p = 0;
-	for(int i=0; i<16; i++)
+	for(int i=0; i<16; ++i)
 	{
 		::sprintf(&asciihash[p],"%02x",bytes[i]);
 		p += 2;
@@ -73,7 +73,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 // Convert string to lower case
 std::string lcase(std::string strToConvert)
 {
-   for(std::string::size_type i = 0; i < strToConvert.length(); i++)
+   for(std::string::size_type i = 0; i < strToConvert.length(); ++i)
       strToConvert[i] = TNL::toLower(strToConvert[i]);
    return strToConvert;
 }

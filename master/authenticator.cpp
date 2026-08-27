@@ -145,11 +145,11 @@ bool Authenticator::isSqlSafe(string s){
 		case 0:
 			return true;
 		case 1:
-			for (unsigned int i=0; i<dangerousCharacters.length(); i++) if (strchr(s.c_str(),dangerousCharacters[i])) return false;
+			for (unsigned int i=0; i<dangerousCharacters.length(); ++i) if (strchr(s.c_str(),dangerousCharacters[i])) return false;
 			return true;
 		case 2:
 		default:
-			for (unsigned int i=0; i<s.length(); i++) if(!isAlNum(s[i])) return false;
+			for (unsigned int i=0; i<s.length(); ++i) if(!isAlNum(s[i])) return false;
 			return true;
 	}
 }

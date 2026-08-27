@@ -250,10 +250,10 @@ void::ClientInfo::updateLoadout(bool useOnDeck, bool engineerAllowed, bool silen
       // second 16 bits to weapons.  The integer created might look like so:
       //    00000000000001110000000000000011
       U32 loadoutHash = 0;
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
          loadoutHash |= BIT(loadout.hasModule(ShipModule(i)) ? 1 : 0);
 
-      for(S32 i = 0; i < ShipWeaponCount; i++)
+      for(S32 i = 0; i < ShipWeaponCount; ++i)
          loadoutHash |= BIT(loadout.hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
 
       getStatistics()->addLoadout(loadoutHash);
@@ -457,13 +457,15 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
          case EngineeredTurret:
             e.push_back("turret");
             responseEvent = EngineerEventTurretBuilt;
-            stats->mTurretsEngineered++;
+            ++stats->mTurretsEngineered;
+
             break;
 
          case EngineeredForceField:
             e.push_back("force field");
             responseEvent = EngineerEventForceFieldBuilt;
-            stats->mFFsEngineered++;
+            ++stats->mFFsEngineered;
+
             break;
 
          case EngineeredTeleporterEntrance:
@@ -474,7 +476,8 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
          case EngineeredTeleporterExit:
             e.push_back("teleport exit");
             responseEvent = EngineerEventTeleporterExitBuilt;
-            stats->mTeleportersEngineered++;
+            ++stats->mTeleportersEngineered;
+
             break;
 
          default:
@@ -514,7 +517,7 @@ void ClientInfo::setEngineeringTeleporter(bool engineeringTeleporter)
    setIsEngineeringTeleporter(engineeringTeleporter);
 
    // Tell everyone that a particular client is engineering a teleport
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       GameType *gameType = mGame->getGameType();
 
@@ -595,7 +598,8 @@ Nonce *ClientInfo::getId()
 // Server only
 void ClientInfo::addKill()
 {
-   mCurrentKillStreak++;
+   ++mCurrentKillStreak;
+
    mStatistics.addKill(mCurrentKillStreak);
 }
 
@@ -647,7 +651,7 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
 
    // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.
    if(mGame->isServer())
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
+      for(S32 i = 0; i < mGame->getClientCount(); ++i)
          if(mGame->getClientInfo(i)->getName() != mName && mGame->getClientInfo(i)->getConnection())
             mGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges, gamesPlayed);
 }

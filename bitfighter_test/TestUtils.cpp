@@ -100,7 +100,7 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    server->startHosting();          // This will load levels and wipe out any teams
 
-   for(S32 i = 0; i < clientCount; i++)
+   for(S32 i = 0; i < clientCount; ++i)
       addClient("TestPlayer" + itos(i));
 }
 
@@ -112,7 +112,7 @@ GamePair::~GamePair()
 
    GameManager::getServerGame()->setAutoLeveling(false);    // No need to run this while we're shutting down
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
       if(clientGames->get(i)->getConnectionToServer())
          clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
@@ -130,7 +130,7 @@ GamePair::~GamePair()
 // Idle a pair of games for a specified number of cycles, static method
 void GamePair::idle(U32 timeDelta, U32 cycles)
 {
-   for(U32 i = 0; i < cycles; i++)
+   for(U32 i = 0; i < cycles; ++i)
       GameManager::idle(timeDelta);
 }
 
@@ -189,7 +189,7 @@ void GamePair::removeClient(const string &name)
 
    const Vector<ClientGame *> *clients = GameManager::getClientGames();
 
-   for(S32 i = 0; i < clients->size(); i++)
+   for(S32 i = 0; i < clients->size(); ++i)
    {
       if(clients->get(i)->getClientInfo() && string(clients->get(i)->getClientInfo()->getName().getString()) == name)
       {

@@ -26,7 +26,7 @@ TEST(RobotTest, addBot)
 
 	gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
 
-	for(U32 i = 0; i < 10; i++)
+	for(U32 i = 0; i < 10; ++i)
 		gamePair.idle(10);
 
 	EXPECT_EQ(1, gamePair.server->getRobotCount());
@@ -46,7 +46,7 @@ TEST(RobotTest, luaRobotNew)
 
 	EXPECT_TRUE(levelgen.runString("bf:addItem(Robot.new())"));
 
-	for(U32 i = 0; i < 10; i++)
+	for(U32 i = 0; i < 10; ++i)
 		gamePair.idle(10);
 
 	EXPECT_EQ(1, gamePair.server->getRobotCount());
@@ -56,7 +56,7 @@ TEST(RobotTest, luaRobotNew)
 
 	// The Lua Robot:removeFromGame implementation queues the object for deletion with
 	// deleteObject(100), so we need a longer delay before the server actually removes the robot.
-	for(U32 i = 0; i < 11; i++)
+	for(U32 i = 0; i < 11; ++i)
 		gamePair.idle(10);
 
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
@@ -82,7 +82,7 @@ TEST(RobotTest, RemoveFromGameDuringInitialOnShipSpawn)
 	Vector<StringTableEntry> args;
 	gamePair.server->getGameType()->addBot(args);
 
-	for(U32 i = 0; i < 10; i++)
+	for(U32 i = 0; i < 10; ++i)
 		gamePair.idle(10);
 
 	EXPECT_TRUE(levelgen.runString("assert(RUN)"));

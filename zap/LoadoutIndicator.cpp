@@ -148,7 +148,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    FontManager::pushFontContext(LoadoutIndicatorContext);
 
    // First, the weapons
-   for(auto i = 0; i < ShipWeaponCount; i++)
+   for(auto i = 0; i < ShipWeaponCount; ++i)
    {
       r.setColor(loadout.isWeaponActive(i) ? *INDICATOR_ACTIVE_COLOR : *INDICATOR_INACTIVE_COLOR);
 
@@ -160,7 +160,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
 
    // Next, loadout modules
-   for(auto i = 0; i < ShipModuleCount; i++)
+   for(auto i = 0; i < ShipModuleCount; ++i)
    {
       ShipModule module = loadout.getModule(i);
 
@@ -182,12 +182,12 @@ S32 LoadoutIndicator::getWidth() const
 {
    S32 width = 0;
 
-   for(auto i = 0; i < ShipWeaponCount; i++)
+   for(auto i = 0; i < ShipWeaponCount; ++i)
       width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + IndicatorHorizPadding;
 
    width += GapBetweenTheGroups;
 
-   for(auto i = 0; i < ShipModuleCount; i++)
+   for(auto i = 0; i < ShipModuleCount; ++i)
       width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + IndicatorHorizPadding;
 
    width -= IndicatorHorizPadding;

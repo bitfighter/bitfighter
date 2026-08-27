@@ -185,7 +185,7 @@ string HttpRequest::urlEncode(const string& str)
    string result;
    string::const_iterator it;
 
-   for(it = str.begin(); it < str.end(); it++)
+   for(it = str.begin(); it < str.end(); ++it)
    {
       result += urlEncodeChar(*it);
    }
@@ -219,14 +219,14 @@ string HttpRequest::buildRequest()
    if(mMethod == PostMethod)
    {
       stringstream encodedData("");
-      for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
+      for(map<string, string>::iterator it = mData.begin(); it != mData.end(); ++it)
       {
          encodedData << "--" + HttpRequestBoundary + "\r\n";
          encodedData << "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
          encodedData << (*it).second + "\r\n";
       }
 
-      for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
+      for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); ++it)
       {
          stringstream fileData;
          fileData.write((const char*) (*it).data, (*it).length);

@@ -45,10 +45,10 @@ LoadoutTracker::~LoadoutTracker()
 // Reset this loadout to its factory settings
 void LoadoutTracker::resetLoadout()
 {
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       mModules[i] = ModuleNone;
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       mWeapons[i] = WeaponNone;
 
    deactivateAllModules();
@@ -61,20 +61,20 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 {
    bool loadoutChanged = false;
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(mModules[i] != loadout.mModules[i])
       {
          mModules[i] = loadout.mModules[i];
          loadoutChanged = true;
       }
 
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
    {
       mModulePrimaryActive[i]   = loadout.mModulePrimaryActive[i];
       mModuleSecondaryActive[i] = loadout.mModuleSecondaryActive[i];
    }
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(mWeapons[i] != loadout.mWeapons[i])
       {
          mWeapons[i] = loadout.mWeapons[i];
@@ -95,19 +95,19 @@ void LoadoutTracker::setLoadout(const Vector<U8> &items)
       return;
 
    // Do some range checking
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(items[i] >= ModuleCount)
          return;
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(items[i + ShipModuleCount] >= WeaponCount)
          return;
 
    // If everything checks out, we can fill the loadout
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       mModules[i] = (ShipModule) items[i];
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       mWeapons[i] = (WeaponType) items[i + ShipModuleCount];
 }
 
@@ -131,12 +131,12 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
 
    bool found;
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       found = false;
       const char *word = words[i].c_str();
 
-      for(S32 j = 0; j < ModuleCount; j++)
+      for(S32 j = 0; j < ModuleCount; ++j)
          if(stricmp(word, ModuleInfo::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
          {
             mModules[i] = ShipModule(j);
@@ -152,12 +152,12 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
       }
    }
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
    {
       found = false;
       const char *word = words[i + ShipModuleCount].c_str();
 
-      for(S32 j = 0; j < WeaponCount; j++)
+      for(S32 j = 0; j < WeaponCount; ++j)
          if(stricmp(word, WeaponInfo::getWeaponInfo(WeaponType(j)).name.getString()) == 0)
          {
             mWeapons[i] = WeaponType(j);
@@ -219,7 +219,7 @@ void LoadoutTracker::setModuleIndexSecondary(U32 moduleIndex, bool isActive)
 
 void LoadoutTracker::deactivateAllModules()
 {
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
    {
       mModulePrimaryActive[i] = false;
       mModuleSecondaryActive[i] = false;
@@ -229,7 +229,7 @@ void LoadoutTracker::deactivateAllModules()
 
 bool LoadoutTracker::hasModule(ShipModule mod) const
 {
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(mModules[i] == mod)
          return true;
 
@@ -239,7 +239,7 @@ bool LoadoutTracker::hasModule(ShipModule mod) const
 
 bool LoadoutTracker::hasWeapon(WeaponType weapon) const
 {
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(mWeapons[i] == weapon)
          return true;
 
@@ -300,10 +300,10 @@ Vector<U8> LoadoutTracker::toU8Vector() const
 {
    Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       loadout.push_back(U8(mModules[i]));
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       loadout.push_back(U8(mWeapons[i]));
 
    return loadout;
@@ -312,11 +312,11 @@ Vector<U8> LoadoutTracker::toU8Vector() const
 
 bool LoadoutTracker::operator == (const LoadoutTracker &other) const
 {
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(getModule(i) != other.getModule(i))
          return false;
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(getWeapon(i) != other.getWeapon(i))
          return false;
 
@@ -339,11 +339,11 @@ string LoadoutTracker::toString(bool compact) const
    Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserve space for efficiency
 
    // First modules
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       loadoutStrings.push_back(ModuleInfo::getModuleInfo((ShipModule) mModules[i])->getName());
 
    // Then weapons
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       loadoutStrings.push_back(WeaponInfo::getWeaponInfo(mWeapons[i]).name.getString());
 
    return listToString(loadoutStrings, compact ? "," : ", ");

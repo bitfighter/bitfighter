@@ -73,13 +73,14 @@ U32 JournalBlockTypeToken::getValue()
       vec.sort(JBTTCompare);
       U32 lastValue = 0;
       const char *lastString = "";
-      for(S32 i = 0; i < vec.size(); i++)
+      for(S32 i = 0; i < vec.size(); ++i)
       {
          if(!strcmp(vec[i]->mString, lastString))
             vec[i]->mValue = lastValue;
          else
          {
-            lastValue++;
+            ++lastValue;
+
             vec[i]->mValue = lastValue;
             lastString = vec[i]->mString;
          }
@@ -102,7 +103,7 @@ JournalEntryRecord::JournalEntryRecord(const char *functionName)
    if(!mEntryVector)
       mEntryVector = new Vector<JournalEntryRecord *>;
 
-   for(i = 0; i < mEntryVector->size(); i++)
+   for(i = 0; i < mEntryVector->size(); ++i)
    {
       if(strcmp((*mEntryVector)[i]->mFunctionName, functionName) < 0)
          break;
@@ -219,7 +220,7 @@ void Journal::callEntry(const char *funcName, Functor *theCall)
    mInsideEntrypoint = true;
 
    S32 entryIndex;
-   for(entryIndex = 0; entryIndex < JournalEntryRecord::mEntryVector->size(); entryIndex++)
+   for(entryIndex = 0; entryIndex < JournalEntryRecord::mEntryVector->size(); ++entryIndex)
    {
       if(!strcmp((*JournalEntryRecord::mEntryVector)[entryIndex]->mFunctionName, funcName))
          break;
@@ -266,7 +267,8 @@ void Journal::beginBlock(U32 blockId, bool writeBlock)
    }
    else
    {
-      mBlockIndex++;
+      ++mBlockIndex;
+
       if(mBreakBlockIndex && mBlockIndex >= mBreakBlockIndex)
          TNL_DEBUGBREAK();
 

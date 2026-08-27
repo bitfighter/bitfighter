@@ -120,7 +120,7 @@ static void gameRecorderScoping(GameRecorderServer *conn, Game *game)
 
 
    const Vector<DatabaseObject *> &gameObjects = *(game->getGameObjDatabase()->findObjects_fast());
-   for(S32 i=0; i < gameObjects.size(); i++)
+   for(S32 i=0; i < gameObjects.size(); ++i)
    {
       BfObject *obj = dynamic_cast<BfObject *>(gameObjects[i]);
       if(obj && obj->isGhostable())
@@ -137,7 +137,7 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
    getFilesFromFolder(dir, files);
 
    S32 max_id = 0;
-   for(S32 i = 0; i < files.size(); i++)
+   for(S32 i = 0; i < files.size(); ++i)
    {
       S32 id = atoi(files[i].c_str()); // do not use stoi unless using inside throw/cactch, stoi throws errors, if unhandled it kills program.
       if(max_id < id && id < S32_MAX)

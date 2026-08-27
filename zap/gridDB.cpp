@@ -29,10 +29,11 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
    if(mChunker == NULL)
       mChunker = new ClassChunker<DatabaseBucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
 
-   mCountGridDatabase++;
+   ++mCountGridDatabase;
 
-   for(U32 i = 0; i < BucketRowCount; i++)
-      for(U32 j = 0; j < BucketRowCount; j++)
+
+   for(U32 i = 0; i < BucketRowCount; ++i)
+      for(U32 j = 0; j < BucketRowCount; ++j)
          mBuckets[i][j].nextInBucket = NULL;
 
    if(createWallSegmentManager)
@@ -49,7 +50,7 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
 // {
 //    mAllObjects.reserve(source.mAllObjects.size());
 //
-//    for(S32 i = 0; i < source.mAllObjects.size(); i++)
+//    for(S32 i = 0; i < source.mAllObjects.size(); ++i)
 //       addToDatabase(source.mAllObjects[i]->clone(), source.mAllObjects[i]->getExtent());
 // }
 
@@ -64,7 +65,8 @@ GridDatabase::~GridDatabase()
    if(mWallSegmentManager)
       delete mWallSegmentManager;
 
-   mCountGridDatabase--;
+   --mCountGridDatabase;
+
 
    if(mCountGridDatabase == 0)
    {
@@ -107,7 +109,7 @@ void GridDatabase::copyObjects(const GridDatabase *source)
    mSpyBugs   .reserve(source->mSpyBugs.size());
 
 
-   for(S32 i = 0; i < source->mAllObjects.size(); i++)
+   for(S32 i = 0; i < source->mAllObjects.size(); ++i)
       addToDatabase(source->mAllObjects[i]->clone());
 
    sortObjects(mAllObjects);
@@ -130,8 +132,8 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject)
    static IntRect bins;
    fillBins(theObject->getExtent(), bins);
 
-   for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
-      for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
+   for(S32 x = bins.minx; bins.maxx - x >= 0; ++x)
+      for(S32 y = bins.miny; bins.maxy - y >= 0; ++y)
       {
          DatabaseBucketEntry *be = mChunker->alloc();
          DatabaseBucketEntryBase *base = &mBuckets[x & BucketMask][y & BucketMask];
@@ -163,16 +165,16 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject)
 // Bulk add items to database
 void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 {
-   for(S32 i = 0; i < objects.size(); i++)
+   for(S32 i = 0; i < objects.size(); ++i)
       addToDatabase(objects[i]);
 }
 
 
 void GridDatabase::removeEverythingFromDatabase()
 {
-   for(S32 x = 0; x < BucketRowCount; x++)
+   for(S32 x = 0; x < BucketRowCount; ++x)
    {
-      for(S32 y = 0; y < BucketRowCount; y++)
+      for(S32 y = 0; y < BucketRowCount; ++y)
       {
          for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; )
          {
@@ -201,7 +203,7 @@ void GridDatabase::removeEverythingFromDatabase()
 // Don't use this with a sorted list!
 static void eraseObject_fast(Vector<DatabaseObject *> *objects, DatabaseObject *objectToDelete)
 {
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
       if(objects->get(i) == objectToDelete)
       {
          objects->erase_fast(i);
@@ -235,7 +237,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
    }
 
    // Find and delete object from our non-spatial databases
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       if(mAllObjects[i] == object)
       {
          mAllObjects.erase(i);            // mAllObjects is sorted, so we can't use erase_fast
@@ -261,7 +263,7 @@ void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector) const
 {
    fillVector.resize(mAllObjects.size());
 
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       fillVector[i] = mAllObjects[i];
 }
 
@@ -303,10 +305,10 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 
 void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const
 {
-   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+   ++mQueryId;    // Used to prevent the same item from being found in multiple buckets
 
-   for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
-      for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
+   for(S32 x = bins->minx; bins->maxx - x >= 0; ++x)
+      for(S32 y = bins->miny; bins->maxy - y >= 0; ++y)
          for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
@@ -331,26 +333,26 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 
    if(typeNumber == GoalZoneTypeNumber)
    {
-      for(S32 i = 0; i < mGoalZones.size(); i++)
+      for(S32 i = 0; i < mGoalZones.size(); ++i)
          fillVector.push_back(mGoalZones[i]);
       return;
    }
 
    //if(typeNumber == FlagTypeNumber)
    //{
-   //   for(S32 i = 0; i < mFlags.size(); i++)
+   //   for(S32 i = 0; i < mFlags.size(); ++i)
    //      fillVector.push_back(mFlags[i]);
    //   return;
    //}
 
    //if(typeNumber == SpyBugTypeNumber)
    //{
-   //   for(S32 i = 0; i < mSpyBugs.size(); i++)
+   //   for(S32 i = 0; i < mSpyBugs.size(); ++i)
    //      fillVector.push_back(mSpyBugs[i]);
    //   return;
    //}
 
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          fillVector.push_back(mAllObjects[i]);
 }
@@ -386,10 +388,10 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 {
    TNLAssert(this, "findObjects 'this' is NULL");
    if(!sameQuery)
-      mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+      ++mQueryId;    // Used to prevent the same item from being found in multiple buckets
 
-   for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
-      for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
+   for(S32 x = bins->minx; bins->maxx - x >= 0; ++x)
+      for(S32 y = bins->miny; bins->maxy - y >= 0; ++y)
          for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
@@ -408,7 +410,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 // Find all objects in database using derived type test function
 void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector) const
 {
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       if(testFunc(mAllObjects[i]->getObjectTypeNumber()))
          fillVector.push_back(mAllObjects[i]);
 }
@@ -427,7 +429,7 @@ void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *>
 // Find all objects in database using derived type test function
 void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector) const
 {
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       if(testTypes(types, mAllObjects[i]->getObjectTypeNumber()))
          fillVector.push_back(mAllObjects[i]);
 }
@@ -436,7 +438,7 @@ void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *>
 // Find first object in database with specified id; currently only used in tests
 BfObject *GridDatabase::findObjectById(S32 id) const
 {
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
    {
       BfObject *bfobj = dynamic_cast<BfObject*>(mAllObjects[i]);
 
@@ -450,7 +452,7 @@ BfObject *GridDatabase::findObjectById(S32 id) const
 
 bool GridDatabase::testTypes(const Vector<U8> &types, U8 objectType) const
 {
-   for(S32 i = 0; i < types.size(); i++)
+   for(S32 i = 0; i < types.size(); ++i)
       if(types[i] == objectType)
          return true;
 
@@ -470,8 +472,8 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 
 void GridDatabase::dumpObjects()
 {
-   for(S32 x = 0; x < BucketRowCount; x++)
-      for(S32 y = 0; y < BucketRowCount; y++)
+   for(S32 x = 0; x < BucketRowCount; ++x)
+      for(S32 y = 0; y < BucketRowCount; ++y)
          for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
@@ -502,7 +504,7 @@ Rect GridDatabase::getExtents()
    S32 first = -1;
 
    // Look for first non-UnknownType object
-   for(S32 i = 0; i < mAllObjects.size() && first == -1; i++)
+   for(S32 i = 0; i < mAllObjects.size() && first == -1; ++i)
       if(mAllObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
       {
          rect = mAllObjects[i]->getExtent();
@@ -520,7 +522,7 @@ Rect GridDatabase::getExtents()
    rect = mAllObjects[0]->getExtent();
 
    // Now start unioning the extents of remaining objects.  Should be all of them.
-   for(S32 i = /*first + */1; i < mAllObjects.size(); i++)
+   for(S32 i = /*first + */1; i < mAllObjects.size(); ++i)
       rect.unionRect(mAllObjects[i]->getExtent());
 
    return rect;
@@ -603,7 +605,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
    Point center;
    Rect rect;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
@@ -665,7 +667,7 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
    Point center;
    Rect rect;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
@@ -735,13 +737,13 @@ void GridDatabase::computeSelectionMinMax(Point &min, Point &max)
    min.set( F32_MAX,  F32_MAX);
    max.set(-F32_MAX, -F32_MAX);
 
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
    {
       BfObject *obj = static_cast<BfObject *>(mAllObjects[i]);
 
       if(obj->isSelected())
       {
-         for(S32 j = 0; j < obj->getVertCount(); j++)
+         for(S32 j = 0; j < obj->getVertCount(); ++j)
          {
             Point v = obj->getVert(j);
 
@@ -789,7 +791,7 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
    if(typeNumber == SpyBugTypeNumber)
       return mSpyBugs.size() > 0;
 
-   for(S32 i = 0; i < mAllObjects.size(); i++)
+   for(S32 i = 0; i < mAllObjects.size(); ++i)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          return true;
 
@@ -948,8 +950,8 @@ void DatabaseObject::setExtent(const Rect &extents)
          }
 
          // ...and re-add for the new extent
-         for(S32 x = minx; maxx - x >= 0; x++)
-            for(S32 y = miny; maxy - y >= 0; y++)
+         for(S32 x = minx; maxx - x >= 0; ++x)
+            for(S32 y = miny; maxy - y >= 0; ++y)
             {
                DatabaseBucketEntry *be = gridDB->mChunker->alloc();
                DatabaseBucketEntryBase *base = &gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask];

@@ -152,7 +152,7 @@ void NetObject::collapseDirtyList()
       obj = next;
    }
    mDirtyList = NULL;
-   for(S32 i = 0; i < tempV.size(); i++)
+   for(S32 i = 0; i < tempV.size(); ++i)
    {
       TNLAssert(tempV[i]->mNextDirtyList == NULL && tempV[i]->mPrevDirtyList == NULL && tempV[i]->mDirtyMaskBits == 0, "Error in collapse");
    }

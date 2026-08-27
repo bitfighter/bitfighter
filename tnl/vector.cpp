@@ -35,7 +35,8 @@ bool VectorResize(U32 *aSize, U32 *aCount, void **arrayPtr, U32 newCount, U32 el
    if (newCount > 0) {
       U32 blocks = newCount / VectorBlockSize;
       if (newCount % VectorBlockSize)
-         blocks++;
+         ++blocks;
+
       S32 mem_size = blocks * VectorBlockSize * elemSize;
       *arrayPtr = *arrayPtr ? realloc(*arrayPtr,mem_size) :
          malloc(mem_size);

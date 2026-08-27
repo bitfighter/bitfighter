@@ -64,7 +64,7 @@ void RobotManager::balanceTeams()
    S32 totalFixedPlayers = 0;
    S32 largestFixedPlayerCount = 0;
 
-   for(S32 i = 0; i < botCounts.size(); i++)
+   for(S32 i = 0; i < botCounts.size(); ++i)
    {
       S32 kickablePlayers = botCounts[i][ClientInfo::ClassRobotAddedByAutoleveler];
       S32 fixedPlayers = (mGame->getTeam(i)->getPlayerBotCount() - kickablePlayers);
@@ -78,7 +78,7 @@ void RobotManager::balanceTeams()
    S32 playersNeededPerTeam = max(largestFixedPlayerCount, maxPlayersPerBalancedTeam);
 
    // Kick bots on any teams with more players than we need
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
    {
       Team *team = static_cast<Team *>(mGame->getTeam(i));
 
@@ -99,7 +99,7 @@ void RobotManager::balanceTeams()
       {
          Vector<const char *> noArgs;
 
-         for(S32 j = teamSize; j < playersNeededPerTeam; j++)
+         for(S32 j = teamSize; j < playersNeededPerTeam; ++j)
             addBot(noArgs, ClientInfo::ClassRobotAddedByAutoleveler, i);
       }
    }
@@ -166,7 +166,7 @@ S32 RobotManager::getBotCount() const
 // Find bot from its id (static)
 Robot *RobotManager::findBot(const char *id)
 {
-   for(S32 i = 0; i < mRobots.size(); i++)
+   for(S32 i = 0; i < mRobots.size(); ++i)
       if(strcmp(mRobots[i]->getScriptId(), id) == 0)
          return mRobots[i];
 
@@ -184,7 +184,7 @@ void RobotManager::addBot(Robot *robot)
 // Remove this robot from the list of bots; does not delete it (only called from Robot destructor)
 void RobotManager::removeBot(Robot *robot)
 {
-   for(S32 i = 0; i < mRobots.size(); i++)
+   for(S32 i = 0; i < mRobots.size(); ++i)
    if(mRobots[i] == robot)
    {
       mRobots.erase_fast(i);
@@ -196,7 +196,7 @@ void RobotManager::removeBot(Robot *robot)
 // Delete bot by index
 void RobotManager::deleteBot(const StringTableEntry &name)
 {
-   for(S32 i = 0; i < mRobots.size(); i++)
+   for(S32 i = 0; i < mRobots.size(); ++i)
    if(mRobots[i]->getClientInfo()->getName() == name)
       deleteBot(i);
 }
@@ -218,7 +218,7 @@ void RobotManager::moreBots()
    // Find largest team player count
    S32 largestTeamCount = 0;
 
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
    {
       S32 currentCount = mGame->getTeam(i)->getPlayerBotCount();
 
@@ -230,7 +230,7 @@ void RobotManager::moreBots()
    // add bots until all teams are even.
    S32 neededBotCount = 0;
 
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
    {
       Team *team = static_cast<Team *>(mGame->getTeam(i));
       if(team->getPlayerBotCount() < largestTeamCount)
@@ -239,12 +239,12 @@ void RobotManager::moreBots()
 
    // If teams all have the same number of players, neededBotCount will be 0 ==> add a bot to each team
    if(neededBotCount == 0)
-      for(S32 i = 0; i < teamCount; i++)
+      for(S32 i = 0; i < teamCount; ++i)
          addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
 
    // Otherwise, add neededBotCount bots to bring all the teams up to the same number of players as on the biggest team
    else
-      for(S32 i = 0; i < neededBotCount; i++)
+      for(S32 i = 0; i < neededBotCount; ++i)
          addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
    mAutoLevelTeams = true;
    mManagerActive = true;
@@ -271,7 +271,7 @@ void RobotManager::fewerBots()
    TNLAssert(targetPlayerCount >= 0, "Negative players makes no sense!");
 
    // Scan the teams -- any teams with a bot and more players than targetPlayerCount will lose bots
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
    {
       // Determine how many bots we can remove from this team if it has more players than the smallest team
       S32 botsToKick = mGame->getTeam(i)->getPlayerBotCount() - targetPlayerCount;
@@ -309,7 +309,7 @@ void RobotManager::printTeams(Game *game, const string &message)
 
    string teamDescr = "";
 
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teams; ++i)
    {
       AbstractTeam *team = game->getTeam(i);
       teamDescr += string(team->getPlayerCount(), 'H');
@@ -332,7 +332,8 @@ void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
    while(botsToKick > 0)
    {
       if(deleteBotFromTeam(teamIndex, ClientInfo::ClassRobotAddedByAutoleveler))
-         botsToKick--;
+         --botsToKick;
+
       else
          break;
    }
@@ -341,7 +342,8 @@ void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
    while(botsToKick > 0)
    {
       if(deleteBotFromTeam(teamIndex, ClientInfo::ClassRobotAddedByAddbots))
-         botsToKick--;
+         --botsToKick;
+
       else
          break;
    }
@@ -350,7 +352,8 @@ void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
    while(botsToKick > 0)
    {
       if(deleteBotFromTeam(teamIndex, ClientInfo::ClassAnyBot))
-         botsToKick--;
+         --botsToKick;
+
       else
          break;
    }
@@ -362,7 +365,7 @@ void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
 // Returns true if it found a bot to delete
 bool RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass)
 {
-   for(S32 i = 0; i < mRobots.size(); i++)
+   for(S32 i = 0; i < mRobots.size(); ++i)
       if(mRobots[i]->getTeam() == teamIndex && (mRobots[i]->getClientInfo()->getClientClass() == botClass ||
                                                 botClass == ClientInfo::ClassAnyBot))
       {
@@ -382,7 +385,7 @@ bool RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botC
 // Get here when player issues /kickbots command, or when they choose REMOVE ALL ROBOTS from the game menu
 void RobotManager::deleteAllBots()
 {
-   for(S32 i = mRobots.size() - 1; i >= 0; i--)
+   for(S32 i = mRobots.size() - 1; i >= 0; --i)
       deleteBot(i);
 
    mManagerActive = false;
@@ -392,7 +395,7 @@ void RobotManager::deleteAllBots()
 
 void RobotManager::clearMoves()
 {
-   for(S32 i = 0; i < mRobots.size(); i++)
+   for(S32 i = 0; i < mRobots.size(); ++i)
       mRobots[i]->clearMove();
 }
 

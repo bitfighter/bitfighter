@@ -156,7 +156,7 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
       moveItemFromQueueToActiveList(game);
 
    // Expire displayed items
-   for(S32 i = 0; i < mHelpTimer.size(); i++)
+   for(S32 i = 0; i < mHelpTimer.size(); ++i)
    {
       if(!mHelpTimer[i].update(timeDelta))
          continue;
@@ -168,7 +168,8 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
          mHelpTimer.erase(i);
 
          buildItemsToHighlightList();
-         i--;
+         --i;
+
       }
 
       else                 // Display period over... enter rollup mode
@@ -196,7 +197,8 @@ S32 HelpItemManager::getLinesInHelpItem(S32 index) const
 {
    S32 lines = 0;
    while(helpItems[mHelpItems[index]].helpMessages[lines])
-      lines++;
+      ++lines;
+
 
    return lines;
 }
@@ -233,7 +235,8 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
       // Handle special case -- want to suppress, but not delete, this item if there are bots in the game
       if(items->get(itemToShow).helpItem == AddBotsItem && game->getBotCount() > 0)
       {
-         itemToShow += 1;
+         ++itemToShow;
+
          continue;
       }
 
@@ -354,7 +357,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
    S32 yOffset = 0;
 
    // Final item in messages array will be NULL; loop until we hit that
-   for(S32 i = 0; messages[i]; i++)
+   for(S32 i = 0; messages[i]; ++i)
    {
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
 
@@ -367,7 +370,8 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       maxw = max(maxw, w);
 
       yOffset += FontSize + FontGap;
-      lines++;
+      ++lines;
+
    }
 
    S32 leftPos = (S32)xPos - maxw / 2;
@@ -415,7 +419,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 
    FontManager::pushFontContext(HelpItemContext);
 
-   for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
+   for(S32 i = 0; i < mHelpItems.size(); ++i)      // Iterate over each message being displayed
    {
       r.setColor(Colors::HelpItemRenderColor, alpha);
 
@@ -443,7 +447,8 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 #ifdef TNL_DEBUG
 void HelpItemManager::debugShowNextSampleHelpItem()
 {
-   mTestingCtr++;
+   ++mTestingCtr;
+
    mTestingTimer.reset();
 }
 
@@ -452,7 +457,7 @@ void HelpItemManager::debugAdvanceHelpItem()
 {
    mInitialDelayTimer.clear();
 
-   for(S32 i = 0; i < mHelpTimer.size(); i++)
+   for(S32 i = 0; i < mHelpTimer.size(); ++i)
       mHelpTimer[i].update(mHelpTimer[i].getCurrent() - 1);
 
    mPacedTimer.update(mPacedTimer.getCurrent() - 1);
@@ -503,7 +508,7 @@ void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 we
       Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems :
                                                                                 &mLowPriorityQueuedItems;
       S32 index = -1;
-      for(S32 i = 0; i < queue->size(); i++)
+      for(S32 i = 0; i < queue->size(); ++i)
          if(queue->get(i).helpItem == item)
          {
             index = i;
@@ -530,7 +535,7 @@ F32 HelpItemManager::getObjectiveArrowHighlightAlpha() const
 
    F32 alpha = 0;
 
-   for(S32 i = 0; i < mHelpItems.size(); i++)
+   for(S32 i = 0; i < mHelpItems.size(); ++i)
       if(helpItems[mHelpItems[i]].highlightObjectiveArrows)
          alpha = max(alpha, mHelpFading[i] ? mHelpTimer[i].getFraction() : 1);
 
@@ -631,7 +636,7 @@ void HelpItemManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playe
       return;
 
    // Figure out which help item to show for this object
-   for(S32 i = 0; i < HelpItemCount; i++)
+   for(S32 i = 0; i < HelpItemCount; ++i)
       if(helpItems[i].associatedObjectTypeNumber == objectType && checkWhose(helpItems[i].whose, objectTeam, playerTeam))
       {
          addInlineHelpItem(HelpItem(i));
@@ -758,7 +763,7 @@ void HelpItemManager::removeGameStartItemsFromQueue()
 // Only called from an assert
 bool HelpItemManager::queueHasGameStartItems() const
 {
-   for(S32 i = 0; i < mHighPriorityQueuedItems.size(); i++)
+   for(S32 i = 0; i < mHighPriorityQueuedItems.size(); ++i)
       if(helpItems[mHighPriorityQueuedItems[0].helpItem].priority == GameStart)
          return true;
 
@@ -776,7 +781,7 @@ void HelpItemManager::buildItemsToHighlightList()
 {
    mItemsToHighlight.clear();
 
-   for(S32 i = 0; i < mHelpItems.size(); i++)
+   for(S32 i = 0; i < mHelpItems.size(); ++i)
    {
       U8 itemType = helpItems[mHelpItems[i]].associatedObjectTypeNumber;
 

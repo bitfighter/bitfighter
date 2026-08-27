@@ -35,21 +35,24 @@ Statistics::~Statistics()
 void Statistics::countShot(WeaponType weaponType)
 {
    TNLAssert(weaponType < WeaponCount, "Out of range");
-   mShots[(S32) weaponType]++;
+   ++mShots[(S32) weaponType];
+
 }
 
 
 void Statistics::countHit(WeaponType weaponType)
 {
    TNLAssert(weaponType < WeaponCount, "Out of range");
-   mHits[(S32) weaponType]++;
+   ++mHits[(S32) weaponType];
+
 }
 
 
 void Statistics::countHitBy(WeaponType weaponType)
 {
    TNLAssert(weaponType < WeaponCount, "Out of range");
-   mHitBy[(S32) weaponType]++;
+   ++mHitBy[(S32) weaponType];
+
 }
 
 
@@ -57,7 +60,7 @@ S32 Statistics::getShots()
 {
    S32 totalShots = 0;
 
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
       totalShots += mShots[i];
 
    return totalShots;
@@ -74,7 +77,7 @@ Vector<U32> Statistics::getShotsVector()
 {
    Vector<U32>(shots);
    shots.resize(WeaponCount);
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
       shots[i] = mShots[i];
    return shots;
 }
@@ -84,7 +87,7 @@ Vector<U32> Statistics::getHitsVector()
 {
    Vector<U32>(hits);
    hits.resize(WeaponCount);
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
       hits[i] = mHits[i];
    return hits;
 }
@@ -94,7 +97,7 @@ S32 Statistics::getHits()
 {
    S32 totalHits = 0;
 
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
       totalHits += mHits[i];
 
    return totalHits;
@@ -148,15 +151,18 @@ U32 Statistics::getModuleUsed(ShipModule module)
 
 void Statistics::addGamePlayed()
 {
-   mGamesPlayed++;
+   ++mGamesPlayed;
+
 }
 
 
 // Player killed another player
 void Statistics::addKill(U32 killStreak)
 {
-   mKills++;
-   mTotalKills++;
+   ++mKills;
+
+   ++mTotalKills;
+
    mLongestKillStreak = MAX(killStreak, mLongestKillStreak);
 }
 
@@ -171,8 +177,10 @@ U32 Statistics::getKills()
 // Player got killed
 void Statistics::addDeath()
 {
-   mDeaths++;
-   mTotalDeaths++;
+   ++mDeaths;
+
+   ++mTotalDeaths;
+
 }
 
 
@@ -192,8 +200,10 @@ U32 Statistics::getLongestKillStreak() const
 // Player killed self
 void Statistics::addSuicide()
 {
-   mSuicides++;
-   mTotalSuicides++;
+   ++mSuicides;
+
+   ++mTotalSuicides;
+
 }
 
 
@@ -207,8 +217,10 @@ U32 Statistics::getSuicides()
 // Player killed teammate
 void Statistics::addFratricide()
 {
-   mFratricides++;
-   mTotalFratricides++;
+   ++mFratricides;
+
+   ++mTotalFratricides;
+
 }
 
 
@@ -282,14 +294,14 @@ void Statistics::resetStatistics()
    mFratricides = 0;
    mDist = 0;
 
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
    {
       mShots[i] = 0;
       mHits[i] = 0;
       mHitBy[i] = 0;
    }
 
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
       mModuleUsedTime[i] = 0;
 
    mLoadouts.clear();

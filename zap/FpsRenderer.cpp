@@ -39,7 +39,7 @@ FpsRenderer::FpsRenderer(ClientGame *game)
 
    mFrameIndex = 0;
 
-   for(S32 i = 0; i < FPS_AVG_COUNT; i++)
+   for(S32 i = 0; i < FPS_AVG_COUNT; ++i)
    {
       mIdleTimeDelta[i] = 50;
       mPing[i] = 100;
@@ -64,7 +64,7 @@ void FpsRenderer::idle(U32 timeDelta)
       {
          U32 sum = 0, sumping = 0;
 
-         for(S32 i = 0; i < FPS_AVG_COUNT; i++)
+         for(S32 i = 0; i < FPS_AVG_COUNT; ++i)
          {
             sum += mIdleTimeDelta[i];
             sumping += mPing[i];
@@ -85,7 +85,8 @@ void FpsRenderer::idle(U32 timeDelta)
    if(mGame->getConnectionToServer())
       mPing[index] = (U32)mGame->getConnectionToServer()->getRoundTripTime();
 
-   mFrameIndex++;
+   ++mFrameIndex;
+
 }
 
 
@@ -111,7 +112,7 @@ void FpsRenderer::render(S32 canvasWidth) const
       // Count wall vertices visible on screen as a measure of geometry complexity.
       // On the client, walls arrive as tiled WallPoly fragments, not Barrier objects.
       const Vector<WallPoly> &tilePolys = GameType::getTilePolys();
-      for(S32 i = 0; i < tilePolys.size(); i++)
+      for(S32 i = 0; i < tilePolys.size(); ++i)
       {
          const WallPoly &wp = tilePolys[i];
          U32 nv = wp.numVerts();

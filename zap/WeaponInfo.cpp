@@ -61,7 +61,7 @@ WeaponType WeaponInfo::getWeaponTypeFromObject(BfObject *bfObject)
 WeaponType WeaponInfo::getWeaponTypeFromString(const char *name)
 {
    // String compares the given name with a WeaponType name (case-insensitive)
-   for(U32 w = 0; w < WeaponCount; w++)
+   for(U32 w = 0; w < WeaponCount; ++w)
       if(stricmp(weaponInfo[w].name.getString(), name) == 0)
          return (WeaponType) w;
 

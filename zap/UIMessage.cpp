@@ -48,7 +48,7 @@ void MessageUserInterface::reset()
    mVertOffset = 0;
    mBox = true;
 
-   for(S32 i = 0; i < mNumLines; i++)
+   for(S32 i = 0; i < mNumLines; ++i)
       mMessage[i] = (char*)"";
 }
 
@@ -159,7 +159,7 @@ void MessageUserInterface::render()
    if(strcmp(mTitle, ""))  // If they are different
       drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
 
-   for(S32 i = 0; i < mNumLines; i++)
+   for(S32 i = 0; i < mNumLines; ++i)
       drawCenteredString(vertMargin + 40 + hInset + i * 24 + mVertOffset, 18, mMessage[i]);
 
    if (!mFadeTime)

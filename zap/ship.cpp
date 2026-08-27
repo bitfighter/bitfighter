@@ -94,7 +94,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mEngineeredTeleporter = NULL;
 
    // Set up module secondary delay timer
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
       mModuleSecondaryTimer[i].setPeriod(ModuleSecondaryTimerDelay);
 
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
@@ -105,7 +105,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mNetFlags.set(Ghostable);
 
 #ifndef ZAP_DEDICATED
-   for(U32 i = 0; i < TrailCount; i++)
+   for(U32 i = 0; i < TrailCount; ++i)
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 #endif
 
@@ -166,7 +166,7 @@ bool Ship::isServerCopyOf(const Ship &clientShip) const
     if(mMountedItems.size() != clientShip.mMountedItems.size())
        return false;
 
-    for(S32 i = 0; i < mMountedItems.size(); i++)
+    for(S32 i = 0; i < mMountedItems.size(); ++i)
        if(mMountedItems[i]->getObjectTypeNumber() != clientShip.mMountedItems[i]->getObjectTypeNumber())
           return false;
 
@@ -190,7 +190,7 @@ void Ship::initialize(const Point &pos)
    mHasExploded = false; // Haven't exploded yet!
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
+   for(S32 i = 0; i < TrailCount; ++i)          // Clear any vehicle trails
       mTrail[i].reset();
 #endif
 
@@ -211,7 +211,7 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
    Point pos;
    pos.read(argv + 1);
    pos *= game->getLegacyGridSize();
-   for(U32 i = 0; i < MoveStateCount; i++)
+   for(U32 i = 0; i < MoveStateCount; ++i)
    {
       setPos(i, pos);
       setAngle(i, 0);
@@ -370,7 +370,7 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
 
    // Extents overlap...  now check for actual overlap
 
-   for(S32 i = 0; i < objects.size(); i++)
+   for(S32 i = 0; i < objects.size(); ++i)
    {
       BfObject *zone = static_cast<BfObject *>(objects[i]);
 
@@ -393,7 +393,7 @@ DatabaseObject *Ship::isOnObject(U8 objectType, U32 stateIndex)
       return NULL;
 
    // Return first actually overlapping object on our candidate list
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
       if(isOnObject(static_cast<BfObject *>(fillVector[i]), ActualState))
          return fillVector[i];
 
@@ -531,7 +531,7 @@ void Ship::controlMoveReplayComplete()
 #ifndef ZAP_DEDICATED
       // If it's a large delta, get rid of the movement trails
       if(deltaLenSq > sq(MaxControlObjectInterpDistance))
-         for(S32 i = 0; i < TrailCount; i++)
+         for(S32 i = 0; i < TrailCount; ++i)
             mTrail[i].reset();
 #endif
 
@@ -729,7 +729,7 @@ void Ship::findRepairTargets()
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);   // All isWithHealthType objects are items
 
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); ++i)
    {
       BfObject *item = static_cast<BfObject*>(foundObjects[i]);
 
@@ -783,7 +783,7 @@ void Ship::repairTargets()
    di.damagingObject = this;
    di.damageType = DamageTypePoint;
 
-   for(S32 i = 0; i < mRepairTargets.size(); i++)
+   for(S32 i = 0; i < mRepairTargets.size(); ++i)
       mRepairTargets[i]->damageObject(&di);
 }
 
@@ -791,7 +791,7 @@ void Ship::repairTargets()
 void Ship::processModules()
 {
    // Update some timers
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
       mModuleSecondaryTimer[i].update(mCurrentMove.time);
 
    mSpyBugPlacementTimer.update(mCurrentMove.time);
@@ -800,7 +800,7 @@ void Ship::processModules()
    bool wasModulePrimaryActive[ModuleCount];
    bool wasModuleSecondaryActive[ModuleCount];
 
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
    {
       wasModulePrimaryActive[i]   = mLoadout.isModulePrimaryActive(ShipModule(i));
       wasModuleSecondaryActive[i] = mLoadout.isModuleSecondaryActive(ShipModule(i));
@@ -810,7 +810,7 @@ void Ship::processModules()
 
    // Go through our loaded modules and see if they are currently turned on
    // Are these checked on the server side?
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
       if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
@@ -857,7 +857,7 @@ void Ship::processModules()
 
       //   if(fillVector.size() > 0)
       //   {
-      //      for(S32 i=0; i<fillVector.size(); i++)
+      //      for(S32 i=0; i<fillVector.size(); ++i)
       //      {
       //         Ship *s = dynamic_cast<Ship *>(fillVector[i]);
 
@@ -879,7 +879,7 @@ void Ship::processModules()
    S32 primaryActivationCount = 0;
 
    // Update things based on available energy...
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)))
       {
@@ -889,7 +889,8 @@ void Ship::processModules()
 
          // Exclude passive modules
          if(energyUsed != 0)
-            primaryActivationCount += 1;
+            ++primaryActivationCount;
+
 
          if(getClientInfo())
             getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
@@ -956,7 +957,7 @@ void Ship::processModules()
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
    // Do logic triggered when module primary component state changes
-   for(S32 i = 0; i < ModuleCount;i++)
+   for(S32 i = 0; i < ModuleCount;++i)
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)) != wasModulePrimaryActive[i])
       {
@@ -968,7 +969,7 @@ void Ship::processModules()
    }
 
    // Do logic triggered when module secondary component state changes
-   for(U32 i = 0; i < ModuleCount;i++)
+   for(U32 i = 0; i < ModuleCount;++i)
    {
       if(mLoadout.isModuleSecondaryActive(ShipModule(i)) != wasModuleSecondaryActive[i])
       {
@@ -1234,7 +1235,7 @@ void Ship::updateModuleSounds()
       SFXNone,       // Armor... tough, but he don't say much
    };
 
-   for(U32 i = 0; i < ModuleCount; i++)
+   for(U32 i = 0; i < ModuleCount; ++i)
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
       {
@@ -1261,7 +1262,7 @@ static U32 MaxFireDelay = 0;
 // static method, only run during init on both client and server
 void Ship::computeMaxFireDelay()
 {
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
       if(WeaponInfo::getWeaponInfo(WeaponType(i)).fireDelay > MaxFireDelay)
          MaxFireDelay = WeaponInfo::getWeaponInfo(WeaponType(i)).fireDelay;
 }
@@ -1360,7 +1361,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeStringTableEntry(getClientInfo() ? getClientInfo()->getName() : StringTableEntry());
 
       // Now write all the mounts:
-      for(S32 i = 0; i < mMountedItems.size(); i++)
+      for(S32 i = 0; i < mMountedItems.size(); ++i)
       {
          if(mMountedItems[i].isValid())
          {
@@ -1380,10 +1381,10 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(stream->writeFlag(updateMask & LoadoutMask))       // Loadout configuration
    {
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
          stream->writeEnum(mLoadout.getModule(i), ModuleCount);
 
-      for(S32 i = 0; i < ShipWeaponCount; i++)
+      for(S32 i = 0; i < ShipWeaponCount; ++i)
          stream->writeEnum(mLoadout.getWeapon(i), WeaponCount);
    }
 
@@ -1433,12 +1434,12 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
       // If a module primary component is detected as on, pack it
       if(stream->writeFlag(updateMask & ModulePrimaryMask))    // <=== THREE
-         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active (primary)
+         for(S32 i = 0; i < ModuleCount; ++i)                  // Send info about which modules are active (primary)
             stream->writeFlag(mLoadout.isModulePrimaryActive(ShipModule(i)));
 
       // If a module secondary component is detected as on, pack it
       if(stream->writeFlag(updateMask & ModuleSecondaryMask))  // <=== FOUR
-         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active (secondary)
+         for(S32 i = 0; i < ModuleCount; ++i)                  // Send info about which modules are active (secondary)
             stream->writeFlag(mLoadout.isModuleSecondaryActive(ShipModule(i)));
    }
 
@@ -1513,7 +1514,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       bool hasSensorNow = false;
       bool hasEngineerModule = false;
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
       {
          // Check old loadout for sensor
          if(mLoadout.getModule(i) == ModuleSensor)
@@ -1534,7 +1535,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
          mSensorEquipZoomTimer.reset();
 
-      for(S32 i = 0; i < ShipWeaponCount; i++)
+      for(S32 i = 0; i < ShipWeaponCount; ++i)
          mLoadout.setWeapon(i, (WeaponType) stream->readEnum(WeaponCount));
 
       // Notify the user interface (via the ClientGame object) about some things that may have changed.
@@ -1623,7 +1624,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // ModulePrimaryMask
    {
       bool wasPrimaryActive[ModuleCount];
-      for(S32 i = 0; i < ModuleCount; i++)
+      for(S32 i = 0; i < ModuleCount; ++i)
       {
          wasPrimaryActive[i] = mLoadout.isModulePrimaryActive(ShipModule(i));
          mLoadout.setModulePrimary(ShipModule(i), stream->readFlag());
@@ -1638,7 +1639,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    if(stream->readFlag())     // ModuleSecondaryMask
-      for(S32 i = 0; i < ModuleCount; i++)
+      for(S32 i = 0; i < ModuleCount; ++i)
          mLoadout.setModuleSecondary(ShipModule(i), stream->readFlag());
 
    setActualAngle(mCurrentMove.angle);
@@ -1655,7 +1656,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mInterpolating = false;
       copyMoveState(ActualState, RenderState);
 
-      for(S32 i = 0; i < TrailCount; i++)
+      for(S32 i = 0; i < TrailCount; ++i)
          mTrail[i].reset();
    }
    else
@@ -1708,7 +1709,7 @@ void Ship::updateInterpolation()
    Parent::updateInterpolation();
 
    // Update position of any mounted items
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->setRenderPos(getRenderPos());
 }
@@ -1732,7 +1733,7 @@ bool Ship::isVisible(bool viewerHasSensor)
    if(viewerHasSensor || !mLoadout.isModulePrimaryActive(ModuleCloak))
       return true;
 
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i].isValid() && mMountedItems[i]->isItemThatMakesYouVisibleWhileCloaked())
          return true;
 
@@ -1743,7 +1744,7 @@ bool Ship::isVisible(bool viewerHasSensor)
 // Returns index of first flag mounted on ship, or NO_FLAG if there aren't any
 S32 Ship::getFlagIndex()
 {
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
          return i;
    return GameType::NO_FLAG;
@@ -1753,7 +1754,7 @@ S32 Ship::getFlagIndex()
 S32 Ship::getFlagCount()
 {
    S32 count = 0;
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
       {
          FlagItem *flag = static_cast<FlagItem *>(mMountedItems[i].getPointer());
@@ -1765,7 +1766,7 @@ S32 Ship::getFlagCount()
 
 bool Ship::isCarryingItem(U8 objectType) const
 {
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = mMountedItems.size() - 1; i >= 0; --i)
       if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeNumber() == objectType)
          return true;
 
@@ -1776,7 +1777,7 @@ bool Ship::isCarryingItem(U8 objectType) const
 // Dismounts first object found of specified type, and returns the object.  If no objects of specified type found, will return NULL.
 MountableItem *Ship::dismountFirst(U8 objectType)
 {
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = mMountedItems.size() - 1; i >= 0; --i)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
@@ -1792,7 +1793,7 @@ MountableItem *Ship::dismountFirst(U8 objectType)
 void Ship::dismountAll()
 {
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = mMountedItems.size() - 1; i >= 0; --i)
       if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
          mMountedItems[i]->dismount(DISMOUNT_MOUNT_WAS_KILLED);
 }
@@ -1801,7 +1802,7 @@ void Ship::dismountAll()
 // Dismount all objects of specified type.  Currently only used when loadout no longer includes engineer and ship drops all ResourceItems.
 void Ship::dismountAll(U8 objectType)
 {
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = mMountedItems.size() - 1; i >= 0; --i)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
          mMountedItems[i]->dismount(DISMOUNT_NORMAL);
 }
@@ -1950,7 +1951,7 @@ void Ship::kill()
 
       getZonesObjectIsIn(zoneList);
 
-      for(S32 i = 0; i < zoneList.size(); i++)
+      for(S32 i = 0; i < zoneList.size(); ++i)
          EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList[i].getPointer()));
    }
 
@@ -2020,7 +2021,7 @@ void Ship::emitMovementSparks()
    Vector<Point> shipDirs;
    shipDirs.resize(cornerCount);
 
-   for(S32 i = 0; i < cornerCount; i++)
+   for(S32 i = 0; i < cornerCount; ++i)
       corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
 
    F32 th = FloatHalfPi - getRenderAngle();
@@ -2029,7 +2030,7 @@ void Ship::emitMovementSparks()
    F32 cosTh = cos(th);
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
-   for(S32 i = 0; i < cornerCount; i++)
+   for(S32 i = 0; i < cornerCount; ++i)
    {
       shipDirs[i].x = corners[i].x * cosTh + corners[i].y * sinTh;
       shipDirs[i].y = corners[i].y * cosTh - corners[i].x * sinTh;
@@ -2046,7 +2047,7 @@ void Ship::emitMovementSparks()
    F32 bestDot = leftVec.dot(shipDirs[0]);
 
    // Find the left-wards match
-   for(S32 i = 1; i < cornerCount; i++)
+   for(S32 i = 1; i < cornerCount; ++i)
    {
       F32 d = leftVec.dot(shipDirs[i]);
       if(d >= bestDot)
@@ -2063,7 +2064,7 @@ void Ship::emitMovementSparks()
    bestId = 0;
    bestDot = rightVec.dot(shipDirs[0]);
 
-   for(S32 i = 1; i < cornerCount; i++)
+   for(S32 i = 1; i < cornerCount; ++i)
    {
       F32 d = rightVec.dot(shipDirs[i]);
       if(d >= bestDot)
@@ -2130,7 +2131,7 @@ void Ship::emitMovementSparks()
       shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
 
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < 4; ++i)
       {
          F32 th = shipDirs[i].dot(velDir);
 
@@ -2166,7 +2167,7 @@ void Ship::emitMovementSparks()
 void Ship::updateTrails()
 {
 #ifndef ZAP_DEDICATED
-   for(U32 i = 0; i < TrailCount; i++)
+   for(U32 i = 0; i < TrailCount; ++i)
       mTrail[i].idle(mCurrentMove.time);
 #endif
 }
@@ -2236,7 +2237,7 @@ void Ship::renderLayer(S32 layerIndex)
       renderShipRepairRays(getRenderPos(), this, mRepairTargets, alpha);
 
    // Render mounted items
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItemAlpha(getRenderPos(), alpha);
 #endif
@@ -2346,7 +2347,7 @@ void Ship::addMountedItem(MountableItem *item)
 // Supposes mountedItems are not repeated, and list is unordered
 void Ship::removeMountedItem(MountableItem *item)
 {
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
       if(mMountedItems[i] == item)
       {
          mMountedItems.erase_fast(i);
@@ -2608,7 +2609,7 @@ S32 Ship::lua_getMountedItems(lua_State *L)
    Vector<BfObject *> tempVector;
 
    // Loop through all the mounted items
-   for(S32 i = 0; i < mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); ++i)
    {
       // Add every item to the list if no arguments were specified
       if(!hasArgs)
@@ -2628,7 +2629,8 @@ S32 Ship::lua_getMountedItems(lua_State *L)
                break;
             }
 
-            index++;
+            ++index;
+
          }
       }
    }
@@ -2640,10 +2642,10 @@ S32 Ship::lua_getMountedItems(lua_State *L)
    // Now push all found items back to LUA
    S32 pushed = 0;      // Count of items actually pushed onto the stack
 
-   for(S32 i = 0; i < tempVector.size(); i++)
+   for(S32 i = 0; i < tempVector.size(); ++i)
    {
       tempVector[i]->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
@@ -2669,7 +2671,7 @@ S32 Ship::lua_getLoadout(lua_State *L)
    lua_createtable(L, ShipModuleCount + ShipWeaponCount, 0);
 
    // Add current modules and weapons to the table
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; ++i)
    {
       // Modules
       if(i < ShipModuleCount)
@@ -2708,7 +2710,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
    // 5 parameters all integers, the argument list check guarantees 5 params here
    else
    {
-      for(S32 i = 0; i < expectedSize; i++)
+      for(S32 i = 0; i < expectedSize; ++i)
          loadoutValues.push_back(getInt2<S32>(L, i + 1));
    }
 
@@ -2720,7 +2722,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
    // Now we verify and build up our loadout
    S32 moduleCount = 0;
    S32 weaponCount = 0;
-   for(S32 i = 0; i < expectedSize; i++)
+   for(S32 i = 0; i < expectedSize; ++i)
    {
       S32 value = loadoutValues[i];
 
@@ -2731,7 +2733,8 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
             THROW_LUA_EXCEPTION(L, string("Too many weapons!  You must provide exactly " + itos(ShipWeaponCount) + " weapons.").c_str());
 
          loadout.setWeapon(weaponCount, WeaponType(value - ModuleCount));
-         weaponCount++;
+         ++weaponCount;
+
       }
       else
       {
@@ -2739,7 +2742,8 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
             THROW_LUA_EXCEPTION(L, string("Too many modules!  You must provide exactly " + itos(ShipModuleCount) + " modules.").c_str());
 
          loadout.setModule(moduleCount, ShipModule(value));
-         moduleCount++;
+         ++moduleCount;
+
       }
    }
 

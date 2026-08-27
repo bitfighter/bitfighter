@@ -1149,7 +1149,7 @@ const char* TiXmlDeclaration::Parse( const char* p, TiXmlParsingData* data )
 
 bool TiXmlText::Blank() const
 {
-	for ( unsigned i=0; i<value.length(); i++ )
+	for ( unsigned i=0; i<value.length(); ++i )
 		if ( !isspace( value[i] ) )
 			return false;
 	return true;

@@ -33,7 +33,7 @@ static void idleObjects(ClientGame *game, U32 timeDelta)
    const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
 
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   for(S32 i = gameObjects->size() - 1; i >= 0; --i)
    {
       BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
@@ -56,7 +56,7 @@ static void resetRenderState(ClientGame *game)
 {
    const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
 
-   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   for(S32 i = gameObjects->size() - 1; i >= 0; --i)
    {
       BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
@@ -157,7 +157,7 @@ void GameRecorderPlayback::addPendingMove(Move *theMove)
 void GameRecorderPlayback::changeSpectate(S32 n)
 {
    const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
-   for(S32 i = 0; i < infos.size(); i++)
+   for(S32 i = 0; i < infos.size(); ++i)
       if(infos[i].getPointer() == mClientInfoSpectating.getPointer())
       {
          n += i;
@@ -226,7 +226,8 @@ void GameRecorderPlayback::processMoreData(U32 MilliSeconds)
       {
          mPacketRecvBytesLast = mSizeToRead;
          mPacketRecvBytesTotal += mSizeToRead;
-         mPacketRecvCount++;
+         ++mPacketRecvCount;
+
 
          if(fread(data, 1, mSizeToRead, mFile) == mSizeToRead)
          {
@@ -307,7 +308,7 @@ void PlaybackSelectUserInterface::onActivate()
    else
       mLevels.sort(alphaNumberSort);
 
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = 0; i < mLevels.size(); ++i)
    {
       addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackSelectionCallback, ""));
    }
@@ -410,7 +411,7 @@ void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string>
 {
    mLevels = levels;
    clearMenuItems();
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = 0; i < mLevels.size(); ++i)
    {
       addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackDownloadCallback, ""));
    }

@@ -53,7 +53,7 @@ NetInterface::NetInterface(const Address &bindAddress) : mSocket(bindAddress)
    Random::read(mRandomHashData, sizeof(mRandomHashData));
 
    mConnectionHashTable.resize(129);
-   for(S32 i = 0; i < mConnectionHashTable.size(); i++)
+   for(S32 i = 0; i < mConnectionHashTable.size(); ++i)
       mConnectionHashTable[i] = NULL;
    mSendPacketList = NULL;
    mCurrentTime = Platform::getRealMilliseconds();
@@ -176,7 +176,7 @@ void NetInterface::addPendingConnection(NetConnection *connection)
 // Search the pending connection list for the specified connection and remove it
 void NetInterface::removePendingConnection(NetConnection *connection)
 {
-   for(S32 i = 0; i < mPendingConnections.size(); i++)
+   for(S32 i = 0; i < mPendingConnections.size(); ++i)
       if(mPendingConnections[i] == connection)
       {
          connection->decRef();
@@ -189,7 +189,7 @@ void NetInterface::removePendingConnection(NetConnection *connection)
 NetConnection *NetInterface::findPendingConnection(const Address &address)
 {
    // Loop through all the pending connections and compare the NetAddresses
-   for(S32 i = 0; i < mPendingConnections.size(); i++)
+   for(S32 i = 0; i < mPendingConnections.size(); ++i)
       if(address == mPendingConnections[i]->getNetAddress())
          return mPendingConnections[i];
    return NULL;
@@ -199,7 +199,7 @@ void NetInterface::findAndRemovePendingConnection(const Address &address)
 {
    // Search through the list by Address and remove any connection
    // that matches.
-   for(S32 i = 0; i < mPendingConnections.size(); i++)
+   for(S32 i = 0; i < mPendingConnections.size(); ++i)
       if(address == mPendingConnections[i]->getNetAddress())
       {
          mPendingConnections[i]->decRef();
@@ -227,7 +227,8 @@ NetConnection *NetInterface::findConnection(const Address &addr)
    {
       if(addr == mConnectionHashTable[hashIndex]->getNetAddress())
          return mConnectionHashTable[hashIndex];
-      hashIndex++;
+      ++hashIndex;
+
       if(hashIndex >= (U32) mConnectionHashTable.size())
          hashIndex = 0;
    }
@@ -236,7 +237,7 @@ NetConnection *NetInterface::findConnection(const Address &addr)
 
 void NetInterface::removeConnection(NetConnection *conn)
 {
-   for(S32 i = 0; i < mConnectionList.size(); i++)
+   for(S32 i = 0; i < mConnectionList.size(); ++i)
    {
       if(mConnectionList[i] == conn)
       {
@@ -249,7 +250,8 @@ void NetInterface::removeConnection(NetConnection *conn)
 
    while(mConnectionHashTable[index] != conn)
    {
-      index++;
+      ++index;
+
       if(index >= (U32) mConnectionHashTable.size())
          index = 0;
       TNLAssert(index != startIndex, "Attempting to remove a connection that is not in the table."); // not in the table
@@ -261,7 +263,8 @@ void NetInterface::removeConnection(NetConnection *conn)
    // rehash all subsequent entries until we find a NULL entry:
    for(;;)
    {
-      index++;
+      ++index;
+
       if(index >= (U32) mConnectionHashTable.size())
          index = 0;
       if(!mConnectionHashTable[index])
@@ -271,7 +274,8 @@ void NetInterface::removeConnection(NetConnection *conn)
       U32 realIndex = rehashConn->getNetAddress().hash() % mConnectionHashTable.size();
       while(mConnectionHashTable[realIndex] != NULL)
       {
-         realIndex++;
+         ++realIndex;
+
          if(realIndex >= (U32) mConnectionHashTable.size())
             realIndex = 0;
       }
@@ -290,15 +294,16 @@ void NetInterface::addConnection(NetConnection *conn)
    if(numConnections > mConnectionHashTable.size() / 2)
    {
       mConnectionHashTable.resize(numConnections * 4 - 1);
-      for(S32 i = 0; i < mConnectionHashTable.size(); i++)
+      for(S32 i = 0; i < mConnectionHashTable.size(); ++i)
          mConnectionHashTable[i] = NULL;
 
-      for(S32 i = 0; i < numConnections; i++)
+      for(S32 i = 0; i < numConnections; ++i)
       {
          U32 index = mConnectionList[i]->getNetAddress().hash() % mConnectionHashTable.size();
          while(mConnectionHashTable[index] != NULL)
          {
-            index++;
+            ++index;
+
             if(index >= (U32) mConnectionHashTable.size())
                index = 0;
          }
@@ -310,7 +315,8 @@ void NetInterface::addConnection(NetConnection *conn)
       U32 index = mConnectionList[numConnections - 1]->getNetAddress().hash() % mConnectionHashTable.size();
       while(mConnectionHashTable[index] != NULL)
       {
-         index++;
+         ++index;
+
          if(index >= (U32) mConnectionHashTable.size())
             index = 0;
       }
@@ -353,7 +359,7 @@ void NetInterface::processConnections()
    }
 
    NetObject::collapseDirtyList(); // collapse all the mask bits...
-   for(S32 i = 0; i < mConnectionList.size(); i++)
+   for(S32 i = 0; i < mConnectionList.size(); ++i)
       mConnectionList[i]->checkPacketSend(false, getCurrentTime());
 
    if(U32(getCurrentTime() - mLastTimeoutCheckTime) > TimeoutCheckInterval)
@@ -413,7 +419,8 @@ void NetInterface::processConnections()
             pending->onConnectTerminated(NetConnection::ReasonTimedOut, "Timeout");
             removePendingConnection(pending);
          }
-         i++;
+         ++i;
+
       }
       mLastTimeoutCheckTime = getCurrentTime();
 
@@ -426,12 +433,13 @@ void NetInterface::processConnections()
             removeConnection(mConnectionList[i]);
          }
          else
-            i++;
+            ++i;
+
       }
    }
 
    // check if we're trying to solve any client connection puzzles
-   for(S32 i = 0; i < mPendingConnections.size(); i++)
+   for(S32 i = 0; i < mPendingConnections.size(); ++i)
    {
       if(mPendingConnections[i]->getConnectionState() == NetConnection::ComputingPuzzleSolution)
       {
@@ -553,7 +561,8 @@ void NetInterface::sendConnectChallengeRequest(NetConnection *conn)
    out.writeFlag(params.mRequestKeyExchange);
    out.writeFlag(params.mRequestCertificate);
 
-   conn->mConnectSendCount++;
+   ++conn->mConnectSendCount;
+
    conn->mConnectLastSendTime = getCurrentTime();
    out.sendto(mSocket, conn->getNetAddress());
 }
@@ -730,7 +739,8 @@ void NetInterface::sendConnectRequest(NetConnection *conn)
       out.hashAndEncrypt(NetConnection::MessageSignatureBytes, encryptPos, &theCipher);
    }
 
-   conn->mConnectSendCount++;
+   ++conn->mConnectSendCount;
+
    conn->mConnectLastSendTime = getCurrentTime();
 
    out.sendto(mSocket, conn->getNetAddress());
@@ -1021,7 +1031,7 @@ void NetInterface::sendPunchPackets(NetConnection *conn)
    SymmetricCipher theCipher(theParams.mArrangedSecret);
    out.hashAndEncrypt(NetConnection::MessageSignatureBytes, encryptPos, &theCipher);
 
-   for(S32 i = 0; i < theParams.mPossibleAddresses.size(); i++)
+   for(S32 i = 0; i < theParams.mPossibleAddresses.size(); ++i)
    {
       out.sendto(mSocket, theParams.mPossibleAddresses[i]);
 
@@ -1030,7 +1040,8 @@ void NetInterface::sendPunchPackets(NetConnection *conn)
          ByteBuffer(theParams.mServerNonce.data, Nonce::NonceSize).encodeBase64()->getBuffer(),
          theParams.mPossibleAddresses[i].toString());
    }
-   conn->mConnectSendCount++;
+   ++conn->mConnectSendCount;
+
    conn->mConnectLastSendTime = getCurrentTime();
 }
 
@@ -1048,7 +1059,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
    U32 streamPos = stream->getBitPosition();
 
-   for(i = 0; i < mPendingConnections.size(); i++)
+   for(i = 0; i < mPendingConnections.size(); ++i)
    {
       conn = mPendingConnections[i];
       ConnectionParameters &theParams = conn->getConnectionParameters();
@@ -1062,7 +1073,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
       // first see if the address is in the possible addresses list:
 
-      for(j = 0; j < theParams.mPossibleAddresses.size(); j++)
+      for(j = 0; j < theParams.mPossibleAddresses.size(); ++j)
          if(theAddress == theParams.mPossibleAddresses[j])
             break;
 
@@ -1071,7 +1082,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
       // we'll want to send a punch to the address it came from, as long
       // as only the port is not an exact match:
       if(j == theParams.mPossibleAddresses.size())
-         for(j = 0; j < theParams.mPossibleAddresses.size(); j++)
+         for(j = 0; j < theParams.mPossibleAddresses.size(); ++j)
             if(theAddress.isEqualAddress(theParams.mPossibleAddresses[j]))
             {
                // as long as we don't have too many ping addresses,
@@ -1186,7 +1197,8 @@ void NetInterface::sendArrangedConnectRequest(NetConnection *conn)
    SymmetricCipher theCipher(theParams.mArrangedSecret);
    out.hashAndEncrypt(NetConnection::MessageSignatureBytes, encryptPos, &theCipher);
 
-   conn->mConnectSendCount++;
+   ++conn->mConnectSendCount;
+
    conn->mConnectLastSendTime = getCurrentTime();
 
    out.sendto(mSocket, conn->getNetAddress());
@@ -1216,7 +1228,7 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
       }
    }
 
-   for(i = 0; i < mPendingConnections.size(); i++)
+   for(i = 0; i < mPendingConnections.size(); ++i)
    {
       conn = mPendingConnections[i];
       ConnectionParameters &theParams = conn->getConnectionParameters();
@@ -1227,7 +1239,7 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
       if(nonce != theParams.mNonce)
          continue;
 
-      for(j = 0; j < theParams.mPossibleAddresses.size(); j++)
+      for(j = 0; j < theParams.mPossibleAddresses.size(); ++j)
          if(theAddress.isEqualAddress(theParams.mPossibleAddresses[j]))
             break;
       if(j != theParams.mPossibleAddresses.size())

@@ -185,7 +185,8 @@ int OGLCONSOLE_CreateFont()
 						*dst++ = 0;
 					}
 				}
-				src++;
+				++src;
+
 			}
 		}
 
@@ -373,7 +374,7 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
       if(oldLines)
       {
          int gLine;
-         for (gLine = 0; gLine < DEFAULT_MAX_LINES; gLine++)
+         for (gLine = 0; gLine < DEFAULT_MAX_LINES; ++gLine)
          {
             char * s = oldLines + (gLine * oldTextWidth);
             if(s != NULL && s[0] != 0)
@@ -598,12 +599,14 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         if(v < 0)
         {
             v ^= -1;
-            C->visibility++;
+            ++C->visibility;
+
         }
         else
         {
             v = SLIDE_STEPS - v;
-            C->visibility--;
+            --C->visibility;
+
         }
 
         d = C->textHeight * C->characterHeight * (1.0f - v * (1.0f / SLIDE_STEPS));
@@ -642,7 +645,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         int gLine, tLine = C->lineScrollIndex;
 
         /* Iterate through each line being displayed */
-        for (gLine = 0; gLine < C->textHeight; gLine++)
+        for (gLine = 0; gLine < C->textHeight; ++gLine)
         {
             /* Draw this line of text adjusting for user scrolling up/down */
             OGLCONSOLE_DrawString(
@@ -709,7 +712,8 @@ void OGLCONSOLE_DrawString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z)
     while (*s)
     {
         OGLCONSOLE_DrawCharacter(*s-FIRST_CHARACTER, x, y, w, h, z);
-        s++;
+        ++s;
+
         x += w;
     }
 }
@@ -724,7 +728,8 @@ void OGLCONSOLE_DrawWrapString(char *s, F32 x, F32 y, F32 w, F32 h,
     while (*s)
     {
         OGLCONSOLE_DrawCharacter(*s-FIRST_CHARACTER, X, y, w, h, z);
-        s++;
+        ++s;
+
         X += w;
 
         if(++pos >= wrap)
@@ -859,7 +864,8 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
          if(*outputCursor == '\n')
          {
              C->outputNewline = 1;
-             outputCursor++;
+             ++outputCursor;
+
              continue;
          }
 
@@ -877,7 +883,8 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
                  /* Switch on the console's newline bit, and advance through the
                   * string output we've been given */
                  C->outputNewline = 1;
-                 outputCursor++;
+                 ++outputCursor;
+
                  continue;
              }
 
@@ -886,7 +893,8 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
              {
                  n = TAB_WIDTH - n % TAB_WIDTH;
                  while (n--) *(consoleCursor++) = ' ';
-                 outputCursor++;
+                 ++outputCursor;
+
                  continue;
              }
          }
@@ -929,7 +937,8 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console C, char *s)
           blank = 0;
           break;
        }
-       i++;
+       ++i;
+
     }
 
     if(blank)
@@ -937,13 +946,15 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console C, char *s)
 
    strcpy(C->history[C->historyQueueIndex], s);      // strcpy(dest, src)
 
-    C->maxHistoryIndex++;
+    ++C->maxHistoryIndex;
+
 
     if(C->maxHistoryIndex >= MAX_HISTORY_COUNT)
         C->maxHistoryIndex = MAX_HISTORY_COUNT;
 
 
-    C->historyQueueIndex++;
+    ++C->historyQueueIndex;
+
 
     if(C->historyQueueIndex >= MAX_HISTORY_COUNT)
         C->historyQueueIndex = 0;
@@ -1063,7 +1074,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
                 /* This is all that differentiates the backspace from the delete
                  * key */
-                userConsole->inputCursorPos--;
+                --userConsole->inputCursorPos;
+
             }
 
             /* Delete key operations bail if the cursor is at the end of the
@@ -1079,7 +1091,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             while (c <= end)
             {
                 *c = *(c+1);
-                c++;
+                ++c;
+
             }
         }
 
@@ -1225,7 +1238,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         OGLCONSOLE_YankHistory(userConsole);
 
         if(userConsole->inputCursorPos > 0)
-            userConsole->inputCursorPos--;
+            --userConsole->inputCursorPos;
+
 
         return 1;
     }
@@ -1238,7 +1252,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
         if(userConsole->inputCursorPos <
             userConsole->inputLineLength)
-            userConsole->inputCursorPos++;
+            ++userConsole->inputCursorPos;
+
 
         return 1;
     }
@@ -1272,17 +1287,19 @@ int OGLCONSOLE_CharEvent(int unicode)
       d = userConsole->inputLine + userConsole->inputLineLength + 1;
 
       /* Slide some of the string to the right */
-      for (; d != c; d--)
+      for (; d != c; --d)
          *d = *(d-1);
 
       /* Insert new character */
       *c = (char)unicode;
 
       /* Increment input line length counter */
-      userConsole->inputLineLength++;
+      ++userConsole->inputLineLength;
+
 
       /* Advance input cursor position */
-      userConsole->inputCursorPos++;
+      ++userConsole->inputCursorPos;
+
    }
 
    return 1;

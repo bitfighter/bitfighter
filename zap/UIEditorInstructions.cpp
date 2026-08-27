@@ -251,7 +251,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    string tabstr = "[[TAB_STOP:200]]";
 
-   for(S32 i = 0; i < mPluginPageCount; i++)
+   for(S32 i = 0; i < mPluginPageCount; ++i)
    {
       UI::SymbolStringSet pluginSymbolSet(10);
 
@@ -274,7 +274,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
       S32 start = i + (PLUGINS_PER_PAGE * i);
       S32 end = MIN(i + (PLUGINS_PER_PAGE * (i + 1)), pluginInfos->size());
-      for(S32 j = start; j < end; j++)
+      for(S32 j = start; j < end; ++j)
       {
          string binding = pluginInfos->get(j).binding;
 
@@ -305,7 +305,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    TNLAssert(mPageHeaders.size() == NonPluginPageCount, "Wrong number of headers!");
 
-   for(S32 i = 0; i < mPluginPageCount; i++)
+   for(S32 i = 0; i < mPluginPageCount; ++i)
       mPageHeaders.push_back("PLUGINS PAGE " + itos(i+1));
 }
 
@@ -441,7 +441,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
       Vector<Vector<Point> > segmentData;
       barrierLineToSegmentData(points, segmentData);
 
-      for(S32 i = 0; i < segmentData.size(); i++)
+      for(S32 i = 0; i < segmentData.size(); ++i)
       {
          // Create a new segment, and add it to the list.  The WallSegment constructor will add it to the specified database.
          WallSegment *newSegment = new WallSegment(mWallSegmentManager.getWallSegmentDatabase(),
@@ -452,7 +452,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
       Vector<Point> edges;
       mWallSegmentManager.clipAllWallEdges(&wallSegments, edges);      // Remove interior wall outline fragments
 
-      for(S32 i = 0; i < wallSegments.size(); i++)
+      for(S32 i = 0; i < wallSegments.size(); ++i)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments[i]);
          wallSegment->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR);
@@ -460,7 +460,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
       renderWallEdges(edges, *getGame()->getSettings()->getWallOutlineColor());
 
-      for(S32 i = 0; i < wallSegments.size(); i++)
+      for(S32 i = 0; i < wallSegments.size(); ++i)
          delete wallSegments[i];
    }
 
@@ -472,7 +472,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
    FontManager::pushFontContext(OldSkoolContext);
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 0; i < points.size(); ++i)
    {
       S32 vertNum = S32(((F32)i  / 2) + 0.5);     // Ick!
 
@@ -505,7 +505,8 @@ void EditorInstructionsUserInterface::onPageChanged()
 
 void EditorInstructionsUserInterface::nextPage()
 {
-   mCurPage++;
+   ++mCurPage;
+
    if(mCurPage == getPageCount())
       mCurPage = 0;
 
@@ -515,7 +516,8 @@ void EditorInstructionsUserInterface::nextPage()
 
 void EditorInstructionsUserInterface::prevPage()
 {
-   mCurPage--;
+   --mCurPage;
+
    if(mCurPage < 0)
       mCurPage = getPageCount() - 1;
 
@@ -530,7 +532,8 @@ void EditorInstructionsUserInterface::idle(U32 timeDelta)
    if(mAnimTimer.update(timeDelta))
    {
       mAnimTimer.reset();
-      mAnimStage++;
+      ++mAnimStage;
+
       if(mAnimStage >= 18)
          mAnimStage = 0;
    }

@@ -72,14 +72,14 @@ bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int
    readint(file); // data rate
    readshort(file); // data block size
    bool bits16 = readshort(file) == 16; // bits per sample
-   for(int i=16; i<size1; i++)
+   for(int i=16; i<size1; ++i)
       readbyte(file);
 
    a=readint(file);
    while(a != 0x61746164 && a != 0) // loop until found "data"
    {
       a=readint(file);
-      for(int i=0; i < (a & 0xFFF); i++)
+      for(int i=0; i < (a & 0xFFF); ++i)
          readbyte(file);
       a=readint(file);
    }
@@ -145,7 +145,7 @@ PictureLoader *LoadPicture(const char* path){
    if(bpp<=8){
       a=1 << bpp;
       if(!p) {closefile(r);return 0;}
-      for(b=0;b<a;b++){
+      for(b=0;b<a;++b){
          p[b]=readint(r) ^ 0xFF000000; //most palette are 32 bit with zero alpha.
       }
    }
@@ -153,7 +153,7 @@ PictureLoader *LoadPicture(const char* path){
    c=0;
    d=0;
    y2=y;while(y2>0){
-      y2--;e=0;
+      --y2;e=0;
       x2=0;while(x2<x){
          switch(bpp){
          case 32:j=readint(r);
@@ -172,9 +172,10 @@ PictureLoader *LoadPicture(const char* path){
 
          j = (j & 255) << 16 | ((j >> 16) & 255) | (j & 0xFF00FF00);  // BGRA to RGBA, as used for GL Texture loader
          mem[x2+y2*x]=j;
-         x2++;
+         ++x2;
+
       }
-      for(e=1;e<vx;e++){a=readbyte(r);}
+      for(e=1;e<vx;++e){a=readbyte(r);}
       //If Eof(r) Then y2=0
    }
    closefile(r);
@@ -202,7 +203,7 @@ GLuint loadGLTex(PictureLoader *picture)
 
    //if(num == 0)  // move color into alpha
    //{
-   //   for(S32 i = pict->x * pict->y - 1; i>=0; i--)
+   //   for(S32 i = pict->x * pict->y - 1; i>=0; --i)
    //      pict->data[i] = (pict->data[i] << 24) | 0x00FFFFFF;
    //}
 

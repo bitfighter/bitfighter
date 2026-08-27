@@ -156,7 +156,7 @@ void ServerGame::cleanUp()
 
    mLevelGens.deleteAndClear();
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
       delete dynamic_cast<Object *>(fillVector[i]);
 
    mVoteTimer = 0;
@@ -216,7 +216,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
    mVoteNumber = number;
    mVoteClientName = clientInfo->getName();
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       if(getClientInfo(i)->getConnection())  // Robots don't have GameConnection
          getClientInfo(i)->getConnection()->mVote = 0;
 
@@ -267,7 +267,7 @@ LevelInfo ServerGame::getLevelInfo(S32 index)
 //{
 //   mLevelInfos.clear();
 //
-//   for(S32 i = 0; i < levelList.size(); i++)
+//   for(S32 i = 0; i < levelList.size(); ++i)
 //      mLevelInfos.push_back(LevelInfo(levelList[i]));
 //}
 //
@@ -279,7 +279,7 @@ LevelInfo ServerGame::getLevelInfo(S32 index)
 
 void ServerGame::sendLevelListToLevelChangers(const string &message)
 {
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
       GameConnection *conn = clientInfo->getConnection();
@@ -322,7 +322,7 @@ bool ServerGame::onlyClientIs(GameConnection *client)
    if(!gameType)
       return false;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       if(!mClientInfos[i]->isRobot() && mClientInfos[i]->getConnection() != client)
          return false;
 
@@ -384,7 +384,8 @@ string ServerGame::loadNextLevelInfo()
    if(mLevelSource->populateLevelInfoFromSource(filename, mLevelLoadIndex))
    {
       levelName = mLevelSource->getLevelName(mLevelLoadIndex);    // This will be the name specified in the level file we just populated
-      mLevelLoadIndex++;
+      ++mLevelLoadIndex;
+
    }
    else     // Failed to process level; remove it from the list
       mLevelSource->remove(mLevelLoadIndex);
@@ -582,7 +583,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
       GameConnection *conn = clientInfo->getConnection();
@@ -662,7 +663,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
                                                                           getWorldExtents(), triangulate);
    if(mGameType->mBotZoneCreationFailed)
    {
-      for(int i = 0; i < getClientCount(); i++)
+      for(int i = 0; i < getClientCount(); ++i)
          getClientInfo(i)->getConnection()->s2cDisplayConsoleMessage("Zone creation failed for level; bots disabled.");
    }
 
@@ -670,7 +671,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    resetAllClientTeams();
 
    // Reset loadouts now that we have GameType set up
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       getClientInfo(i)->resetLoadout(levelHasLoadoutZone());
 
 
@@ -681,7 +682,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    if(mGameType.isValid())
    {
       // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
-      for(S32 i = getClientCount() - 1; i > -1; i--)
+      for(S32 i = getClientCount() - 1; i > -1; --i)
       {
          ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
 
@@ -697,7 +698,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 
    // Fire onPlayerJoined event for any players already on the server
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo(i)->getPlayerInfo());
 
 
@@ -716,7 +717,7 @@ void ServerGame::onConnectedToMaster()
    // Check if we have any clients that need to have their authentication status checked; might happen if we've lost touch with master
    // and clients have connected in the meantime.  In some rare circumstances, could lead to double-verification, but I don't think this
    // would be a real problem
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       if(!getClientInfo(i)->isRobot())
          getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
 
@@ -744,7 +745,7 @@ void ServerGame::sendLevelStatsToMaster()
 
    // Check if we've already sent these stats... if so, no need to waste bandwidth and resend
    // TODO: Is there a standard container that would make this process simpler?  like a sorted hash or whatnot?
-   for(S32 i = 0; i < mSentHashes.size(); i++)
+   for(S32 i = 0; i < mSentHashes.size(); ++i)
       if(mSentHashes[i] == mLevelFileHash)
          return;
 
@@ -773,7 +774,7 @@ void ServerGame::sendLevelStatsToMaster()
 // Resets all player team assignments
 void ServerGame::resetAllClientTeams()
 {
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       getClientInfo(i)->setTeamIndex(NO_TEAM);
 }
 
@@ -835,7 +836,8 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
       S32 playerCount = getPlayerCount();
       if(mGameSuspended)
-         playerCount++;
+         ++playerCount;
+
 
       bool first = true;
       bool found = false;
@@ -860,14 +862,16 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       // We didn't find a suitable level... just proceed to the next one in the list
       if(!found)
       {
-         currentLevelIndex++;
+         ++currentLevelIndex;
+
          if(S32(currentLevelIndex) >= levelCount)
             currentLevelIndex = FIRST_LEVEL;
       }
    }
    else if(nextLevel == PREVIOUS_LEVEL)
    {
-      currentLevelIndex--;
+      --currentLevelIndex;
+
       if(currentLevelIndex < 0)
          currentLevelIndex = levelCount - 1;
    }
@@ -878,12 +882,13 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       S32 playerCount = getPlayerCount();
 
       if(mGameSuspended)
-         playerCount++;
+         ++playerCount;
+
 
       do
       {
          newLevel = TNL::Random::readI(0, levelCount - 1);
-         retriesLeft--;  // Prevent endless loop
+         --retriesLeft;  // Prevent endless loop
 
          if(retriesLeft == 0)
             break;
@@ -919,11 +924,12 @@ bool ServerGame::clientCanSuspend(ClientInfo *info)
       return false;
 
    U32 activePlayers = 0;
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
       if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
-         activePlayers++;
+         ++activePlayers;
+
    }
    return activePlayers <= 1; // If only one player active, allow suspend.
 }
@@ -934,7 +940,7 @@ void ServerGame::suspendGame()
    if(mGameSuspended) // Already suspended
       return;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       if(getClientInfo(i)->getConnection())
          getClientInfo(i)->getConnection()->s2rSetSuspendGame(true);
 
@@ -960,7 +966,7 @@ void ServerGame::unsuspendGame(bool remoteRequest)
 
    mGameSuspended = false;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
       if(getClientInfo(i)->getConnection())
          getClientInfo(i)->getConnection()->s2rSetSuspendGame(false);
 
@@ -984,7 +990,7 @@ GameConnection *ServerGame::getSuspendor()
 static bool shouldBeSuspended(ServerGame *game)
 {
    // Check all clients and make sure they're not active
-   for(S32 i = 0; i < game->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = game->getClientInfo(i);
 
@@ -1072,7 +1078,7 @@ bool ServerGame::loadLevel()
    Vector<string> scriptList;
    parseString(mSettings->getIniSettings()->globalLevelScript, scriptList, '|');
 
-   for(S32 i = 0; i < scriptList.size(); i++)
+   for(S32 i = 0; i < scriptList.size(); ++i)
       runLevelGenScript(scriptList[i]);
 
    // Fire an update to make sure certain events run on level start (like onShipSpawned)
@@ -1129,20 +1135,21 @@ Vector<Vector<S32> > ServerGame::getCategorizedPlayerCountsByTeam() const
    Vector<Vector<S32> > counts;
 
    counts.resize(getTeamCount());
-   for(S32 i = 0; i < counts.size(); i++)
+   for(S32 i = 0; i < counts.size(); ++i)
    {
       counts[i].resize(ClientInfo::ClassCount);
-      for(S32 j = 0; j < counts[i].size(); j++)
+      for(S32 j = 0; j < counts[i].size(); ++j)
          counts[i][j] = 0;
    }
 
-   for(S32 i = 0; i < mClientInfos.size(); i++)
+   for(S32 i = 0; i < mClientInfos.size(); ++i)
    {
       S32 team = mClientInfos[i]->getTeamIndex();
       S32 cc   = mClientInfos[i]->getClientClass();
 
       if(team >= 0)
-         counts[team][cc]++;
+         ++counts[team][cc];
+
    }
 
    return counts;
@@ -1349,7 +1356,7 @@ bool ServerGame::isReadyToShutdown(U32 timeDelta, string &reason)
          // move from main server list into "Host from server" list
          // Loop backwards to avoid skipping clients
 
-         for(S32 i = getClientCount() - 1; i >= 0; i--)
+         for(S32 i = getClientCount() - 1; i >= 0; --i)
          {
             ClientInfo *clientInfo = getClientInfo(i);
 
@@ -1435,7 +1442,7 @@ void ServerGame::idle(U32 timeDelta)
 
    mCurrentTime += timeDelta;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
 
@@ -1449,11 +1456,11 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // Tick levelgen timers
-   for(S32 i = 0; i < mLevelGens.size(); i++)
+   for(S32 i = 0; i < mLevelGens.size(); ++i)
       mLevelGens[i]->tickTimer<LuaLevelGenerator>(timeDelta);
 
    // Check for any levelgens that must die
-   for(S32 i = 0; i < mLevelGenDeleteList.size(); i++)
+   for(S32 i = 0; i < mLevelGenDeleteList.size(); ++i)
    {
       S32 index = mLevelGens.getIndex(mLevelGenDeleteList[i]);
       if(index != -1)
@@ -1481,7 +1488,7 @@ void ServerGame::idle(U32 timeDelta)
    const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
 
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   for(S32 i = gameObjects->size() - 1; i >= 0; --i)
    {
       BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
@@ -1508,7 +1515,7 @@ void ServerGame::idle(U32 timeDelta)
       if(getSettings()->getIniSettings()->kickIdlePlayers)
       {
          // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = 0; i < getClientCount(); ++i)
          {
             ClientInfo *clientInfo = getClientInfo(i);
 
@@ -1626,7 +1633,7 @@ void ServerGame::processVoting(U32 timeDelta)
 
             bool WaitingToVote = false;
 
-            for(S32 i2 = 0; i2 < getClientCount(); i2++)
+            for(S32 i2 = 0; i2 < getClientCount(); ++i2)
             {
                ClientInfo *clientInfo = getClientInfo(i2);
                GameConnection *conn = clientInfo->getConnection();
@@ -1650,17 +1657,20 @@ void ServerGame::processVoting(U32 timeDelta)
          S32 voteNothing = 0;
          mVoteTimer = 0;
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = 0; i < getClientCount(); ++i)
          {
             ClientInfo *clientInfo = getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
 
             if(conn && conn->mVote == 1)
-               voteYes++;
+               ++voteYes;
+
             else if(conn && conn->mVote == 2)
-               voteNo++;
+               ++voteNo;
+
             else if(conn && !clientInfo->isRobot())
-               voteNothing++;
+               ++voteNothing;
+
          }
 
          bool votePass = voteYes     * mSettings->getIniSettings()->voteYesStrength +
@@ -1700,7 +1710,7 @@ void ServerGame::processVoting(U32 timeDelta)
                case VoteChangeTeam:
                   if(mGameType)
                   {
-                     for(S32 i = 0; i < getClientCount(); i++)
+                     for(S32 i = 0; i < getClientCount(); ++i)
                      {
                         ClientInfo *clientInfo = getClientInfo(i);
 
@@ -1713,7 +1723,7 @@ void ServerGame::processVoting(U32 timeDelta)
                   if(mGameType && mGameType->getGameTypeId() != CoreGame) // No changing score in Core
                   {
                      // Reset player scores
-                     for(S32 i = 0; i < getClientCount(); i++)
+                     for(S32 i = 0; i < getClientCount(); ++i)
                      {
                         if(getClientInfo(i)->getScore() != 0)
                            mGameType->s2cSetPlayerScore(i, 0);
@@ -1721,7 +1731,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      }
 
                      // Reset team scores
-                     for(S32 i = 0; i < getTeamCount(); i++)
+                     for(S32 i = 0; i < getTeamCount(); ++i)
                      {
                         // broadcast it to the clients
                         if(((Team*)getTeam(i))->getScore() != 0)
@@ -1748,7 +1758,7 @@ void ServerGame::processVoting(U32 timeDelta)
          i.push_back(voteNothing);
          e.push_back(votePass ? "Pass" : "Fail");
 
-         for(S32 i2 = 0; i2 < getClientCount(); i2++)
+         for(S32 i2 = 0; i2 < getClientCount(); ++i2)
          {
             ClientInfo *clientInfo = getClientInfo(i2);
             GameConnection *conn = clientInfo->getConnection();
@@ -1824,7 +1834,7 @@ bool ServerGame::startHosting()
 
    S32 levelCount = mLevelSource->getLevelCount();
 
-   for(S32 i = 0; i < levelCount; i++)
+   for(S32 i = 0; i < levelCount; ++i)
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(),
                 mLevelSource->getLevelFileName(i).c_str());
 
@@ -1853,7 +1863,7 @@ Ship *ServerGame::getLocalPlayerShip() const
 void ServerGame::levelAddedNotifyClients(const LevelInfo &levelInfo)
 {
    // Let levelChangers know about the new level if it was just added
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
       GameConnection *conn = clientInfo->getConnection();
@@ -1894,7 +1904,7 @@ void ServerGame::removeLevel(S32 index)
    else
       mLevelSource->remove(index);
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
       if(clientInfo->isLevelChanger())
@@ -1961,7 +1971,7 @@ U16 ServerGame::findZoneContaining(const Point &p) const
    mBotZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
                                 Rect(p - Point(0.1f, 0.1f), p + Point(0.1f, 0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!

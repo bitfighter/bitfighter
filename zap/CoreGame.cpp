@@ -97,7 +97,7 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
       return;
    }
 
-   for(S32 i = mCores.size() - 1; i >= 0; i--)
+   for(S32 i = mCores.size() - 1; i >= 0; --i)
    {
       CoreItem *coreItem = mCores[i];
       if(coreItem)  // Core may have been destroyed
@@ -112,7 +112,7 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
 
 bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 {
-   for(S32 i = mCores.size() - 1; i >= 0; i--)
+   for(S32 i = mCores.size() - 1; i >= 0; --i)
    {
       CoreItem *coreItem = mCores[i];
 
@@ -155,7 +155,7 @@ Vector<string> CoreGameType::getGameParameterMenuKeys()
    Vector<string> items = Parent::getGameParameterMenuKeys();
 
    // Replace "Win Score" as that's not needed here -- win score is determined by the number of cores
-   for(S32 i = 0; i < items.size(); i++)
+   for(S32 i = 0; i < items.size(); ++i)
       if(items[i] == "Win Score")
       {
          items[i] = CoreGameTeamRedistKey;
@@ -170,7 +170,7 @@ shared_ptr<MenuItem> CoreGameType::getMenuItem(const string &key)
 {
    Vector<string> opts;
 
-   for(S32 i = 0; i < RedistCount; i++)
+   for(S32 i = 0; i < RedistCount; ++i)
       opts.push_back(CoreGameRedistNames[i]);
 
    if(key == CoreGameTeamRedistKey)
@@ -239,10 +239,11 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
 
       S32 numberOfTeamsHaveSomeCores = 0;
       // Count up the teams that still have Cores
-      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      for(S32 i = 0; i < getGame()->getTeamCount(); ++i)
       {
          if(((Team *)getGame()->getTeam(i))->getScore() != 0)
-            numberOfTeamsHaveSomeCores++;
+            ++numberOfTeamsHaveSomeCores;
+
       }
 
       // Handle losing team redistribution
@@ -252,7 +253,7 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
       {
          // Get players on this (losing) team
          Vector<ClientInfo*> players;
-         for(S32 i = 0; i < getGame()->getClientCount(); i++)
+         for(S32 i = 0; i < getGame()->getClientCount(); ++i)
          {
             ClientInfo *info = getGame()->getClientInfo(i);
 
@@ -392,7 +393,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
    S32 teamsCount = getGame()->getTeamCount();
 
    // Check to make sure at least one team has at least one player...
-   for(S32 i = 0; i < teamsCount; i++)
+   for(S32 i = 0; i < teamsCount; ++i)
    {
       // Add teams to list if they still have Cores
       Team *team = (Team *)getGame()->getTeam(i);
@@ -419,7 +420,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
          // Duplicate and sort by the balancing algorithm
          Vector<Team*> balancedSortedTeams(remainingTeams);
 
-         for(S32 i = 0; i < players.size(); i++)
+         for(S32 i = 0; i < players.size(); ++i)
          {
             // Update mTeams, must be run before anything that calls Team::getPlayerCount()
             getGame()->countTeamPlayers();
@@ -441,7 +442,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
 
       case RedistRandom:
       {
-         for(S32 i = 0; i < players.size(); i++)
+         for(S32 i = 0; i < players.size(); ++i)
          {
             // Randomly grab a team index
             S32 randomIndex = TNL::Random::readI(0, remainingTeams.size() - 1);
@@ -458,7 +459,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
       {
          Team *receivingTeam = remainingTeams.first();  // Losers at index 0
 
-         for(S32 i = 0; i < players.size(); i++)
+         for(S32 i = 0; i < players.size(); ++i)
          {
             ClientInfo *clientInfo = players[i];
             // Send player to new team
@@ -471,7 +472,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
       {
          Team *receivingTeam = remainingTeams.last();  // Winners at last index
 
-         for(S32 i = 0; i < players.size(); i++)
+         for(S32 i = 0; i < players.size(); ++i)
          {
             ClientInfo *clientInfo = players[i];
             // Send player to new team
@@ -490,7 +491,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
    // Send server message to players that they've been moved
    if(playersMoved)
    {
-      for(S32 i = 0; i < players.size(); i++)
+      for(S32 i = 0; i < players.size(); ++i)
       {
          ClientInfo *clientInfo = players[i];
          if(!clientInfo->isRobot())
@@ -507,7 +508,7 @@ void CoreGameType::handleNewClient(ClientInfo *clientInfo)
 
    // Find if any teams have already lost
    bool hasLostTeam = false;
-   for(S32 i = 0; i < teamsCount; i++)
+   for(S32 i = 0; i < teamsCount; ++i)
    {
       // Add teams to list if they still have Cores
       Team *team = (Team *)getGame()->getTeam(i);
@@ -777,7 +778,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damageAmount < 0)
    {
       // Heal each damaged core if it is in range
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
          if(isPanelDamaged(i))
             if(isPanelInRepairRange(theInfo->damagingObject->getPos(), i))
             {
@@ -840,7 +841,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(mPanelHealth[hit] == 0)
    {
       coreDestroyed = true;
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
          if(mPanelHealth[i] > 0)
          {
             coreDestroyed = false;
@@ -917,7 +918,8 @@ void CoreItem::doExplosion(const Point &pos)
    game->emitBlast(blastPoint, 600 - 100 * mCurrentExplosionNumber);
    game->emitExplosion(blastPoint, 4.f - F32(mCurrentExplosionNumber), CoreExplosionColors, ARRAYSIZE(CoreExplosionColors));
 
-   mCurrentExplosionNumber++;
+   ++mCurrentExplosionNumber;
+
 }
 #endif
 
@@ -941,14 +943,14 @@ void CoreItem::fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom)
 
    F32 angles[CORE_PANELS];
 
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
       angles[i] = i * PANEL_ANGLE + angle;
 
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
       panelGeom.vert[i].set(pos.x + cos(angles[i]) * size, pos.y + sin(angles[i]) * size);
 
    Point start, end, mid;
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
    {
       start = panelGeom.vert[i];
       end   = panelGeom.vert[(i + 1) % CORE_PANELS];      // Next point, with wrap-around
@@ -986,7 +988,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point chunkPos, chunkVel;           // Reusable containers
 
-   for(S32 i = 0; i < num; i++)
+   for(S32 i = 0; i < num; ++i)
    {
       static const S32 MAX_CHUNK_LENGTH = 10;
       points[1].set(0, Random::readF() * MAX_CHUNK_LENGTH);
@@ -1007,7 +1009,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    // Draw debris for the panel health 'stake'
    num = Random::readI(5, 15);
-   for(S32 i = 0; i < num; i++)
+   for(S32 i = 0; i < num; ++i)
    {
       points.erase(1);
       points.push_back(Point(0, Random::readF() * 10));
@@ -1078,7 +1080,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
    {
       Point cross, dir;
 
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
       {
          // Panel is dead (ensured by damageObject() )
          if(mPanelHealth[i] == 0)
@@ -1109,7 +1111,7 @@ void CoreItem::setStartingHealth(F32 health)
    mStartingPanelHealth = mStartingHealth / CORE_PANELS;
 
    // Core's total health is divided evenly amongst its panels
-   for(S32 i = 0; i < 10; i++)
+   for(S32 i = 0; i < 10; ++i)
       mPanelHealth[i] = mStartingPanelHealth;
 }
 
@@ -1124,7 +1126,7 @@ F32 CoreItem::getTotalCurrentHealth() const
 {
    F32 total = 0;
 
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
       total += mPanelHealth[i];
 
    return total;
@@ -1159,7 +1161,7 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 
    PanelGeom *panelGeom = getPanelGeom();
 
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
       if(isPanelDamaged(i))
          if(isPanelInRepairRange(repairOrigin, i))
             repairLocations.push_back(panelGeom->repair[i]);
@@ -1221,7 +1223,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(!mHasExploded)
    {
       // Don't bother with health report if we've exploded
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
       {
          if(stream->writeFlag(updateMask & (PanelDamagedMask << i))) // go through each bit mask
          {
@@ -1256,7 +1258,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())     // Exploding!  Take cover!!
    {
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
          mPanelHealth[i] = 0;
 
       if(!mHasExploded)    // Just exploded!
@@ -1268,7 +1270,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    else                             // Haven't exploded, getting health
    {
-      for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; ++i)
       {
          if(stream->readFlag())                    // Panel damaged
          {

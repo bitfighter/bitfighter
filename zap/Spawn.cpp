@@ -577,7 +577,7 @@ bool AsteroidSpawn::processArguments(S32 argc, const char** argv, Game* game)
    Point pos;
    pos.read(argv);
    pos *= game->getLegacyGridSize();
-   for (S32 i = 0; i < argc; i++)
+   for (S32 i = 0; i < argc; ++i)
    {
       char firstChar = argv[i][0];    // First character of arg
 

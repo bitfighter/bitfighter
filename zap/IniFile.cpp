@@ -196,7 +196,7 @@ void CIniFile::ReadFile()
    lineCount = iniLines.size();      // Set our INI vector length
 
    // Process our INI lines, will provide sensible defaults for any missing or malformed entries
-   for(S32 i = 0; i < lineCount; i++)
+   for(S32 i = 0; i < lineCount; ++i)
       processLine(iniLines[i]);
 }
 
@@ -395,7 +395,7 @@ bool CIniFile::SetAllValues(const string &section, const string &prefix, const V
 {
    char key[256];
    bool stat = true;
-   for(S32 i = 0; i < values.size(); i++)
+   for(S32 i = 0; i < values.size(); ++i)
    {
       dSprintf(key, 255, "%s%d", prefix.c_str(), i);
       stat &= SetValue(section, key, values[i], true);
@@ -470,7 +470,7 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 // Fill valueList with values from all keys in the specified section.  Key names will be discarded.
 void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList) const
 {
-   for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
+   for(S32 i = 0; i < sections[sectionId].keys.size(); ++i)
       // Only return non-empty values
       if(sections[sectionId].values[i] != "")
          valueList.push_back(expandEnvironmentVariables(sections[sectionId].values[i]));
@@ -493,7 +493,7 @@ void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList) const
    if(GetNumEntries(sectionId) == 0)
       return;
 
-   for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
+   for(S32 i = 0; i < sections[sectionId].keys.size(); ++i)
       keyList.push_back(sections[sectionId].keys[i]);
 }
 
@@ -723,7 +723,7 @@ bool CIniFile::deleteSectionComments(const string &keyname)
 bool CIniFile::deleteAllSectionComments()
 {
    bool result = true;
-   for(S32 i = 0; i < sections.size() && result; i++)
+   for(S32 i = 0; i < sections.size() && result; ++i)
       result &= deleteSectionComments(i);
 
    return result;

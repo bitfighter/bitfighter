@@ -577,7 +577,7 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
    // Notify all active UIs that the screen has changed state.  May cause problems
    // in split-screen mode
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
       if(clientGames->get(i)->getUIManager()->getCurrentUI())
          clientGames->get(i)->getUIManager()->getCurrentUI()->onDisplayModeChange();
 }

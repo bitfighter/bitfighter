@@ -54,14 +54,14 @@ void TeamShuffleHelper::shuffle()
    teamCount = getGame()->getTeamCount();
 
    mTeams.resize(teamCount);
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
       mTeams[i].clear();
 
    const Vector<RefPtr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
 
    playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
 
-   for(S32 i = 0; i < clientInfos->size(); i++)
+   for(S32 i = 0; i < clientInfos->size(); ++i)
    {
       while(true)
       {
@@ -119,8 +119,8 @@ void TeamShuffleHelper::calculateRenderSizes()
    maxColumnWidth = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 100) / cols;
    rowHeight = (2 * vpad) + S32((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);
 
-   for(S32 i = 0; i < mTeams.size(); i++)
-      for(S32 j = 0; j < mTeams[i].size(); j++)
+   for(S32 i = 0; i < mTeams.size(); ++i)
+      for(S32 j = 0; j < mTeams[i].size(); ++j)
       {
          S32 width = getStringWidth(TEXT_SIZE, mTeams[i][j]->getName().getString());
 
@@ -153,8 +153,8 @@ void TeamShuffleHelper::render()
 
    FontManager::pushFontContext(TeamShuffleContext);
 
-   for(S32 i = 0; i < rows; i++)
-      for(S32 j = 0; j < cols; j++)
+   for(S32 i = 0; i < rows; ++i)
+      for(S32 j = 0; j < cols; ++j)
       {
          if(i * cols + j >= teamCount)
             break;
@@ -177,7 +177,7 @@ void TeamShuffleHelper::render()
          drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
 
          r.setColor(Colors::white);
-         for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
+         for(S32 k = 0; k < mTeams[teamIndex].size(); ++k)
             drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
                   TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
       }
@@ -212,8 +212,8 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
       exitHelper();
 
       // Now determine if a player is going to change teams
-      for(S32 i = 0; i < mTeams.size(); i++)
-         for(S32 j = 0; j < mTeams[i].size(); j++)
+      for(S32 i = 0; i < mTeams.size(); ++i)
+         for(S32 j = 0; j < mTeams[i].size(); ++j)
          {
             ClientInfo *thisClientInfo = mTeams[i][j];
 

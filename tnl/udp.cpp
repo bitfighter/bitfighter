@@ -149,13 +149,15 @@ static bool init()
          logprintf(LogError, "Winsock initialization failed.")
 
 #endif
-   initCount++;
+   ++initCount;
+
    return success;
 }
 
 static void shutdown()
 {
-   initCount--;
+   --initCount;
+
 #ifdef TNL_OS_WIN32
    if(!initCount)
    {
@@ -530,7 +532,7 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
    // actual data we want
    DWORD dwRetVal;
    if ( (dwRetVal = GetIpAddrTableFn( pIPAddrTable, &dwSize, 0 )) == NO_ERROR ) {
-      for(U32 i = 0; i < pIPAddrTable->dwNumEntries; i++)
+      for(U32 i = 0; i < pIPAddrTable->dwNumEntries; ++i)
       {
          // construct an Address for this interface
          Address a;
@@ -598,7 +600,8 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
    {
       char *s = buf;
       while(*s == ' ')
-         s++;
+         ++s;
+
       char *end = strchr(s, ':');
       if(!end)
          continue;
@@ -662,7 +665,7 @@ Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
    }
    else if(transport == IPXProtocol)
    {
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < 4; ++i)
          netNum[i] = 0xFFFFFFFF;
    }
 
@@ -801,7 +804,7 @@ bool Address::set(const char *addressString)
       S32 aPort;
 
       transport = IPXProtocol;
-      for(i = 0; i < 4; i++)
+      for(i = 0; i < 4; ++i)
          netNum[i] = 0xFFFFFFFF;
 
       // it's an IPX string
@@ -830,7 +833,8 @@ bool Address::set(const char *addressString)
          if(count == 10)
          {
             aPort = 0;
-            count++;
+            ++count;
+
          }
          if(count != 11)
          {

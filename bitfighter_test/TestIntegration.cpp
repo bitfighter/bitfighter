@@ -38,7 +38,7 @@ void checkTeleporter(Game *game, const string &geomString, S32 expectedDests)
    ASSERT_EQ(expectedDests, teleporter->getDestCount())  << "Wrong number of destinations";
 
    string actualGeomString = teleporter->getOrigin().toString();
-   for(S32 i = 0; i < teleporter->getDestCount(); i++)
+   for(S32 i = 0; i < teleporter->getDestCount(); ++i)
       actualGeomString +=  joiner + teleporter->getDest(i).toString();
    EXPECT_EQ(geomString, actualGeomString);
    EXPECT_FALSE(teleporter->isEngineered());
@@ -60,7 +60,7 @@ void checkTeleporter(Teleporter *teleporter, Point *pts, S32 pointCount)
    Vector<Point> geom(pts, pointCount);
 
    string str = geom[0].toString();
-   for(S32 i = 1; i < geom.size(); i++)
+   for(S32 i = 1; i < geom.size(); ++i)
       str += joiner + geom[i].toString();
 
    teleporter->doSetGeom(geom);     // When a levelgen changes the geometry, this fn gets called
@@ -72,7 +72,7 @@ void checkTeleporter(Teleporter *teleporter, Point *pts, S32 pointCount)
    }
 
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("Testing CLIENT game " + itos(i));
       checkTeleporter((Game *) clientGames->get(i), str, pointCount - 1);
@@ -95,7 +95,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
 
    // Test level item propagation
    // TestItem (placed @ 1,1)
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("i = " + itos(i));
       ClientGame *clientGame = clientGames->get(i);
@@ -169,7 +169,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
          checkTeleporter(serverGame, "30, 50 | 2550, 2550", 1);
       }
 
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
       {
          SCOPED_TRACE("1 ClientGame, after origin move #" + itos(i));
          checkTeleporter(clientGames->get(i), "30, 50 | 2550, 2550", 1);
@@ -200,7 +200,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
          checkTeleporter(serverGame, "80, 85 | 180, 300 | 50, 60", 2);
       }
 
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
       {
          SCOPED_TRACE("4 ClientGame, after origin move with 2 dests #" + itos(i));
          checkTeleporter(clientGames->get(i), "80, 85 | 180, 300 | 50, 60", 2);
@@ -222,7 +222,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
          SCOPED_TRACE("addDest() test - ServerGame");
          checkTeleporter(serverGame, "345, 555 | 612, 123 | 19, 99", 2);
       }
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
       {
          SCOPED_TRACE("addDest() test - ClientGame #" + itos(i));
          checkTeleporter(clientGames->get(i), "345, 555 | 612, 123 | 19, 99", 2);
@@ -238,7 +238,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
          SCOPED_TRACE("delDest() test - ServerGame");
          checkTeleporter(serverGame, "345, 555 | 19, 99", 1);
       }
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
       {
          SCOPED_TRACE("delDest() test - ClientGame #" + itos(i));
          checkTeleporter(clientGames->get(i), "345, 555 | 19, 99", 1);
@@ -254,7 +254,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
          SCOPED_TRACE("clearDests() test - ServerGame");
          checkTeleporter(serverGame, "345, 555", 0);
       }
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
       {
          // Will be rendered in-game, will not teleport you anywhere... FYI
          SCOPED_TRACE("clearDests() test - ClientGame #" + itos(i));
@@ -264,7 +264,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
 
    /////
    // Test metadata propagation
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       ClientGame *clientGame = clientGames->get(i);
       SCOPED_TRACE("metadata propagation i = " + itos(i));

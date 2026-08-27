@@ -129,7 +129,7 @@ void TeamDefUserInterface::onActivate()
 
    ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
 
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; ++i)
    {
       EditorTeam *team = ui->getTeam(i);
 
@@ -208,7 +208,7 @@ void TeamDefUserInterface::render()
    r.setColor(Colors::HostileTeamColor);
    drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
-   for(S32 j = 0; j < size; j++)
+   for(S32 j = 0; j < size; ++j)
    {
       S32 i = j + 2;    // Take account of the two fixed teams (neutral & hostile)
 
@@ -424,7 +424,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       EditorTeam *team = new EditorTeam(gTeamPresets[presetIndex]);
       ui->addTeam(team, teamCount);
 
-      selectedIndex++;
+      ++selectedIndex;
+
 
       if(selectedIndex < 0)      // It can happen with too many deletes
          selectedIndex = 0;
@@ -472,7 +473,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputCode == KEY_UP || inputCode == BUTTON_DPAD_UP)        // Prev item
    {
-      selectedIndex--;
+      --selectedIndex;
+
       if(selectedIndex < 0)
          selectedIndex = ui->getTeamCount() - 1;
       playBoop();
@@ -481,7 +483,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
    {
-      selectedIndex++;
+      ++selectedIndex;
+
       if(selectedIndex >= ui->getTeamCount())
          selectedIndex = 0;
       playBoop();
@@ -496,7 +499,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       {
          U32 count = (inputCode - KEY_1) + 1;
          ui->clearTeams();
-         for(U32 i = 0; i < count; i++)
+         for(U32 i = 0; i < count; ++i)
          {
             EditorTeam *team = new EditorTeam(gTeamPresets[i]);
             ui->addTeam(team);

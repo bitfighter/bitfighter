@@ -65,7 +65,7 @@ Vector<string> HTFGameType::getGameParameterMenuKeys()
    Vector<string> items = Parent::getGameParameterMenuKeys();
 
    // Use "Win Score" as an indicator of where to insert our specific menu items
-   for(S32 i = 0; i < items.size(); i++)
+   for(S32 i = 0; i < items.size(); ++i)
       if(items[i] == "Win Score")
       {
          items.insert(i + 1, "Point Earn Rate");
@@ -218,7 +218,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 
    // Does it already have a flag in it?
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
       if(static_cast<FlagItem *>(flags->get(i))->getZone() == zone)
          return;
 
@@ -265,7 +265,7 @@ void HTFGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
    // Server only, from here on out
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(flag->getZone() != NULL && flag->mTimer.update(deltaT))     // Flag is in a zone && it's scorin' time!
@@ -289,7 +289,7 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(flag->isAtHome() || flag->getZone())      // Flag is at home or in a zone
@@ -324,7 +324,7 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
    const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
    const Vector<DatabaseObject *> *flags     = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -332,7 +332,7 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
          continue;
 
       // Flag is mounted on our ship (generally, this will only get run once, as ships won't carry more than one flag)
-      for(S32 j = 0; j < goalZones->size(); j++)
+      for(S32 j = 0; j < goalZones->size(); ++j)
       {
          GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(j));
 
@@ -341,7 +341,7 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
             continue;
 
          bool found = false;
-         for(S32 k = 0; k < flags->size(); k++)
+         for(S32 k = 0; k < flags->size(); ++k)
          {
             FlagItem *kflag = static_cast<FlagItem *>(flags->get(k));
 
@@ -358,7 +358,7 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
       break;
    }
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 

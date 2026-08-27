@@ -124,7 +124,7 @@ bool BanList::processBanListLine(const string &line)
       return false;
 
    // Check to make sure there is at lease one character in each token
-   for (S32 i = 0; i < 4; i++)
+   for (S32 i = 0; i < 4; ++i)
       if(words[i].length() < 1)
          return false;
 
@@ -197,7 +197,7 @@ bool BanList::isBanned(const Address &address, const string &nickname, bool isAu
    string addressString = addressToString(address);
    auto currentTime = cleanTimeNow();
 
-   for (S32 i = 0; i < serverBanList.size(); i++)
+   for (S32 i = 0; i < serverBanList.size(); ++i)
    {
       // Check IP
       if (addressString.compare(serverBanList[i].address) != 0 && serverBanList[i].address.compare("*") != 0)
@@ -261,7 +261,7 @@ S32 BanList::getDefaultBanDuration()
 Vector<string> BanList::banListToString()
 {
    Vector<string> banList;
-   for(S32 i = 0; i < serverBanList.size(); i++)
+   for(S32 i = 0; i < serverBanList.size(); ++i)
       banList.push_back(banItemToString(&serverBanList[i]));
 
    return banList;
@@ -271,7 +271,7 @@ Vector<string> BanList::banListToString()
 void BanList::loadBanList(const Vector<string> &banItemList)
 {
    serverBanList.clear();  // Clear old list for /loadini command.
-   for(S32 i = 0; i < banItemList.size(); i++)
+   for(S32 i = 0; i < banItemList.size(); ++i)
       if(!processBanListLine(banItemList[i]))
          logprintf("Ban list item on line %d is malformed: %s", i+1, banItemList[i].c_str());
       else
@@ -290,7 +290,7 @@ void BanList::kickHost(const Address &address)
 
 bool BanList::isAddressKicked(const Address &address)
 {
-   for(S32 i = 0; i < serverKickList.size(); i++)
+   for(S32 i = 0; i < serverKickList.size(); ++i)
       if(address.isEqualAddress(serverKickList[i].address))
          return true;
 
@@ -307,7 +307,8 @@ void BanList::updateKickList(U32 timeElapsed)
       else
       {
          serverKickList[i].kickTimeRemaining -= timeElapsed;
-         i++;
+         ++i;
+
       }
    }
 }

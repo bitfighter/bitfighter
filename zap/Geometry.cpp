@@ -226,7 +226,7 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
    F32 sinTheta = sinf(rad);
    F32 cosTheta = cosf(rad);
 
-   for(S32 j = 0; j < getVertCount(); j++)
+   for(S32 j = 0; j < getVertCount(); ++j)
    {
       Point v = getVert(j) - center;
       Point n(v.x * cosTheta + v.y * sinTheta, v.y * cosTheta - v.x * sinTheta);
@@ -240,7 +240,7 @@ void Geometry::flip(F32 center, bool isHoriz)
 {
    S32 count = getVertCount();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       Point p = getVert(i);
 
@@ -260,10 +260,10 @@ void Geometry::reverseWinding()
    S32 count = getVertCount();
    Vector<Point> temp(count);
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       temp.push_back(getVert(i));
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       setVert(temp[i], count - i - 1);
 }
 
@@ -273,7 +273,7 @@ void Geometry::scale(const Point &center, F32 scale)
 {
    S32 count = getVertCount();
 
-   for(S32 j = 0; j < count; j++)
+   for(S32 j = 0; j < count; ++j)
       setVert((getVert(j) - center) * scale + center, j);
 }
 
@@ -289,7 +289,7 @@ void Geometry::offset(const Point &offset)
 {
    S32 count = getVertCount();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       setVert(getVert(i) + offset, i);
 }
 
@@ -816,7 +816,7 @@ void PolylineGeometry::unselectVert(S32 vertIndex)
 
 void PolylineGeometry::unselectVerts()
 {
-   for(S32 i = 0; i < mVertSelected.size(); i++)
+   for(S32 i = 0; i < mVertSelected.size(); ++i)
       mVertSelected[i] = false;
 
    mAnyVertsSelected = false;
@@ -834,7 +834,7 @@ void PolylineGeometry::checkIfAnyVertsSelected()
 {
    mAnyVertsSelected = false;
 
-   for(S32 i = 0; i < mVertSelected.size(); i++)
+   for(S32 i = 0; i < mVertSelected.size(); ++i)
       if(mVertSelected[i])
       {
          mAnyVertsSelected = true;
@@ -874,7 +874,7 @@ void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 
    // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
    stream->writeEnum(mPolyBounds.size() - 1, Geometry::MAX_POLY_POINTS);
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
+   for(S32 i = 0; i < mPolyBounds.size(); ++i)
       mPolyBounds[i].write(stream);
 }
 
@@ -887,7 +887,7 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
    mPolyBounds.resize(size);
    mVertSelected.resize(size);
 
-   for(U32 i = 0; i < size; i++)
+   for(U32 i = 0; i < size; ++i)
       mPolyBounds[i].read(stream);
 
    // If we are getting this from a packet, we can reverse the order of the points without consequence.
@@ -904,7 +904,7 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
    mPolyBounds.clear();
    mPolyBounds.reserve(size);
 
-   for(S32 i = 0; i < size; i++)
+   for(S32 i = 0; i < size; ++i)
    {
       // Filter out points with NaN values
       if(points[i] == points[i])
@@ -927,7 +927,7 @@ string PolylineGeometry::geomToLevelCode() const
    S32 size = mPolyBounds.size();
 
    Point p;
-   for(S32 i = 0; i < size; i++)
+   for(S32 i = 0; i < size; ++i)
    {
       p = mPolyBounds[i];
       bounds += p.toLevelCode() + (i < size - 1 ? " " : "");

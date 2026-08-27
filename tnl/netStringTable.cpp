@@ -105,7 +105,7 @@ U8   sgToLowerTable[256];
 
 void initToLowerTable()
 {
-   for (U32 i = 0; i < 256; i++) {
+   for (U32 i = 0; i < 256; ++i) {
       U8 c = dTolower(i);
       sgToLowerTable[i] = c * c;
    }
@@ -148,14 +148,14 @@ void init()
 {
    mMemPool = new DataChunker;
    mBuckets = (StringTableEntryId *) malloc(InitialHashTableSize * sizeof(StringTableEntryId));
-   for(U32 i = 0; i < InitialHashTableSize; i++)
+   for(U32 i = 0; i < InitialHashTableSize; ++i)
       mBuckets[i] = 0;
 
    mNumBuckets = InitialHashTableSize;
    mItemCount = 0;
 
    mNodeList = (Node **) malloc(InitialNodeListSize * sizeof(Node *));
-   for(U32 i = 1; i < InitialNodeListSize; i++)
+   for(U32 i = 1; i < InitialNodeListSize; ++i)
       mNodeList[i] = (Node *) (size_t)(( (i + 1) << 1) | 1); // see the doco in stringTable.h for how free list entries are coded
 
    mNodeList[InitialNodeListSize - 1] = NULL;
@@ -195,10 +195,11 @@ void validate()
 {
    // count all the nodes in the node list:
    U32 nodeCount = 0;
-   for(U32 i = 0; i < mNodeListSize; i++)
+   for(U32 i = 0; i < mNodeListSize; ++i)
    {
       if(mNodeList[i] && !(StringTableEntryId(mNodeList[i]) & 1))
-        nodeCount++;
+        ++nodeCount;
+
    }
    TNLAssert(nodeCount == mItemCount, "Error!!!");
    U32 freeListCount = 0;
@@ -208,13 +209,14 @@ void validate()
       walk = StringTableEntryId(mNodeList[walk >> 1]);
       if(!((walk >> 1) < mNodeListSize))
          TNLAssert((walk >> 1) < mNodeListSize, "Out of range node index!!!");
-      freeListCount++;
+      ++freeListCount;
+
    }
    TNLAssert(freeListCount + nodeCount == mNodeListSize, "Error!!!!");
    // walk through all the bucket chains...
    // and make sure there are no free entries...
 
-   for(U32 i = 0; i < mNumBuckets; i++)
+   for(U32 i = 0; i < mNumBuckets; ++i)
    {
       StringTableEntryId walk = mBuckets[i];
       while(walk)
@@ -248,7 +250,8 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
          (!caseSens && !strnicmp(stringNode->stringData, val, len) && stringNode->stringData[len] == 0) )
       {
          // the string was found, so bump the reference count and return the node id
-         stringNode->refCount++;
+         ++stringNode->refCount;
+
          return *walk;
       }
       // step to the next node in the hash bucket.
@@ -263,7 +266,7 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
       U32 oldNodeListSize = mNodeListSize;
       mNodeListSize += InitialNodeListSize;
       mNodeList = (Node **) realloc(mNodeList, mNodeListSize * sizeof(Node *));
-      for(U32 i = oldNodeListSize; i < mNodeListSize; i++)
+      for(U32 i = oldNodeListSize; i < mNodeListSize; ++i)
          mNodeList[i] = (Node *) (size_t) (((i + 1) << 1) | 1);
       mNodeList[mNodeListSize - 1] = 0;
       mNodeListFreeEntry = (size_t) ((oldNodeListSize << 1) | 1);
@@ -284,7 +287,8 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
 
    strcpy(stringNode->stringData, val);
    stringNode->stringData[len] = 0;    // Null terminate
-   mItemCount++;
+   ++mItemCount;
+
 
    // Check for hash table resize
    if(mItemCount > 2 * mNumBuckets) {
@@ -342,7 +346,7 @@ void resizeHashTable(const U32 newSize)
    // lists so that case sens strings are always after their
    // corresponding case insens strings
 
-   for(i = 0; i < mNumBuckets; i++) {
+   for(i = 0; i < mNumBuckets; ++i) {
       walk = mBuckets[i];
       while(walk)
       {
@@ -353,7 +357,7 @@ void resizeHashTable(const U32 newSize)
       }
    }
    mBuckets = (StringTableEntryId *) realloc(mBuckets, newSize * sizeof(StringTableEntryId));
-   for(i = 0; i < newSize; i++) {
+   for(i = 0; i < newSize; ++i) {
       mBuckets[i] = 0;
    }
    mNumBuckets = newSize;
@@ -373,7 +377,7 @@ void resizeHashTable(const U32 newSize)
 void compact()
 {
    DataChunker *newData = new DataChunker;
-   for(U32 i = 1; i < mNodeListSize; i++)
+   for(U32 i = 1; i < mNodeListSize; ++i)
    {
       Node *theNode, *newNode;
       theNode = mNodeList[i];
@@ -399,7 +403,8 @@ void compact()
 
 void incRef(StringTableEntryId index)
 {
-    mNodeList[index]->refCount++;
+    ++mNodeList[index]->refCount;
+
 }
 
 void decRef(StringTableEntryId index)
@@ -428,7 +433,8 @@ void decRef(StringTableEntryId index)
 
    if(mFreeStringDataSize > CompactThreshold)
       compact();
-   mItemCount--;
+   --mItemCount;
+
    if(!mItemCount)
       destroy();
 }

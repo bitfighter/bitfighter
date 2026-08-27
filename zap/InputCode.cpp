@@ -287,7 +287,7 @@ InputCodeManager::~InputCodeManager()
 // Initialize state of keys... assume none are depressed, or even sad
 void InputCodeManager::resetStates()
 {
-   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
+   for(S32 i = 0; i < MAX_INPUT_CODES; ++i)
       inputCodeIsDown[i] = false;
 }
 
@@ -295,7 +295,7 @@ void InputCodeManager::resetStates()
 // Prints list of any input codes that are down, for debugging purposes
 void InputCodeManager::dumpInputCodeStates()
 {
-  for(S32 i = 0; i < MAX_INPUT_CODES; i++)
+  for(S32 i = 0; i < MAX_INPUT_CODES; ++i)
      if(inputCodeIsDown[i])
         logprintf("Key %s down", inputCodeToString((InputCode) i));
 }
@@ -329,7 +329,7 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
 
    // First, find the base key -- this will be the last non-modifier key we find, or one where the base key is the same as inputCode,
    // assuming the standard modifier-key combination
-   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
+   for(S32 i = 0; i < MAX_INPUT_CODES; ++i)
    {
       InputCode code = (InputCode) i;
 
@@ -349,7 +349,7 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
 
    string inputString = "";
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); ++i)
       if(getState(modifiers[i]))
          inputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
 
@@ -363,11 +363,12 @@ bool InputCodeManager::checkModifier(InputCode mod1)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); ++i)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1)
-            foundCount++;
+            ++foundCount;
+
          else                                      // Wrong modifier!
             return false;
       }
@@ -381,11 +382,12 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); ++i)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)
-            foundCount++;
+            ++foundCount;
+
          else                                      // Wrong modifier!
             return false;
       }
@@ -399,11 +401,12 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); ++i)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)
-            foundCount++;
+            ++foundCount;
+
          else                                      // Wrong modifier!
             return false;
       }
@@ -426,17 +429,17 @@ string InputCodeManager::normalizeInputString(const string &inputString)
 
    // Modifiers will be first words... sort them, normalize capitalization, get them organized
    bool hasModifier[ARRAYSIZE(modifiers)];
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); ++i)
       hasModifier[i] = false;
 
-   for(S32 i = 0; i < words.size() - 1; i++)
+   for(S32 i = 0; i < words.size() - 1; ++i)
    {
       InputCode inputCode = stringToInputCode(words[i].c_str());
       if(inputCode == KEY_UNKNOWN)     // Encountered something unexpected
          return INVALID;
 
       bool found = false;
-      for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      for(U32 i = 0; i < ARRAYSIZE(modifiers); ++i)
          if(inputCode == modifiers[i])
          {
             hasModifier[i] = true;
@@ -458,7 +461,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
       return INVALID;
 
    string normalizedInputString = "";
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); ++i)
       if(hasModifier[i])
          normalizedInputString += string(keyNames[modifiers[i]]) + InputStringJoiner;
 
@@ -483,10 +486,10 @@ bool InputCodeManager::isValidInputString(const string &inputString)
    S32 startMod = 0;
 
    // Make sure all but the last word are modifiers
-   for(S32 i = 0; i < words.size() - 1; i++)
+   for(S32 i = 0; i < words.size() - 1; ++i)
    {
       bool found = false;
-      for(S32 j = startMod; j < S32(ARRAYSIZE(modifiers)); j++)
+      for(S32 j = startMod; j < S32(ARRAYSIZE(modifiers)); ++j)
          if(words[i] == mods->get(j))
          {
             found = true;
@@ -1532,7 +1535,7 @@ InputCode InputCodeManager::getKeyBoundToBindingCodeName(const string &name) con
 {
    // Linear search is not at all efficient, but this will be called very infrequently, in non-performance sensitive area
    // Note that for some reason the { }s are needed below... without them this code does not work right.
-   for(U32 i = 0; i < ARRAYSIZE(BindingNames); i++)
+   for(U32 i = 0; i < ARRAYSIZE(BindingNames); ++i)
    {
       if(caseInsensitiveStringCompare(BindingNames[i], name))
          return this->getBinding(BindingNameEnum(i));
@@ -1547,7 +1550,7 @@ string InputCodeManager::getEditorKeyBoundToBindingCodeName(const string &name) 
 {
    // Linear search is of O(n) speed and therefore is not really efficient, but this will be called very infrequently,
    // Note that for some reason the { }s are needed below... without them this code does not work right.
-   for(U32 i = 0; i < ARRAYSIZE(EditorBindingNames); i++)
+   for(U32 i = 0; i < ARRAYSIZE(EditorBindingNames); ++i)
    {
       if(caseInsensitiveStringCompare(EditorBindingNames[i], name))
          return this->getEditorBinding(EditorBindingNameEnum(i));
@@ -1562,7 +1565,7 @@ string InputCodeManager::getSpecialKeyBoundToBindingCodeName(const string &name)
 {
    // Linear search is of O(n) speed and therefore is not really efficient, but this will be called very infrequently,
    // Note that for some reason the { }s are needed below... without them this code does not work right.
-   for(U32 i = 0; i < ARRAYSIZE(SpecialBindingNames); i++)
+   for(U32 i = 0; i < ARRAYSIZE(SpecialBindingNames); ++i)
    {
       if(caseInsensitiveStringCompare(SpecialBindingNames[i], name))
          return this->getSpecialBinding(SpecialBindingNameEnum(i));
@@ -1576,7 +1579,7 @@ string InputCodeManager::getSpecialKeyBoundToBindingCodeName(const string &name)
 void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value
-   for(S32 i = 0; i < KEY_COUNT; i++)
+   for(S32 i = 0; i < KEY_COUNT; ++i)
       keyNames[i] = "Unknown Key";
 
    // Now keys we know with our locally defined names
@@ -1744,7 +1747,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";
    keyNames[S32(KEY_LESS)]            = "Less";
 
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); ++i)
       modifierNames.push_back(keyNames[S32(modifiers[i])]);
 }
 
@@ -1765,7 +1768,7 @@ const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 // (primarily for loading key bindings from INI files)
 InputCode InputCodeManager::stringToInputCode(const char *inputName)
 {
-   for(S32 i = 0; i < KEY_COUNT; i++)
+   for(S32 i = 0; i < KEY_COUNT; ++i)
       if(stricmp(inputName, keyNames[i]) == 0)
          return InputCode(i);
 

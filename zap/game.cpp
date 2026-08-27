@@ -228,9 +228,10 @@ S32 Game::getPlayerCount() const
 S32 Game::getAuthenticatedPlayerCount() const
 {
    S32 count = 0;
-   for(S32 i = 0; i < mClientInfos.size(); i++)
+   for(S32 i = 0; i < mClientInfos.size(); ++i)
       if(!mClientInfos[i]->isRobot() && mClientInfos[i]->isAuthenticated())
-         count++;
+         ++count;
+
 
    return count;
 }
@@ -261,7 +262,7 @@ void Game::addToClientList(ClientInfo *clientInfo)
    //
    // NOTE - This can happen when a Robot line is found in a level file.  For some reason
    // it tries to get added twice to the game
-   for(S32 i = 0; i < mClientInfos.size(); i++)
+   for(S32 i = 0; i < mClientInfos.size(); ++i)
    {
       if(mClientInfos[i] == clientInfo)
          return;
@@ -270,16 +271,18 @@ void Game::addToClientList(ClientInfo *clientInfo)
    mClientInfos.push_back(clientInfo);
 
    if(clientInfo->isRobot())
-      mRobotCount++;
+      ++mRobotCount;
+
    else
-      mPlayerCount++;
+      ++mPlayerCount;
+
 }
 
 
 // Helper function for other find functions
 S32 Game::findClientIndex(const StringTableEntry &name)
 {
-   for(S32 i = 0; i < mClientInfos.size(); i++)
+   for(S32 i = 0; i < mClientInfos.size(); ++i)
    {
       if(mClientInfos[i]->getName() == name)
          return i;
@@ -296,9 +299,11 @@ void Game::removeFromClientList(const StringTableEntry &name)
    if(index >= 0)
    {
       if(mClientInfos[index]->isRobot())
-         mRobotCount--;
+         --mRobotCount;
+
       else
-         mPlayerCount--;
+         --mPlayerCount;
+
 
       mClientInfos.erase_fast(index);
    }
@@ -307,13 +312,15 @@ void Game::removeFromClientList(const StringTableEntry &name)
 
 void Game::removeFromClientList(ClientInfo *clientInfo)
 {
-   for(S32 i = 0; i < mClientInfos.size(); i++)
+   for(S32 i = 0; i < mClientInfos.size(); ++i)
       if(mClientInfos[i] == clientInfo)
       {
          if(mClientInfos[i]->isRobot())
-            mRobotCount--;
+            --mRobotCount;
+
          else
-            mPlayerCount--;
+            --mPlayerCount;
+
 
          mClientInfos.erase_fast(i);
          return;
@@ -490,7 +497,7 @@ bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamMana
 
 S32 Game::getTeamIndexFromTeamName(const char *teamName) const
 {
-   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
+   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); ++i)
       if(stricmp(teamName, getTeamName(i).getString()) == 0)
          return i;
 
@@ -509,13 +516,13 @@ S32 Game::getTeamIndexFromTeamName(const char *teamName) const
 // Rating may only work on server... not tested on client
 void Game::countTeamPlayers() const
 {
-   for(S32 i = 0; i < getTeamCount(); i++)
+   for(S32 i = 0; i < getTeamCount(); ++i)
    {
       TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");      // Assert for safety
       static_cast<Team *>(getTeam(i))->clearStats();                    // static_cast for speed
    }
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       ClientInfo *clientInfo = getClientInfo(i);
 
@@ -551,7 +558,7 @@ S32 Game::findLargestTeamWithBots() const
    S32 largestTeamCount = 0;
    S32 largestTeamIndex = NONE;
 
-   for(S32 i = 0; i < getTeamCount(); i++)
+   for(S32 i = 0; i < getTeamCount(); ++i)
    {
       TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");
       Team *team = static_cast<Team *>(getTeam(i));
@@ -617,7 +624,7 @@ void Game::parseLevelLine(const char *line, GridDatabase *database, const string
       }
    }
 
-   for(U32 i = 0; i < argc; i++)
+   for(U32 i = 0; i < argc; ++i)
       argv[i] = args[i].c_str();
 
    try
@@ -641,7 +648,8 @@ void Game::loadLevelFromString(const string &contents, GridDatabase *database, c
    while(std::getline(iss, line))
    {
       parseLevelLine(line.c_str(), database, filename, lineNum);
-      lineNum++;
+      ++lineNum;
+
    }
 }
 
@@ -923,7 +931,7 @@ string Game::toLevelCode() const
    if(getLevelDatabaseId())
       str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
 
-   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
+   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); ++i)
       str += mActiveTeamManager->getTeam(i)->toLevelCode() + "\n";
 
    str += gameType->getSpecialsLine() + "\n";
@@ -968,7 +976,7 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 
 void Game::onReadSpecialsParam(S32 argc, const char **argv, S32 lineNum)
 {
-   for(S32 i = 1; i < argc; i++)
+   for(S32 i = 1; i < argc; ++i)
       if(!getGameType()->processSpecialsParam(argv[i]))
          logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s (line %d)", argv[i], lineNum);
 }
@@ -979,7 +987,7 @@ void Game::onReadScriptParam(S32 argc, const char **argv)
    Vector<string> args;
 
    // argv[0] is always "Script"
-   for(S32 i = 1; i < argc; i++)
+   for(S32 i = 1; i < argc; ++i)
       args.push_back(argv[i]);
 
    getGameType()->setScript(args);
@@ -989,7 +997,7 @@ void Game::onReadScriptParam(S32 argc, const char **argv)
 static string getString(S32 argc, const char **argv)
 {
    string s;
-   for(S32 i = 1; i < argc; i++)
+   for(S32 i = 1; i < argc; ++i)
    {
       s += argv[i];
       if(i < argc - 1)
@@ -1162,13 +1170,14 @@ void Game::addToDeleteList(BfObject *theObject, U32 delay)
 // Cycle through our pending delete list, and either delete an object or update its timer
 void Game::processDeleteList(U32 timeDelta)
 {
-   for(S32 i = 0; i < mPendingDeleteObjects.size(); i++)
+   for(S32 i = 0; i < mPendingDeleteObjects.size(); ++i)
       if(timeDelta > mPendingDeleteObjects[i].delay)
       {
          BfObject *g = mPendingDeleteObjects[i].theObject;
          delete g;
          mPendingDeleteObjects.erase_fast(i);
-         i--;
+         --i;
+
       }
       else
          mPendingDeleteObjects[i].delay -= timeDelta;
@@ -1180,7 +1189,7 @@ void Game::deleteObjects(U8 typeNumber)
 {
    fillVector.clear();
    mGameObjDatabase->findObjects(typeNumber, fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *obj = static_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
@@ -1193,7 +1202,7 @@ void Game::deleteObjects(TestFunc testFunc)
 {
    fillVector.clear();
    mGameObjDatabase->findObjects(testFunc, fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *obj = static_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
@@ -1214,7 +1223,7 @@ Rect Game::computeBarrierExtents()
    fillVector.clear();
    mGameObjDatabase->findObjects((TestFunc)isWallType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
       extents.unionRect(fillVector[i]->getExtent());
 
    return extents;
@@ -1253,7 +1262,7 @@ string Game::makeUnique(const char *name)
    {
       unique = true;
 
-      for(S32 i = 0; i < getClientCount(); i++)
+      for(S32 i = 0; i < getClientCount(); ++i)
       {
          if(proposedName == getClientInfo(i)->getName().getString())     // Collision detected!
          {
@@ -1267,7 +1276,8 @@ string Game::makeUnique(const char *name)
             S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr);
             proposedName = string(name).substr(0, maxNamePos) + numstr;     // Make sure name won't grow too long
 
-            index++;
+            ++index;
+
 
             if(index == U32_MAX)
             {
@@ -1512,7 +1522,7 @@ void Game::seedRandomNumberGenerator(const string &name)
    buf[3] = U8(time >> 24);
 
    // Bytes from the name
-   for(S32 i = 0; i < nameBytes; i++)
+   for(S32 i = 0; i < nameBytes; ++i)
       buf[i + timeByteCount] = name.at(i);
 
    Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok

@@ -233,7 +233,8 @@ bool BitStream::writeFlag(bool val)
       *(getBuffer() + (bitNum >> 3)) |= (1 << (bitNum & 0x7));
    else
       *(getBuffer() + (bitNum >> 3)) &= ~(1 << (bitNum & 0x7));
-   bitNum++;
+   ++bitNum;
+
    return (val);
 }
 
@@ -509,7 +510,7 @@ void BitStream::writeString(const char *string, U8 maxLen)     // maxlen default
    if(!string)
       string = "";
    U8 j;
-   for(j = 0; j < maxLen && mStringBuffer[j] == string[j] && string[j];j++)
+   for(j = 0; j < maxLen && mStringBuffer[j] == string[j] && string[j];++j)
       ;  // do nothing
    strncpy(mStringBuffer + j, string + j, maxLen - j);
    mStringBuffer[maxLen] = 0;

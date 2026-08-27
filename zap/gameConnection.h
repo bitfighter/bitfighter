@@ -355,7 +355,7 @@ public:
          pending.clear();
          sentTiles.clear();
          sentTiles.resize(tileCount);
-         for(U32 i = 0; i < tileCount; i++)
+         for(U32 i = 0; i < tileCount; ++i)
             sentTiles[i] = false;
          totalTiles = tileCount;
       }

@@ -73,7 +73,7 @@ void VoiceRecorder::render() const
       static F32 colorArray[400];
       static F32 vertexArray[200];
 
-      for(U32 i = 1; i < full; i++)
+      for(U32 i = 1; i < full; ++i)
       {
          if(i < halfway)
          {
@@ -168,7 +168,8 @@ void VoiceRecorder::process()
 
    if(mWantToStopRecordingAudio != 0)
    {
-      mWantToStopRecordingAudio--;
+      --mWantToStopRecordingAudio;
+
       if(mWantToStopRecordingAudio == 0)
       {
          stopNow();
@@ -185,7 +186,7 @@ void VoiceRecorder::process()
    S16 *samplePtr = (S16 *) mUnusedAudio->getBuffer();
    mMaxAudioSample = 0;
 
-   for(U32 i = preSampleCount; i < sampleCount; i++)
+   for(U32 i = preSampleCount; i < sampleCount; ++i)
    {
       if(samplePtr[i] > mMaxAudioSample)
          mMaxAudioSample = samplePtr[i];
@@ -201,7 +202,7 @@ void VoiceRecorder::process()
    if(mMaxForGain > MaxDetectionThreshold)
    {
       F32 gain = 0x7FFF / F32(mMaxForGain);
-      for(U32 i = preSampleCount; i < sampleCount; i++)
+      for(U32 i = preSampleCount; i < sampleCount; ++i)
       {
          F32 sample = gain * samplePtr[i];
          if(sample > 0x7FFF)

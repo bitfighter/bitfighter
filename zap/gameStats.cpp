@@ -137,7 +137,7 @@ char getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
 // Fills in some of the blanks in the gameStats struct; not everything is sent
 void processStatsResults(GameStats *gameStats)
 {
-   for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+   for(S32 i = 0; i < gameStats->teamStats.size(); ++i)
    {
       Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
 
@@ -145,7 +145,7 @@ void processStatsResults(GameStats *gameStats)
       if(! gameStats->isTeamGame)
       {
          playerStats->sort(playerScoreSort);
-         for(S32 j = 0; j < playerStats->size(); j++)
+         for(S32 j = 0; j < playerStats->size(); ++j)
             (*playerStats)[j].gameResult =
                getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ?
                                                             0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
@@ -156,11 +156,11 @@ void processStatsResults(GameStats *gameStats)
    {
       Vector<TeamStats> *teams = &gameStats->teamStats;
       teams->sort(teamScoreSort);
-      for(S32 i = 0; i < teams->size(); i++)
+      for(S32 i = 0; i < teams->size(); ++i)
       {
          (*teams)[i].gameResult =
             getResult(teams->size(), (*teams)[0].score, teams->size() == 1 ? 0 : (*teams)[1].score, (*teams)[i].score, i == 0);
-         for(S32 j = 0; j < (*teams)[i].playerStats.size(); j++) // make all players in a team same gameResults
+         for(S32 j = 0; j < (*teams)[i].playerStats.size(); ++j) // make all players in a team same gameResults
             (*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
       }
    }
@@ -478,7 +478,7 @@ void read(TNL::BitStream &s, Zap::GameStats *val, U8 version)
 
    val->playerCount = 0;
 
-   for(S32 i = 0; i < val->teamStats.size(); i++)
+   for(S32 i = 0; i < val->teamStats.size(); ++i)
       val->playerCount += val->teamStats[i].playerStats.size();  // count number of players
 }
 
@@ -526,13 +526,13 @@ void write(TNL::BitStream &s, VersionedGameStats &val)
    U32 bitStart = s.getBitPosition();
 
 #ifdef TNL_ENABLE_ASSERTS
-   for(S32 i = -200; i < 200; i++)
+   for(S32 i = -200; i < 200; ++i)
    {  writeCompressedS32(s, i);
       s.setBitPosition(bitStart);
       TNLAssert(readCompressedS32(s) == i, "Problem with read / write CompressedS32");
       s.setBitPosition(bitStart);
    }
-   for(U32 i = 0; i < 400; i++)
+   for(U32 i = 0; i < 400; ++i)
    {  writeCompressedU32(s, i);
       s.setBitPosition(bitStart);
       TNLAssert(readCompressedU32(s) == i, "Problem with read / write CompressedU32");

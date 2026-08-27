@@ -118,7 +118,7 @@ Vector<string> RabbitGameType::getGameParameterMenuKeys()
    Vector<string> items = Parent::getGameParameterMenuKeys();
 
    // Use "Win Score" as an indicator of where to insert our Rabbit specific menu items
-   for(S32 i = 0; i < items.size(); i++)
+   for(S32 i = 0; i < items.size(); ++i)
       if(items[i] == "Win Score")
       {
          items.insert(i - 1, "Flag Return Time");
@@ -248,7 +248,7 @@ void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
    // Server only from here on
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *mRabbitFlag = static_cast<FlagItem *>(flags->get(i));
 

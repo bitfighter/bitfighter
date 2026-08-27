@@ -136,7 +136,7 @@ string Settings::getSection(const string &name) const
 Vector<AbstractSetting *> Settings::getSettingsInSection(const string &section) const
 {
    Vector<AbstractSetting *> settings;
-   for(S32 i = 0; i < mSettings.size(); i++)
+   for(S32 i = 0; i < mSettings.size(); ++i)
    {
       if(mSettings[i]->getSection() == section)
          settings.push_back(mSettings[i]);

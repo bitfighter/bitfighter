@@ -21,9 +21,9 @@ using namespace TNL;
 void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 {
 	map<char, Point> points;
-	for(S32 i = 0; i < size; i++)
+	for(S32 i = 0; i < size; ++i)
 	{
-		for(S32 j = 0; lines[i][j] != '\0'; j++)
+		for(S32 j = 0; lines[i][j] != '\0'; ++j)
 		{
 			char c = lines[i][j];
 
@@ -37,7 +37,7 @@ void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 	}
 
 	// maps are sorted by key on insertion
-	for(map<char, Point>::iterator it = points.begin(); it != points.end(); it++)
+	for(map<char, Point>::iterator it = points.begin(); it != points.end(); ++it)
 	{
 		result.push_back((*it).second);
 	}
@@ -97,7 +97,7 @@ TEST(GeomUtilsTest, splitRepeatedlySelfIntersecting)
 	splitSelfIntersectingPolys(polys, result);
 
 	ASSERT_EQ(5, result.size());
-	for(S32 i = 0; i < result.size(); i++)
+	for(S32 i = 0; i < result.size(); ++i)
 	{
 		EXPECT_EQ(4, result[i].size());
 	}
@@ -388,7 +388,7 @@ TEST(GeomUtilsTest, triangulateLongPolygon)
 TEST(GeomUtilsTest, triangulateManyPolygons)
 {
 	Vector<Vector<Point> > polys;
-	for(S32 i = 0; i < 512; i++)
+	for(S32 i = 0; i < 512; ++i)
 	{
 		Vector<Point> poly = createPolygon(Point(i * 120, i * 120), 100, 4, 0);
 		polys.push_back(poly);
@@ -1286,7 +1286,7 @@ TEST(GeomUtilsTest, createPolygonSquare)
    Vector<Point> poly = createPolygon(Point(0, 0), 1.0f, 4, FloatPi / 4.0f);
    ASSERT_EQ(4, poly.size());
    // Each vertex should be at distance 1 from origin
-   for(S32 i = 0; i < poly.size(); i++)
+   for(S32 i = 0; i < poly.size(); ++i)
       EXPECT_NEAR(1.0f, poly[i].len(), 0.001f);
 }
 
@@ -1295,7 +1295,7 @@ TEST(GeomUtilsTest, createPolygonCentered)
    // Polygon centered at (5, 5)
    Vector<Point> poly = createPolygon(Point(5, 5), 3.0f, 6, 0);
    ASSERT_EQ(6, poly.size());
-   for(S32 i = 0; i < poly.size(); i++)
+   for(S32 i = 0; i < poly.size(); ++i)
       EXPECT_NEAR(3.0f, poly[i].distanceTo(Point(5, 5)), 0.001f);
 }
 
@@ -1310,7 +1310,7 @@ TEST(GeomUtilsTest, calcPolygonVerts)
    Vector<Point> pts;
    calcPolygonVerts(Point(0, 0), 8, 5.0f, 0, pts);
    ASSERT_EQ(8, pts.size());
-   for(S32 i = 0; i < pts.size(); i++)
+   for(S32 i = 0; i < pts.size(); ++i)
       EXPECT_NEAR(5.0f, pts[i].len(), 0.001f);
 }
 
@@ -1561,7 +1561,7 @@ TEST(GeomUtilsTest, expandCenterlineToOutlineHorizontal)
    ASSERT_EQ(4, corners.size());
    // Width is 4, so cross-vec is ±2 in y direction
    // All x should be 0 or 10
-   for(S32 i = 0; i < corners.size(); i++)
+   for(S32 i = 0; i < corners.size(); ++i)
    {
       EXPECT_NEAR(2.0f, fabs(corners[i].y), 0.001f);
       EXPECT_TRUE(corners[i].x == 0.0f || corners[i].x == 10.0f);
@@ -1573,7 +1573,7 @@ TEST(GeomUtilsTest, expandCenterlineToOutlineVertical)
    Vector<Point> corners;
    expandCenterlineToOutline(Point(5, 0), Point(5, 10), 4.0f, corners);
    ASSERT_EQ(4, corners.size());
-   for(S32 i = 0; i < corners.size(); i++)
+   for(S32 i = 0; i < corners.size(); ++i)
    {
       EXPECT_NEAR(2.0f, fabs(corners[i].x - 5.0f), 0.001f);
       EXPECT_TRUE(corners[i].y == 0.0f || corners[i].y == 10.0f);

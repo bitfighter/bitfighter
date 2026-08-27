@@ -277,7 +277,8 @@ void EventConnection::packetReceived(PacketNotify *pnotify)
    }
    while(mNotifyEventList && mNotifyEventList->mSeqCount == mLastAckedEventSeq + 1)
    {
-      mLastAckedEventSeq++;
+      ++mLastAckedEventSeq;
+
       EventNote *next = mNotifyEventList->mNextEvent;
       logprintf(LogConsumer::LogEventConnection, "EventConnection %s: NotifyDelivered - %d", getNetAddressString(), mNotifyEventList->mSeqCount);
       mNotifyEventList->mEvent->notifyDelivered(this, true);
@@ -412,8 +413,9 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          {
             TNLAssertV(false, ("%s Packet too big to send, one or more events may be unable to send", ev->mEvent->getDebugName()));
             for(EventNote *walk = ev->mNextEvent; walk; walk = walk->mNextEvent)
-               walk->mSeqCount--;    // removing a GuaranteedOrdered needs to re-order mSeqCount
-            mNextSendEventSeq--;
+               --walk->mSeqCount;    // removing a GuaranteedOrdered needs to re-order mSeqCount
+            --mNextSendEventSeq;
+
 
             // dequeue the event:
             mSendEventQueueHead = ev->mNextEvent;
@@ -509,7 +511,8 @@ void EventConnection::readPacket(BitStream *bstream)
    }
    while(mWaitSeqEvents && mWaitSeqEvents->mSeqCount == mNextRecvEventSeq)
    {
-      mNextRecvEventSeq++;
+      ++mNextRecvEventSeq;
+
       EventNote *temp = mWaitSeqEvents;
       mWaitSeqEvents = temp->mNextEvent;
       

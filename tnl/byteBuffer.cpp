@@ -104,7 +104,7 @@ RefPtr<ByteBuffer> ByteBuffer::encodeBase16() const
    U8 *outBuffer = ret->getBuffer();
 
    S32 size = getBufferSize();
-   for(S32 i = 0; i < size; i++)
+   for(S32 i = 0; i < size; ++i)
    {
       U8 b = *buffer++;
       U32 nib1 = b >> 4;
@@ -128,7 +128,7 @@ RefPtr<ByteBuffer> ByteBuffer::decodeBase16() const
    ByteBuffer *ret = new ByteBuffer(outLen);
    const U8 *src = getBuffer();
    U8 *dst = ret->getBuffer();
-   for(U32 i = 0; i < outLen; i++)
+   for(U32 i = 0; i < outLen; ++i)
    {
       U8 out = 0;
       U8 nib1 = *src++;
@@ -172,10 +172,10 @@ U32 ByteBuffer::calculateCRC(U32 start, U32 end, U32 crcVal) const
    {
       U32 val;
 
-      for(S32 i = 0; i < 256; i++)
+      for(S32 i = 0; i < 256; ++i)
       {
          val = i;
-         for(S32 j = 0; j < 8; j++)
+         for(S32 j = 0; j < 8; ++j)
          {
             if(val & 0x01)
                val = 0xedb88320 ^ (val >> 1);
@@ -194,7 +194,7 @@ U32 ByteBuffer::calculateCRC(U32 start, U32 end, U32 crcVal) const
 
    // now calculate the crc
    const U8 * buf = getBuffer();
-   for(U32 i = start; i < end; i++)
+   for(U32 i = start; i < end; ++i)
       crcVal = crcTable[(crcVal ^ buf[i]) & 0xff] ^ (crcVal >> 8);
    return(crcVal);
 }

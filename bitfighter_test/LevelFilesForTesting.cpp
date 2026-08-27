@@ -68,7 +68,7 @@ string getLevelCodeForEmptyLevelWithBots(const string &botSpec)
       "LevelDescription\n"
       "LevelCredits Tyler Derden\n";
 
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teams; ++i)
    {
       level += "Team team" + itos(i) + " 0 0 0\n";
    }
@@ -78,9 +78,9 @@ string getLevelCodeForEmptyLevelWithBots(const string &botSpec)
       "MinPlayers\n"
       "MaxPlayers\n";
 
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teams; ++i)
       if(words[i] != "0")
-         for(S32 j = 0; j < words[i].size(); j++)
+         for(S32 j = 0; j < words[i].size(); ++j)
             level += "Robot " + itos(i) + " s_bot\n";
 
    return level;

@@ -17,7 +17,7 @@ using namespace std;
 	
 static void testThatLinesAreNotLongerThanMax(const Vector<string> &lines, S32 maxLen, S32 fontSize)
 {
-   for(S32 i = 0; i < lines.size(); i++)    
+   for(S32 i = 0; i < lines.size(); ++i)    
    {
       if(getStringWidth(fontSize, lines[i].c_str()) > maxLen)
       {
@@ -37,7 +37,7 @@ static void testThatLinesAreNotLongerThanMax(const Vector<string> &lines, S32 ma
 // Here make sure that just one more character would make the line too long
 static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 maxLen, S32 fontSize)
 {
-   for(S32 i = 0; i < lines.size() - 1; i++)    
+   for(S32 i = 0; i < lines.size() - 1; ++i)    
    {
       string line = lines[i] + lines[i + 1][0];    // Add first char of next item
 
@@ -50,7 +50,7 @@ static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 
 static void wouldOneMoreWordMakeTheLineTooLong(const Vector<string> &lines, S32 maxLen, S32 fontSize)
 {
    Vector<string> words;
-   for(S32 i = 0; i < lines.size() - 1; i++)
+   for(S32 i = 0; i < lines.size() - 1; ++i)
    {
       parseString(lines[i + 1], words);
       string line = lines[i] + ' ' + words[0];
@@ -98,7 +98,7 @@ TEST(RenderUtilsTest, StringWrappingTests)
    // Forcing the linebreaks where they would normally fall should produce same result
    lines2 = wrapString("One\nlonger\nline that\nwill\nrequire\nwrapping\ndue to\nshort\nlength", 50, 10);
    EXPECT_EQ(lines.size(), lines2.size());
-   for(S32 i = 0; i < lines.size(); i++)
+   for(S32 i = 0; i < lines.size(); ++i)
       EXPECT_EQ(lines[i], lines2[i]) << "Failed on iter " << i << "; \"" << lines[i] << "\" != \"" << lines2[i] << "\"!";
    {
       SCOPED_TRACE("Scenario 1A");
@@ -110,7 +110,7 @@ TEST(RenderUtilsTest, StringWrappingTests)
    lines = wrapString(alphabet, 50, 10);
 
    string line;
-   for(S32 i = 0; i < lines.size(); i++)
+   for(S32 i = 0; i < lines.size(); ++i)
       line += lines[i];
 
    EXPECT_EQ(line, alphabet) << "Merge failed... expected " << alphabet << " got " << line;
@@ -131,10 +131,10 @@ TEST(RenderUtilsTest, StringWrappingTests)
       "Our stern alarums changed to merry meetings, "
       "Our dreadful marches to delightful measures.";
 
-   for(S32 i = 0; i < 50; i++)
+   for(S32 i = 0; i < 50; ++i)
    {
       S32 width = 150 + i * 10;
-      for(S32 j = 0; j < 5; j++)
+      for(S32 j = 0; j < 5; ++j)
       {
          S32 size = 10 + 2 * j;
          lines = wrapString(longLine, 300, 14);

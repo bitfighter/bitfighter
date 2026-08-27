@@ -244,14 +244,16 @@ public:
    /// Records bits used in the initial update of objects of this class.
    void addInitialUpdate(U32 bitCount)
    {
-      mInitialUpdateCount++;
+      ++mInitialUpdateCount;
+
       mInitialUpdateBitsUsed += bitCount;
    }
 
    /// Records bits used in a partial update of an object of this class.
    void addPartialUpdate(U32 bitCount)
    {
-      mPartialUpdateCount++;
+      ++mPartialUpdateCount;
+
       mPartialUpdateBitsUsed += bitCount;
    }
 
@@ -329,7 +331,7 @@ public:
       mClassType      = classType;
       mClassGroupMask = groupMask;
       mClassVersion   = classVersion;
-      for(U32 i = 0; i < NetClassGroupCount; i++)
+      for(U32 i = 0; i < NetClassGroupCount; ++i)
          mClassId[i] = 0;
 
       // link the class into our global list
@@ -368,12 +370,14 @@ public:
 
    void incRef()
    {
-      mRefCount++;
+      ++mRefCount;
+
    }
 
    void decRef()
    {
-      mRefCount--;
+      --mRefCount;
+
       if(!mRefCount)
          destroySelf();
    }

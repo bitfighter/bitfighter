@@ -50,7 +50,7 @@ TEST(ServerGameTest, KillStreakTests)
    S32 iters = (S32)ceil((F32)ServerGame::LevelSwitchTime / (F32)timeDelta) - 1;
 
    // Idle for 4000ms more... in 1000 ms chunks because of timeDelta limitations in ServerGame
-   for(S32 i = 0; i < iters; i++)
+   for(S32 i = 0; i < iters; ++i)
       game->idle(timeDelta);
 
    // New game has begun... kill streak should be reset to 0
@@ -81,7 +81,7 @@ TEST(ServerGameTest, LittleStory)
    ship->setMove(Move(1,0));                  // Length 1 = max speed; moves stay active until replaced
 
    // Test that we can simulate several ticks, and the ship advances every cycle
-   for(S32 i = 0; i < 20; i++)
+   for(S32 i = 0; i < 20; ++i)
    {
       Point prevPos = ship->getPos();
       serverGame->idle(10);                   // when i == 16 this locks up... why?
@@ -96,7 +96,7 @@ TEST(ServerGameTest, LittleStory)
    t->addToGame(serverGame, serverGame->getGameObjDatabase());
 
    bool shipDeleted = false;
-   for(S32 i = 0; i < 100; i++)
+   for(S32 i = 0; i < 100; ++i)
    {
       ship->setMove(Move(0,0));
       serverGame->idle(100);

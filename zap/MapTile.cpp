@@ -90,7 +90,8 @@ static Path64 pointsToPath64(const Vector<Point> &pts)
 static U32 nextPow2(U32 v)
 {
    if(v == 0) return 1;
-   v--;
+   --v;
+
    v |= v >> 1;
    v |= v >> 2;
    v |= v >> 4;
@@ -206,11 +207,11 @@ static void buildProtectedBoundaries(const Vector<Vector<Point>> &wallPolygons,
                                       S32 gridWidth, S32 gridHeight,
                                       std::unordered_set<U16> &outProtected)
 {
-   for(S32 w = 0; w < wallPolygons.size(); w++)
+   for(S32 w = 0; w < wallPolygons.size(); ++w)
    {
       const Vector<Point> &poly = wallPolygons[w];
       S32 n = poly.size();
-      for(S32 v = 0; v < n; v++)
+      for(S32 v = 0; v < n; ++v)
       {
          const Point &p1 = poly[v];
          const Point &p2 = poly[(v + 1) % n];
@@ -247,7 +248,7 @@ static void buildProtectedBoundaries(const Vector<Vector<Point>> &wallPolygons,
             if(gyEnd >= gridHeight) gyEnd = gridHeight - 1;
 
             // Protect the tile this edge's grid coordinate maps to
-            for(S32 gy = gyStart; gy <= gyEnd; gy++)
+            for(S32 gy = gyStart; gy <= gyEnd; ++gy)
             {
                U16 tid = static_cast<U16>(gy * gridWidth + gx);
                outProtected.insert(protectedKey(tid, side));
@@ -268,7 +269,7 @@ static void buildProtectedBoundaries(const Vector<Vector<Point>> &wallPolygons,
             }
             if(adjGx >= 0 && adjGx < gridWidth)
             {
-               for(S32 gy = gyStart; gy <= gyEnd; gy++)
+               for(S32 gy = gyStart; gy <= gyEnd; ++gy)
                {
                   U16 tid = static_cast<U16>(gy * gridWidth + adjGx);
                   outProtected.insert(protectedKey(tid, adjSide));
@@ -300,7 +301,7 @@ static void buildProtectedBoundaries(const Vector<Vector<Point>> &wallPolygons,
             if(gxStart < 0) gxStart = 0;
             if(gxEnd >= gridWidth) gxEnd = gridWidth - 1;
 
-            for(S32 gx = gxStart; gx <= gxEnd; gx++)
+            for(S32 gx = gxStart; gx <= gxEnd; ++gx)
             {
                U16 tid = static_cast<U16>(gy * gridWidth + gx);
                outProtected.insert(protectedKey(tid, side));
@@ -320,7 +321,7 @@ static void buildProtectedBoundaries(const Vector<Vector<Point>> &wallPolygons,
             }
             if(adjGy >= 0 && adjGy < gridHeight)
             {
-               for(S32 gx = gxStart; gx <= gxEnd; gx++)
+               for(S32 gx = gxStart; gx <= gxEnd; ++gx)
                {
                   U16 tid = static_cast<U16>(adjGy * gridWidth + gx);
                   outProtected.insert(protectedKey(tid, adjSide));
@@ -370,13 +371,13 @@ static bool computeEdgeSpans(const WallPoly &wp, U32 edgeIdx,
 
    const int64_t fixedC = vertical ? p1.x : p1.y;   // x (vertical) or y (horizontal)
 
-   for(S32 pi = 0; pi < globalUnion.size(); pi++)
+   for(S32 pi = 0; pi < globalUnion.size(); ++pi)
    {
       const Path64 &path = globalUnion[pi];
       if(path.size() < 2)
          continue;
 
-      for(S32 ei = 0; ei < path.size(); ei++)
+      for(S32 ei = 0; ei < path.size(); ++ei)
       {
          const Point64 &a = path[ei];
          const Point64 &b = path[(ei + 1) % path.size()];
@@ -426,7 +427,7 @@ static bool computeEdgeSpans(const WallPoly &wp, U32 edgeIdx,
    std::sort(crossings.begin(), crossings.end());
    std::vector<double> uniq;
    uniq.reserve(crossings.size());
-   for(S32 i = 0; i < (S32)crossings.size(); i++)
+   for(S32 i = 0; i < (S32)crossings.size(); ++i)
       if(uniq.empty() || std::fabs(crossings[i] - uniq.back()) > 1e-4)
          uniq.push_back(crossings[i]);
 
@@ -446,7 +447,7 @@ static bool computeEdgeSpans(const WallPoly &wp, U32 edgeIdx,
                             // Clipper2 precision shifts (1 unit = 1000 C2 units)
 
    double prevS = 0.0;
-   for(S32 i = 0; i <= (S32)uniq.size(); i++)
+   for(S32 i = 0; i <= (S32)uniq.size(); ++i)
    {
       const double sNext = (i < (S32)uniq.size()) ? uniq[i] : 1.0;
       const double midS = (prevS + sNext) * 0.5;
@@ -468,7 +469,7 @@ static bool computeEdgeSpans(const WallPoly &wp, U32 edgeIdx,
    }
 
    splitTs.reserve(uniq.size());
-   for(S32 i = 0; i < (S32)uniq.size(); i++)
+   for(S32 i = 0; i < (S32)uniq.size(); ++i)
       splitTs.push_back((F32)uniq[i]);
 
    return true;
@@ -490,7 +491,7 @@ static void applyEdgeSplits(WallPoly &wp, const std::vector<EdgeSpanSplit> &spli
    newEdges.reserve(wp.edges.size() + splits.size() * 6);
 
    auto findSplit = [&splits](U32 edgeIdx) -> const EdgeSpanSplit * {
-      for(S32 s = 0; s < (S32)splits.size(); s++)
+      for(S32 s = 0; s < (S32)splits.size(); ++s)
          if(splits[s].edgeIdx == edgeIdx)
             return &splits[s];
       return NULL;
@@ -500,7 +501,7 @@ static void applyEdgeSplits(WallPoly &wp, const std::vector<EdgeSpanSplit> &spli
    newVerts.push_back(wp.verts[0]);
    newVerts.push_back(wp.verts[1]);
 
-   for(U32 i = 0; i < n; i++)
+   for(U32 i = 0; i < n; ++i)
    {
       const U32 next = (i + 1) % n;
       const F32 eX = wp.verts[next * 2];
@@ -517,7 +518,7 @@ static void applyEdgeSplits(WallPoly &wp, const std::vector<EdgeSpanSplit> &spli
          const F32 sX = wp.verts[i * 2];
          const F32 sY = wp.verts[i * 2 + 1];
 
-         for(S32 k = 0; k < split->ts.size(); k++)
+         for(S32 k = 0; k < split->ts.size(); ++k)
          {
             const F32 t = split->ts[k];
             newVerts.push_back(sX + (eX - sX) * t);
@@ -569,7 +570,7 @@ static void classifyEdges(WallPoly &wallPoly, const Rect &tileBounds, U16 tileId
    const U32 numVerts = wallPoly.numVerts();
    std::vector<EdgeSpanSplit> splits;   // collected split ops, applied after the loop
 
-   for(U32 i = 0; i < numVerts; i++)
+   for(U32 i = 0; i < numVerts; ++i)
    {
       const F32 x1 = wallPoly.verts[i * 2];
       const F32 y1 = wallPoly.verts[i * 2 + 1];
@@ -601,7 +602,7 @@ static void classifyEdges(WallPoly &wallPoly, const Rect &tileBounds, U16 tileId
       {
          bool allNone    = true;
          bool allVisible = true;
-         for(S32 s = 0; s < segStyles.size(); s++)
+         for(S32 s = 0; s < segStyles.size(); ++s)
          {
             if(segStyles[s] != EdgeStyle::None)
                allNone = false;
@@ -671,7 +672,7 @@ static void stripCollinearPoints(Path64 &path)
    result.reserve(path.size());
 
    S32 n = static_cast<S32>(path.size());
-   for(S32 i = 0; i < n; i++)
+   for(S32 i = 0; i < n; ++i)
    {
       const Point64 &prev = path[(i - 1 + n) % n];
       const Point64 &curr = path[i];
@@ -720,7 +721,7 @@ static void mergeOverlappingEdges(WallPoly &wp)
    };
 
    Vector<EdgeInfo> infos;
-   for(U32 e = 0; e < nv; e++)
+   for(U32 e = 0; e < nv; ++e)
    {
       if(wp.edges[e] == EdgeStyle::None)
          continue;
@@ -755,12 +756,12 @@ static void mergeOverlappingEdges(WallPoly &wp)
 
    // Find overlapping pairs and merge
    S32 n = infos.size();
-   for(S32 i = 0; i < n; i++)
+   for(S32 i = 0; i < n; ++i)
    {
       if(wp.edges[infos[i].idx] == EdgeStyle::None)
          continue;
 
-      for(S32 j = i + 1; j < n; j++)
+      for(S32 j = i + 1; j < n; ++j)
       {
          if(wp.edges[infos[j].idx] == EdgeStyle::None)
             continue;
@@ -849,7 +850,7 @@ static void suppressInteriorBoundaryEdges(WallPoly &wp)
    };
 
    Vector<EdgeRange> ranges;
-   for(U32 e = 0; e < nv; e++)
+   for(U32 e = 0; e < nv; ++e)
    {
       F32 x1 = wp.verts[e * 2];
       F32 y1 = wp.verts[e * 2 + 1];
@@ -872,9 +873,9 @@ static void suppressInteriorBoundaryEdges(WallPoly &wp)
 
    // Mark interior edges: if edge B's range is strictly inside edge A's range
    // on the same line, edge B is interior.
-   for(S32 i = 0; i < ranges.size(); i++)
+   for(S32 i = 0; i < ranges.size(); ++i)
    {
-      for(S32 j = i + 1; j < ranges.size(); j++)
+      for(S32 j = i + 1; j < ranges.size(); ++j)
       {
          EdgeRange &a = ranges[i];
          EdgeRange &b = ranges[j];
@@ -903,7 +904,7 @@ static void appendClippedPaths(MapTile &mt, const Rect &tileBounds, const Paths6
                                const std::unordered_set<U16> &protectedBoundaries,
                                const Paths64 &globalUnion)
 {
-   for(S32 i = 0; i < paths.size(); i++)
+   for(S32 i = 0; i < paths.size(); ++i)
    {
       if(paths[i].size() < 3) 
          continue;
@@ -961,7 +962,7 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
    Vector<ClipperWall> clipperWalls;
    clipperWalls.reserve(mWallPolygons.size());
 
-   for(S32 w = 0; w < mWallPolygons.size(); w++)
+   for(S32 w = 0; w < mWallPolygons.size(); ++w)
    {
       ClipperWall cw;
       cw.path = pointsToPath64(mWallPolygons[w]);
@@ -986,7 +987,7 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
    // Direct tileId → index lookup table (tileId = gy * mGridWidth + gx)
    std::vector<S32> tileLookup(mGridWidth * mGridHeight, -1);
 
-   for(S32 i = 0; i < clipperWalls.size(); i++)
+   for(S32 i = 0; i < clipperWalls.size(); ++i)
    {
       const Path64 &wallPath = clipperWalls[i].path;
 
@@ -1002,9 +1003,9 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
       const S32 tileMaxGY = static_cast<S32>(std::floor(
          (wallBounds.max.y - mLevelBounds.min.y) / static_cast<F32>(mTileSize)));
 
-      for(S32 gy = tileMinGY; gy <= tileMaxGY; gy++)
+      for(S32 gy = tileMinGY; gy <= tileMaxGY; ++gy)
       {
-         for(S32 gx = tileMinGX; gx <= tileMaxGX; gx++)
+         for(S32 gx = tileMinGX; gx <= tileMaxGX; ++gx)
          {
             if(gx < 0 || gx >= mGridWidth || gy < 0 || gy >= mGridHeight)
                continue;
@@ -1072,7 +1073,7 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
 
    // Collect original (pre-clip) wall paths, separated by type
    Paths64 origPermPaths, origDestPaths;
-   for(S32 w = 0; w < mWallPolygons.size(); w++)
+   for(S32 w = 0; w < mWallPolygons.size(); ++w)
    {
       Path64 path = pointsToPath64(mWallPolygons[w]);
       if(mWallDestructible[w])
@@ -1090,7 +1091,7 @@ void MapTileBuilder::build(Vector<MapTile> &outTiles)
    // This avoids the merged-Union Z-callback complexity entirely.
    // ------------------------------------------------------------
 
-   for(S32 i = 0; i < outTiles.size(); i++)
+   for(S32 i = 0; i < outTiles.size(); ++i)
    {
       MapTile &tile = outTiles[i];
       TilePaths &tilePath = tilePaths[i];

@@ -160,7 +160,7 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Poin
 
    S32 index = 0;
 
-   for(S32 i = 0; i < 2; i++)
+   for(S32 i = 0; i < 2; ++i)
    {
       F32 offset = halfWidth * 2 * i - (i * 4);
 
@@ -278,7 +278,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    S32 argc = 0;
    const char *argv[8];                // 8 is ok, SpeedZone only supports 4 numbered args
 
-   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; ++i)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg
 
@@ -296,7 +296,8 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
          if(argc < 8)
          {
             argv[argc] = argv2[i];
-            argc++;
+            ++argc;
+
          }
       }
    }
@@ -541,7 +542,8 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       Point pos, dir;
 
-      mUnpackInit++;
+      ++mUnpackInit;
+
 
       pos.read(stream);
       dir.read(stream);

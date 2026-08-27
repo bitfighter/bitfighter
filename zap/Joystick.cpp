@@ -108,7 +108,7 @@ bool Joystick::initJoystick(GameSettings *settings)
 
    logprintf("%d joystick(s) detected:", joystickCount);
 
-   for(S32 i = 0; i < joystickCount; i++)
+   for(S32 i = 0; i < joystickCount; ++i)
    {
       // A GameController is a specific type of joystick
       if(SDL_IsGameController(i))

@@ -124,7 +124,8 @@ void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycy
       currentDashStart += periodSeg;
       currentDashEnd   += periodSeg;
       if(numPeriods != 0) // Don't wrap around
-         numPeriods--;
+         --numPeriods;
+
 
       firstDashStart = currentDashStart;
    }
@@ -140,7 +141,7 @@ void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycy
 
 
    // Draw middles
-   for(U32 i = 0; i < numPeriods; i++)
+   for(U32 i = 0; i < numPeriods; ++i)
    {
       vertexArray.push_back(currentDashStart);
       vertexArray.push_back(currentDashEnd);
@@ -192,13 +193,15 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
    {
       arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
+      ++count;
+
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
    arcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
    arcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
-   count++;
+   ++count;
+
 
    Renderer::get().renderVertexArray(arcVertexArray, count, RenderType::LineStrip);
 }
@@ -208,7 +211,7 @@ void drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount,
 {
    F32 interimAngle = arcTheta / dashCount;
 
-   for(S32 i = 0; i < dashCount; i++)
+   for(S32 i = 0; i < dashCount; ++i)
       drawArc(center, radius, interimAngle * i + offsetAngle, (interimAngle * (i + 1)) - dashSpaceCentralAngle + offsetAngle);
 }
 
@@ -240,7 +243,7 @@ void drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32
 {
    F32 interimAngle = centralAngle / rayCount;
 
-   for(S32 i = 0; i < rayCount; i++)
+   for(S32 i = 0; i < rayCount; ++i)
       drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + offsetAngle);
 }
 
@@ -325,17 +328,20 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
    {
       filledArcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledArcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
+      ++count;
+
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
    filledArcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
    filledArcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
-   count++;
+   ++count;
+
 
    filledArcVertexArray[2*count]       = pos.x;
    filledArcVertexArray[(2*count) + 1] = pos.y;
-   count++;
+   ++count;
+
 
    Renderer::get().renderVertexArray(filledArcVertexArray, count, RenderType::TriangleFan);
 }
@@ -388,7 +394,8 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, R
 
       vertexArray[2*count]     = pos.x + (width * cosalpha * cosbeta - height * sinalpha * sinbeta);
       vertexArray[(2*count)+1] = pos.y + (width * cosalpha * sinbeta + height * sinalpha * cosbeta);
-      count++;
+      ++count;
+
    }
 
    Renderer::get().renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, mode);
@@ -407,7 +414,7 @@ void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 
    F32 theta = 0;
    F32 dTheta = FloatTau / sides;
-   for(S32 i = 0; i < sides; i++)
+   for(S32 i = 0; i < sides; ++i)
    {
       polygonVertexArray[2*i]       = pos.x + cos(theta + angle) * radius;
       polygonVertexArray[(2*i) + 1] = pos.y + sin(theta + angle) * radius;
@@ -466,7 +473,8 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
    {
       filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
+      ++count;
+
    }
 
    Renderer::get().renderVertexArray(filledSectorVertexArray, count, RenderType::TriangleFan);
@@ -494,7 +502,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
    Point segMid;                                   // Reusable container
 
    Vector<Point> vertexArray(2 * hatchCount);
-   for(F32 i = 0; i < hatchCount; i++)
+   for(F32 i = 0; i < hatchCount; ++i)
    {
       dirx = dir;                                  // Reset to original value
       segMid = base + dirx * (i + 0.5f) / F32(HATCH_COUNT) * length;      // Adding 0.5 causes hatches to be centered properly
@@ -568,8 +576,8 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 {
    Renderer& r = Renderer::get();
 
-   for(S32 i = 0; i < flameCount; i++)
-      for(S32 j = 0; j < flames[i].layerCount; j++)
+   for(S32 i = 0; i < flameCount; ++i)
+      for(S32 j = 0; j < flames[i].layerCount; ++j)
       {
          ShipFlameLayer *flameLayer = &flames[i].layers[j];
          r.setColor(flameLayer->color, alpha);
@@ -623,7 +631,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, cons
 
    // Inner hull with colored insides
    r.setColor(*shipColor, alpha);
-   for(S32 i = 0; i < shipShapeInfo->innerHullPieceCount; i++)
+   for(S32 i = 0; i < shipShapeInfo->innerHullPieceCount; ++i)
       r.renderVertexArray(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, RenderType::LineStrip);
 
    // Render health bar
@@ -647,7 +655,7 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
    F32 len = vel.len();
 
    // Reset thrusts
-   for(U32 i = 0; i < 4; i++)
+   for(U32 i = 0; i < 4; ++i)
       thrusts[i] = 0;
 
    if(len > 0)
@@ -661,7 +669,7 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
       shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
 
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < 4; ++i)
          thrusts[i] = shipDirs[i].dot(vel);
    }
 
@@ -672,7 +680,7 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
       thrusts[2] += 0.25;
 
    if(boostActive)
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < 4; ++i)
          thrusts[i] *= 1.3f;
 }
 
@@ -1054,14 +1062,14 @@ void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfO
    r.setLineWidth(gLineWidth3);
    r.setColor(Colors::red, alpha);
 
-   for(S32 i = 0; i < repairTargets.size(); i++)
+   for(S32 i = 0; i < repairTargets.size(); ++i)
    {
       if(repairTargets[i] && repairTargets[i].getPointer() != ship)
       {
          Vector<Point> targetRepairLocations = repairTargets[i]->getRepairLocations(pos);
 
          Vector<Point> vertexArray(2 * targetRepairLocations.size());
-         for(S32 i = 0; i < targetRepairLocations.size(); i++)
+         for(S32 i = 0; i < targetRepairLocations.size(); ++i)
          {
             vertexArray.push_back(pos);
             vertexArray.push_back(targetRepairLocations[i]);
@@ -1182,7 +1190,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    if(!trackerInit)
    {
       trackerInit = true;
-      for(U32 i = 0; i < MaxParticles; i++)
+      for(U32 i = 0; i < MaxParticles; ++i)
       {
          Tracker &t = particles[i];
 
@@ -1210,7 +1218,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
 //      glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
       // Draw a different line for each destination
-      for(S32 i = 0; i < dests->size(); i++)
+      for(S32 i = 0; i < dests->size(); ++i)
       {
          F32 ang = pos.angleTo(dests->get(i));
          F32 sina = sin(ang);
@@ -1260,14 +1268,14 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    // of the teleporter.  This makes the whole teleport look white when you move a
    // ship into it and it shrinks; then it expands and slowly fades back the colors
    Color liveColors[NumColors];
-   for(S32 i = 0; i < NumColors; i++)
+   for(S32 i = 0; i < NumColors; ++i)
    {
       Color c(colors[type][i][0], colors[type][i][1], colors[type][i][2]);
       liveColors[i].interp(radiusFraction, Colors::white, c);
    }
 
    Color deadColors[NumColors];
-   for(S32 i = 0; i < NumColors; i++)
+   for(S32 i = 0; i < NumColors; ++i)
    {
       Color c(colors[3][i][0], colors[3][i][1], colors[3][i][2]);
       deadColors[i].interp(radiusFraction, Colors::white, c);
@@ -1288,7 +1296,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    F64 time_f64 = (F64)time * 0.001;
 
    // Draw the Trackers
-   for(U32 i = 0; i < MaxParticles; i++)
+   for(U32 i = 0; i < MaxParticles; ++i)
    {
       // Do some math first
       Tracker &t = particles[i];
@@ -1350,7 +1358,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
       teleporterColorArray[6] = currentColor->b;
       teleporterColorArray[7] = alpha * alphaMod;
 
-      for(U32 j = 0; j <= vertexCount; j++)
+      for(U32 j = 0; j <= vertexCount; ++j)
       {
          F32 frac = j / F32(vertexCount);
          F32 width = beamWidth * (1 - frac) * 0.5f;
@@ -1411,7 +1419,7 @@ void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale)
    // Draw the vertices of the wall or the polygon area
    S32 verts = obj->getVertCount();
 
-   for(S32 j = 0; j < verts; j++)
+   for(S32 j = 0; j < verts; ++j)
    {
       if(obj->vertSelected(j))
          renderVertex(SelectedVertex,     obj->getVert(j), j, currentScale, 1);   // Hollow yellow boxes with number
@@ -1467,7 +1475,7 @@ void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, 
 
    // Render half-circle front
    Vector<Point> vertexArray;
-   for(S32 x = -10; x <= 10; x++)
+   for(S32 x = -10; x <= 10; ++x)
    {
       F32 theta = x * FloatHalfPi * 0.1f;
       Point pos = normal * cos(theta) + cross * sin(theta);
@@ -1482,7 +1490,7 @@ void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, 
    if(healRate > 0)
    {
       Vector<Point> pointArray;
-      for(S32 x = -4; x <= 4; x++)
+      for(S32 x = -4; x <= 4; ++x)
       {
          F32 theta = x * FloatHalfPi * 0.2f;
          Point pos = normal * cos(theta) + cross * sin(theta);
@@ -1731,7 +1739,7 @@ void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
    Point p;
 
    Vector<Point> pts;
-   for(S32 i = 0; i < points * 2; i++)
+   for(S32 i = 0; i < points * 2; ++i)
    {
       p.set(r * cos(a), r * sin(a));
       pts.push_back(p + pos);
@@ -1765,7 +1773,7 @@ void drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
    core.clear();
    outline.clear();
 
-   for(S32 i = 0; i < points * 2; i++)
+   for(S32 i = 0; i < points * 2; ++i)
    {
       p.set(r * cos(a) + pos.x, r * sin(a) + pos.y);
 
@@ -1859,7 +1867,7 @@ void renderNavMeshBorders(const Vector<NeighboringZone> &borders)
    r.setColor(Colors::cyan);
 
    // Go through each border and render
-   for(S32 i = 0; i < borders.size(); i++)
+   for(S32 i = 0; i < borders.size(); ++i)
    {
       F32 vertices[] = {
             borders[i].borderStart.x, borders[i].borderStart.y,
@@ -2037,7 +2045,7 @@ static void drawInterruptedCircle(const Point &center, F32 radius, const F32 ang
    if(lastAngle >= FloatTau)
       lastAngle -= FloatTau;
 
-   for(S32 i = 0; i < 4; i++)
+   for(S32 i = 0; i < 4; ++i)
    {
       F32 gapStart = angles[i] - halfGap;
       F32 gapEnd = angles[i] + halfGap;
@@ -2594,7 +2602,7 @@ void renderTilePolys(const Vector<WallPoly> &wallPolys, const Color &fillColor, 
    // Pass 1: fill all polys using precomputed triangulation
    static const Color DEST_FILL(0.04f, 0.15f, 0.06f);  // green = destructible fill
    r.setColor(fillColor);
-   for(S32 i = 0; i < wallPolys.size(); i++)
+   for(S32 i = 0; i < wallPolys.size(); ++i)
    {
       const WallPoly &wallPoly = wallPolys[i];
       if(wallPoly.cachedFill.size() < 3)
@@ -2613,7 +2621,7 @@ void renderTilePolys(const Vector<WallPoly> &wallPolys, const Color &fillColor, 
    // destructible edges in DEST_COLOR (green)
    static const Color DEST_COLOR(0.0f, 1.0f, 0.0f);  // green = destructible outline
    r.setColor(outlineColor);
-   for(S32 i = 0; i < wallPolys.size(); i++)
+   for(S32 i = 0; i < wallPolys.size(); ++i)
    {
       const WallPoly &wallPoly = wallPolys[i];
       if(wallPoly.numVerts() < 3)
@@ -2637,7 +2645,7 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
    Renderer& r = Renderer::get();
    r.setColor(Colors::red);
 
-   for(S32 j = 0; j < 2; j++)
+   for(S32 j = 0; j < 2; ++j)
    {
       S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
       r.renderVertexArray((F32*)points.address(), points.size() / 2, RenderType::LineLoop, start, sizeof(Point));
@@ -2781,7 +2789,7 @@ void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 
 
    Point dir;   // Reusable container
 
-   for(S32 i = 0; i < CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; ++i)
    {
       dir = (panelGeom->repair[i] - pos);
       dir.normalize();
@@ -2843,7 +2851,8 @@ void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 
          colorArray[(4*count)+1]  = coreColor->g;
          colorArray[(4*count)+2]  = coreColor->b;
          colorArray[(4*count)+3]  = theta / FloatTau;
-         count++;
+         ++count;
+
       }
       r.renderColored(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, RenderType::LineLoop);
    }
@@ -3365,7 +3374,7 @@ void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
    F32 vertexArray[2 * NUM_CIRCLE_SIDES];
 
    // This is a repeated rotation
-   for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
+   for(S32 i = 0; i < NUM_CIRCLE_SIDES; ++i)
    {
       vertexArray[(2*i)]     = curX + x;
       vertexArray[(2*i) + 1] = curY + y;
@@ -3443,7 +3452,7 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
    F32 a = Float2Pi / teeth;
    F32 theta  = -ang1rad / 2;    // Start a little rotated to get an outer tooth facing up!
 
-   for(S32 i = 0; i < teeth; i++)
+   for(S32 i = 0; i < teeth; ++i)
    {
       pts.push_back(Point(-radius1 * sin(theta), radius1 * cos(theta)));
       theta += ang1rad;
@@ -3875,8 +3884,8 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    r.enableBlending();
 
    // The (F32(xPage + 1.f) == xPage) part becomes true, which could cause endless loop problem freezing game when way too far off the center.
-   for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); xPage++)
-      for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2 && !(F32(yPage + 1.f) == yPage); yPage++)
+   for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); ++xPage)
+      for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2 && !(F32(yPage + 1.f) == yPage); ++yPage)
       {
          r.pushMatrix();
             r.scale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
@@ -3901,7 +3910,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       // Render walls that have been moved first (i.e. render their shadows)
       if(moved)
       {
-         for(S32 i = 0; i < count; i++)
+         for(S32 i = 0; i < count; ++i)
          {
             WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
             if(wallSegment->isSelected())
@@ -3909,7 +3918,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
          }
       }
 
-      for(S32 i = 0; i < count; i++)
+      for(S32 i = 0; i < count; ++i)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(!moved || !wallSegment->isSelected())
@@ -3925,7 +3934,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
             {
                S32 ownerId = wallSegment->getOwner();
                const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
-               for(S32 o = 0; o < objs->size(); o++)
+               for(S32 o = 0; o < objs->size(); ++o)
                {
                   BfObject *obj = static_cast<BfObject *>(objs->get(o));
                   if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
@@ -3950,7 +3959,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
    }
    else  // Render selected/moving walls last so they appear on top; this is pass 2,
    {
-      for(S32 i = 0; i < count; i++)
+      for(S32 i = 0; i < count; ++i)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(wallSegment->isSelected())
@@ -3961,7 +3970,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
             {
                S32 ownerId = wallSegment->getOwner();
                const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
-               for(S32 o = 0; o < objs->size(); o++)
+               for(S32 o = 0; o < objs->size(); ++o)
                {
                   BfObject *obj = static_cast<BfObject *>(objs->get(o));
                   if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
@@ -3991,7 +4000,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       r.setLineWidth(gLineWidth1);
 
       //glColor(Colors::magenta);
-      for(S32 i = 0; i < wallEdgePoints.size(); i++)
+      for(S32 i = 0; i < wallEdgePoints.size(); ++i)
          renderSmallSolidVertex(currentScale, wallEdgePoints[i], dragMode);
 
       r.setLineWidth(gDefaultLineWidth);
@@ -4063,7 +4072,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
    vertices[2].set(p3.x, p3.y);
 
    // This loops twice: once to render the objective arrow, once to render the outline
-   for(S32 i = 0; i < 2; i++)
+   for(S32 i = 0; i < 2; ++i)
    {
       renderer.setColor(i == 1 ? fillColor : *outlineColor, alpha);
       renderer.renderVertexArray((F32 *)(vertices), ARRAYSIZE(vertices), i == 1 ? RenderType::TriangleFan : RenderType::LineLoop);
@@ -4145,7 +4154,7 @@ void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color
 {
    Renderer& r = Renderer::get();
 
-   for(S32 i = 1; i >= 0; i--)
+   for(S32 i = 1; i >= 0; --i)
    {
       // Draw heavy colored line with colored core
       r.setLineWidth(i ? gLineWidth4 : gDefaultLineWidth);

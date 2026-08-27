@@ -197,7 +197,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    S32 index;
 
-   for(index = 0; index < menuItems.size(); index++)
+   for(index = 0; index < menuItems.size(); ++index)
       if(inputCode == menuItems[index].key || inputCode == menuItems[index].button)
          break;
 
@@ -238,12 +238,12 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(mCurrentIndex < ShipModuleCount)    // We're working with modules
    {                                      // (note... braces required here!)
-      for(S32 i = 0; i < mCurrentIndex && !alreadyUsed; i++)
+      for(S32 i = 0; i < mCurrentIndex && !alreadyUsed; ++i)
          if(mModule[i] == index)
             alreadyUsed = true;
    }
    else                                   // We're working with weapons
-      for(S32 i = ShipModuleCount; i < mCurrentIndex && !alreadyUsed; i++)
+      for(S32 i = ShipModuleCount; i < mCurrentIndex && !alreadyUsed; ++i)
          if(mWeapon[i - ShipModuleCount] == index)
             alreadyUsed = true;
 
@@ -254,7 +254,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       menuItems[index].buttonOverrideColor = &Colors::overlayMenuSelectedItemColor;
 
       mModule[mCurrentIndex] = ShipModule(index);
-      mCurrentIndex++;
+      ++mCurrentIndex;
+
 
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
@@ -265,10 +266,10 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    {
       LoadoutTracker loadout;
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; ++i)
          loadout.setModule(i, ShipModule(loadoutModuleMenuItems[mModule[i]].itemIndex));
 
-      for(S32 i = 0; i < ShipWeaponCount; i++)
+      for(S32 i = 0; i < ShipWeaponCount; ++i)
          loadout.setWeapon(i, WeaponType(loadoutWeaponMenuItems[mWeapon[i]].itemIndex));
 
       Ship *ship = getGame()->getLocalPlayerShip();         // Can be NULL if game has ended while we're here

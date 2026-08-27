@@ -48,7 +48,7 @@ void DebugOverlayRenderer::appendBotPaths(ClientGame *game, Vector<BfObject *> &
    ServerGame *serverGame = game->getServerGame();
 
    if(serverGame)
-      for(S32 i = 0; i < serverGame->getBotCount(); i++)
+      for(S32 i = 0; i < serverGame->getBotCount(); ++i)
          renderObjects.push_back(serverGame->getBot(i));
 }
 
@@ -63,7 +63,7 @@ void DebugOverlayRenderer::populateRenderZones(ClientGame *game, const Rect *ext
       game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, mRawRenderObjects);
 
    mRenderZones.clear();
-   for(S32 i = 0; i < mRawRenderObjects.size(); i++)
+   for(S32 i = 0; i < mRawRenderObjects.size(); ++i)
       mRenderZones.push_back(static_cast<BotNavMeshZone *>(mRawRenderObjects[i]));
 }
 
@@ -110,7 +110,7 @@ void DebugOverlayRenderer::renderObjectIds(const ClientGame *game) const
 
    const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();
 
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
       static const S32 height = 13;
@@ -137,7 +137,7 @@ void DebugOverlayRenderer::renderObjectIds(const ClientGame *game) const
 
 void DebugOverlayRenderer::renderMeshZones(S32 layer) const
 {
-   for(S32 i = 0; i < mRenderZones.size(); i++)
+   for(S32 i = 0; i < mRenderZones.size(); ++i)
       mRenderZones[i]->renderLayer(layer);
 }
 
@@ -161,7 +161,7 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
    // Collect unique grid coordinates from all tile bounds.
    // All tiles are the same size, so sorting and deduping gives the grid lines.
    Vector<F32> gridX, gridY;
-   for(S32 i = 0; i < tiles.size(); i++)
+   for(S32 i = 0; i < tiles.size(); ++i)
    {
       gridX.push_back(tiles[i].bounds.min.x);
       gridX.push_back(tiles[i].bounds.max.x);
@@ -173,25 +173,25 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
 
    // Dedup within a small epsilon
    Vector<F32> uniqX, uniqY;
-   for(S32 i = 0; i < gridX.size(); i++)
+   for(S32 i = 0; i < gridX.size(); ++i)
       if(i == 0 || gridX[i] > gridX[i-1] + 0.1f)
          uniqX.push_back(gridX[i]);
 
-   for(S32 i = 0; i < gridY.size(); i++)
+   for(S32 i = 0; i < gridY.size(); ++i)
       if(i == 0 || gridY[i] > gridY[i-1] + 0.1f)
          uniqY.push_back(gridY[i]);
 
    // Draw the grid as horizontal and vertical lines (each edge once)
    r.setColor(Colors::cyan, 0.35f);
    r.setLineWidth(1);
-   for(S32 i = 0; i < uniqX.size(); i++)
+   for(S32 i = 0; i < uniqX.size(); ++i)
    {
       Vector<Point> line;
       line.push_back(Point(uniqX[i], uniqY[0]));
       line.push_back(Point(uniqX[i], uniqY[uniqY.size()-1]));
       r.renderPointVector(&line, RenderType::Lines);
    }
-   for(S32 i = 0; i < uniqY.size(); i++)
+   for(S32 i = 0; i < uniqY.size(); ++i)
    {
       Vector<Point> line;
       line.push_back(Point(uniqX[0], uniqY[i]));
@@ -204,17 +204,17 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
    //   red    = clip-introduced edge (outline == false, normally hidden)
    // Batch all edges into two vectors for fewer draw calls
    Vector<Point> origEdges, clipEdges;
-   for(S32 i = 0; i < tiles.size(); i++)
+   for(S32 i = 0; i < tiles.size(); ++i)
    {
       const MapTile &tile = tiles[i];
-      for(S32 j = 0; j < tile.polys.size(); j++)
+      for(S32 j = 0; j < tile.polys.size(); ++j)
       {
          const WallPoly &wp = tile.polys[j];
          const U32 numVerts = wp.numVerts();
          if(numVerts < 3)
             continue;
 
-         for(U32 k = 0; k < numVerts; k++)
+         for(U32 k = 0; k < numVerts; ++k)
          {
             const U32 v0 = k * 2;
             const U32 v1 = ((k + 1) % numVerts) * 2;
@@ -235,7 +235,7 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
       r.renderPointVector(&clipEdges, RenderType::Lines);
 
    // Draw tile ID labels centered in each tile
-   for(S32 i = 0; i < tiles.size(); i++)
+   for(S32 i = 0; i < tiles.size(); ++i)
    {
       const MapTile &tile = tiles[i];
       F32 cx = (tile.bounds.min.x + tile.bounds.max.x) / 2;
@@ -296,14 +296,14 @@ void DebugOverlayRenderer::renderEdgeIds(const ClientGame *game) const
    std::set<EdgeKey> keys;
    std::map<EdgeKey, Point> keyMidpoints;  // midpoint for label placement
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
 
-         for(U32 e = 0; e < nv; e++)
+         for(U32 e = 0; e < nv; ++e)
          {
             // Include ALL edges — including EdgeStyle::None (tile boundary /
             // interior overlap edges).  This is so /showedgeids shows every
@@ -380,7 +380,8 @@ void DebugOverlayRenderer::renderEdgeIds(const ClientGame *game) const
 
       r.setColor(col);
       drawStringf(labelX, labelY, fontSize, "%d", nextId);
-      nextId++;
+      ++nextId;
+
    }
 }
 

@@ -54,7 +54,7 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 // Static method, for testing
 InputCode HelperMenu::getInputCodeForOption(const OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut)
 {
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
       if(items[i].itemIndex == index)
          return keyBut ? items[i].key : items[i].button;
 
@@ -128,9 +128,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 displayItems = 0;
 
    // Count how many items we will be displaying -- some may be hidden
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       if(items[i].showOnMenu)
-         displayItems++;
+         ++displayItems;
+
 
    bool hasLegend = legendCount > 0;
 
@@ -217,7 +218,7 @@ S32 HelperMenu::getButtonWidth(const OverlayMenuItem *items, S32 itemCount) cons
    InputMode inputMode = getGame()->getInputMode();
 
    S32 buttonWidth = 0;
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
    {
       if(!items[i].showOnMenu)
          continue;
@@ -250,7 +251,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
    S32 height = 0;
 
    // Calculate height of all our items, ignoring those that are hidden
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
       if(items[i].showOnMenu)
          height += MENU_FONT_SIZE + MENU_FONT_SPACING;
 
@@ -280,7 +281,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
    yPos += 2;        // Aesthetics
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       // Skip hidden options!
       if(!items[i].showOnMenu)
@@ -345,12 +346,12 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
    const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
 
    // First, get the total width so we can center properly
-   for(S32 i = 0; i < legendCount; i++)
+   for(S32 i = 0; i < legendCount; ++i)
       width += getStringWidth(MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
 
    x -= width / 2;
 
-   for(S32 i = 0; i < legendCount; i++)
+   for(S32 i = 0; i < legendCount; ++i)
    {
       Renderer::get().setColor(*legendColors[i]);
       x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
@@ -363,7 +364,7 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count) const
 {
    S32 maxWidth = 0;
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       S32 width = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
       if(width > maxWidth)

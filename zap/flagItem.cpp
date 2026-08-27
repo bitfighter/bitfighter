@@ -324,7 +324,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
    // Now remove the occupied spots from our list of potential spawns
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(flag->isAtHome() && (flag->getTeam() <= TEAM_NEUTRAL || flag->getTeam() == getTeam() || !isTeamGame))
@@ -332,7 +332,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
          // on the unoccupied list, unless a second flag at this location removes it from the list on a subsequent pass.
-         for(S32 j = 0; j < spawnPoints.size(); j++)
+         for(S32 j = 0; j < spawnPoints.size(); ++j)
             if(spawnPoints[j]->getPos() == flag->mInitialPos)
             {
                spawnPoints.erase_fast(j);

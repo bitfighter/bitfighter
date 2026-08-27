@@ -64,7 +64,7 @@ LuaScriptRunner::LuaScriptRunner()
    static U32 mNextScriptId = 0;
 
    // Initialize all subscriptions to unsubscribed -- bits will automatically subscribe to onTick later
-   for(S32 i = 0; i < EventManager::EventTypes; i++)
+   for(S32 i = 0; i < EventManager::EventTypes; ++i)
       mSubscriptions[i] = false;
 
    mScriptId = "script" + itos(mNextScriptId++);
@@ -79,7 +79,7 @@ LuaScriptRunner::~LuaScriptRunner()
 {
    // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to
    // send an event to a dead bot, after all...
-   for(S32 i = 0; i < EventManager::EventTypes; i++)
+   for(S32 i = 0; i < EventManager::EventTypes; ++i)
       if(mSubscriptions[i])
          EventManager::get()->unsubscribeImmediate(this, (EventManager::EventType)i);
 
@@ -249,7 +249,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
          // Check if script is in our cache
          S32 cacheSize = (S32)mCachedScripts.size();
 
-         for(S32 i = 0; i < cacheSize; i++)
+         for(S32 i = 0; i < cacheSize; ++i)
             if(mCachedScripts[i] == mScriptName)
             {
                found = true;
@@ -724,7 +724,7 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
    lua_pushstring(L, mScriptName.c_str());            //                                        -- ..., env_table, "arg", table, scriptName
    lua_rawseti(L, -2, 0);                             //                                        -- ..., env_table, "arg", table
 
-   for(S32 i = 0; i < args.size(); i++)
+   for(S32 i = 0; i < args.size(); ++i)
    {
       lua_pushstring(L, args[i].c_str());             //                                        -- ..., env_table, "arg", table, string
       lua_rawseti(L, -2, i + 1);                      //                                        -- ..., env_table, "arg", table
@@ -775,7 +775,7 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
 {
    S32 id = S32(getInt(L, 1));
 
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
    {
       BfObject *bfObject = static_cast<BfObject *>(objects->get(i));
       if(bfObject->getUserAssignedId() == id)
@@ -1000,7 +1000,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
    // ModuleInfo
    lua_newtable(L);                                // table
 
-   for(S32 i = 0; i < ModuleCount; i++)
+   for(S32 i = 0; i < ModuleCount; ++i)
    {
       lua_pushinteger(L, i);                       // table, index
       lua_newtable(L);                             // table, index, table
@@ -1022,7 +1022,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
    // WeaponInfo
    lua_newtable(L);                                // table
 
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
    {
       WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(WeaponType(i));
 
@@ -1116,12 +1116,12 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
    ProfileMap moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
 
    ProfileMap::iterator it;
-   for(it = moduleProfiles.begin(); it != moduleProfiles.end(); it++)
+   for(it = moduleProfiles.begin(); it != moduleProfiles.end(); ++it)
    {
       if((*it).first == "global")
       {
          vector<LuaStaticFunctionProfile> &profiles = (*it).second;
-         for(U32 i = 0; i < profiles.size(); i++)
+         for(U32 i = 0; i < profiles.size(); ++i)
          {
             LuaStaticFunctionProfile &profile = profiles[i];
             lua_pushcfunction(L, profile.function);                 // -- fn
@@ -1133,7 +1133,7 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
          lua_createtable(L, 0, 0);                                  // -- table
 
          vector<LuaStaticFunctionProfile> &profiles = (*it).second;
-         for(U32 i = 0; i < profiles.size(); i++)
+         for(U32 i = 0; i < profiles.size(); ++i)
          {
             LuaStaticFunctionProfile &profile = profiles[i];
             lua_pushcfunction(L, profile.function);                 // -- table, fn
@@ -1297,10 +1297,10 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
    S32 pushed = 0;      // Count of items we put into our table
 
-   for(S32 i = 0; i < results->size(); i++)
+   for(S32 i = 0; i < results->size(); ++i)
    {
       static_cast<BfObject *>(results->get(i))->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
@@ -1382,10 +1382,10 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    S32 pushed = 0;      // Count of items we put into our table
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       static_cast<BfObject *>(fillVector[i])->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
