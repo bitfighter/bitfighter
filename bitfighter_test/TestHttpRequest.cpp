@@ -147,8 +147,18 @@ TEST_F(HttpRequestTest, connectError)
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    sock->connectError = UnknownError;
    EXPECT_FALSE(req.send());
+   EXPECT_EQ("Connect error", req.getError());
 }
 
+
+TEST_F(HttpRequestTest, notWritable)
+{
+   plantMocks();
+   sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
+   sock->isWritableResult = false;
+   EXPECT_FALSE(req.send());
+   EXPECT_EQ("Socket not writable", req.getError());
+}
 
 
 TEST_F(HttpRequestTest, sendError)
@@ -157,6 +167,7 @@ TEST_F(HttpRequestTest, sendError)
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    sock->sendError = UnknownError;
    EXPECT_FALSE(req.send());
+   EXPECT_EQ("Can't send request", req.getError());
 }
 
 
@@ -166,6 +177,7 @@ TEST_F(HttpRequestTest, receiveFail)
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    sock->receiveError = UnknownError;
    EXPECT_FALSE(req.send());
+   EXPECT_EQ("No response", req.getError());
 }
 
 
@@ -173,7 +185,9 @@ TEST_F(HttpRequestTest, successTest)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
-   EXPECT_TRUE(req.send());
+   ASSERT_TRUE(req.send()) << req.getError();
+   EXPECT_EQ(200, req.getResponseCode());
+   EXPECT_EQ("response", req.getResponseBody());
 }
 
 };

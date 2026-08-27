@@ -52,6 +52,7 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
+	Matrix4.cpp
 	LevelDatabase.cpp
 	LevelSource.cpp
 	LineItem.cpp
@@ -100,6 +101,7 @@ set(SHARED_SOURCES
 	TextItem.cpp
 	Timer.cpp
 	WallSegmentManager.cpp
+	MapTile.cpp
 	WeaponInfo.cpp
 	Zone.cpp
 	zoneControlGame.cpp
@@ -152,7 +154,6 @@ set(CLIENT_SOURCES
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
 	LevelListDisplayer.cpp
-	Matrix4.cpp
 	oglconsole.cpp
 	quickChatHelper.cpp
     Renderer.cpp
@@ -201,6 +202,8 @@ file(GLOB BITFIGHTER_HEADERS *.h)
 
 file(GLOB OTHER_HEADERS
 	${CLIPPER_INCLUDE_DIR}/*.hpp
+	${CLIPPER2_INCLUDE_DIR}/*.h
+	${CLIPPER2_INCLUDE_DIR}/clipper2/*.h
 	${CMAKE_SOURCE_DIR}/other/*.h
 	${CMAKE_SOURCE_DIR}/fontstash/*.h
 	${CMAKE_SOURCE_DIR}/recast/*.h
@@ -226,6 +229,7 @@ set(SHARED_LIBS
 	${TOMCRYPT_LIBRARIES}
 	${SQLITE3_LIBRARIES}
 	${CLIPPER_LIBRARIES}
+	${CLIPPER2_LIBRARIES}
 	${POLY2TRI_LIBRARIES}
 	${EXTRA_LIBS}
 )
@@ -256,7 +260,7 @@ BF_PLATFORM_ADD_DEFINITIONS()
 # Targets
 #
 
-# Disable compiling of client and test suite if certain dependencies arent met
+# Disable compiling of client and test suite if certain dependencies aren't met
 set(COMPILE_CLIENT YES)
 if(NOT SDL2_FOUND AND NOT SDL_FOUND)
 	set(COMPILE_CLIENT NO)
@@ -288,11 +292,12 @@ endif()
 
 # Defaults for bitfighterd
 set(INCLUDE_DIRS
-	${OPENAL_INCLUDE_DIR}
 	${ALURE_INCLUDE_DIR}
+	${OPENAL_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${TOMCRYPT_INCLUDE_DIR}
 	${CLIPPER_INCLUDE_DIR}
+	${CLIPPER2_INCLUDE_DIR}
 	${POLY2TRI_INCLUDE_DIR}
 	${SQLITE3_INCLUDE_DIR}
 	${BOOST_INCLUDE_DIR}
@@ -311,7 +316,7 @@ if(COMPILE_CLIENT)
 	)
 
 	if(COMPILE_TEST_SUITE)
-		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/include)
+		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/googletest/include)
 	endif()
 endif()
 

@@ -50,7 +50,7 @@ static const HelpItems helpItems[] = {
 };
 
 // Provide very specific access to above structure (static method)
-// Only used for intializing hasHelpItemForObjects[] array in ClientGame
+// Only used for initializing hasHelpItemForObjects[] array in ClientGame
 U8 HelpItemManager::getAssociatedObjectType(HelpItem helpItem)
 {
    if(helpItems[helpItem].autoAdd)

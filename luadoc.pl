@@ -350,7 +350,7 @@ foreach my $file (@files) {
 
             $enumDescr = $descrColumn != -1 ? $words[$descrColumn] : "";
 
-            # Clean up descr -- remove leading and traling non-word characters... i.e. junk
+            # Clean up descr -- remove leading and trailing non-word characters... i.e. junk
             $enumDescr =~ s|^\W*"||;         # Remove leading junk
             $enumDescr =~ s|"\W*$||;         # Remove trailing junk
 
@@ -399,7 +399,7 @@ foreach my $file (@files) {
          }
       }
 
-      print $OUT "\n\n// What follows is a dump of the \@globalfunctions varaible\n\n";
+      print $OUT "\n\n// What follows is a dump of the \@globalfunctions variable\n\n";
 
       print $OUT "namespace global {\n";
       foreach ( @globalfunctions ) {
@@ -408,7 +408,7 @@ foreach my $file (@files) {
       }
       print $OUT "}\n";
 
-      print $OUT "\n\n// What follows is a dump of the \@comments varaible\n\n";
+      print $OUT "\n\n// What follows is a dump of the \@comments variable\n\n";
       print $OUT @comments;
 
       close $OUT;
@@ -438,7 +438,7 @@ system("doxygen luadocs.doxygen");
 
 # Post-process the generated doxygen stuff
 # Let's try this with Tie::File... it looks pretty neat!
-# Chcek the docs at http://search.cpan.org/~toddr/Tie-File-0.98/lib/Tie/File.pm
+# Check the docs at http://search.cpan.org/~toddr/Tie-File-0.98/lib/Tie/File.pm
 
 print "Fixing doxygen output...\n";
 @files = ();

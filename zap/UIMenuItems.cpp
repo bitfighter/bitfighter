@@ -161,7 +161,7 @@ void MenuItem::setMenu(MenuUserInterface *menu)
 }
 
 
-// Shouldn't need to be overridden -- all redering routines should include xpos
+// Shouldn't need to be overridden -- all rendering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, ypos, textsize, isSelected);
@@ -285,7 +285,7 @@ void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in chil
  * @descr MenuItem is the parent class for all other MenuItems.
  *
  * Currently, you cannot instantiate a MenuItem from Lua, though you can
- * instatiate MenuItem subclasses.
+ * instantiate MenuItem subclasses.
  */
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \

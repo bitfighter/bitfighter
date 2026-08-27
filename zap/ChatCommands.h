@@ -88,6 +88,8 @@ void showCoordsHandler         (ClientGame *game, const Vector<string> &args);
 void showIdsHandler            (ClientGame *game, const Vector<string> &args);
 void showZonesHandler          (ClientGame *game, const Vector<string> &args);
 void showPathsHandler          (ClientGame *game, const Vector<string> &args);
+void showMapTilesHandler       (ClientGame *game, const Vector<string> &args);
+void showEdgeIdsHandler        (ClientGame *game, const Vector<string> &args);
 void pauseBotsHandler          (ClientGame *game, const Vector<string> &args);
 void stepBotsHandler           (ClientGame *game, const Vector<string> &args);
 void setAdminPassHandler       (ClientGame *game, const Vector<string> &args);

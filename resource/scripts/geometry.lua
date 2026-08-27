@@ -189,7 +189,7 @@ end
 @luafunc Geom.transform(Geom geom, int tx, int ty, int sx, int sy, int angle)
 @brief   Transform \em geom by scaling, rotating, and translating.
 @descr    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.
-         Scales, rotates, then translates.  Performing these operations together is more effient than applying them
+         Scales, rotates, then translates.  Performing these operations together is more efficient than applying them
          individually.
 
 Note that \em sy can be omitted for uniform scaling horizontally and vertically.
@@ -236,7 +236,7 @@ end
 Example: pts = Geom.coordsToPoints({ 0,0,  100,0,  100,100,  0,100 })
 
 @param   coordList - The list of coordinates to be used for creating points
-@return  A table of points that can be used as input for other functions requring a multi-point geometry
+@return  A table of points that can be used as input for other functions requiring a multi-point geometry
  --]]
 function Geom.coordsToPoints(coordList)
     if type(coordList) ~= 'table' then

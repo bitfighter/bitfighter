@@ -351,7 +351,7 @@ public:
 
    void rebuildEverything(GridDatabase *database);   // Does lots of things in undo, redo, and add items from script
 
-   void onQuitted();       // Releases some memory when quitting the editor
+   void onQuit();       // Releases some memory when quitting the editor
 
    S32 getTeamCount();
    EditorTeam *getTeam(S32 teamId);
@@ -413,9 +413,10 @@ public:
    void flipSelectionHorizontal();               // Flip selection along horizontal axis
    void flipSelectionVertical();                 // Flip selection along vertical axis
    void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
+   void toggleDestructibleWallSegment();         // Toggle destructibility of a wall segment between two selected vertices
 
    void scaleSelection(F32 scale);               // Scale selection by scale
-   void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle
+   void rotateSelection(F32 angle, bool useOrigin); // Rotate selection by angle
    void setSelectionId(S32 id);
 
    void validateLevel();               // Check level for things that will make the game crash!
@@ -459,7 +460,7 @@ public:
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
    // Helpers for doing batch deletes
-   void doneDeleteingWalls();
+   void doneDeletingWalls();
    void doneDeleting();
 
    // Run a script, and put resulting objects in database

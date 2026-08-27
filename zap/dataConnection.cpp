@@ -84,7 +84,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
    FileType fileType = getResourceType(resourceType.c_str());
    if(fileType == INVALID_RESOURCE_TYPE)
    {
-      printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
+      printf("Invalid resource type: Please specify BOT, LEVEL, or LEVELGEN\n");
       exitToOs(1);
    }
 

@@ -14,7 +14,7 @@
 namespace Zap
 {
 
-// Contsructor --> Warning: game may not be fully-formed... do not access any members/functions in this constructor
+// Constructor --> Warning: game may not be fully-formed... do not access any members/functions in this constructor
 RobotManager::RobotManager(ServerGame *game, GameSettingsPtr settings)
 {
    mManagerActive = true;
@@ -77,7 +77,7 @@ void RobotManager::balanceTeams()
    S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(mTargetPlayerCount, teamCount);
    S32 playersNeededPerTeam = max(largestFixedPlayerCount, maxPlayersPerBalancedTeam);
 
-   // Kick bots on any teams with more palyers than we need
+   // Kick bots on any teams with more players than we need
    for(S32 i = 0; i < teamCount; i++)
    {
       Team *team = static_cast<Team *>(mGame->getTeam(i));
@@ -181,7 +181,7 @@ void RobotManager::addBot(Robot *robot)
 }
 
 
-// Remove this robot from the list of bots; does not delete it (only called from Robot desctructor)
+// Remove this robot from the list of bots; does not delete it (only called from Robot destructor)
 void RobotManager::removeBot(Robot *robot)
 {
    for(S32 i = 0; i < mRobots.size(); i++)

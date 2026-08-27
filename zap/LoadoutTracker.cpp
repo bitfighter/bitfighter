@@ -85,7 +85,7 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 }
 
 
-// Takes a vector of U8s repesenting loadout... M,M,W,W,W
+// Takes a vector of U8s representing loadout... M,M,W,W,W
 void LoadoutTracker::setLoadout(const Vector<U8> &items)
 {
    resetLoadout();

@@ -70,7 +70,7 @@ void checkTeleporter(Teleporter *teleporter, Point *pts, S32 pointCount)
       SCOPED_TRACE("Testing SERVER game");
       checkTeleporter((Game *) GameManager::getServerGame(), str, pointCount - 1);
    }
-   
+
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
    for(S32 i = 0; i < clientGames->size(); i++)
    {
@@ -115,17 +115,30 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       serverGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
       EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
 
-      // Wall (placed @ -1,-1 ==> -1,1  thickness = 40)
-      fillVector.clear();
-      clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
-      ASSERT_EQ(1, fillVector.size());
-      Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
-      // barrier will have 4 points; first and last are dummies because those are pointers to the previous and next 
-      // wall segments, and this wall only has one segment.
-      EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[1].toString() + " | " + barrier->mPoints[2].toString()); 
-      EXPECT_EQ("nan, nan | nan, nan", barrier->mPoints[0].toString() + " | " + barrier->mPoints[3].toString()); 
-      // hint: use barrier->mPoints.get(0) at debug time
-      EXPECT_EQ(40, barrier->mWidth);
+      // Wall propagation with tiled walls: the client deletes Barrier objects
+      // when tiles arrive; wall geometry lives in GameType::getTilePolys().
+      // BarrierMaker 40 spine from (-255,-255) to (-255,255) → extruded
+      // rectangle ~40×510 centered on x=-255.
+      {
+         // Server: Barrier still exists in the database
+         fillVector.clear();
+         serverGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+         ASSERT_EQ(1, fillVector.size());
+         Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
+         // First and last mPoints entries are dummies (prev/next segment pointers)
+         EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[1].toString() + " | " + barrier->mPoints[2].toString());
+         EXPECT_EQ(40, barrier->mWidth);
+
+         // Client: tiled wall polys should cover the wall area
+         const Vector<WallPoly> &clientPolys = clientGame->getGameType()->getTilePolys();
+         EXPECT_GT(clientPolys.size(), 0);
+         // World extents should include the wall (roughly -275..-235 x, -255..255 y)
+         const Rect *worldExtents = clientGame->getWorldExtents();
+         EXPECT_LE(worldExtents->min.x, -235);
+         EXPECT_GE(worldExtents->max.x, -275);
+         EXPECT_LE(worldExtents->min.y, -255);
+         EXPECT_GE(worldExtents->max.y,  255);
+      }
 
       // Teleporter (placed @ 5,5 ==> 10,10)
       {
@@ -147,7 +160,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
 
    ///// Passing one point moves the origin -- shorter form below doesn't work when passing only one point
    {
-      Point pts[] = { Point(30, 50) };   
+      Point pts[] = { Point(30, 50) };
       Vector<Point> geom(pts, ARRAYSIZE(pts));
       teleporter->doSetGeom(geom);        // When a levelgen changes the geometry, this fn gets called
       GamePair::idle(10, 5);              // Idle for a while to allow propagation
@@ -163,21 +176,21 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       }
    }
 
-   { 
+   {
       SCOPED_TRACE("2 Passing two points moves the origin and the dest");
-      Point pts[] = { Point(100, 100), Point(150, 200) };    
+      Point pts[] = { Point(100, 100), Point(150, 200) };
       checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
-   { 
+   {
       SCOPED_TRACE("3 Passing three points moves the origin and the dest and adds a second dest");
-      Point pts[] = { Point(200, 220), Point(180, 300), Point(50, 60) };    
+      Point pts[] = { Point(200, 220), Point(180, 300), Point(50, 60) };
       checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
    ///// Passing one point moves the origin, leaving other dests intact
    {
-      Point pts[] = { Point(80, 85) };   
+      Point pts[] = { Point(80, 85) };
       Vector<Point> geom(pts, ARRAYSIZE(pts));
       teleporter->doSetGeom(geom);        // When a levelgen changes the geometry, this fn gets called
       GamePair::idle(10, 5);               // Idle for a while to allow propagation
@@ -194,9 +207,9 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       }
    }
 
-   { 
+   {
       SCOPED_TRACE("5 Passing two points moves the origin and the first dest, removing the second dest");
-      Point pts[] = { Point(345, 555), Point(612, 123) };    
+      Point pts[] = { Point(345, 555), Point(612, 123) };
       checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
@@ -224,17 +237,17 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       {
          SCOPED_TRACE("delDest() test - ServerGame");
          checkTeleporter(serverGame, "345, 555 | 19, 99", 1);
-      }                
+      }
       for(S32 i = 0; i < clientGames->size(); i++)
-      {                                                   
-         SCOPED_TRACE("delDest() test - ClientGame #" + itos(i));     
+      {
+         SCOPED_TRACE("delDest() test - ClientGame #" + itos(i));
          checkTeleporter(clientGames->get(i), "345, 555 | 19, 99", 1);
       }
    }
 
    // Clear the dests with clearDests()
    {
-      teleporter->clearDests(); 
+      teleporter->clearDests();
       GamePair::idle(10, 5);               // Idle for a while to allow propagation
 
       {
@@ -244,7 +257,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       for(S32 i = 0; i < clientGames->size(); i++)
       {
          // Will be rendered in-game, will not teleport you anywhere... FYI
-         SCOPED_TRACE("clearDests() test - ClientGame #" + itos(i));    
+         SCOPED_TRACE("clearDests() test - ClientGame #" + itos(i));
          checkTeleporter(clientGames->get(i), "345, 555", 0);
       }
    }
@@ -254,12 +267,12 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       ClientGame *clientGame = clientGames->get(i);
-      SCOPED_TRACE("metadata propagation i = " + itos(i)); 
+      SCOPED_TRACE("metadata propagation i = " + itos(i));
       EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                           // Team name
       EXPECT_EQ   ("Test Level", clientGame->getGameType()->getLevelName());                          // Quoted in level file
       EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription());   // Quoted in level file
       EXPECT_STREQ("level creator", clientGame->getGameType()->getLevelCredits()->getString());       // Not quoted in level file
    }
-}   
+}
 
 };

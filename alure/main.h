@@ -1,357 +1,132 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef ALURE_MAIN_H
+#define ALURE_MAIN_H
 
-#include "AL/alure.h"
-#include "alext.h"
+#include "alure2.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-
-#ifdef HAVE_WINDOWS_H
-
-#include <windows.h>
-
-#ifdef _MSC_VER
- #if _MSC_VER >= 1600
-  #define typeof decltype
- #endif
-#endif
-
+#include <system_error>
+#if __cplusplus >= 201703L
+#include <variant>
 #else
+#include "mpark/variant.hpp"
 
-#ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
+namespace std {
+using mpark::variant;
+using mpark::monostate;
+using mpark::get;
+using mpark::get_if;
+using mpark::holds_alternative;
+} // namespace std
 #endif
 
-#include <assert.h>
-#include <pthread.h>
-#ifdef HAVE_PTHREAD_NP_H
-#include <pthread_np.h>
-#endif
-#include <errno.h>
-
-typedef pthread_mutex_t CRITICAL_SECTION;
-void EnterCriticalSection(CRITICAL_SECTION *cs);
-void LeaveCriticalSection(CRITICAL_SECTION *cs);
-void InitializeCriticalSection(CRITICAL_SECTION *cs);
-void DeleteCriticalSection(CRITICAL_SECTION *cs);
-
+#ifdef __GNUC__
+#define LIKELY(x) __builtin_expect(static_cast<bool>(x), true)
+#define UNLIKELY(x) __builtin_expect(static_cast<bool>(x), false)
+#else
+#define LIKELY(x) static_cast<bool>(x)
+#define UNLIKELY(x) static_cast<bool>(x)
 #endif
 
-#include <map>
-#include <streambuf>
-#include <istream>
-#include <list>
-#include <algorithm>
-#include <vector>
-#include <memory>
+#define DECL_THUNK0(ret, C, Name, cv)                                         \
+ret C::Name() cv { return pImpl->Name(); }
+#define DECL_THUNK1(ret, C, Name, cv, T1)                                     \
+ret C::Name(T1 a) cv { return pImpl->Name(std::forward<T1>(a)); }
+#define DECL_THUNK2(ret, C, Name, cv, T1, T2)                                 \
+ret C::Name(T1 a, T2 b) cv                                                    \
+{ return pImpl->Name(std::forward<T1>(a), std::forward<T2>(b)); }
+#define DECL_THUNK3(ret, C, Name, cv, T1, T2, T3)                             \
+ret C::Name(T1 a, T2 b, T3 c) cv                                              \
+{                                                                             \
+    return pImpl->Name(std::forward<T1>(a), std::forward<T2>(b),              \
+                       std::forward<T3>(c));                                  \
+}
 
-static const union {
-    int val;
-    char b[sizeof(int)];
-} endian_test = { 1 };
-static const bool LittleEndian = (endian_test.b[0] != 0);
-static const bool BigEndian = !LittleEndian;
 
+namespace alure {
 
-#if defined (DYNLOAD) || defined (DYNLOAD_MPG123)
-void *OpenLib(const char *libname);
-void CloseLib(void *handle);
-void *GetLibProc(void *handle, const char *funcname);
+// Need to use these to avoid extraneous commas in macro parameter lists
+using Vector3Pair = std::pair<Vector3,Vector3>;
+using UInt64NSecPair = std::pair<uint64_t,std::chrono::nanoseconds>;
+using SecondsPair = std::pair<Seconds,Seconds>;
+using ALfloatPair = std::pair<ALfloat,ALfloat>;
+using ALuintPair = std::pair<ALuint,ALuint>;
+using BoolTriple = std::tuple<bool,bool,bool>;
+
 
 template<typename T>
-void LoadFunc(void *handle, const char *funcname, T **funcptr)
-{ *funcptr = reinterpret_cast<T*>(GetLibProc(handle, funcname)); }
+inline std::future_status GetFutureState(const SharedFuture<T> &future)
+{ return future.wait_for(std::chrono::seconds::zero()); }
 
-#define LOAD_FUNC(h, x) LoadFunc((h), #x, &(p##x));                          \
-if(!(p##x))                                                                  \
-{                                                                            \
-    CloseLib((h));                                                           \
-    (h) = NULL;                                                              \
-    return;                                                                  \
-}
-#endif
+// This variant is a poor man's optional
+std::variant<std::monostate,uint64_t> ParseTimeval(StringView strval, double srate) noexcept;
 
-
-extern PFNALCSETTHREADCONTEXTPROC palcSetThreadContext;
-extern PFNALCGETTHREADCONTEXTPROC palcGetThreadContext;
-#define alcSetThreadContext palcSetThreadContext
-#define alcGetThreadContext palcGetThreadContext
-
-void SetError(const char *err);
-ALuint DetectBlockAlignment(ALenum format);
-ALuint DetectCompressionRate(ALenum format);
-ALenum GetSampleFormat(ALuint channels, ALuint bits, bool isFloat);
-
-struct UserCallbacks {
-    void*     (*open_file)(const ALchar*);
-    void*     (*open_mem)(const ALubyte*,ALuint);
-    ALboolean (*get_fmt)(void*,ALenum*,ALuint*,ALuint*);
-    ALuint    (*decode)(void*,ALubyte*,ALuint);
-    ALboolean (*rewind)(void*);
-    void      (*close)(void*);
-};
-extern std::map<ALint,UserCallbacks> InstalledCallbacks;
-
-
-void StopStream(alureStream *stream);
-struct alureStream {
-    // Local copy of memory data
-    ALubyte *data;
-
-    // Storage when reading chunks
-    std::vector<ALubyte> dataChunk;
-
-    // Abstracted input stream
-    std::istream *fstream;
-
-    virtual bool IsValid() = 0;
-    virtual bool GetFormat(ALenum*,ALuint*,ALuint*) = 0;
-    virtual ALuint GetData(ALubyte*,ALuint) = 0;
-    virtual bool Rewind() = 0;
-    virtual bool SetOrder(ALuint order)
-    {
-        if(!order) return Rewind();
-        SetError("Invalid order for stream");
-        return false;
-    }
-    virtual bool SetPatchset(const char*)
-    { return true; }
-    virtual alureInt64 GetLength()
-    { return 0; }
-
-    alureStream(std::istream *_stream)
-      : data(NULL), fstream(_stream)
-    { StreamList.push_front(this); }
-    virtual ~alureStream()
-    {
-        delete[] data;
-        StreamList.erase(std::find(StreamList.begin(), StreamList.end(), this));
-    }
-
-    static void Clear(void)
-    {
-        while(StreamList.size() > 0)
-        {
-            alureStream *stream = *(StreamList.begin());
-            StopStream(stream);
-            std::istream *f = stream->fstream;
-            delete stream;
-            delete f;
-        }
-    }
-
-    static bool Verify(alureStream *stream)
-    {
-        ListType::iterator i = std::find(StreamList.begin(), StreamList.end(), stream);
-        return (i != StreamList.end());
-    }
-
+template<size_t N>
+struct Bitfield {
 private:
-    typedef std::list<alureStream*> ListType;
-    static ListType StreamList;
-};
-
-
-struct MemDataInfo {
-    const ALubyte *Data;
-    size_t Length;
-    size_t Pos;
-
-    MemDataInfo() : Data(NULL), Length(0), Pos(0)
-    { }
-    MemDataInfo(const MemDataInfo &inf) : Data(inf.Data), Length(inf.Length),
-                                          Pos(inf.Pos)
-    { }
-};
-
-class MemStreamBuf : public std::streambuf {
-    MemDataInfo memInfo;
-
-    virtual int_type underflow();
-    virtual pos_type seekoff(off_type offset, std::ios_base::seekdir whence, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
-    virtual pos_type seekpos(pos_type pos, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
+    Array<uint8_t,(N+7)/8> mElems;
 
 public:
-    MemStreamBuf(const MemDataInfo &data)
-      : memInfo(data)
-    {
-        memInfo.Pos /= sizeof(char_type);
-        memInfo.Length /= sizeof(char_type);
-    }
-    virtual ~MemStreamBuf() { }
+    Bitfield() { std::fill(mElems.begin(), mElems.end(), 0); }
+
+    bool operator[](size_t i) const noexcept
+    { return static_cast<bool>(mElems[i/8] & (1<<(i%8))); }
+
+    void set(size_t i) noexcept { mElems[i/8] |= 1<<(i%8); }
 };
 
-struct UserFuncs {
-    void* (*open)(const char *filename, ALuint mode);
-    void (*close)(void *f);
-    ALsizei (*read)(void *f, ALubyte *buf, ALuint count);
-    ALsizei (*write)(void *f, const ALubyte *buf, ALuint count);
-    alureInt64 (*seek)(void *f, alureInt64 offset, int whence);
-};
-extern UserFuncs Funcs;
-extern bool UsingSTDIO;
 
-class FileStreamBuf : public std::streambuf {
-    void *usrFile;
-    UserFuncs fio;
-
-    char buffer[1024];
-
-    virtual int_type underflow();
-    virtual pos_type seekoff(off_type offset, std::ios_base::seekdir whence, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
-    virtual pos_type seekpos(pos_type pos, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
+class alc_category : public std::error_category {
+    alc_category() noexcept { }
 
 public:
-    const char *fname;
-    bool IsOpen()
-    { return usrFile != NULL; }
+    static alc_category sSingleton;
 
-    FileStreamBuf(const char *filename, ALint mode)
-      : usrFile(NULL), fio(Funcs), fname(NULL)
-    { usrFile = fio.open(filename, mode); fname = filename; }
-    virtual ~FileStreamBuf()
-    { if(usrFile) fio.close(usrFile); }
+    const char *name() const noexcept override final { return "alc_category"; }
+    std::error_condition default_error_condition(int code) const noexcept override final
+    { return std::error_condition(code, *this); }
+
+    bool equivalent(int code, const std::error_condition &condition) const noexcept override final
+    { return default_error_condition(code) == condition; }
+    bool equivalent(const std::error_code &code, int condition) const noexcept override final
+    { return *this == code.category() && code.value() == condition; }
+
+    std::string message(int condition) const override final;
 };
+template<typename T>
+inline std::system_error alc_error(int code, T&& what)
+{ return std::system_error(code, alc_category::sSingleton, std::forward<T>(what)); }
+inline std::system_error alc_error(int code)
+{ return std::system_error(code, alc_category::sSingleton); }
 
-class InStream : public std::istream {
+class al_category : public std::error_category {
+    al_category() noexcept { }
+
 public:
-    bool isFile;
-    InStream(const char *filename)
-      : std::istream(new FileStreamBuf(filename, 0)), isFile(true)
-    {
-        if(!(static_cast<FileStreamBuf*>(rdbuf())->IsOpen()))
-            clear(failbit);
-    }
-    InStream(const MemDataInfo &memInfo)
-      : std::istream(new MemStreamBuf(memInfo)), isFile(false)
-    { }
-    virtual ~InStream()
-    { delete rdbuf(); }
+    static al_category sSingleton;
+
+    const char *name() const noexcept override final { return "al_category"; }
+    std::error_condition default_error_condition(int code) const noexcept override final
+    { return std::error_condition(code, *this); }
+
+    bool equivalent(int code, const std::error_condition &condition) const noexcept override final
+    { return default_error_condition(code) == condition; }
+    bool equivalent(const std::error_code &code, int condition) const noexcept override final
+    { return *this == code.category() && code.value() == condition; }
+
+    std::string message(int condition) const override final;
 };
+template<typename T>
+inline std::system_error al_error(int code, T&& what)
+{ return std::system_error(code, al_category::sSingleton, std::forward<T>(what)); }
+inline std::system_error al_error(int code)
+{ return std::system_error(code, al_category::sSingleton); }
 
-
-static inline ALuint read_le32(std::istream *file)
+inline void throw_al_error(const char *str)
 {
-    ALubyte buffer[4];
-    if(!file->read(reinterpret_cast<char*>(buffer), 4)) return 0;
-    return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
+    ALenum err = alGetError();
+    if(UNLIKELY(err != AL_NO_ERROR))
+        throw al_error(err, str);
 }
 
-static inline ALushort read_le16(std::istream *file)
-{
-    ALubyte buffer[2];
-    if(!file->read(reinterpret_cast<char*>(buffer), 2)) return 0;
-    return buffer[0] | (buffer[1]<<8);
-}
+} // namespace alure
 
-static inline ALuint read_be32(std::istream *file)
-{
-    ALubyte buffer[4];
-    if(!file->read(reinterpret_cast<char*>(buffer), 4)) return 0;
-    return (buffer[0]<<24) | (buffer[1]<<16) | (buffer[2]<<8) | buffer[3];
-}
-
-static inline ALushort read_be16(std::istream *file)
-{
-    ALubyte buffer[2];
-    if(!file->read(reinterpret_cast<char*>(buffer), 2)) return 0;
-    return (buffer[0]<<8) | buffer[1];
-}
-
-static inline ALuint read_be80extended(std::istream *file)
-{
-    ALubyte buffer[10];
-    if(!file->read(reinterpret_cast<char*>(buffer), 10)) return 0;
-    ALuint mantissa, last = 0;
-    ALubyte exp = buffer[1];
-    exp = 30 - exp;
-    mantissa = (buffer[2]<<24) | (buffer[3]<<16) | (buffer[4]<<8) | buffer[5];
-    while (exp--)
-    {
-        last = mantissa;
-        mantissa >>= 1;
-    }
-    if((last&1)) mantissa++;
-    return mantissa;
-}
-
-
-extern CRITICAL_SECTION cs_StreamPlay;
-
-alureStream *create_stream(const char *fname);
-alureStream *create_stream(const MemDataInfo &memData);
-alureStream *create_stream(ALvoid *userdata, ALenum format, ALuint rate, const UserCallbacks &cb);
-
-template <typename T>
-const T& clamp(const T& val, const T& min, const T& max)
-{ return std::max(std::min(val, max), min); }
-
-template <typename T>
-void swap(T &val1, T &val2)
-{
-    val1 ^= val2;
-    val2 ^= val1;
-    val1 ^= val2;
-}
-
-
-template<typename T1, typename T2>
-T1 SearchSecond(T1 start, T1 end, T2 val)
-{
-    while(start != end && start->second != val)
-        ++start;
-    return start;
-}
-
-struct Decoder {
-    typedef std::auto_ptr<alureStream>(*FactoryType)(std::istream*);
-    typedef std::multimap<ALint,FactoryType> ListType;
-
-    static const ListType& GetList();
-
-protected:
-    static ListType& AddList(FactoryType func=NULL, ALint prio=0);
-};
-
-template<typename T, ALint prio>
-struct DecoderDecl : public Decoder {
-    DecoderDecl()
-    {
-        T::Init();
-        AddList(Factory, prio);
-    }
-    ~DecoderDecl()
-    {
-        ListType &list = AddList();
-        list.erase(SearchSecond(list.begin(), list.end(), Factory));
-        T::Deinit();
-    }
-
-private:
-    static std::auto_ptr<alureStream> Factory(std::istream *file)
-    {
-        std::auto_ptr<alureStream> ret(new T(file));
-        if(ret->IsValid()) return ret;
-        return std::auto_ptr<alureStream>();
-    }
-};
-
-Decoder &alure_init_wav(void);
-Decoder &alure_init_aiff(void);
-Decoder &alure_init_vorbisfile(void);
-Decoder &alure_init_flac(void);
-Decoder &alure_init_sndfile(void);
-Decoder &alure_init_fluidsynth(void);
-Decoder &alure_init_dumb(void);
-Decoder &alure_init_modplug(void);
-Decoder &alure_init_mpg123(void);
-
-#endif // MAIN_H
+#endif /* ALURE_MAIN_H */

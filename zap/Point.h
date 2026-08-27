@@ -74,7 +74,7 @@ public:
 
    // inlines  need to be in header, too
 
-   // Operators with one arguement mean the argument is the right-hand-side
+   // Operators with one argument mean the argument is the right-hand-side
    // Left-hand-side is implicitly 'this'
    inline Point operator+(const Point &pt) const
    {

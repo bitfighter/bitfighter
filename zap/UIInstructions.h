@@ -47,7 +47,7 @@ class InstructionsUserInterface : public AbstractInstructionsUserInterface
    typedef AbstractInstructionsUserInterface Parent;
 
 public:
-   enum IntructionPages {
+   enum InstructionPages {
 #     define INSTR_ITEM(enumValue, b)  enumValue,
          INSTR_TABLE
 #     undef INSTR_ITEM
@@ -95,7 +95,7 @@ public:
 
    bool onKeyDown(InputCode inputCode);
 
-   void activatePage(IntructionPages pageIndex);
+   void activatePage(InstructionPages pageIndex);
    void onActivate();
    void exitInstructions() const;
 };

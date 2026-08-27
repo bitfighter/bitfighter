@@ -57,7 +57,7 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
-   // These MUST be overriden in child classes
+   // These MUST be overridden in child classes
    mLuaGame = NULL;
    mLuaGridDatabase = NULL;
 
@@ -435,7 +435,7 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
       // Currently, the only time <<whatever>> is anything is when we're dealing with onDataReceived,
       // in which case it will have argCount items.
 
-      // Inital starting depth will be same as argCount, except with onDataReceived, in which case it will
+      // Initial starting depth will be same as argCount, except with onDataReceived, in which case it will
       // be double argCount (because we had to duplicate the args to keep a copy for subsequent calls).
       // Therefore, generally we'll end up with only our return vals on the stack, (stackDepth - argCount == 0)
       // but with onDataReceived, we also have a copy our args (stackDepth - argCount == argCount).

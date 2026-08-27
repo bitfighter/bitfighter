@@ -366,42 +366,42 @@ static void x86UNIXInitTimer()
    }
 }
 
+static bool sg_initialized = false;
+static timeval sg_startTime;
+
+static void x86UNIXTimerInit()
+{
+   if (sg_initialized == false) {
+      sg_initialized = true;
+      ::gettimeofday(&sg_startTime, NULL);
+   }
+}
+
 U32 x86UNIXGetTickCount()
 {
-   x86UNIXInitTimer();
+   x86UNIXTimerInit();
 
    timeval t;
    ::gettimeofday(&t, NULL);
 
-   U32 secs  = t.tv_sec - sg_startTime.tv_sec;
-   S32 uSecs = t.tv_usec - sg_startTime.tv_usec;
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
 
    // Make granularity 1 ms
-   return (secs * 1000) + (uSecs / 1000);
+   return (U32)(secs * 1000 + uSecs / 1000);
 }
 
 U32 x86UNIXGetTickCountMicro()
 {
-   x86UNIXInitTimer();
+   x86UNIXTimerInit();
 
    timeval t;
    ::gettimeofday(&t, NULL);
 
-   U32 secs  = t.tv_sec - sg_startTime.tv_sec;
-   S32 uSecs = t.tv_usec - sg_startTime.tv_usec;
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
 
-   return (secs * 1000000) + uSecs;
-}
-//--------------------------------------
-
-U32 Platform::getRealMilliseconds()
-{
-   return x86UNIXGetTickCount();
-}
-
-U32 Platform::getRealMicroseconds()
-{
-   return x86UNIXGetTickCountMicro();
+   return (U32)(secs * 1000000 + uSecs);
 }
 
 class UnixTimer

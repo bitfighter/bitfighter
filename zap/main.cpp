@@ -32,7 +32,7 @@
 // Enemy FF: Lets enemy ships pass - destroy by shooting the base
 // Neutral FF: Claim it for your team by repairing with the repair module
 // Friendly Turret: Targets enemies, but won't hurt you (on purpose)
-// Enemy Turret: Defends enemy teritory.  Destroy with multiple shots
+// Enemy Turret: Defends enemy territory.  Destroy with multiple shots
 // Neutral turret: Claim it for your team by repairing with the repair module
 // Timer shows time left in game
 // Heatlh indicator shows health left
@@ -492,7 +492,7 @@ void shutdownBitfighter()
       // Save current window position if in windowed mode
       if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
       {
-         VideoSystem::saveWindowPostion(settings);
+         VideoSystem::saveWindowPosition(settings);
       }
 
       FontManager::cleanup();
@@ -564,7 +564,7 @@ void createClientGame(GameSettingsPtr settings)
 
       //gClientGames.push_back(new ClientGame(Address(), settings));   //  !!! 2-player split-screen game in same game.
 
-      // Set the intial UI
+      // Set the initial UI
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
@@ -616,7 +616,11 @@ void createClientGame(GameSettingsPtr settings)
 void setupLogging(const string &logDir)
 {
    // Specify which events each logging destination will record
-   S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection;
+#ifdef TNL_DEBUG     // This doesn't seem to trigger for some reason...
+   S32 stdoutEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection | LogConsumer::LogInfo;
+#else
+   S32 stdoutEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection | LogConsumer::LogInfo;
+#endif
    S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::ConsoleMsg;
    S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter     | LogConsumer::StatisticsFilter;
    // logfileEvents  ==> set from INI settings     See setupLogging(IniSettings *iniSettings)
@@ -769,12 +773,22 @@ string getUserDataDir()
 
 void setDefaultPaths(Vector<string> &argv)
 {
+   // Remember whether the user pointed us at a data root before we add our own
+   // default below, so the read-only asset dirs can honor an explicit -rootdatadir.
+   bool userSpecifiedRootDataDir = argv.contains("-rootdatadir");
+
    // If we don't already have -rootdatadir specified on the command line
-   if(!argv.contains("-rootdatadir"))
+   if(!userSpecifiedRootDataDir)
    {
       argv.push_back("-rootdatadir");
       argv.push_back(getUserDataDir());
    }
+
+   // sfx, fonts, and shaders are read-only engine assets that are never copied
+   // into the (mutable) user data dir, so they load straight from the install
+   // dir.  sfx/fonts always do; shaders follow an explicit -rootdatadir when the
+   // user gives one (resolveDirs derives shaderDir from rootDataDir), and
+   // otherwise default to the install dir too.
 
    // Same with -sfxdir
    if(!argv.contains("-sfxdir"))
@@ -788,6 +802,13 @@ void setDefaultPaths(Vector<string> &argv)
    {
       argv.push_back("-fontsdir");
       argv.push_back(getInstalledDataDir() + getFileSeparator() + "fonts");
+   }
+
+   // And with -shaderdir, unless the user steered us with -rootdatadir
+   if(!userSpecifiedRootDataDir && !argv.contains("-shaderdir"))
+   {
+      argv.push_back("-shaderdir");
+      argv.push_back(getInstalledDataDir() + getFileSeparator() + "shaders");
    }
 
    // iOS needs the INI in an editable location
@@ -810,7 +831,7 @@ void copyResourcesToUserData()
 
    printf("Copying resources\n");
 
-   // Everything but sfx amd fonts (which are loaded from the install dir)
+   // Everything but sfx, fonts, and shaders (which are loaded from the install dir)
    Vector<string> dirArray;
    dirArray.push_back("levels");
    dirArray.push_back("robots");
@@ -978,7 +999,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Remove option that is no longer used, added in 019
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
 
-      // Remove item_select.lua plugin, it was superceded by filter.lua
+      // Remove item_select.lua plugin, it was superseded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
       string offendingFile = joindir(folderManager->pluginDir, "item_select.lua");
 

@@ -89,7 +89,7 @@ void BotNavMeshZone::renderLayer(S32 layerIndex)
 // Only gets run on the server, never on client, obviously, because that's where the bots are!!!
 //bool BotNavMeshZone::collide(BfObject *hitObject)
 //{
-//   // This does not get run anymore, it is in a seperate database.
+//   // This does not get run anymore, it is in a separate database.
 //   if(hitObject->getObjectTypeNumber() == RobotShipTypeNumber)     // Only care about robots...
 //   {
 //      Robot *r = (Robot *) hitObject;
@@ -518,7 +518,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
       Point currentVec = dir;
       currentVec.normalize(distanceEstimate);   // Vector from the SZ
 
-      // These position variables will be updated to reflect the currect trajectory
+      // These position variables will be updated to reflect the correct trajectory
       // as the simulated ship bounces around
       source = szMiddle;           // Start from middle of zone as an average of any point of entry
       dest = source + currentVec;  // Will likely be overridden

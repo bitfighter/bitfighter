@@ -162,7 +162,7 @@ or IP:www.foobar.com:24601
 
 -server [bindAddress] hosts a game server/client on the specified 
         bind address.
--master [masterAddress] specfies the address of the master server 
+-master [masterAddress] specifies the address of the master server 
         to connect to.
 -dedicated [bindAddress] starts Zap as a dedicated server
 -name [playerName] sets the client's name to the specified name 
