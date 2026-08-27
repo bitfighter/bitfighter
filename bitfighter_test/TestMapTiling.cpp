@@ -60,9 +60,11 @@ static F32 wallPolyArea(const WallPoly &wp)
 static F32 totalTiledArea(const Vector<MapTile> &tiles)
 {
    F32 total = 0;
-   for (S32 t = 0; t < tiles.size(); ++t)
-      for (S32 p = 0; p < tiles[t].polys.size(); ++p)
+   for (S32 t = 0; t < tiles.size(); ++t) {
+      S32 polys_sz = tiles[t].polys.size();
+      for (S32 p = 0; p < polys_sz; ++p)
          total += wallPolyArea(tiles[t].polys[p]);
+   }
    return total;
 }
 
@@ -72,11 +74,15 @@ static F32 totalTiledArea(const Vector<MapTile> &tiles)
 static S32 countClipIntroducedEdges(const Vector<MapTile> &tiles)
 {
    S32 count = 0;
-   for (S32 t = 0; t < tiles.size(); ++t)
-      for (S32 p = 0; p < tiles[t].polys.size(); ++p)
-         for (S32 e = 0; e < tiles[t].polys[p].edges.size(); ++e)
+   for (S32 t = 0; t < tiles.size(); ++t) {
+      S32 polys_sz = tiles[t].polys.size();
+      for (S32 p = 0; p < polys_sz; ++p) {
+         S32 edges_sz = tiles[t].polys[p].edges.size();
+         for (S32 e = 0; e < edges_sz; ++e)
             if (tiles[t].polys[p].edges[e] == EdgeStyle::None)
                ++count;
+      }
+   }
 
    return count;
 }
@@ -221,7 +227,8 @@ static void buildEdgeIdMaps(
 
    for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+      S32 polys_sz = tiles[t].polys.size();
+      for(S32 p = 0; p < polys_sz; ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
@@ -674,7 +681,8 @@ TEST(WallTilingTest, WallEdgeAlignedToComputedTileBoundary)
 
    for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+      S32 polys_sz = tiles[t].polys.size();
+      for(S32 p = 0; p < polys_sz; ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
@@ -1684,7 +1692,8 @@ TEST(WallTilingTest, MadMaze2ThreeWalls)
       for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.edges.size(); ++e)
+         U32 edges_sz = wp.edges.size();
+         for(U32 e = 0; e < edges_sz; ++e)
          {
             if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
             if(wp.edges[e] == EdgeStyle::Destructible) hasDashed = true;
@@ -1747,7 +1756,8 @@ TEST(WallTilingTest, MadMaze2DiagDest)
    // Diagnostic: show which None edges are not on tile boundary
    for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+      S32 polys_sz = tiles[t].polys.size();
+      for(S32 p = 0; p < polys_sz; ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
@@ -1776,7 +1786,8 @@ TEST(WallTilingTest, MadMaze2DiagDest)
       for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.edges.size(); ++e)
+         U32 edges_sz = wp.edges.size();
+         for(U32 e = 0; e < edges_sz; ++e)
          {
             if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
             if(wp.edges[e] == EdgeStyle::Destructible) hasDashed = true;
@@ -2191,7 +2202,8 @@ TEST(WallTilingTest, PavillionBackwardsLInteriorEdges)
 
    for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+      S32 polys_sz = tiles[t].polys.size();
+      for(S32 p = 0; p < polys_sz; ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
@@ -2405,7 +2417,8 @@ TEST(WallTilingTest, PavillionDestructibleLeftEdgeBelowHorizontalArmIsRendered)
 
    for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+      S32 polys_sz = tiles[t].polys.size();
+      for(S32 p = 0; p < polys_sz; ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
