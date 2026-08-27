@@ -44,7 +44,7 @@ S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const ch
    const LuaFunctionProfile *functionInfo = NULL;
 
    // First, find the correct profile for this function
-   for(S32 i = 0; functionInfos[i].functionName != NULL; i++)
+   for(S32 i = 0; functionInfos[i].functionName != NULL; ++i)
       if(strcmp(functionInfos[i].functionName, functionName) == 0)
       {
          functionInfo = &functionInfos[i];
@@ -66,7 +66,7 @@ S32 checkArgList(lua_State *L, const char *moduleName, const char *functionName)
    if(iter != profileMap.end())
    {
       vector<LuaStaticFunctionProfile> &profiles = (*iter).second;
-      for(U32 i = 0; i < profiles.size(); i++)
+      for(U32 i = 0; i < profiles.size(); ++i)
       {
          if(!strcmp(profiles[i].functionName, functionName))
          {
@@ -86,19 +86,20 @@ S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const 
    S32 stackDepth = lua_gettop(L);
    S32 profileCount = functionArgList.profileCount;
 
-   for(S32 i = 0; i < profileCount; i++)
+   for(S32 i = 0; i < profileCount; ++i)
    {
       const LuaArgType *candidateArgList = functionArgList.argList[i];     // argList is a 2D array
       bool validProfile = true;
       S32 stackPos = 0;
 
-      for(S32 j = 0; candidateArgList[j] != END; j++)
+      for(S32 j = 0; candidateArgList[j] != END; ++j)
       {
          bool ok = false;
 
          if(stackPos < stackDepth)
          {
-            stackPos++;
+            ++stackPos;
+
             ok = checkLuaArgs(L, candidateArgList[j], stackPos);
          }
 
@@ -133,7 +134,8 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
    {
       S32 initialPos = stackPos;
       while(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
-         stackPos++;
+         ++stackPos;
+
 
       return (stackPos - initialPos + 1) >= minNumberOfPoints;
    }
@@ -149,7 +151,8 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
             return false;
          }
          lua_pop(L, 1);
-         pointsFound++;
+         ++pointsFound;
+
       }
       return pointsFound >= minNumberOfPoints;
    }
@@ -187,7 +190,8 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 
          if(ok)
             while(stackPos < stackDepth && lua_isnumber(L, stackPos))
-               stackPos++;
+               ++stackPos;
+
 
          return ok;
       }
@@ -201,7 +205,8 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 
          if(ok)
             while(stackPos < stackDepth && lua_isstring(L, stackPos))
-               stackPos++;
+               ++stackPos;
+
 
          return ok;
       }
@@ -220,7 +225,8 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          if(luaIsPoint(L, stackPos))           // Pair of Points
          {
             if(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
-               stackPos++;
+               ++stackPos;
+
 
             return true;
          }
@@ -241,7 +247,8 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          if(luaIsPoint(L, stackPos))             // Series of Points
          {
             while(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
-               stackPos++;
+               ++stackPos;
+
 
             return true;
          }
@@ -298,7 +305,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
                logprintf(LogConsumer::LogError, "WARNING: It appears you have tried to add an item to teamIndex 0; this is\n"
                                                 "almost certainly an error.  If you want to add an item to the first team,\n"
                                                 "specify team 1.  Remember that Lua uses 1-based arrays.");
-            i--;    // Subtract 1 because Lua indices start with 1, and we need to convert to C++ 0-based index
+            --i;    // Subtract 1 because Lua indices start with 1, and we need to convert to C++ 0-based index
             return ((i >= 0 && i < Game::getAddTarget()->getTeamCount()) || (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);
          }
          return false;
@@ -431,7 +438,8 @@ Vector<Point> getPointsOrXYs(lua_State *L, S32 index)
       while(index + offset <= stackDepth && luaIsPoint(L, index + offset))
       {
          points.push_back(luaToPoint(L, index + offset));
-         offset++;
+         ++offset;
+
       }
    }
    else if(lua_istable(L, index))
@@ -455,7 +463,8 @@ Vector<Vector<Point> > getPolygons(lua_State *L, S32 index)
       Vector<Point > &poly = result[count];
       getPointVectorFromTable(L, -1, poly);     // table ... k, v, v
       lua_pop(L, 2);                                     // table ... k
-      count += 1;
+      ++count;
+
    }
                                                          // table ...
    return result;
@@ -510,7 +519,8 @@ bool dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 
    // Compensate for other stuff we'll be putting on the stack
    if(tableIndex < 0)
-      tableIndex -= 1;
+      --tableIndex;
+
                                                             // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
    lua_pushnil(L);      // First key                        // -- ... table nil
    while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]
@@ -533,7 +543,7 @@ bool dumpStack(lua_State* L, const char *msg)
    bool hasMsg = (strcmp(msg, "") != 0);
    printf("\nTotal in stack: %d %s%s%s\n", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
-   for(S32 i = 1; i <= top; i++)
+   for(S32 i = 1; i <= top; ++i)
    {
       string val = stringify(L, i);
       printf("%d : %s\n", i, val.c_str());
@@ -787,7 +797,7 @@ S32 returnPoints(lua_State *L, const Vector<Point> *points)
    lua_createtable(L, points->size(), 0);                  //                                -- table
    S32 tableIndex = 1;     // Table will live on top of the stack, at index 1
 
-   for(S32 i = 0; i < points->size(); i++)
+   for(S32 i = 0; i < points->size(); ++i)
    {
       luaPushPoint(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
       lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point
@@ -802,12 +812,12 @@ S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not clean!");
 
    lua_createtable(L, polys.size(), 0);            // polylist
-   for(S32 i = 0; i < polys.size(); i++)
+   for(S32 i = 0; i < polys.size(); ++i)
    {
       Vector<Point> points = polys[i];
       lua_createtable(L, points.size(), 0);        // polylist, poly
 
-      for(S32 j = 0; j < points.size(); j++)
+      for(S32 j = 0; j < points.size(); ++j)
       {
          luaPushPoint(L, points[j].x, points[j].y); // polylist, poly, point
          lua_rawseti(L, -2, j + 1);                // polylist, poly
@@ -970,13 +980,13 @@ string prettyPrintParamList(const LuaFunctionArgList &functionArgList)
 {
    string msg;
 
-   for(S32 i = 0; i < functionArgList.profileCount; i++)
+   for(S32 i = 0; i < functionArgList.profileCount; ++i)
    {
       msg += "\n\t";
 
       bool none = true;
 
-      for(S32 j = 0; functionArgList.argList[i][j] != END; j++)
+      for(S32 j = 0; functionArgList.argList[i][j] != END; ++j)
       {
          if(j > 0)
             msg += ", ";

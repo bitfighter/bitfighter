@@ -93,11 +93,13 @@ void ChatDisplay::idle(U32 timeDelta)
 
 void ChatDisplay::advanceFirst()
 {
-   mFirst++;
+   ++mFirst;
+
 
    if(mLast % mMessages.size() == mFirst % mMessages.size())
    {
-      mLast++;
+      ++mLast;
+
       mFull = true;
    }
 }
@@ -105,12 +107,14 @@ void ChatDisplay::advanceFirst()
 
 void ChatDisplay::advanceLast()
 {
-   mLast++;
+   ++mLast;
+
 
    U32 id = mMessages[mLast % mMessages.size()].groupId;
 
    while(mMessages[(mLast + 1) % mMessages.size()].groupId == id && mFirst > mLast)
-      mLast++;
+      ++mLast;
+
 
    mFull = false;
 
@@ -124,13 +128,14 @@ void ChatDisplay::onChatMessageReceived(const Color &msgColor, const string &msg
    Vector<string> lines = wrapString(substituteVars(msg), mWrapWidth, mFontSize, "      ");
    FontManager::popFontContext();
 
-   for(S32 i = 0; i < lines.size(); i++)
+   for(S32 i = 0; i < lines.size(); ++i)
    {
       advanceFirst();
       mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId);
    }
 
-   mNextGroupId++;
+   ++mNextGroupId;
+
 
    mDisplayChatMessageTimer.reset();
 
@@ -147,7 +152,7 @@ string ChatDisplay::substituteVars(const string &str)
    std::size_t startPos = 0;
    std::size_t endPos = 0;
 
-   for(std::size_t i = 0; i < s.length(); i++)
+   for(std::size_t i = 0; i < s.length(); ++i)
    {
       if(s[i] == '%')
       {
@@ -213,14 +218,15 @@ void ChatDisplay::render(S32 anchorPos, bool helperVisible, bool announcementAct
    if(announcementActive)
    {
       if(!mExpire && mFirst >= (U32)mMessages.size() - 1)
-         last++;
+         ++last;
+
 
       y -= lineHeight;
    }
 
    FontManager::pushFontContext(ChatMessageContext);
 
-   for(U32 i = mFirst; i != last - renderExtra; i--)
+   for(U32 i = mFirst; i != last - renderExtra; --i)
    {
       U32 index = i % (U32)mMessages.size();
 

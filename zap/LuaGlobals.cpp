@@ -30,7 +30,7 @@ static string buildPrintString(lua_State *L)
   string out;
 
   lua_getglobal(L, "tostring");
-  for(i = 1; i <= n; i++)
+  for(i = 1; i <= n; ++i)
   {
     const char *s;
     lua_pushvalue(L, -1);  /* function to be called */

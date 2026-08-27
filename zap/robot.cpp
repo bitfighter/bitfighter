@@ -418,7 +418,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
    {
       string line;
 
-      for(S32 i = 0; i < argc; i++)
+      for(S32 i = 0; i < argc; ++i)
       {
          if(i > 0)
             line += " ";
@@ -478,7 +478,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
-   for(S32 i = 2; i < argc; i++)        // Does nothing if we have no args
+   for(S32 i = 2; i < argc; ++i)        // Does nothing if we have no args
       mScriptArgs.push_back(string(argv[i]));
 
    // I'm not sure this goes here, but it needs to be set early in setting up the Robot, but after
@@ -543,7 +543,7 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
    fillVector.clear();
    mGame->getGameObjDatabase()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       const Vector<Point> *otherPoints = fillVector[i]->getCollisionPoly();
       if(otherPoints && polygonsIntersect(thisPoints, *otherPoints))
@@ -601,7 +601,7 @@ void Robot::clearMove()
    mCurrentMove.x = 0;
    mCurrentMove.y = 0;
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       mCurrentMove.modulePrimary[i] = false;
       mCurrentMove.moduleSecondary[i] = false;
@@ -648,7 +648,7 @@ U16 Robot::findClosestZone(const Point &point)
 
    getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
-   for(S32 i = 0; i < objects.size(); i++)
+   for(S32 i = 0; i < objects.size(); ++i)
    {
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
@@ -991,7 +991,7 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
    else
       getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       // Ignore self
       if(fillVector[i] == this)
@@ -1116,7 +1116,7 @@ S32 Robot::lua_fireWeapon(lua_State *L)
    bool hasWeapon = false;
 
    // Check the weapons we have on board -- if any match the requested weapon, select it
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(mLoadout.getWeapon(i) == weapon)
       {
          hasWeapon = true;
@@ -1152,7 +1152,7 @@ S32 Robot::lua_hasWeapon(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
    WeaponType weap = getWeaponType(L, 1);
 
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; ++i)
       if(mLoadout.getWeapon(i) == weap)
          return returnBool(L, true);      // We have it!
 
@@ -1176,7 +1176,7 @@ S32 Robot::lua_fireModule(lua_State *L)
    bool hasModule = false;
 
    // Check if module is equipped and fire it
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(getModule(i) == module)
       {
          hasModule = true;
@@ -1205,7 +1205,7 @@ S32 Robot::lua_hasModule(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "hasModule");
    ShipModule module = getShipModule(L, 1);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
       if(mLoadout.getModule(i) == module)
          return returnBool(L, true);      // We have it!
 
@@ -1435,7 +1435,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
 
    S32 pushed = 0;      // Count of items we put into our table
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
@@ -1450,7 +1450,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       }
 
       static_cast<BfObject *>(fillVector[i])->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
@@ -1607,7 +1607,7 @@ S32 Robot::lua_dropItem(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "dropItem");
 
    S32 count = mMountedItems.size();
-   for(S32 i = count - 1; i >= 0; i--)
+   for(S32 i = count - 1; i >= 0; --i)
       mMountedItems[i]->dismount(DISMOUNT_NORMAL);
 
    return 0;

@@ -88,7 +88,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
    fillVector.clear();
    editorObjectDatabase->findObjects((TestFunc)isEngineeredType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
 
@@ -162,7 +162,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
    database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
       buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
 }
 
@@ -182,11 +182,11 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    S32 count = mWallSegmentDatabase->getObjectCount();
 
    // Loop through all the walls, and, for each, see if any of the engineered objects we were given are mounted to it
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
       if(wallSegment->getOwner() == wall->getSerialNumber())       // Segment belongs to wall
-         for(S32 j = 0; j < engrObjects.size(); j++)               // Loop through all engineered objects checking the mount seg
+         for(S32 j = 0; j < engrObjects.size(); ++j)               // Loop through all engineered objects checking the mount seg
          {
             EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
 
@@ -216,7 +216,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       Vector<Vector<Point> > segmentData;
       barrierLineToSegmentData(*(wallItem->getOutline()), segmentData);
 
-      for(S32 i = 0; i < segmentData.size(); i++)
+      for(S32 i = 0; i < segmentData.size(); ++i)
       {
          // Create the segment; the WallSegment constructor will add it to the specified database
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, segmentData[i],
@@ -233,7 +233,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    }
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 i = 0; i < toBeRemounted.size(); i++)
+   for(S32 i = 0; i < toBeRemounted.size(); ++i)
       toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager(), NULL);
 
 #endif
@@ -248,7 +248,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSe
 
    S32 count = wallSegments->size();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments->get(i));
       inputPolygons.push_back(wallSegment->getCorners());
@@ -268,7 +268,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
    fillVector.clear();
    database->findObjects((TestFunc)isEngineeredType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
       engrItem->mountToWall(engrItem->getVert(0), database->getWallSegmentManager(), NULL);
@@ -300,7 +300,7 @@ void WallSegmentManager::clearSelected()
 {
    S32 count = mWallSegmentDatabase->getObjectCount();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
       wallSegment->setSelected(false);
@@ -325,7 +325,7 @@ void WallSegmentManager::setSelected(S32 owner, bool selected)
 {
    S32 count = mWallSegmentDatabase->getObjectCount();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
       if(wallSegment->getOwner() == owner)
@@ -340,7 +340,7 @@ void WallSegmentManager::rebuildSelectedOutline()
 
    S32 count = mWallSegmentDatabase->getObjectCount();
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
       if(wallSegment->isSelected())
@@ -362,14 +362,14 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
    Vector<DatabaseObject *> toBeDeleted;     // Use DatabaseObject to match args for removeFromDatabase
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
       if(wallSegment->getOwner() == owner)
          toBeDeleted.push_back(wallSegment);
    }
 
-   for(S32 i = 0; i < toBeDeleted.size(); i++)
+   for(S32 i = 0; i < toBeDeleted.size(); ++i)
       mWallSegmentDatabase->removeFromDatabase(toBeDeleted[i], true);
 }
 

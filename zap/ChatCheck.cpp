@@ -60,7 +60,7 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
       return false;
 
    U32 chatPrevMessageSum = 0;
-   for(S32 i = 0; message[i] != 0; i++)
+   for(S32 i = 0; message[i] != 0; ++i)
       chatPrevMessageSum += U32(message[i]) * (i + 0x4EC691);
 
    if(chatPrevMessageSum == mChatPrevMessageSum && mChatPrevMessageMode >= mode && mode <= 1 && mChatTimer != 0)

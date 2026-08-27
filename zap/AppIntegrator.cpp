@@ -69,7 +69,7 @@ void AppIntegrationController::init()
 #endif
 
    // Run init() on all the integrators
-   for(int i = 0; i < mAppIntegrators.size(); i++)
+   for(int i = 0; i < mAppIntegrators.size(); ++i)
       mAppIntegrators[i]->init();
 
    // Start callback timer
@@ -93,11 +93,11 @@ void AppIntegrationController::idle(U32 deltaTime)
 void AppIntegrationController::shutdown()
 {
    // Run shutdown() on all the integrators
-   for(int i = 0; i < mAppIntegrators.size(); i++)
+   for(int i = 0; i < mAppIntegrators.size(); ++i)
       mAppIntegrators[i]->shutdown();
 
    // Clean up
-   for(int i = 0; i < mAppIntegrators.size(); i++)
+   for(int i = 0; i < mAppIntegrators.size(); ++i)
    {
       AppIntegrator *app = mAppIntegrators[i];
 
@@ -109,7 +109,7 @@ void AppIntegrationController::shutdown()
 
 void AppIntegrationController::runCallbacks()
 {
-   for(int i = 0; i < mAppIntegrators.size(); i++)
+   for(int i = 0; i < mAppIntegrators.size(); ++i)
       mAppIntegrators[i]->runCallbacks();
 }
 
@@ -117,7 +117,7 @@ void AppIntegrationController::runCallbacks()
 void AppIntegrationController::updateState(const string &state, const string &details)
 {
 
-   for(int i = 0; i < mAppIntegrators.size(); i++)
+   for(int i = 0; i < mAppIntegrators.size(); ++i)
    {
       if(state != "")
          mAppIntegrators[i]->updateState(state);

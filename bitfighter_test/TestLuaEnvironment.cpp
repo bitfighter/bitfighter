@@ -188,7 +188,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    ASSERT_TRUE(bot->runString("function onMsgReceived(msg, player, isGlobal) message = msg end"));
    ASSERT_TRUE(bot->runString("bf:subscribe(Event.MsgReceived)"));
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(levelgen->runString("levelgen:globalMsg('Test sending global message')"));
 
@@ -204,7 +204,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    ASSERT_TRUE(bot->runString("function onDataReceived(data) message = data.msg; int = data.int; end"));
    ASSERT_TRUE(bot->runString("bot:subscribe(Event.DataReceived)"));
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(levelgen->runString("levelgen:sendData({msg='Message in a table', int=765})"));
 
@@ -217,7 +217,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    // Sending multiple values
    ASSERT_TRUE(bot->runString("function onDataReceived(param1, param2, param3) p1 = param1; p2 = param2; p3 = param3; end"));
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(levelgen->runString("bf:sendData(100, 'two hundred', true)"));
 
@@ -232,7 +232,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    ASSERT_TRUE(levelgen->runString("function onDataReceived(a, b, c) ct = ct + 1; aaa = a; bbb=b; ccc= c; end;   ct = 0"));
    ASSERT_TRUE(levelgen->runString("levelgen:subscribe(Event.DataReceived)"));
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(bot->runString("bot:sendData(1, 2, 4)"));
 
@@ -253,12 +253,12 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    bot2->prepareEnvironment();
    serverGame->addBot(bot2);
    
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(bot2->runString("function onDataReceived(param1, param2, param3) pp1 = param1; pp2 = param2; pp3 = param3; end"));
    ASSERT_TRUE(bot2->runString("bf:subscribe(Event.DataReceived)"));    // We used bot:subscribe for other bot; both should work
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
    ASSERT_TRUE(bot->runString("bot:sendData(11, 12, 13)"));
 
@@ -278,10 +278,10 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    ASSERT_TRUE(bot->runString("function onDataReceived(p1, p2, p3) x = p1[1] end"));   // <- script contains crashing bug
    // When the above gets run, it will trigger bot death as the code has an exception
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
    ASSERT_TRUE(levelgen->runString("bf:sendData(5, 6, 7)"));
 
-   //for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate to give dead bot time to delete itself
+   //for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate to give dead bot time to delete itself
 
    // We want bot2 to get the data even if bot crashed handling the event
    EXPECT_EQ(5, bot2->getLuaGlobalVar<S32>("pp1"));
@@ -294,7 +294,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    serverGame->addBot(bot);
    ASSERT_TRUE(bot->runString("function onDataReceived(param1, param2, param3) p1 = param1; p2 = param2; p3 = param3; end"));
    ASSERT_TRUE(bot->runString("bot:subscribe(Event.DataReceived)"));
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);   // Marinate
 
 
    ///// Shared table functionality
@@ -365,7 +365,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
 
    ASSERT_TRUE(levelgen->runString("bf:sendData('a', 'b', 'c')"));
 
-   for(U32 i = 0; i < 10; i++) serverGame->idle(10);      // Marinate to give dead bot time to delete itself
+   for(U32 i = 0; i < 10; ++i) serverGame->idle(10);      // Marinate to give dead bot time to delete itself
 
    // We want bot to get the data even if bot2 crashed handling the event
    EXPECT_EQ("a", bot->getLuaGlobalVar<string>("p1"));

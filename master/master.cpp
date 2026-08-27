@@ -85,14 +85,14 @@ void MasterSettings::loadSettingsFromINI()
    // Read all settings defined in the new modern manner
    S32 sectionCount = ini.GetNumSections();
 
-   for(S32 i = 0; i < sectionCount; i++)
+   for(S32 i = 0; i < sectionCount; ++i)
    {
       string section = ini.getSectionName(i);
 
       // Enumerate all settings we've defined for [section]
       Vector<AbstractSetting *> settings = mSettings.getSettingsInSection(section);
 
-      for(S32 j = 0; j < settings.size(); j++)
+      for(S32 j = 0; j < settings.size(); ++j)
          settings[j]->setValFromString(ini.GetValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
    }
 
@@ -114,7 +114,7 @@ void MasterSettings::loadSettingsFromINI()
 
    motdClientMap.clear();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys.size(); ++i)
    {
       U32 build_version = (U32)atoi(keys[i].c_str());    // Avoid conflicts with std::stoi() which is defined for VC++ 10
       string message = ini.GetValue("motd_clients", keys[i], upgradeMessage);
@@ -350,7 +350,7 @@ void MasterServer::idle(const U32 timeDelta)
    // Process connections -- cycle through them and check if any have timed out
    U32 currentTime = Platform::getRealMilliseconds();
 
-   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)
+   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; --i)
    {
       GameConnectRequest *request = MasterServerConnection::gConnectList[i];
 
@@ -373,7 +373,7 @@ void MasterServer::idle(const U32 timeDelta)
    }
 
    // Process any delayed disconnects; we use this to avoid repeating and flooding join / leave messages
-   for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
+   for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; --i)
    {
       MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
 
@@ -387,7 +387,7 @@ void MasterServer::idle(const U32 timeDelta)
 
             const Vector<MasterServerConnection *> *clientList = getClientList();
 
-            for(S32 j = 0; j < clientList->size(); j++)
+            for(S32 j = 0; j < clientList->size(); ++j)
                if(clientList->get(j) != c && clientList->get(j)->isInGlobalChat)
                   clientList->get(j)->m2cPlayerLeftGlobalChat(c->mPlayerOrServerName);
 

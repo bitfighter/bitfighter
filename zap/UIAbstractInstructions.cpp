@@ -58,7 +58,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,      // <=
 {
    Vector<SymbolShapePtr> symbols;
 
-   for(S32 i = 0; i < bindingCount; i++)
+   for(S32 i = 0; i < bindingCount; ++i)
    {
       if(helpBindings[i] == "-")
       {
@@ -82,7 +82,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
 {
    Vector<SymbolShapePtr> symbols;
 
-   for(S32 i = 0; i < bindingCount; i++)
+   for(S32 i = 0; i < bindingCount; ++i)
    {
       if(helpBindings[i].command == "-")
       {
@@ -172,7 +172,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
    ypos += 10;     // Small gap before cmds start
    ypos += cmdSize;
 
-   for(S32 i = 0; cmdList[i].command != ""; i++)
+   for(S32 i = 0; cmdList[i].command != ""; ++i)
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {

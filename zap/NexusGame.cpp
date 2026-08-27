@@ -172,7 +172,7 @@ static S32 getMountedFlagCount(Ship *ship)
    S32 flagCount = 0;
    S32 itemCount = ship->getMountedItemCount();
 
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
    {
       MountableItem *mountedItem = ship->getMountedItem(i);
 
@@ -192,7 +192,7 @@ bool NexusGameType::isCarryingItems(Ship *ship)
 {
    S32 itemCount = ship->getMountedItemCount();
 
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < itemCount; ++i)
    {
       MountableItem *mountedItem = ship->getMountedItem(i);
       if(!mountedItem)        // Could be null when a player drop their flags and gets destroyed at the same time
@@ -270,7 +270,7 @@ Vector<string> NexusGameType::getGameParameterMenuKeys()
    Vector<string> items = Parent::getGameParameterMenuKeys();
 
    // Remove Win Score, replace it with some Nexus specific items
-   for(S32 i = 0; i < items.size(); i++)
+   for(S32 i = 0; i < items.size(); ++i)
       if(items[i] == "Win Score")
       {
          items.erase(i);      // Delete "Win Score"
@@ -454,7 +454,8 @@ void NexusGameType::idle_client(U32 deltaT)
       if(mYardSaleWaypoints[i].timeLeft.update(deltaT))
          mYardSaleWaypoints.erase_fast(i);
       else
-         i++;
+         ++i;
+
    }
 #endif
 }
@@ -479,7 +480,7 @@ void NexusGameType::openNexus(S32 timeNexusOpened)
    mNexusChangeAtTime = getNextChangeTime(timeNexusOpened, mNexusOpenTime);
 
    // Check if anyone is already in the Nexus, examining each client's ship in turn...
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   for(S32 i = 0; i < getGame()->getClientCount(); ++i)
    {
       Ship *client_ship = getGame()->getClientInfo(i)->getShip();
 
@@ -661,12 +662,12 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
 
 void NexusGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
-   for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
+   for(S32 i = 0; i < mYardSaleWaypoints.size(); ++i)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white, canvasWidth, canvasHeight);
 
    const Color *color = mNexusIsOpen ? &Colors::NexusOpenColor : &Colors::NexusClosedColor;
 
-   for(S32 i = 0; i < mNexus.size(); i++)
+   for(S32 i = 0; i < mNexus.size(); ++i)
       renderObjectiveArrow(mNexus[i], color, canvasWidth, canvasHeight);
 
    Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
@@ -722,7 +723,8 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *touchedFlag)
    if(touchedFlag)
       shipFlagCount += touchedFlag->getFlagCount();
    else
-      shipFlagCount++;
+      ++shipFlagCount;
+
 
    shipFlag->changeFlagCount(shipFlagCount);
 
@@ -832,7 +834,7 @@ void NexusFlagItem::dropFlags(U32 flags)
 
    if(flags > MAX_DROP_FLAGS)
    {
-      for(U32 i = MAX_DROP_FLAGS; i > 0; i--)
+      for(U32 i = MAX_DROP_FLAGS; i > 0; --i)
       {
          // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left,
          // and the last loop is (i == 1), dropping exact amount using only limited FlagItems
@@ -844,7 +846,7 @@ void NexusFlagItem::dropFlags(U32 flags)
       }
    }
    else     // Normal situation
-      for(U32 i = 0; i < flags; i++)
+      for(U32 i = 0; i < flags; ++i)
          getGame()->releaseFlag(mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
@@ -980,7 +982,7 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[Geometry::MAX_POLY_POINTS * 2];
-   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; ++i)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
       //switch(c)
@@ -991,7 +993,8 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
       {
          if(argc < Geometry::MAX_POLY_POINTS * 2)
          {  argv[argc] = argv2[i];
-            argc++;
+            ++argc;
+
          }
       }
    }

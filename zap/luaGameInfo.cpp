@@ -255,7 +255,7 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < game->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = game->getClientInfo(i);
 
@@ -263,14 +263,14 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
          continue;
 
       clientInfo->getPlayerInfo()->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
    for(S32 i = 0; i < game->getRobotCount(); i ++)
    {
       game->getBot(i)->getPlayerInfo()->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 

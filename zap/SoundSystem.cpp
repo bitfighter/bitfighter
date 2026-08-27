@@ -322,7 +322,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
    gSFXProfiles = sfxProfilesModern;
 
    // Iterate through all sounds and load them
-   for(U32 i = 0; i < NumSFXBuffers; i++)
+   for(U32 i = 0; i < NumSFXBuffers; ++i)
    {
       // End when we find a sound sans filename
       if(!gSFXProfiles[i].fileName)
@@ -351,7 +351,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
    else     // Got us some music!
    {
       // Remove the menu music from the file list
-      for(S32 i = 0; i < mGameMusicList.size(); i++)
+      for(S32 i = 0; i < mGameMusicList.size(); ++i)
       {
          if(mGameMusicList[i] == mMenuMusicFile)
          {
@@ -362,7 +362,7 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
       }
 
       // Remove the credits music from the file list
-      for(S32 i = 0; i < mGameMusicList.size(); i++)
+      for(S32 i = 0; i < mGameMusicList.size(); ++i)
       {
          if(mGameMusicList[i] == mCreditsMusicFile)
          {
@@ -424,7 +424,7 @@ void SoundSystem::shutdown()
    }
 
    // Clean up sources
-   for (S32 i = 0; i < NumSamples; i++)
+   for (S32 i = 0; i < NumSamples; ++i)
       alDeleteSources(1, &(gFreeSources[i]));
 
    gFreeSources.clear();
@@ -433,7 +433,7 @@ void SoundSystem::shutdown()
    alDeleteBuffers(NumSFXBuffers, gSfxBuffers);
 
    // Clean up voice buffers
-   for (S32 i = 0; i < 32; i++)
+   for (S32 i = 0; i < 32; ++i)
       alDeleteBuffers(1, &(gVoiceFreeBuffers[i]));
    gVoiceFreeBuffers.clear();
 
@@ -503,7 +503,7 @@ void SoundSystem::playSoundEffect(const SFXHandle &effect)
    else
    {
       // See if it's already on the play list:
-      for(S32 i = 0; i < gPlayList.size(); i++)
+      for(S32 i = 0; i < gPlayList.size(); ++i)
          if(effect == gPlayList[i].getPointer())
             return;
 
@@ -524,7 +524,7 @@ void SoundSystem::stopSoundEffect(SFXHandle &effect)
       alSourceStop(gFreeSources[effect->mSourceIndex]);
       effect->mSourceIndex = -1;
    }
-   for(S32 i = 0; i < gPlayList.size(); i++)
+   for(S32 i = 0; i < gPlayList.size(); ++i)
    {
       if(gPlayList[i].getPointer() == effect)
       {
@@ -553,14 +553,15 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
          if(alGetError() != AL_NO_ERROR)
             return;
 
-         processed--;
+         --processed;
+
 
          // ok, this is a lame solution - but the way OpenAL should work is...
          // you should only be able to unqueue buffers that you queued - duh!
          // otherwise it's a bitch to manage sources that can either be streamed
          // or already loaded.
          U32 i;
-         for(i = 0 ; i < NumSFXBuffers; i++)
+         for(i = 0 ; i < NumSFXBuffers; ++i)
             if(buffer == gSfxBuffers[i])
                break;
          if(i == NumSFXBuffers)
@@ -765,7 +766,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
          {
             // Start streaming: queue initial buffers
             alSourcei(mMusicData.source, AL_BUFFER, 0); // clear old buffers
-            for (S32 i = 0; i < NumMusicStreamBuffers; i++)
+            for (S32 i = 0; i < NumMusicStreamBuffers; ++i)
                queueNextMusicBuffer();
 
             ALint state;
@@ -779,7 +780,8 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
          static U32 failedCount = 0;
          if(failed)
          {
-            failedCount++;
+            ++failedCount;
+
 
             if(failedCount >= 10)  // Arbitrary
             {
@@ -920,7 +922,7 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
    // ones need to be retired:
 
    bool sourceActive[NumSamples];
-   for(S32 i = 0; i < NumSamples; i++)
+   for(S32 i = 0; i < NumSamples; ++i)
    {
       ALint state;
       unqueueBuffers(i);
@@ -945,17 +947,18 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
             s->mPriority = (500 - (s->mPosition - mListenerPosition).len()) / 500.0f;
          else
             s->mPriority = 1.0;
-         i++;
+         ++i;
+
       }
    }
    // Now, bubble sort all the sounds up the list:
    // we choose bubble sort, because the list should
    // have a lot of frame-to-frame coherency, making the
    // sort most often O(n)
-   for(S32 i = 1; i < gPlayList.size(); i++)
+   for(S32 i = 1; i < gPlayList.size(); ++i)
    {
       F32 priority = gPlayList[i]->mPriority;
-      for(S32 j = i - 1; j >= 0; j--)
+      for(S32 j = i - 1; j >= 0; --j)
       {
          if(priority > gPlayList[j]->mPriority)
          {
@@ -978,7 +981,8 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
       if(!s->mProfile->isLooping)
          gPlayList.erase_fast(i);
       else
-         i++;
+         ++i;
+
    }
    // Assign sources to all sounds that need them
    S32 firstFree = 0;
@@ -986,13 +990,14 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
    if(max > gPlayList.size())
       max = gPlayList.size();
 
-   for(S32 i = 0; i < max; i++)
+   for(S32 i = 0; i < max; ++i)
    {
       SFXHandle &s = gPlayList[i];
       if(s->mSourceIndex == -1)
       {
          while(firstFree < NumSamples-1 && sourceActive[firstFree])
-            firstFree++;
+            ++firstFree;
+
          s->mSourceIndex = firstFree;
          sourceActive[firstFree] = true;
          playOnSource(s, sfxVol, voiceVol);
@@ -1078,7 +1083,8 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
       {
          if(max < *ptr)
             max = *ptr;
-         ptr++;
+         ++ptr;
+
       }
 
       alBufferData(buffer, AL_FORMAT_MONO16, effect->mInitialBuffer->getBuffer(),

@@ -82,7 +82,8 @@ public:
    {
       mString = string.mString;
       if(mString)
-         mString->mRefCount++;
+         ++mString->mRefCount;
+
    }
    StringPtr(const std::string &string)
    {
@@ -99,7 +100,8 @@ public:
       decRef();
       mString = ref.mString;
       if(mString)
-         mString->mRefCount++;
+         ++mString->mRefCount;
+
       return *this;
    }
    StringPtr &operator=(const char *string)

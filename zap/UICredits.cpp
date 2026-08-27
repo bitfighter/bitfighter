@@ -174,7 +174,8 @@ CreditsScroller::CreditsScroller()
       else
          c.lines.push_back(gameCredits[index]);
 
-      index++;
+      ++index;
+
    }
 
    // Start credits position at the appropriate place
@@ -201,7 +202,7 @@ void CreditsScroller::updateFX(U32 delta)
    if(mCredits[indexMinus1].pos > 150 - (CreditSpace * mCredits[indexMinus1].lines.size()))  // 150 = banner height
    {
       // Scroll the credits text from bottom to top
-      for(S32 i = 0; i < mCredits.size(); i++)
+      for(S32 i = 0; i < mCredits.size(); ++i)
          mCredits[i].pos -= (delta / 8.f);
 
       // Test if credit music is playing - this just picks an arbitrary time to test if the music loaded properly
@@ -233,8 +234,8 @@ void CreditsScroller::render()
    r.setColor(Colors::white);
 
    // Draw the credits text, section by section, line by line
-   for(S32 i = 0; i < mCredits.size(); i++)
-      for(S32 j = 0; j < mCredits[i].lines.size(); j++)
+   for(S32 i = 0; i < mCredits.size(); ++i)
+      for(S32 j = 0; j < mCredits[i].lines.size(); ++j)
          drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].lines[j]);
 
    r.setColor(Colors::black);
@@ -256,7 +257,7 @@ void CreditsScroller::resetPosition()
 {
    mCredits[0].pos = (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   for(S32 i = 1; i < mCredits.size(); i++)
+   for(S32 i = 1; i < mCredits.size(); ++i)
       mCredits[i].pos = mCredits[i-1].pos + (CreditSpace * mCredits[i-1].lines.size()) + SectionSpace;
 }
 

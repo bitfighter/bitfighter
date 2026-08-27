@@ -51,7 +51,7 @@ void PickupItem::idle(BfObject::IdleCallPath path)
          show();
 
          // Check if there is a ship sitting on this item... it so, ship gets the pickup!
-         for(S32 i = 0; i < getGame()->getClientCount(); i++)
+         for(S32 i = 0; i < getGame()->getClientCount(); ++i)
          {
             Ship *ship = getGame()->getClientInfo(i)->getShip();
 

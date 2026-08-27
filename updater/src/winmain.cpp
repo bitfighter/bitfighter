@@ -73,7 +73,7 @@ static bool isInList(const char *token2Find, char *list2Clean) {
 	char word[1024];
 	bool isFileNamePart = false;
 
-	for (int i = 0, j = 0 ;  i <= int(strlen(list2Clean)) ; i++)
+	for (int i = 0, j = 0 ;  i <= int(strlen(list2Clean)) ; ++i)
 	{
 		if ((list2Clean[i] == ' ') || (list2Clean[i] == '\0'))
 		{
@@ -88,7 +88,7 @@ static bool isInList(const char *token2Find, char *list2Clean) {
 					int wordLen = int(strlen(word));
 					int prevPos = i - wordLen;
 
-					for (i = i + 1 ;  i <= int(strlen(list2Clean)) ; i++, prevPos++)
+					for (i = i + 1 ;  i <= int(strlen(list2Clean)) ; ++i, ++prevPos)
 						list2Clean[prevPos] = list2Clean[i];
 
 					list2Clean[prevPos] = '\0';
@@ -117,7 +117,7 @@ static string getParamVal(char c, char *list2Clean) {
 	bool isFileNamePart = false;
 	int pos2Erase = 0;
 
-	for (int i = 0, j = 0 ;  i <= int(strlen(list2Clean)) ; i++)
+	for (int i = 0, j = 0 ;  i <= int(strlen(list2Clean)) ; ++i)
 	{
 		if ((list2Clean[i] == ' ') || (list2Clean[i] == '\0'))
 		{
@@ -127,7 +127,7 @@ static string getParamVal(char c, char *list2Clean) {
 				j = 0;
 				action = false;
 
-				for (i = i + 1 ;  i <= int(strlen(list2Clean)) ; i++, pos2Erase++)
+				for (i = i + 1 ;  i <= int(strlen(list2Clean)) ; ++i, ++pos2Erase)
 					list2Clean[pos2Erase] = list2Clean[i];
 						
 				list2Clean[pos2Erase] = '\0';

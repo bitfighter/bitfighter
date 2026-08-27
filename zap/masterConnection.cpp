@@ -73,7 +73,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cHostOnServerAvailable, (bo
 void MasterServerConnection::startServerQuery(bool hostOnServer)
 {
    // Invalidate old queries
-   mCurrentQueryId++;
+   ++mCurrentQueryId;
+
 
    // And automatically do a server query as well - you may not want to do things
    // in this order in your own clients.
@@ -104,7 +105,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    if(ipList.size() > 0)
    {
       // Store these intermediate results
-      for(S32 i = 0; i < ipList.size(); i++)
+      for(S32 i = 0; i < ipList.size(); ++i)
          mServerList.push_back(ServerAddr(ipList[i]));
    }
    else  // Empty list received, transmission complete, send whole list on to the UI
@@ -139,7 +140,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
    if(ipList.size() > 0)
    {
       // Store these intermediate results
-      for(S32 i = 0; i < ipList.size(); i++)
+      for(S32 i = 0; i < ipList.size(); ++i)
          mServerList.push_back(ServerAddr(ipList[i], serverIdList[i]));
    }
    else  // Empty list received, transmission complete, send whole list on to the UI
@@ -174,7 +175,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_023,
 	if(ipList.size() > 0)
 	{
 		// Store these intermediate results
-		for(S32 i = 0; i < ipList.size(); i++)
+		for(S32 i = 0; i < ipList.size(); ++i)
 			mServerList.push_back(ServerAddr(ipList[i], serverIdList[i], serverNames[i]));
 	}
 	else  // Empty list received, transmission complete, send whole list on to the UI
@@ -189,13 +190,15 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_023,
 
 void MasterServerConnection::cancelArrangedConnectionAttempt()
 {
-   mCurrentQueryId++;
+   ++mCurrentQueryId;
+
 }
 
 
 void MasterServerConnection::requestArrangedConnection(const Address &remoteAddress)
 {
-   mCurrentQueryId++;
+   ++mCurrentQueryId;
+
 
    c2mRequestArrangedConnection(mCurrentQueryId, remoteAddress.toIPAddress(),
       getInterface()->getFirstBoundInterfaceAddress().toIPAddress(),
@@ -233,7 +236,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    // From here on, we're running on a game server that the master is trying to arrange a connection with
 
    Vector<Address> fullPossibleAddresses;
-   for(S32 i = 0; i < possibleAddresses.size(); i++)
+   for(S32 i = 0; i < possibleAddresses.size(); ++i)
       fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
    // Ok, let's do the arranged connection!
@@ -274,7 +277,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
 
       Vector<Address> fullPossibleAddresses;
-      for(S32 i = 0; i < possibleAddresses.size(); i++)
+      for(S32 i = 0; i < possibleAddresses.size(); ++i)
          fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
       ByteBufferPtr theSharedData =
@@ -361,7 +364,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vec
 
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
 
@@ -373,7 +376,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vec
             clientInfo->setAuthenticated(true, badges, gamesPlayed);       // Broadcasts status to other clients
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
-            for(S32 j = 0; j < mGame->getClientCount(); j++)
+            for(S32 j = 0; j < mGame->getClientCount(); ++j)
             {
                ClientInfo *c = mGame->getClientInfo(j);
 

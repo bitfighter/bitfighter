@@ -257,7 +257,8 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
       while(timeLeft > 0.01f && loopcount != 0)    // This loop is to prevent slow bounce on low frame rate / high time left
       {
-         loopcount--;
+         --loopcount;
+
 
          startPos = getPos();
 
@@ -319,7 +320,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          // Note that if we hit an object that does want to be collided with, it won't be in disabledList
          // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
          // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
-         for(S32 i = 0; i < disabledList.size(); i++)
+         for(S32 i = 0; i < disabledList.size(); ++i)
             disabledList[i]->enableCollision();
 
          // This logic lets the Railgun go through ships. It assumes that the
@@ -361,7 +362,8 @@ void Projectile::idle(BfObject::IdleCallPath path)
                      (S32)mTimeRemaining < WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime)
                {
                   mTimeRemaining += LIVETIME_INCREASE;
-                  mLiveTimeIncreases++;
+                  ++mLiveTimeIncreases;
+
                }
 
                // We hit something that we should bounce from, so bounce!
@@ -502,7 +504,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
          if(safeZone && safeZone->protectsShip(ship))
          {
             useDesaturatedSparks = true;
-            for(S32 i = 0; i < NumSparkColors; i++)
+            for(S32 i = 0; i < NumSparkColors; ++i)
                desaturatedSparkColors[i].interp(0.75f, sparkColors[i], Colors::gray50);
          }
       }
@@ -861,7 +863,7 @@ void Burst::explode(const Point &pos)
    S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo);
 
    if(getOwner())
-      for(S32 i = 0; i < hits; i++)
+      for(S32 i = 0; i < hits; ++i)
          getOwner()->getStatistics()->countHit(mWeaponType);
 
    disableCollision();
@@ -1023,7 +1025,7 @@ void Mine::idle(IdleCallPath path)
 
    // Found something!
    bool foundItem = false;
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
@@ -1715,7 +1717,7 @@ void Seeker::acquireTarget()
 
    F32 closest = F32_MAX;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Not a BfObject");
       BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
@@ -1752,7 +1754,7 @@ void Seeker::acquireTarget()
       F32 dummy;
       bool wallInTheWay = false;
 
-      for(S32 i = 0; i < localFillVector.size(); i++)
+      for(S32 i = 0; i < localFillVector.size(); ++i)
       {
          BfObject *collideObject = static_cast<BfObject *>(localFillVector[i]);
 
@@ -1893,7 +1895,7 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
       S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo, 200);
 
       if(getOwner())
-         for(S32 i = 0; i < hits; i++)
+         for(S32 i = 0; i < hits; ++i)
             getOwner()->getStatistics()->countHit(mWeaponType);
    }
 

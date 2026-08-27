@@ -82,7 +82,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 
    mFiring = false;
 
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(U32 i = 0; i < (U32)ShipModuleCount; ++i)
    {
       mModPrimaryActivated[i] = false;
       mModSecondaryActivated[i] = false;
@@ -143,7 +143,7 @@ void GameUserInterface::onActivate()
 
    mHelperManager.reset();
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       mModPrimaryActivated[i]   = false;
       mModSecondaryActivated[i] = false;
@@ -163,7 +163,7 @@ void GameUserInterface::onReactivate()
    if(!isChatting())
       getGame()->setBusyChatting(false);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; ++i)
    {
       mModPrimaryActivated[i]   = false;
       mModSecondaryActivated[i] = false;
@@ -324,7 +324,7 @@ void GameUserInterface::idle(U32 timeDelta)
    if(mAnnouncementTimer.update(timeDelta))
       mAnnouncement = "";
 
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(U32 i = 0; i < (U32)ShipModuleCount; ++i)
       mModuleDoubleTapTimer[i].update(timeDelta);
 
    // Messages
@@ -656,7 +656,7 @@ void GameUserInterface::renderMsgBox(const string *message, S32 msgLines) const
 {
    Vector<SymbolShapePtr> messages(msgLines);
 
-   for(S32 i = 0; i < msgLines; i++)
+   for(S32 i = 0; i < msgLines; ++i)
       messages.push_back(SymbolShapePtr(new SymbolString(message[i], NULL, ErrorMsgContext, 30, true)));
 
    // Use empty shared pointer instead of NULL
@@ -735,7 +735,7 @@ void GameUserInterface::prepareStars()
    static const Color starColor(0.8f, 0.8f, 1.0f);
 
    // Create some random stars
-   for(S32 i = 0; i < NumStars; i++)
+   for(S32 i = 0; i < NumStars; ++i)
    {
       // Positions
       mStars[i].set(TNL::Random::readF(), TNL::Random::readF());    // Between 0 and 1
@@ -758,7 +758,7 @@ void GameUserInterface::prepareStars()
    }
 
    // //Create some random hexagons
-   //for(U32 i = 0; i < NumStars; i++)
+   //for(U32 i = 0; i < NumStars; ++i)
    //{
    //   F32 x = TNL::Random::readF();
    //   F32 y = TNL::Random::readF();
@@ -766,7 +766,7 @@ void GameUserInterface::prepareStars()
    //   F32 size = TNL::Random::readF() * .1;
 
 
-   //   for(S32 j = 0; j < 6; j++)
+   //   for(S32 j = 0; j < 6; ++j)
    //   {
    //      mStars[i * 6 + j].x = x + sin(ang + Float2Pi / 6 * j) * size;      // Between 0 and 1
    //      mStars[i * 6 + j].y = y + cos(ang + Float2Pi / 6 * j) * size;
@@ -825,7 +825,7 @@ void GameUserInterface::renderProgressBar() const
       // whole mechanism is used for is to display something to the user, this should work fine.
       F32 barWidth = mShowProgressBar ? S32((F32) width * (F32) getGame()->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
 
-      for(S32 i = 1; i >= 0; i--)
+      for(S32 i = 1; i >= 0; --i)
       {
          F32 w = i ? width : barWidth;
 
@@ -1817,7 +1817,7 @@ Move *GameUserInterface::getCurrentMove()
 
       mCurrentMove.fire = mFiring;
 
-      for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+      for(U32 i = 0; i < (U32)ShipModuleCount; ++i)
       {
          mCurrentMove.modulePrimary[i]   = mModPrimaryActivated[i];
          mCurrentMove.moduleSecondary[i] = mModSecondaryActivated[i];
@@ -1830,7 +1830,7 @@ Move *GameUserInterface::getCurrentMove()
 
       mCurrentMove.fire = mFiring;     // should be false?
 
-      for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+      for(U32 i = 0; i < (U32)ShipModuleCount; ++i)
       {
          mCurrentMove.modulePrimary[i] = false;
          mCurrentMove.moduleSecondary[i] = false;
@@ -1952,7 +1952,7 @@ void GameUserInterface::renderTalkingClients() const
 {
    S32 y = 150;
 
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   for(S32 i = 0; i < getGame()->getClientCount(); ++i)
    {
       ClientInfo *client = ((Game *)getGame())->getClientInfo(i);
 
@@ -2099,7 +2099,7 @@ void GameUserInterface::renderGameNormal()
 
    // Cast objects in rawRenderObjects and put them in renderObjects
    renderObjects.clear();
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+   for(S32 i = 0; i < rawRenderObjects.size(); ++i)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally
@@ -2116,12 +2116,12 @@ void GameUserInterface::renderGameNormal()
    // Render in three passes, to ensure some objects are drawn above others
    bool hasTileWalls = (GameType::getTilePolys().size() > 0);
 
-   for(S32 i = -1; i < 2; i++)
+   for(S32 i = -1; i < 2; ++i)
    {
       if(mDebugOverlayRenderer.renderingMeshZones())
          mDebugOverlayRenderer.renderMeshZones(i);
 
-      for(S32 j = 0; j < renderObjects.size(); j++)
+      for(S32 j = 0; j < renderObjects.size(); ++j)
          renderObjects[j]->renderLayer(i);
 
       mFxManager.render(i, getCommanderZoomFraction());
@@ -2178,8 +2178,8 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
 
    const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
 
-   for(S32 i = 0; i < itemsToHighlight->size(); i++)
-      for(S32 j = 0; j < renderObjects.size(); j++)
+   for(S32 i = 0; i < itemsToHighlight->size(); ++i)
+      for(S32 j = 0; j < renderObjects.size(); ++j)
          if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() &&
                                              renderObjects[j]->shouldRender())
          {
@@ -2215,7 +2215,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       fillVector.clear();
       getGame()->getGameObjDatabase()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
       polygons.clear();
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < fillVector.size(); ++i)
          if(static_cast<BfObject *>(fillVector[i])->shouldRender())
             polygons.push_back(fillVector[i]->getOutline());
    }
@@ -2227,7 +2227,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
 
       offsetPolygons(polygons, outlines, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
-      for(S32 j = 0; j < outlines.size(); j++)
+      for(S32 j = 0; j < outlines.size(); ++j)
          renderPolygonOutline(&outlines[j], &Colors::green, alpha);
    }
 }
@@ -2294,7 +2294,7 @@ void GameUserInterface::renderGameCommander()
    renderObjects.clear();
 
    // Copy rawRenderObjects into renderObjects
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+   for(S32 i = 0; i < rawRenderObjects.size(); ++i)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    // Add extra bots if we're showing them
@@ -2315,7 +2315,7 @@ void GameUserInterface::renderGameCommander()
          playerTeam = ship->getTeam();
          Color teamColor = *ship->getColor();
 
-         for(S32 i = 0; i < renderObjects.size(); i++)
+         for(S32 i = 0; i < renderObjects.size(); ++i)
          {
             // Render ship visibility range, and that of our teammates
             if(isShipType(renderObjects[i]->getObjectTypeNumber()))
@@ -2338,7 +2338,7 @@ void GameUserInterface::renderGameCommander()
          const Vector<DatabaseObject *> *spyBugs = getGame()->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
-         for(S32 i = 0; i < spyBugs->size(); i++)
+         for(S32 i = 0; i < spyBugs->size(); ++i)
          {
             SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
 
@@ -2361,7 +2361,7 @@ void GameUserInterface::renderGameCommander()
    bool hasTileWalls = (GameType::getTilePolys().size() > 0);
 
    // First pass
-   for(S32 i = 0; i < renderObjects.size(); i++)
+   for(S32 i = 0; i < renderObjects.size(); ++i)
       renderObjects[i]->renderLayer(0);
 
    // Render tiled wall geometry
@@ -2381,7 +2381,7 @@ void GameUserInterface::renderGameCommander()
    if(mDebugOverlayRenderer.renderingEdgeIds())
       mDebugOverlayRenderer.renderEdgeIds(getGame());
 
-   for(S32 i = 0; i < renderObjects.size(); i++)
+   for(S32 i = 0; i < renderObjects.size(); ++i)
    {
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
  //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
@@ -2457,16 +2457,16 @@ void GameUserInterface::renderGameCommander()
 //      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 //
 //   renderObjects.clear();
-//   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+//   for(S32 i = 0; i < rawRenderObjects.size(); ++i)
 //      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 //
 //
 //   renderObjects.sort(renderSortCompare);
 //
-//   for(S32 i = 0; i < renderObjects.size(); i++)
+//   for(S32 i = 0; i < renderObjects.size(); ++i)
 //      renderObjects[i]->render(0);
 //
-//   for(S32 i = 0; i < renderObjects.size(); i++)
+//   for(S32 i = 0; i < renderObjects.size(); ++i)
 //      // Keep our spy bugs from showing up on enemy commander maps, even if they're known
 // //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
 //         renderObjects[i]->render(1);

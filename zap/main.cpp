@@ -208,7 +208,7 @@ void hostGame(ServerGame *serverGame)
 #ifndef ZAP_DEDICATED
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       clientGames->get(i)->getUIManager()->disableLevelLoadDisplay(true);
       clientGames->get(i)->joinLocalGame(serverGame->getNetInterface());  // ...then we'll play, too!
@@ -246,7 +246,7 @@ void display()
 
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
       // we have two games, we might want to divide the screen into two viewports, configuring each before running the
@@ -282,7 +282,7 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
    {
 #ifndef ZAP_DEDICATED
       // Disconnect any local clients, passing whatever reason string we have
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
          clientGames->get(i)->closeConnectionToGameServer(shutdownReason.c_str());
 
       if(clientGames->size() > 0)       // If there are any clients running...
@@ -309,7 +309,7 @@ void loadAnotherLevelOrStartHosting()
 #ifndef ZAP_DEDICATED
       const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
       // Notify any client UIs on the hosting machine that the server has loaded a level
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
          clientGames->get(i)->getUIManager()->serverLoadedLevel(levelName);
 #endif
    }
@@ -385,7 +385,7 @@ void idle()
          shutdownBitfighter();
 
       // Pass the event to all clientGames
-      for(S32 i = 0; i < clientGames->size(); i++)
+      for(S32 i = 0; i < clientGames->size(); ++i)
          Event::onEvent(clientGames->get(i), &event);
    }
    // END SDL event polling
@@ -568,7 +568,7 @@ void createClientGame(GameSettingsPtr settings)
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-         for(S32 i = 0; i < clientGames->size(); i++)
+         for(S32 i = 0; i < clientGames->size(); ++i)
             clientGames->get(i)->getUIManager()->activate<NameEntryUserInterface>();
 
          //if(gClientGame)
@@ -586,7 +586,7 @@ void createClientGame(GameSettingsPtr settings)
       else  // Skipping startup screen
       {
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-         for(S32 i = 0; i < clientGames->size(); i++)
+         for(S32 i = 0; i < clientGames->size(); ++i)
          {
             clientGames->get(i)->getUIManager()->activate<MainMenuUserInterface>();
             clientGames->get(i)->setReadyToConnectToMaster(true);
@@ -843,7 +843,7 @@ void copyResourcesToUserData()
    string installDataDir = getInstalledDataDir();
    string fileSeparator = getFileSeparator();
 
-   for(S32 i = 0; i < dirArray.size(); i++)
+   for(S32 i = 0; i < dirArray.size(); ++i)
    {
       // Make sure each resource folder exists
       string userResourceDir = userDataDir + fileSeparator + dirArray[i];
@@ -862,7 +862,7 @@ void copyResourcesToUserData()
       Vector<string> fillFiles;
       getFilesFromFolder(installedResourceDir, fillFiles);
 
-      for(S32 i = 0; i < fillFiles.size(); i++)
+      for(S32 i = 0; i < fillFiles.size(); ++i)
       {
          string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
          if(!copyFileToDir(sourceFile, userResourceDir))
@@ -1097,7 +1097,7 @@ void exceptionHandler(int sig) {
    logprintf(LogConsumer::LogError, "Error: signal %d:", sig);
    functions = backtrace_symbols(stack, size);
 
-   for(S32 i=0; i < size; i++)
+   for(S32 i=0; i < size; ++i)
       logprintf(LogConsumer::LogError, "%d: %s", i, functions[i]);
 
    free(functions);
@@ -1166,7 +1166,7 @@ int main(int argc, char **argv)
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
 
-   for(S32 i = 1; i < argc; i++)
+   for(S32 i = 1; i < argc; ++i)
       argVector.push_back(argv[i]);
 
    // We change our current directory to be useful, usually to the location the executable resides
@@ -1295,7 +1295,7 @@ int main(int argc, char **argv)
       if(configurationErrors.size() > 0)
       {
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-         for(S32 i = 0; i < clientGames->size(); i++)
+         for(S32 i = 0; i < clientGames->size(); ++i)
          {
             UIManager *uiManager = clientGames->get(i)->getUIManager();
             ErrorMessageUserInterface *ui = uiManager->getUI<ErrorMessageUserInterface>();
@@ -1304,7 +1304,7 @@ int main(int argc, char **argv)
             ui->setTitle("CONFIGURATION ERROR");
 
             string msg = "";
-            for(S32 i = 0; i < configurationErrors.size(); i++)
+            for(S32 i = 0; i < configurationErrors.size(); ++i)
                msg += itos(i + 1) + ".  " + configurationErrors[i] + "\n";
 
             ui->setMessage(msg);

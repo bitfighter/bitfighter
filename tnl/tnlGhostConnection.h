@@ -294,7 +294,8 @@ inline void GhostConnection::ghostPushNonZero(GhostInfo *info)
       mGhostArray[mGhostZeroUpdateIndex] = info;
       info->arrayIndex = mGhostZeroUpdateIndex;
    }
-   mGhostZeroUpdateIndex++;
+   ++mGhostZeroUpdateIndex;
+
    //TNLAssert(validateGhostArray(), "Invalid ghost array!");
 }
 
@@ -302,7 +303,8 @@ inline void GhostConnection::ghostPushToZero(GhostInfo *info)
 {
    TNLAssert(info->arrayIndex < mGhostZeroUpdateIndex, "Out of range arrayIndex.");
    TNLAssert(mGhostArray[info->arrayIndex] == info, "Invalid array object.");
-   mGhostZeroUpdateIndex--;
+   --mGhostZeroUpdateIndex;
+
    if(info->arrayIndex != mGhostZeroUpdateIndex)
    {
       mGhostArray[mGhostZeroUpdateIndex]->arrayIndex = info->arrayIndex;
@@ -317,7 +319,8 @@ inline void GhostConnection::ghostPushZeroToFree(GhostInfo *info)
 {
    TNLAssert(info->arrayIndex >= mGhostZeroUpdateIndex && info->arrayIndex < mGhostFreeIndex, "Out of range arrayIndex.");
    TNLAssert(mGhostArray[info->arrayIndex] == info, "Invalid array object.");
-   mGhostFreeIndex--;
+   --mGhostFreeIndex;
+
    if(info->arrayIndex != mGhostFreeIndex)
    {
       mGhostArray[mGhostFreeIndex]->arrayIndex = info->arrayIndex;
@@ -339,7 +342,8 @@ inline void GhostConnection::ghostPushFreeToZero(GhostInfo *info)
       mGhostArray[mGhostFreeIndex] = info;
       info->arrayIndex = mGhostFreeIndex;
    }
-   mGhostFreeIndex++;
+   ++mGhostFreeIndex;
+
    //TNLAssert(validateGhostArray(), "Invalid ghost array!");
 }
 

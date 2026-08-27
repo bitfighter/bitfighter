@@ -102,10 +102,10 @@ void NetClassRep::initialize()
       
    NetClassRep *walk;
    
-   for(U32 group = 0; group < NetClassGroupCount; group++)
+   for(U32 group = 0; group < NetClassGroupCount; ++group)
    {
       U32 groupMask = 1 << group;
-      for(U32 type = 0; type < NetClassTypeCount; type++)
+      for(U32 type = 0; type < NetClassTypeCount; ++type)
       {
          for(walk = mClassLinkList; walk; walk = walk->mNextClass)
          {
@@ -121,12 +121,12 @@ void NetClassRep::initialize()
          logprintf(LogConsumer::LogNetBase, "Class Group: %d (%s) Class Type: %d (%s)  Count: %d", 
                                             group, NetClassGroupNames[group], type, NetClassTypeNames[type], dynamicTable.size());
 
-         for(S32 i = 0; i < dynamicTable.size(); i++)
+         for(S32 i = 0; i < dynamicTable.size(); ++i)
             logprintf(LogConsumer::LogNetBase, "\tClass %d: %s", i + 1, dynamicTable[i]->getClassName());
 
          mClassTable[group][type] = dynamicTable;
    
-         for(S32 i = 0; i < mClassTable[group][type].size(); i++)
+         for(S32 i = 0; i < mClassTable[group][type].size(); ++i)
             mClassTable[group][type][i]->mClassId[group] = i;
 
          mNetClassBitSize[group][type] = 

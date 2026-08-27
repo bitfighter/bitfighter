@@ -52,7 +52,7 @@ string PHPBB3Password::md5(string data) {
 	md5_process(&state, (const unsigned char *)data.c_str(), data.length());
 	md5_done(&state, hash);
 	string ret;
-	for (int i=0; i<16; i++) ret += hash[i];
+	for (int i=0; i<16; ++i) ret += hash[i];
 	return ret;
 }
 

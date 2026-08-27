@@ -97,7 +97,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
       // based on what we've found so far. This lets scripts using the new
       // system to put the returned values in a human-readable order, while
       // maintaining backwards-compatibility with old plugins.
-      for(S32 i = 1; i <= numResults; i++)
+      for(S32 i = 1; i <= numResults; ++i)
       {
          if(lua_istable(L, i))
          {
@@ -321,7 +321,7 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
    const Vector<DatabaseObject *> *objects = mGridDatabase->findObjects_fast();
    map<U32, BfObject*> orderedSelectedItems;
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
 
@@ -338,11 +338,11 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
    S32 pushed = 0;
 
    map<U32, BfObject*>::iterator it;
-   for(it = orderedSelectedItems.begin(); it != orderedSelectedItems.end(); it++)
+   for(it = orderedSelectedItems.begin(); it != orderedSelectedItems.end(); ++it)
    {
       BfObject *obj = (*it).second;
       obj->push(L);
-      pushed++;         // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;         // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
@@ -367,12 +367,12 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
 
    S32 pushed = 0;
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
 
       obj->push(L);
-      pushed++;         // Increment pushed before using it because Lua uses 1-based arrays
+      ++pushed;         // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 

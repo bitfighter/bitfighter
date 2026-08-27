@@ -53,7 +53,7 @@ void getDummyPlayerScores(ClientGame *game, Vector<ClientInfo *> &scores)
    ClientInfo *clientInfo;
    const S32 teams = getDummyTeamCount();
 
-   for(S32 i = 0; i < getDummyMaxPlayers(); i++)
+   for(S32 i = 0; i < getDummyMaxPlayers(); ++i)
    {
       string name = "PlayerName-" + itos(i);
 
@@ -162,7 +162,7 @@ void ScoreboardRenderer::render()
    const S32 teams = isTeamGame ? game->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
 
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teams; ++i)
    {
       Team *team = static_cast<Team *>(game->getTeam(i));
 
@@ -195,7 +195,7 @@ void ScoreboardRenderer::render()
 
    FontManager::pushFontContext(ScoreboardContext);
 
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teams; ++i)
       renderTeamScoreboard(i, teams, isTeamGame, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
 
    renderScoreboardLegend(game->getPlayerCount(), scoreboardTop, totalHeight);
@@ -242,12 +242,12 @@ void ScoreboardRenderer::renderTeamScoreboard(S32 index, S32 teams, bool isTeamG
    S32 colIndexWidths[ColIndexCount];
    S32 maxColIndexWidths[ColIndexCount] = {0};
 
-   for(S32 i = 0; i < playerInfos.size(); i++)
+   for(S32 i = 0; i < playerInfos.size(); ++i)
    {
       renderScoreboardLine(playerInfos, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
       curRowY += lineHeight;
 
-      for(S32 j = 0; j < ColIndexCount; j++)
+      for(S32 j = 0; j < ColIndexCount; ++j)
          maxColIndexWidths[j] = max(colIndexWidths[j], maxColIndexWidths[j]);
    }
 
@@ -360,7 +360,7 @@ void ScoreboardRenderer::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 
 
    bool hasBBBBadge = false;
 
-   for(S32 i = 0; i < BADGE_COUNT; i++)
+   for(S32 i = 0; i < BADGE_COUNT; ++i)
    {
       MeritBadges badge = MeritBadges(i);
 

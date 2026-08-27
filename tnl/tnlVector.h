@@ -127,7 +127,7 @@ public:
    //    doSomething(row);
    //
    // Equivalent to a traditional loop:
-   // for (S32 i = 0; i < rows.size(); i++)
+   // for (S32 i = 0; i < rows.size(); ++i)
    //    doSomething(rows[i]);
 
    // Note: for Vector<bool>, innerVector is std::vector<S32>, so these iterators
@@ -288,7 +288,7 @@ template<class T> inline void Vector<T>::clear()
 
 template<class T> inline void Vector<T>::deleteAndClear()
 {
-   for(U32 i = 0; i < this->innerVector.size(); i++)
+   for(U32 i = 0; i < this->innerVector.size(); ++i)
       delete this->innerVector[i];
 
    this->innerVector.clear();
@@ -301,7 +301,7 @@ template<class T> inline bool Vector<T>::contains(const T &object) const
 
 template<class T> inline S32 Vector<T>::getIndex(const T &object) const
 {
-   for(U32 i = 0; i < this->innerVector.size(); i++)
+   for(U32 i = 0; i < this->innerVector.size(); ++i)
       if(object == this->innerVector[i])
          return i;
 
@@ -403,7 +403,7 @@ template<class T> inline void Vector<T>::reserve(U32 size)
 // Reverses this Vector's elements in place.
 template<class T> inline void Vector<T>::reverse()
 {
-   for(S32 i = (S32(this->innerVector.size()) >> 1) - 1; i >= 0; i--)
+   for(S32 i = (S32(this->innerVector.size()) >> 1) - 1; i >= 0; --i)
    {
       T temp = this->innerVector[this->innerVector.size() - i - 1];
       this->innerVector[this->innerVector.size() - i - 1] = this->innerVector[i];

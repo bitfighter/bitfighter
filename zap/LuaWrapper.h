@@ -1017,7 +1017,7 @@ private:
    // Helper function -- return true if name is found in orderedClassList
    static bool findInOrderedClassList(const char *name)
    {
-      for(int i = 0; i < (int)getOrderedClassList().size(); i++)
+      for(int i = 0; i < (int)getOrderedClassList().size(); ++i)
          if(strcmp(name, getOrderedClassList()[i]) == 0)
             return true;
 
@@ -1045,7 +1045,7 @@ private:
       {
          bool foundAtLeastOneThisIteration = false;      // For detecting and preventing endless loops due to hierarchy problems
 
-         for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)    // Descending order for greater efficiency
+         for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; --i)    // Descending order for greater efficiency
             // If parent is in orderedClassList, we can move the item to the orderedClassList
             if(findInOrderedClassList(getUnorderedClassList()[i].parent))
             {
@@ -1057,7 +1057,7 @@ private:
          TNLAssert(foundAtLeastOneThisIteration, "Registering items is stuck -- check luaW class/subclass declarations!");
 
          if(!foundAtLeastOneThisIteration)
-            for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
+            for(int i = (int)getUnorderedClassList().size() - 1; i > -1; --i)
                moveToOrderedList(i);
 
          itemsRemainingInList = getUnorderedClassList().size();
@@ -1113,11 +1113,11 @@ public:
       std::vector<ClassName> &orderedClassList = getOrderedClassList();
 
       // Register all our classes
-      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+      for(unsigned int i = 0; i < orderedClassList.size(); ++i)
          getRegistrationFunctions()[orderedClassList[i]](L);
 
       // Extend those that need extending
-      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+      for(unsigned int i = 0; i < orderedClassList.size(); ++i)
       {
          // Skip base classes
          if(getExtensionFunctions()[orderedClassList[i]] == NULL)

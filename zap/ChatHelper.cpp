@@ -232,7 +232,7 @@ void ChatHelper::render()
          (F32)xPos,            top + BOX_HEIGHT
    };
 
-   for(S32 i = 1; i >= 0; i--)
+   for(S32 i = 1; i >= 0; --i)
    {
       renderer.setColor(baseColor, i ? .25f : .4f);
       renderer.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? RenderType::TriangleFan : RenderType::LineLoop);
@@ -256,7 +256,7 @@ void ChatHelper::render()
 
       if(words.size() > 0)
       {
-         for(S32 i = 0; i < chatCmdSize; i++)
+         for(S32 i = 0; i < chatCmdSize; ++i)
          {
             const char *cmd = words[0].c_str();
 
@@ -305,7 +305,7 @@ static void makePlayerNameList(Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
-   for(S32 i = 0; i < game->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); ++i)
       nameCandidateList.push_back(((Game *)game)->getClientInfo(i)->getName().getString());
 }
 
@@ -314,7 +314,7 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
 {
    nameCandidateList.clear();
 
-   for(S32 i = 0; i < game->getTeamCount(); i++)
+   for(S32 i = 0; i < game->getTeamCount(); ++i)
       nameCandidateList.push_back(game->getTeamName(i).getString());
 }
 
@@ -330,7 +330,7 @@ static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
    if(!gameConnection)
       return;
 
-   for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
+   for(S32 i = 0; i < gameConnection->mLevelInfos.size(); ++i)
       nameCandidateList.push_back(gameConnection->mLevelInfos[i].mLevelName.getString());
 }
 
@@ -408,7 +408,8 @@ void ChatHelper::upArrowPressed()
    if(mHistoryIndex > 0)
    {
       mHistory[mHistoryIndex] = mLineEditor.getString();       // Save any edits we've made to this line
-      mHistoryIndex--;
+      --mHistoryIndex;
+
       mLineEditor.setString(mHistory[mHistoryIndex]);
    }
 }
@@ -420,7 +421,8 @@ void ChatHelper::downArrowPressed()
    if(mHistoryIndex < mHistory.size() - 1)
    {
       mHistory[mHistoryIndex] = mLineEditor.getString();      // Save any edits we've made to this line
-      mHistoryIndex++;
+      ++mHistoryIndex;
+
       mLineEditor.setString(mHistory[mHistoryIndex]);
    }
 }
@@ -492,7 +494,7 @@ bool ChatHelper::completeChatCmd()
       S32 end = lastArgIsEmpty ? arg - 1 : arg;
 
       string newPartial = words[commandInfo->cmdArgCount];
-      for (S32 i = commandInfo->cmdArgCount + 1; i <= end; i++)
+      for (S32 i = commandInfo->cmdArgCount + 1; i <= end; ++i)
          newPartial = newPartial + " " + words[i];
 
       // Set the arg to what it should be with the multiple words
@@ -587,7 +589,7 @@ const char *ChatHelper::getChatMessage() const
 
 static void makeCommandCandidateList()
 {
-   for(S32 i = 0; i < ChatHelper::chatCmdSize; i++)
+   for(S32 i = 0; i < ChatHelper::chatCmdSize; ++i)
       commandCandidateList.push_back(chatCmds[i].cmdName);
 
    commandCandidateList.sort(alphaSort);
@@ -643,7 +645,7 @@ void ChatHelper::issueChat()
 
 CommandInfo *ChatHelper::getCommandInfo(const char *command)
 {
-   for(S32 i = 0; i < ChatHelper::chatCmdSize; i++)
+   for(S32 i = 0; i < ChatHelper::chatCmdSize; ++i)
       if(!stricmp(chatCmds[i].cmdName.c_str(), command))
          return &chatCmds[i];
 
@@ -670,7 +672,7 @@ void ChatHelper::runCommand(ClientGame *game, const char *input)
       return;
    }
 
-   for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
+   for(U32 i = 0; i < ARRAYSIZE(chatCmds); ++i)
       if(lcase(words[0]) == chatCmds[i].cmdName)
       {
          (*(chatCmds[i].cmdCallback))(game, words);
@@ -691,7 +693,7 @@ void ChatHelper::serverCommandHandler(ClientGame *game, const Vector<string> &wo
 {
    Vector<StringPtr> args;
 
-   for(S32 i = 1; i < words.size(); i++)
+   for(S32 i = 1; i < words.size(); ++i)
       args.push_back(StringPtr(words[i]));
 
    game->sendCommand(StringTableEntry(words[0], false), args);

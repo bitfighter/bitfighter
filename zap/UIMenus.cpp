@@ -286,7 +286,7 @@ static void renderArrow(S32 pos, bool pointingUp)
          F32(canvasWidth) / 2,               F32(y)
    };
 
-   for(S32 i = 1; i >= 0; i--)
+   for(S32 i = 1; i >= 0; --i)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
       r.setColor(i ? Colors::black : Colors::blue);
@@ -352,7 +352,7 @@ void MenuUserInterface::render()
 
    S32 y = yStart;
 
-   for(S32 i = 0; i < count; i++)
+   for(S32 i = 0; i < count; ++i)
    {
       MenuItemSize size = getMenuItem(i)->getSize();
       S32 textsize = getTextSize(size);
@@ -442,7 +442,7 @@ S32 MenuUserInterface::getMaxFirstItemIndex()
 // Fill responses with values from each menu item in turn
 void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 {
-   for(S32 i = 0; i < mMenuItems.size(); i++)
+   for(S32 i = 0; i < mMenuItems.size(); ++i)
       responses.push_back(mMenuItems[i]->getValue());
 }
 
@@ -483,7 +483,7 @@ S32 MenuUserInterface::getSelectedMenuItem()
       return mFirstVisibleItem;
 
    // Mouse is on the menu
-   for(S32 i = 0; i < getMenuItemCount() - 1; i++)
+   for(S32 i = 0; i < getMenuItemCount() - 1; ++i)
    {
       MenuItemSize size = getMenuItem(i)->getSize();
       S32 height = getGap(size) / 2 + getTextSize(size);
@@ -509,7 +509,8 @@ void MenuUserInterface::processMouse()
       {
          if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
-            mFirstVisibleItem--;
+            --mFirstVisibleItem;
+
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
          selectedIndex = mFirstVisibleItem;
@@ -518,7 +519,8 @@ void MenuUserInterface::processMouse()
       {
          if(!mScrollTimer.getCurrent() && selectedIndex > mFirstVisibleItem + mMaxMenuSize - 2)
          {
-            mFirstVisibleItem++;
+            ++mFirstVisibleItem;
+
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
          selectedIndex = mFirstVisibleItem + mMaxMenuSize - 1;
@@ -627,7 +629,7 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
       return false;
 
    // Check for some shortcut keys
-   for(S32 i = 0; i < mMenuItems.size(); i++)
+   for(S32 i = 0; i < mMenuItems.size(); ++i)
    {
       if(inputCode == mMenuItems[i]->key1 || inputCode == mMenuItems[i]->key2)
       {
@@ -646,7 +648,7 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 S32 MenuUserInterface::getTotalMenuItemHeight()
 {
    S32 height = 0;
-   for(S32 i = 0; i < mMenuItems.size(); i++)
+   for(S32 i = 0; i < mMenuItems.size(); ++i)
    {
       MenuItemSize size = mMenuItems[i]->getSize();
       height += getTextSize(size) + getGap(size);
@@ -704,7 +706,8 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
    }
    else if(inputCode == KEY_UP || (inputCode == KEY_TAB && InputCodeManager::checkModifier(KEY_SHIFT)))   // Prev item
    {
-      selectedIndex--;
+      --selectedIndex;
+
       itemSelectedWithMouse = false;
 
       if(selectedIndex < 0)                        // Scrolling off the top
@@ -752,7 +755,8 @@ void MenuUserInterface::renderExtras() const
 
 void MenuUserInterface::advanceItem()
 {
-   selectedIndex++;
+   ++selectedIndex;
+
    itemSelectedWithMouse = false;
 
    if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
@@ -1463,7 +1467,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
 
    GameSettings *settings = getGame()->getSettings();
 
-   for(S32 i = 0; i <= 10; i++)
+   for(S32 i = 0; i <= 10; ++i)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
    addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false,
@@ -1865,11 +1869,13 @@ void NameEntryUserInterface::renderExtras() const
 
    Renderer::get().setColor(Colors::menuHelpColor);
 
-   row++;
+   ++row;
+
 
    drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size,
             "A password is only needed if you are using a reserved name.  You can reserve your");
-   row++;
+   ++row;
+
 
    drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size,
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
@@ -2263,11 +2269,11 @@ void LevelMenuUserInterface::onActivate()
    addMenuItem(new MenuItem(ALL_LEVELS_MENUID, ALL_LEVELS, selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
 
    // Cycle through all levels, looking for unique type strings
-   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
+   for(S32 i = 0; i < gc->mLevelInfos.size(); ++i)
    {
       bool found = false;
 
-      for(S32 j = 0; j < getMenuItemCount(); j++)
+      for(S32 j = 0; j < getMenuItemCount(); ++j)
          if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), "") == 0 ||
             strcmp(gc->mLevelInfos[i].getLevelTypeName(), getMenuItem(j)->getPrompt().c_str()) == 0)
          {
@@ -2452,14 +2458,14 @@ void LevelMenuSelectUserInterface::onActivate()
       // Get all the playable levels in levelDir
       mLevels = getGame()->getSettings()->getLevelList();
 
-      for(S32 i = 0; i < mLevels.size(); i++)
+      for(S32 i = 0; i < mLevels.size(); ++i)
       {
          c[0] = mLevels[i].c_str()[0];
          addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
 
-   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
+   for(S32 i = 0; i < gc->mLevelInfos.size(); ++i)
    {
       if(gc->mLevelInfos[i].mLevelName == "")   // Skip levels with blank names --> but all should have names now!
          continue;
@@ -2520,7 +2526,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
    MenuItemSize size = getMenuItem(getOffset())->getSize();
    S32 y = getYStart();
 
-   for(S32 j = getOffset(); j < selectedIndex; j++)
+   for(S32 j = getOffset(); j < selectedIndex; ++j)
    {
       size = getMenuItem(j)->getSize();
       y += getTextSize(size) + getGap(size);
@@ -2569,7 +2575,8 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
       if(offset == 0 && !first)
          break;
 
-      offset++;
+      ++offset;
+
       first = false;
    }
 
@@ -2611,7 +2618,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    // When we created the menu, names were not sorted, and item indices were assigned in "natural order".  Then
    // the menu items were sorted by name, and now the indices are now jumbled.  This bit here tries to get the
    // new, actual list index of an item given its original index.
-   for(S32 i = 0; i < getMenuItemCount(); i++)
+   for(S32 i = 0; i < getMenuItemCount(); ++i)
       if(getMenuItem(i)->getIndex() == (S32)index)
       {
          index = i;
@@ -2647,7 +2654,7 @@ void PlayerMenuUserInterface::render()
       return;
 
    char c[] = "A";      // Dummy shortcut key
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   for(S32 i = 0; i < getGame()->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = ((Game *)getGame())->getClientInfo(i);      // Lame!
 
@@ -2731,7 +2738,7 @@ void TeamMenuUserInterface::render()
    getGame()->countTeamPlayers();                     // Make sure numPlayers is correctly populated
 
    char c[] = "A";                                    // Dummy shortcut key, will change below
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   for(S32 i = 0; i < getGame()->getTeamCount(); ++i)
    {
       AbstractTeam *team = getGame()->getTeam(i);
       strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key

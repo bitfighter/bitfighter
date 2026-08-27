@@ -323,7 +323,8 @@ TEST_F(FileLoggingTest, BothLoggingPathsHaveTimestamps)
       if (!line.empty())
       {
          EXPECT_TRUE(lineContainsTimestamp(line)) << "Line " << (lineCount + 1) << " missing timestamp: " << line;
-         lineCount++;
+         ++lineCount;
+
       }
    }
 

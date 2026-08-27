@@ -44,7 +44,7 @@ void AbstractMessageUserInterface::setMessage(const string &message)
 
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
-   for(S32 i = 0; i < wrappedLines.size(); i++)
+   for(S32 i = 0; i < wrappedLines.size(); ++i)
       mMessage[i] = SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextHeight, true));
 
    mMaxLines = wrappedLines.size();
@@ -86,7 +86,7 @@ void AbstractMessageUserInterface::quit()
 
 void AbstractMessageUserInterface::reset()
 {
-   for(S32 i = 0; i < MAX_LINES; i++)
+   for(S32 i = 0; i < MAX_LINES; ++i)
       mMessage[i] = SymbolShapePtr(new SymbolBlank());
 
    mMaxLines = MAX_LINES;

@@ -48,7 +48,8 @@ void LineEditor::backspacePressed()
    }
 
    mLine = mLine.substr(0, mCursorOffset - 1) + mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
-   mCursorOffset -= 1;
+   --mCursorOffset;
+
    mMatchIndex = -1;
 }
 
@@ -180,7 +181,7 @@ void LineEditor::buildMatchList(const Vector<string> *candidates, const string &
 
       string::size_type len = partial.size();
 
-      for(S32 i = 0; i < candidates->size(); i++)
+      for(S32 i = 0; i < candidates->size(); ++i)
       {
          // If partial is empty, then everything matches -- we want all candidates in our list
          if(partial == "" || stricmp(partial.c_str(), (*candidates)[i].substr(0, len).c_str()) == 0)
@@ -202,7 +203,7 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
       if(mMatchList.size() == 0)             // Found no matches... no expansion possible
          return;
 
-      mMatchIndex++;                         // Advance to next potential match
+      ++mMatchIndex;                         // Advance to next potential match
 
       if(mMatchIndex >= mMatchList.size())   // Handle wrap-around
          mMatchIndex = 0;
@@ -297,7 +298,8 @@ bool LineEditor::addChar(const char c)
    if(length() < mMaxLen)
    {
       mLine = mLine.substr(0, mCursorOffset) + c + mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
-      mCursorOffset += 1;
+      ++mCursorOffset;
+
    }
    mMatchIndex = -1;
    return true;
@@ -322,7 +324,8 @@ bool LineEditor::handleKey(InputCode inputCode)
       }
       else
       {
-         spacePos += 1;
+         ++spacePos;
+
       }
 
       string left = mLine.substr(0, spacePos);

@@ -222,7 +222,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 // Convert string to lower case
 string lcase(string strToConvert)      // Note that strToConvert is a copy of whatever was passed
 {
-   for(U32 i = 0; i < strToConvert.length(); i++)
+   for(U32 i = 0; i < strToConvert.length(); ++i)
       strToConvert[i] = toLower(strToConvert[i]);
    return strToConvert;
 }
@@ -231,7 +231,7 @@ string lcase(string strToConvert)      // Note that strToConvert is a copy of wh
 // Convert string to upper case
 string ucase(string strToConvert)
 {
-   for(U32 i = 0; i < strToConvert.length(); i++)
+   for(U32 i = 0; i < strToConvert.length(); ++i)
       strToConvert[i] = toUpper(strToConvert[i]);
    return strToConvert;
 }
@@ -255,7 +255,8 @@ bool isPositiveInteger(const char *str)
    {
       if(s[i] < '0' || s[i] > '9')
          return false;
-      i++;
+      ++i;
+
    }
 
    return true;
@@ -354,7 +355,8 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
             while(isDigit(*src))
             {
                index = index * 10 + (*src - '0');
-               src++;
+               ++src;
+
             }
 
             switch(*type)
@@ -425,7 +427,8 @@ Vector<string> parseString(const string &line)
             if(i + 1 < line.length() && line[i + 1] == '"')
             {
                current += '"';
-               i++;
+               ++i;
+
             }
             else
             {
@@ -496,7 +499,8 @@ void parseString(const char *inputString, Vector<string> &words, char separator)
       {
          word += inputString[isn];
       }
-      isn++;
+      ++isn;
+
    }
 
    words.push_back(trim(word));
@@ -530,20 +534,23 @@ const char *findPointerOfArg(const char *message, S32 count)
 
    // Skip leading whitespace
    while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
-      cur++;
+      ++cur;
 
-   for(S32 i = 0; i < count; i++)
+
+   for(S32 i = 0; i < count; ++i)
    {
       if(message[cur] == '\0')    // End of string
          return &message[cur];
 
       // Skip current argument (non-whitespace)
       while(message[cur] != '\0' && !isspace((unsigned char)message[cur]))
-         cur++;
+         ++cur;
+
 
       // Skip whitespace separating this arg from the next
       while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
-         cur++;
+         ++cur;
+
    }
 
    return &message[cur];
@@ -558,7 +565,7 @@ string concatenate(const Vector<string> &words, S32 startingWith)
       startingWith = 0;
 
    string concatenated = "";
-   for(S32 i = startingWith; i < words.size(); i++)
+   for(S32 i = startingWith; i < words.size(); ++i)
       concatenated += (i == startingWith ? "" : " ") + words[i];
 
    return concatenated;
@@ -570,7 +577,7 @@ string listToString(const Vector<string> &words, const string &separator)
 {
    string str = "";
 
-   for(S32 i = 0; i < words.size(); i++)
+   for(S32 i = 0; i < words.size(); ++i)
       str += words[i] + ((i < words.size() - 1) ? separator : "");
 
    return str;
@@ -653,7 +660,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
       {
          string extension = lcase(extractExtension(name));
 
-         for(S32 i = 0; i < extensionCount; i++)
+         for(S32 i = 0; i < extensionCount; ++i)
          {
             if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
             {
@@ -685,7 +692,8 @@ bool safeFilename(const char *str)
    {
       if(chr == '\\' || chr == '/')
          return false;
-      i++;
+      ++i;
+
       chr = str[i];
    }
    return true;
@@ -832,10 +840,11 @@ S32 countCharInString(const string &source, char search)
 {
     S32 count = 0;
 
-    for(size_t i = 0; i < source.length(); i++)
+    for(size_t i = 0; i < source.length(); ++i)
     {
       if (source[i] == search)
-         count++;
+         ++count;
+
     }
     return count;
 }
@@ -860,7 +869,8 @@ string makeFilenameFromString(const char *levelname, bool allowLastDot)
             lastDotIndex = i;
          filename[i]='_';
       }
-      i++;
+      ++i;
+
    }
 
    filename[i] = 0;    // Null terminate
@@ -905,7 +915,8 @@ string replaceString(const char *in, const char *find, const char *replace)
       else
       {
          out += in[n];
-         n++;
+         ++n;
+
       }
    }
    return out;
@@ -929,7 +940,8 @@ string chopComment(const string &line)
          {
             // Check for escaped quote ""
             if(i + 1 < line.length() && line[i + 1] == '"')
-               i++;
+               ++i;
+
             else
                inQuotes = false;
          }
@@ -954,7 +966,8 @@ string writeLevelString(const char *in)
 
    int c = 0;
    while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && !isSpace(in[c]))
-      c++;
+      ++c;
+
 
    if(in[c] == 0 && c != 0)
       return string(in);  // string does not need to be changed if not zero length and there is no space or any of: # "
@@ -1048,7 +1061,7 @@ bool stringContainsAllTheSameCharacter(const string &str)
    if(str.size() <= 1)
       return true;
 
-   for(string::size_type i = 1; i < str.size(); i++)
+   for(string::size_type i = 1; i < str.size(); ++i)
       if(str[i] != str[0])
          return false;
 
@@ -1096,7 +1109,7 @@ bool isHex(const string &str)
    if(str.empty())
       return false;
 
-   for(string::size_type i = 0; i < str.length(); i++)
+   for(string::size_type i = 0; i < str.length(); ++i)
       if(!TNL::isHex(str[i]))
          return false;
 
@@ -1125,17 +1138,21 @@ bool alphaNumberSort(const string &a, const string &b)
          // Compare numeric segments
          size_t start_a = ia;
          while(ia < size_a && a[ia] == '0')
-            ia++;
+            ++ia;
+
          size_t end_a = ia;
          while(end_a < size_a && isDigit(a[end_a]))
-            end_a++;
+            ++end_a;
+
 
          size_t start_b = ib;
          while(ib < size_b && b[ib] == '0')
-            ib++;
+            ++ib;
+
          size_t end_b = ib;
          while(end_b < size_b && isDigit(b[end_b]))
-            end_b++;
+            ++end_b;
+
 
          size_t len_a = end_a - ia;
          size_t len_b = end_b - ib;
@@ -1145,7 +1162,7 @@ bool alphaNumberSort(const string &a, const string &b)
             return len_a < len_b;
 
          // Same number of digits, compare them one by one
-         for(size_t i = 0; i < len_a; i++)
+         for(size_t i = 0; i < len_a; ++i)
          {
             if(a[ia + i] != b[ib + i])
                return a[ia + i] < b[ib + i];
@@ -1170,8 +1187,10 @@ bool alphaNumberSort(const string &a, const string &b)
          if(ca != cb)
             return (unsigned char)ca < (unsigned char)cb;
 
-         ia++;
-         ib++;
+         ++ia;
+
+         ++ib;
+
       }
    }
 

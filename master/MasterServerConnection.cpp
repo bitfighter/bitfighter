@@ -42,7 +42,8 @@ MasterServer *MasterServerConnection::mMaster = NULL;
 static S32 getNextId()
 {
    static S32 nextId = 0;
-   nextId++;
+   ++nextId;
+
 
    // Negative range reserved for self-generated IDs, and 0 will never be issued
    if(nextId == S32_MAX)
@@ -80,7 +81,7 @@ MasterServerConnection::~MasterServerConnection()
    {
       const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-      for(S32 i = 0; i < clientList->size(); i++)
+      for(S32 i = 0; i < clientList->size(); ++i)
          if(clientList->get(i)->isInGlobalChat && clientList->get(i) != this)
             clientList->get(i)->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
    }
@@ -266,7 +267,7 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
          {
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-            for(S32 i = 0; i < clientList->size(); i++)
+            for(S32 i = 0; i < clientList->size(); ++i)
             {
                MasterServerConnection *client = clientList->get(i);
 
@@ -288,7 +289,7 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
       else
          m2cSetAuthenticated_019((U32)AuthenticationStatusAuthenticatedName, badges, gamesPlayed, newName.getString());
 
-      for(S32 i = 0; i < master_admins.size(); i++)  // check for master admin
+      for(S32 i = 0; i < master_admins.size(); ++i)  // check for master admin
          if(newName == master_admins[i])
          {
             mIsMasterAdmin = true;
@@ -336,7 +337,7 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 
    const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
-   for(S32 i = 0; i < serverList->size(); i++)
+   for(S32 i = 0; i < serverList->size(); ++i)
    {
       // Hide hidden servers
       if(serverList->get(i)->mIsIgnoredFromList)
@@ -418,7 +419,8 @@ bool MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
    U32 currentTime = Platform::getRealMilliseconds();
    if(currentTime - mLastActivityTime < timeDeltaMinimum)
    {
-      mStrikeCount++;
+      ++mStrikeCount;
+
       if(mStrikeCount == 3)
       {
          logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds",
@@ -428,7 +430,8 @@ bool MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
       }
    }
    else if(mStrikeCount > 0)
-      mStrikeCount--;
+      --mStrikeCount;
+
 
    mLastActivityTime = currentTime;
    return true;
@@ -437,7 +440,7 @@ bool MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
 
 void MasterServerConnection::removeConnectRequest(GameConnectRequest *gcr)
 {
-   for(S32 j = 0; j < mConnectList.size(); j++)
+   for(S32 j = 0; j < mConnectList.size(); ++j)
    {
       if(gcr == mConnectList[j])
       {
@@ -451,7 +454,7 @@ void MasterServerConnection::removeConnectRequest(GameConnectRequest *gcr)
 GameConnectRequest *MasterServerConnection::findAndRemoveRequest(U32 requestId)
 {
    GameConnectRequest *req = NULL;
-   for(S32 j = 0; j < mConnectList.size(); j++)
+   for(S32 j = 0; j < mConnectList.size(); ++j)
    {
       if(mConnectList[j]->hostQueryId == requestId)
       {
@@ -465,7 +468,7 @@ GameConnectRequest *MasterServerConnection::findAndRemoveRequest(U32 requestId)
 
    if(req->initiator.isValid())
       req->initiator->removeConnectRequest(req);
-   for(S32 j = 0; j < gConnectList.size(); j++)
+   for(S32 j = 0; j < gConnectList.size(); ++j)
    {
       if(gConnectList[j] == req)
       {
@@ -484,7 +487,7 @@ MasterServerConnection *MasterServerConnection::findClient(Nonce &clientId)   //
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
       if(clientList->get(i)->mPlayerId == clientId)
          return clientList->get(i);
 
@@ -526,7 +529,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
       const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
-      for(S32 i = 0; i < serverList->size(); i++)
+      for(S32 i = 0; i < serverList->size(); ++i)
       {
          MasterServerConnection *server = serverList->get(i);
 
@@ -537,7 +540,8 @@ void MasterServerConnection::writeClientServerList_JSON()
                      first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()).c_str(),
                      server->mCSProtocolVersion, server->mLevelName.getString(), server->mLevelType.getString(), server->mPlayerCount);
          playerCount += server->mPlayerCount;
-         serverCount++;
+         ++serverCount;
+
          first = false;
       }
 
@@ -547,7 +551,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
       const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-      for(S32 i = 0; i < clientList->size(); i++)
+      for(S32 i = 0; i < clientList->size(); ++i)
       {
          if(listClient(clientList->get(i)))
          {
@@ -560,7 +564,7 @@ void MasterServerConnection::writeClientServerList_JSON()
       fprintf(f, "],\n\t\"authenticated\": [");
       first = true;
 
-      for(S32 i = 0; i < clientList->size(); i++)
+      for(S32 i = 0; i < clientList->size(); ++i)
       {
          if(listClient(clientList->get(i)))
          {
@@ -650,11 +654,13 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
    Vector<IPAddress> possibleAddresses;
 
    // The address, but port+1
-   theAddress.port++;
+   ++theAddress.port;
+
    possibleAddresses.push_back(theAddress.toIPAddress());
 
    // The address, with the original port
-   theAddress.port--;
+   --theAddress.port;
+
    possibleAddresses.push_back(theAddress.toIPAddress());
 
    // Or the address the port thinks it's talking to.
@@ -682,10 +688,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
    Address theAddress = getNetAddress();
    Vector<IPAddress> possibleAddresses;
 
-   theAddress.port++;
+   ++theAddress.port;
+
    possibleAddresses.push_back(theAddress.toIPAddress());
 
-   theAddress.port--;
+   --theAddress.port;
+
    possibleAddresses.push_back(theAddress.toIPAddress());
 
    Address theInternalAddress(internalAddress);
@@ -778,11 +786,11 @@ U16 MasterServerConnection::getGamesPlayed()
 
 void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
 {
-   for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+   for(S32 i = 0; i < gameStats->teamStats.size(); ++i)
    {
       Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
 
-      for(S32 j = 0; j < playerStats->size(); j++)
+      for(S32 j = 0; j < playerStats->size(); ++j)
       {
          Nonce playerId = playerStats->get(j).nonce;
          MasterServerConnection *client = findClient(playerId);
@@ -968,7 +976,7 @@ struct HighScoresReader : public MasterThreadEntry
    {
       MasterServerConnection::highScores.isBusy = false;
 
-      for(S32 i = 0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
+      for(S32 i = 0; i < MasterServerConnection::highScores.waitingClients.size(); ++i)
          if(MasterServerConnection::highScores.waitingClients[i])
             MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames,
                                                                                     MasterServerConnection::highScores.names,
@@ -1018,7 +1026,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
       totalRating->setRatingMagicValue(rating);  // Because, as noted above, rating could be a magic number
       totalRating->isBusy = false;
 
-      for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
+      for(S32 i = 0; i < totalRating->waitingClients.size(); ++i)
          if(totalRating->waitingClients[i])
             totalRating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating);
 
@@ -1068,7 +1076,7 @@ struct PlayerLevelRatingsReader : public MasterThreadEntry
       playerRating->receivedUpdateByClientWhileBusy = false;
       playerRating->isBusy = false;
 
-      for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
+      for(S32 i = 0; i < playerRating->waitingClients.size(); ++i)
          if(playerRating->waitingClients[i])
             playerRating->waitingClients[i]->sendPlayerLevelRating(dbId, rating);
 
@@ -1240,7 +1248,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 a
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
       if(clientList->get(i)->mPlayerOrServerName == playerNick)
       {
          clientList->get(i)->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database
@@ -1336,7 +1344,7 @@ bool ThreadingStruct::isExpired()
 
 void ThreadingStruct::addClientToWaitingList(MasterServerConnection *connection)
 {
-   for(S32 i = 0; i < waitingClients.size(); i++)
+   for(S32 i = 0; i < waitingClients.size(); ++i)
       if(waitingClients[i] == connection)
          return;     // Already on the list!
 
@@ -1446,7 +1454,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Ve
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
    {
       MasterServerConnection *client = clientList->get(i);
       if(client->mPlayerId == clientId)
@@ -1602,7 +1610,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          // With 2^64 possibilities, it most likely will be.
          const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-         for(S32 i = 0; i < clientList->size(); i++)
+         for(S32 i = 0; i < clientList->size(); ++i)
             if(clientList->get(i) != this && clientList->get(i)->mPlayerId == mPlayerId)
             {
                logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(),
@@ -1620,7 +1628,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
          // so we pause waiting for database instead of fully connecting yet.
 
-         for(S32 i = 0; i < gListAddressHide.size(); i++)
+         for(S32 i = 0; i < gListAddressHide.size(); ++i)
             if(getNetAddress().isEqualAddress(gListAddressHide[i]))
                mIsIgnoredFromList = true;
 
@@ -1723,7 +1731,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
       if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
          names.push_back(clientList->get(i)->mPlayerOrServerName);
 
@@ -1739,7 +1747,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
 
    isInGlobalChat = true;
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
       if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
          clientList->get(i)->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
 }
@@ -1756,7 +1764,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mLeaveGlobalChat, ())
 
    //isInGlobalChat = false;
    //Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
-   //for(S32 i = 0; i < clientList->size(); i++)
+   //for(S32 i = 0; i < clientList->size(); ++i)
    //   if (clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
    //      clientList->get(i)->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 }
@@ -1791,7 +1799,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
 
             const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
-            for(S32 i = 0; i < serverList->size(); i++)
+            for(S32 i = 0; i < serverList->size(); ++i)
             {
                MasterServerConnection *server = serverList->get(i);
 
@@ -1812,7 +1820,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
 
             const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
-            for(S32 i = 0; i < serverList->size(); i++)
+            for(S32 i = 0; i < serverList->size(); ++i)
                if(serverList->get(i)->mIsIgnoredFromList)
                {
                   broughtBackServer = true;
@@ -1827,7 +1835,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-            for(S32 i = 0; i < clientList->size(); i++)
+            for(S32 i = 0; i < clientList->size(); ++i)
             {
                MasterServerConnection *client = clientList->get(i);
                if(strcmp(words[1].c_str(), client->mPlayerOrServerName.getString()) == 0)
@@ -1847,7 +1855,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-            for(S32 i = 0; i < clientList->size(); i++)
+            for(S32 i = 0; i < clientList->size(); ++i)
             {
                MasterServerConnection *client = clientList->get(i);
 
@@ -1898,7 +1906,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
          // Now relay the message and only send to client with the specified nick
          const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-         for(S32 i = 0; i < clientList->size(); i++)
+         for(S32 i = 0; i < clientList->size(); ++i)
          {
             if(stricmp(clientList->get(i)->mPlayerOrServerName.getString(), pmRecipient.c_str()) == 0)
             {
@@ -1932,7 +1940,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
    {
       const  Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-      for(S32 i = 0; i < clientList->size(); i++)
+      for(S32 i = 0; i < clientList->size(); ++i)
       {
          if(clientList->get(i) != this)    // ...except self!
             clientList->get(i)->m2cSendChat(mPlayerOrServerName, isPrivate, message);

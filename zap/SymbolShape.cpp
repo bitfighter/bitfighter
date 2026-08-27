@@ -48,18 +48,18 @@ S32 SymbolStringSetCollection::render(S32 yPos) const
    S32 lines = -1;
 
    // Figure out how many lines in our tallest SymbolStringSet
-   for(S32 i = 0; i < mSymbolSet.size(); i++)
+   for(S32 i = 0; i < mSymbolSet.size(); ++i)
       lines = max(lines, mSymbolSet[i].getItemCount());
 
    // Render the SymbolStringSets line-by-line, keeping all lines aligned with one another.
    // Make a tally of the total height along the way (using the height of the tallest item rendered).
    S32 totalHeight = 0;
 
-   for(S32 i = 0; i < lines; i++)
+   for(S32 i = 0; i < lines; ++i)
    {
       S32 height = 0;
 
-      for(S32 j = 0; j < mSymbolSet.size(); j++)
+      for(S32 j = 0; j < mSymbolSet.size(); ++j)
       {
          S32 h = mSymbolSet[j].renderLine(i, mXPos[j], yPos + totalHeight, mAlignment[j]);
          height = max(h, height);   // Find tallest
@@ -97,7 +97,7 @@ void SymbolStringSet::add(const SymbolString &symbolString)
 S32 SymbolStringSet::getHeight() const
 {
    S32 height = 0;
-   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   for(S32 i = 0; i < mSymbolStrings.size(); ++i)
       height += mSymbolStrings[i].getHeight() + (mSymbolStrings[i].getHasGap() ? mGap : 0);
 
    return height;
@@ -107,7 +107,7 @@ S32 SymbolStringSet::getHeight() const
 S32 SymbolStringSet::getWidth() const
 {
    S32 width = 0;
-   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   for(S32 i = 0; i < mSymbolStrings.size(); ++i)
       width = max(mSymbolStrings[i].getWidth(), width);
 
    return width;
@@ -131,7 +131,7 @@ S32 SymbolStringSet::render(F32 x, F32 yStart, Alignment alignment, S32 blockWid
    S32 width = getWidth();
    S32 y = 0;
 
-   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   for(S32 i = 0; i < mSymbolStrings.size(); ++i)
    {
       mSymbolStrings[i].render(x, yStart + y, alignment, width);
       y += mSymbolStrings[i].getHeight() + mGap;
@@ -160,7 +160,7 @@ static S32 computeWidth(const Vector<SymbolShapePtr > &symbols)
 {
    S32 width = 0;
 
-   for(S32 i = 0; i < symbols.size(); i++)
+   for(S32 i = 0; i < symbols.size(); ++i)
       width += symbols[i]->getWidth();
 
    return width;
@@ -172,7 +172,7 @@ static S32 computeLayeredWidth(const Vector<SymbolShapePtr> &symbols)
 {
    S32 width = 0;
 
-   for(S32 i = 0; i < symbols.size(); i++)
+   for(S32 i = 0; i < symbols.size(); ++i)
    {
       S32 w = symbols[i]->getWidth();
 
@@ -187,7 +187,7 @@ static S32 computeHeight(const Vector<SymbolShapePtr> &symbols)
 {
    S32 height = 0;
 
-   for(S32 i = 0; i < symbols.size(); i++)
+   for(S32 i = 0; i < symbols.size(); ++i)
    {
       S32 h = symbols[i]->getHeight();
       height = max(h, height);
@@ -276,7 +276,7 @@ S32 SymbolString::getWidth() const
 S32 SymbolString::getHeight() const
 {
    S32 height = 0;
-   for(S32 i = 0; i < mSymbols.size(); i++)
+   for(S32 i = 0; i < mSymbols.size(); ++i)
       height = max(height, mSymbols[i]->getHeight());
 
    return height;
@@ -331,7 +331,7 @@ S32 SymbolString::render(F32 x, F32 y, Alignment blockAlignment, S32 blockWidth)
          x -= (blockWidth - mWidth) / 2;
    }
 
-   for(S32 i = 0; i < mSymbols.size(); i++)
+   for(S32 i = 0; i < mSymbols.size(); ++i)
    {
       S32 w = mSymbols[i]->getWidth();
       mSymbols[i]->render(Point(x + w / 2, y));
@@ -344,7 +344,7 @@ S32 SymbolString::render(F32 x, F32 y, Alignment blockAlignment, S32 blockWidth)
 
 bool SymbolString::getHasGap() const
 {
-   for(S32 i = 0; i < mSymbols.size(); i++)
+   for(S32 i = 0; i < mSymbols.size(); ++i)
       if(mSymbols[i]->getHasGap())
          return true;
 
@@ -502,7 +502,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, cons
 
    while(found)
    {
-      for(S32 i = 0; i < mods->size(); i++)
+      for(S32 i = 0; i < mods->size(); ++i)
       {
          string mod = mods->get(i) + "+";
          found = false;
@@ -533,7 +533,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vec
       return getSymbol(inputCode, color);
 
    Vector<SymbolShapePtr> symbols;
-   for(S32 i = 0; i < modifiers.size(); i++)
+   for(S32 i = 0; i < modifiers.size(); ++i)
    {
       symbols.push_back(SymbolShapePtr(new SymbolKey(modifiers[i], color)));
       symbols.push_back(SymbolShapePtr(new SymbolText("+", 13, KeyContext, Point(0, -3), color))); // Use offset to vertically center "+"
@@ -742,7 +742,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       S32 width = atoi(words[1].c_str());
 
       S32 w = 0;
-      for(S32 i = 0; i < symbols.size(); i++)
+      for(S32 i = 0; i < symbols.size(); ++i)
          w += symbols[i]->getWidth();
 
       symbols.push_back(SymbolShapePtr(new SymbolBlank(width - w)));
@@ -791,7 +791,8 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
 
       // Check for the exception of the ']' key, which would create a symbol ending in ']]]'
       if(str[endPos+2] == ']')
-         endPos++;
+         ++endPos;
+
 
       symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, textColor)));
 
@@ -824,7 +825,7 @@ LayeredSymbolString::~LayeredSymbolString()
 // Each layer is rendered atop the previous, creating a layered effect
 S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidth) const
 {
-   for(S32 i = 0; i < mSymbols.size(); i++)
+   for(S32 i = 0; i < mSymbols.size(); ++i)
       mSymbols[i]->render(Point(x, y));
 
    return mHeight;

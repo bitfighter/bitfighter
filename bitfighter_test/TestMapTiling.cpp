@@ -76,7 +76,8 @@ static S32 countClipIntroducedEdges(const Vector<MapTile> &tiles)
       for (S32 p = 0; p < tiles[t].polys.size(); ++p)
          for (S32 e = 0; e < tiles[t].polys[p].edges.size(); ++e)
             if (tiles[t].polys[p].edges[e] == EdgeStyle::None)
-               count++;
+               ++count;
+
    return count;
 }
 
@@ -94,7 +95,7 @@ static bool clientHasCollidedProjectile(ClientGame *client)
    Vector<DatabaseObject *> projectiles;
    client->getGameObjDatabase()->findObjects((TestFunc)isProjectileType, projectiles);
 
-   for(S32 i = 0; i < projectiles.size(); i++)
+   for(S32 i = 0; i < projectiles.size(); ++i)
    {
       Projectile *projectile = dynamic_cast<Projectile *>(projectiles[i]);
 
@@ -218,14 +219,14 @@ static void buildEdgeIdMaps(
    // Temporary parallel: map from key to style (only used for visible edges)
    map<EdgeKey, EdgeStyle> keyStyle;
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
 
-      for(U32 e = 0; e < nv; e++)
+      for(U32 e = 0; e < nv; ++e)
          {
             // Include ALL edges (including EdgeStyle::None) so the ID
             // numbering matches the in-game /showedgeids display.
@@ -246,7 +247,8 @@ static void buildEdgeIdMaps(
       keyToId[key] = nextId;
       idToKey[nextId] = key;
       idToStyle[nextId] = keyStyle[key];
-      nextId++;
+      ++nextId;
+
    }
 }
 
@@ -309,7 +311,7 @@ static ExpectedEdges makeExpectedEdges(const std::string &spec)
       {
          const int lo = atoi(token.substr(0, dash).c_str());
          const int hi = atoi(token.substr(dash + 1).c_str());
-         for(int id = lo; id <= hi; id++)
+         for(int id = lo; id <= hi; ++id)
             result[id] = current;
       }
    }
@@ -379,7 +381,8 @@ static void verifyTileEdges(
             << " but edge was not found in tiled output. "
             << "The edge set may have changed — re-run dumpTileEdges to "
             << "get the current edge IDs.";
-         mismatches++;
+         ++mismatches;
+
          continue;
       }
 
@@ -395,7 +398,8 @@ static void verifyTileEdges(
             << key.x2 << "," << key.y2 << ")): "
             << "expected " << edgeStyleName(expectedStyle)
             << " but got " << edgeStyleName(actualStyle);
-         mismatches++;
+         ++mismatches;
+
       }
    }
 
@@ -575,15 +579,15 @@ TEST(WallTilingTest, WallEdgeAlignedToTileBoundary)
     // Find tile 0 (gridX=0). The wall portion in tile 0 should have
     // the right edge (x=256), which was an original wall edge — NOT None.
     bool foundTile0 = false;
-    for(S32 t = 0; t < tiles.size(); t++)
+    for(S32 t = 0; t < tiles.size(); ++t)
     {
        if(tiles[t].tileId == 0)
        {
           foundTile0 = true;
-          for(S32 p = 0; p < tiles[t].polys.size(); p++)
+          for(S32 p = 0; p < tiles[t].polys.size(); ++p)
           {
              const WallPoly &wp = tiles[t].polys[p];
-             for(U32 e = 0; e < wp.edges.size(); e++)
+             for(U32 e = 0; e < wp.edges.size(); ++e)
              {
                 // Get the two endpoints of this edge
                 U32 v0 = e * 2;
@@ -649,13 +653,13 @@ TEST(WallTilingTest, WallEdgeAlignedToComputedTileBoundary)
    // The tile grid must match the design: tile width 200 and origin -35,
    // so the column-2/column-3 boundary is at -35 + 2*200 = 365.
    F32 tileOrigin = F32_MAX;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
       if(tiles[t].bounds.min.x < tileOrigin)
          tileOrigin = tiles[t].bounds.min.x;
    EXPECT_NEAR(-35.0f, tileOrigin, 0.1f);
 
    bool sawTileWidth200 = false;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
       F32 w = tiles[t].bounds.getWidth();
       if(std::abs(w - 200.0f) < 0.1f)
@@ -668,13 +672,13 @@ TEST(WallTilingTest, WallEdgeAlignedToComputedTileBoundary)
 
    bool foundAlignedEdge = false;
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
-         for(U32 e = 0; e < nv; e++)
+         for(U32 e = 0; e < nv; ++e)
          {
             U32 v0 = e * 2;
             U32 v1 = ((e + 1) % nv) * 2;
@@ -730,13 +734,13 @@ TEST(WallTilingTest, WallEdgeOnTileBoundaryNotSuppressed)
 
     // Every edge on x=256 should be Normal (not None)
     bool foundBoundaryEdge = false;
-    for(S32 t = 0; t < tiles.size(); t++)
+    for(S32 t = 0; t < tiles.size(); ++t)
     {
        if(tiles[t].tileId != 0) continue;
-       for(S32 p = 0; p < tiles[t].polys.size(); p++)
+       for(S32 p = 0; p < tiles[t].polys.size(); ++p)
        {
           const WallPoly &wp = tiles[t].polys[p];
-          for(U32 e = 0; e < wp.edges.size(); e++)
+          for(U32 e = 0; e < wp.edges.size(); ++e)
           {
              U32 v0 = e * 2;
              U32 v1 = ((e + 1) % wp.numVerts()) * 2;
@@ -1047,7 +1051,7 @@ TEST(WallTilingTest, WallExactlyFillingTile)
    // Should have at least 1 tile; find the one with content (tile 0)
    ASSERT_GE(tiles.size(), 1);
    bool foundTile0 = false;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
       if(tiles[t].tileId == 0 && tiles[t].polys.size() > 0)
       {
          foundTile0 = true;
@@ -1097,10 +1101,10 @@ TEST(WallTilingTest, TileDeliveryWorldExtents)
    Vector<Vector<Point> > allWalls;
    allWalls.push_back(wall1);
    allWalls.push_back(wall2);
-   for(S32 w = 0; w < allWalls.size(); w++)
+   for(S32 w = 0; w < allWalls.size(); ++w)
    {
       const Vector<Point> &poly = allWalls[w];
-      for(S32 v = 0; v < poly.size(); v++)
+      for(S32 v = 0; v < poly.size(); ++v)
       {
          if(poly[v].x < expectedExtents.min.x) expectedExtents.min.x = poly[v].x;
          if(poly[v].y < expectedExtents.min.y) expectedExtents.min.y = poly[v].y;
@@ -1120,10 +1124,10 @@ TEST(WallTilingTest, TileDeliveryWorldExtents)
    clientExtents.min.set(F32_MAX,  F32_MAX);
    clientExtents.max.set(-F32_MAX, -F32_MAX);
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
       const MapTile &tile = tiles[t];
-      for(S32 p = 0; p < tile.polys.size(); p++)
+      for(S32 p = 0; p < tile.polys.size(); ++p)
       {
          const WallPoly &wp = tile.polys[p];
          for(U32 v = 0; v < wp.verts.size(); v += 2)
@@ -1183,10 +1187,10 @@ TEST(WallTilingTest, WorldExtentsSurvivesPerFrameRecompute)
    tileExtents.min.set(F32_MAX,  F32_MAX);
    tileExtents.max.set(-F32_MAX, -F32_MAX);
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
       const MapTile &tile = tiles[t];
-      for(S32 p = 0; p < tile.polys.size(); p++)
+      for(S32 p = 0; p < tile.polys.size(); ++p)
       {
          const WallPoly &wp = tile.polys[p];
          for(U32 v = 0; v < wp.verts.size(); v += 2)
@@ -1271,7 +1275,7 @@ TEST(WallTilingTest, RebuildTilesAfterAddingWall)
    EXPECT_GT(initialTileCount, 0);
 
    S32 initialPolyCount = 0;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
       initialPolyCount += tiles[t].polys.size();
    EXPECT_GT(initialPolyCount, 0);
 
@@ -1290,7 +1294,7 @@ TEST(WallTilingTest, RebuildTilesAfterAddingWall)
    // Verify tiles now include the new wall
    tiles = serverGT->getMapTiles();
    S32 newPolyCount = 0;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
       newPolyCount += tiles[t].polys.size();
 
    EXPECT_GT(newPolyCount, initialPolyCount)
@@ -1356,7 +1360,7 @@ TEST(WallTilingTest, WallAddedOnServerPropagatesToClient)
    // Verify server now has more tile polys
    S32 serverNewPolyCount = 0;
    const Vector<MapTile> &newTiles = serverGT->getMapTiles();
-   for(S32 t = 0; t < newTiles.size(); t++)
+   for(S32 t = 0; t < newTiles.size(); ++t)
       serverNewPolyCount += newTiles[t].polys.size();
 
    // Idle to let the updated tiles propagate to the client
@@ -1412,7 +1416,7 @@ TEST(WallTilingTest, ClientProjectileHitsTileWallWithoutCrash)
    gameUI->onKeyUp(fireKey);
 
    bool sawProjectile = false;
-   for(S32 i = 0; i < 15; i++)
+   for(S32 i = 0; i < 15; ++i)
    {
       GamePair::idle(20, 1);
       if(countClientProjectiles(client) > 0)
@@ -1426,7 +1430,7 @@ TEST(WallTilingTest, ClientProjectileHitsTileWallWithoutCrash)
       << "Client should receive a projectile ghost after firing.";
 
    bool sawCollidedProjectile = false;
-   for(S32 i = 0; i < 40; i++)
+   for(S32 i = 0; i < 40; ++i)
    {
       GamePair::idle(20, 1);
       if(clientHasCollidedProjectile(client))
@@ -1492,10 +1496,11 @@ TEST(WallTilingTest, ShipDestroysDestructibleWall)
    auto countDestEdges = []() -> S32 {
       S32 count = 0;
       const auto &polys = GameType::getTilePolys();
-      for(S32 i = 0; i < polys.size(); i++)
-         for(S32 e = 0; e < polys[i].edges.size(); e++)
+      for(S32 i = 0; i < polys.size(); ++i)
+         for(S32 e = 0; e < polys[i].edges.size(); ++e)
             if(polys[i].edges[e] == EdgeStyle::Destructible)
-               count++;
+               ++count;
+
       return count;
    };
 
@@ -1517,7 +1522,7 @@ TEST(WallTilingTest, ShipDestroysDestructibleWall)
    gameUI->onKeyUp(fireKey);
 
    // Track the projectile step by step
-   for(S32 step = 0; step < 10; step++)
+   for(S32 step = 0; step < 10; ++step)
    {
       Vector<DatabaseObject *> projs;
       gamePair.server->getGameObjDatabase()->findObjects((TestFunc)isProjectileType, projs);
@@ -1549,7 +1554,7 @@ TEST(WallTilingTest, ShipDestroysDestructibleWall)
 
    // Let updated tiles propagate to the client
    S32 destAfter = -1;
-   for(S32 idleCycle = 0; idleCycle < 300; idleCycle++)
+   for(S32 idleCycle = 0; idleCycle < 300; ++idleCycle)
    {
       GamePair::idle(50, 1);
       destAfter = countDestEdges();
@@ -1594,12 +1599,12 @@ TEST(WallTilingTest, MadMaze2DiagonalOverlap)
    // With the combined Union approach, Tile 0 has ONE poly (13 verts).
    // Verify it has both Solid and Dashed edges (from both barrier types).
    bool hasSolid = false, hasDashed = false, hasNone = false;
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
       if(tiles[t].tileId == 0)
-         for(S32 p = 0; p < tiles[t].polys.size(); p++)
+         for(S32 p = 0; p < tiles[t].polys.size(); ++p)
          {
             const WallPoly &wp = tiles[t].polys[p];
-            for(U32 e = 0; e < wp.edges.size(); e++)
+            for(U32 e = 0; e < wp.edges.size(); ++e)
             {
                if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
                if(wp.edges[e] == EdgeStyle::Destructible) hasDashed = true;
@@ -1610,10 +1615,10 @@ TEST(WallTilingTest, MadMaze2DiagonalOverlap)
    // ---- Assertions on CLIENT received tiles ----
    const Vector<WallPoly> &clientPolys = GameType::getTilePolys();
    bool clientHasSolid = false, clientHasDashed = false;
-   for(S32 i = 0; i < clientPolys.size(); i++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
    {
       const WallPoly &wp = clientPolys[i];
-      for(U32 e = 0; e < wp.edges.size(); e++)
+      for(U32 e = 0; e < wp.edges.size(); ++e)
       {
          if(wp.edges[e] == EdgeStyle::Normal) clientHasSolid = true;
          if(wp.edges[e] == EdgeStyle::Destructible) clientHasDashed = true;
@@ -1660,12 +1665,12 @@ TEST(WallTilingTest, MadMaze2ThreeWalls)
 
    // Count polys that have zero visible edges (all None)
    S32 invisiblePolys = 0;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          bool allNone = true;
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
             if(wp.edges[e] != EdgeStyle::None) { allNone = false; break; }
          if(allNone) invisiblePolys++;
       }
@@ -1675,11 +1680,11 @@ TEST(WallTilingTest, MadMaze2ThreeWalls)
 
    // Must have both types
    bool hasSolid = false, hasDashed = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
          {
             if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
             if(wp.edges[e] == EdgeStyle::Destructible) hasDashed = true;
@@ -1694,10 +1699,10 @@ TEST(WallTilingTest, MadMaze2ThreeWalls)
    EXPECT_GT(clientPolys.size(), 0) << "Client must receive tile polys";
    bool clientHasSolid = false, clientHasDashed = false;
    S32 clientInvisible = 0;
-   for(S32 i = 0; i < clientPolys.size(); i++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
    {
       bool allNone = true;
-      for(U32 e = 0; e < clientPolys[i].edges.size(); e++)
+      for(U32 e = 0; e < clientPolys[i].edges.size(); ++e)
       {
          if(clientPolys[i].edges[e] == EdgeStyle::Normal) clientHasSolid = true;
          if(clientPolys[i].edges[e] == EdgeStyle::Destructible) clientHasDashed = true;
@@ -1740,9 +1745,9 @@ TEST(WallTilingTest, MadMaze2DiagDest)
    const auto &tiles = gt->getMapTiles();
 
    // Diagnostic: show which None edges are not on tile boundary
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
@@ -1753,12 +1758,12 @@ TEST(WallTilingTest, MadMaze2DiagDest)
 
    // Count polys that have zero visible edges (all None)
    S32 invisiblePolys = 0;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          bool allNone = true;
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
             if(wp.edges[e] != EdgeStyle::None) { allNone = false; break; }
          if(allNone) invisiblePolys++;
       }
@@ -1767,11 +1772,11 @@ TEST(WallTilingTest, MadMaze2DiagDest)
 
    // Must have both types
    bool hasSolid = false, hasDashed = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
          {
             if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
             if(wp.edges[e] == EdgeStyle::Destructible) hasDashed = true;
@@ -1786,10 +1791,10 @@ TEST(WallTilingTest, MadMaze2DiagDest)
    EXPECT_GT(clientPolys.size(), 0) << "Client must receive tile polys";
    bool clientHasSolid = false, clientHasDashed = false;
    S32 clientInvisible = 0;
-   for(S32 i = 0; i < clientPolys.size(); i++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
    {
       bool allNone = true;
-      for(U32 e = 0; e < clientPolys[i].edges.size(); e++)
+      for(U32 e = 0; e < clientPolys[i].edges.size(); ++e)
       {
          if(clientPolys[i].edges[e] == EdgeStyle::Normal) clientHasSolid = true;
          if(clientPolys[i].edges[e] == EdgeStyle::Destructible) clientHasDashed = true;
@@ -1833,11 +1838,11 @@ TEST(WallTilingTest, MadMaze2AfterDestruction)
 
    // Must have Solid edges
    bool hasSolid = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
             if(wp.edges[e] == EdgeStyle::Normal) hasSolid = true;
       }
 
@@ -1847,8 +1852,8 @@ TEST(WallTilingTest, MadMaze2AfterDestruction)
    const Vector<WallPoly> &clientPolys = GameType::getTilePolys();
    EXPECT_GT(clientPolys.size(), 0) << "Client must receive tile polys";
    bool clientHasSolid = false;
-   for(S32 i = 0; i < clientPolys.size(); i++)
-      for(U32 e = 0; e < clientPolys[i].edges.size(); e++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
+      for(U32 e = 0; e < clientPolys[i].edges.size(); ++e)
          if(clientPolys[i].edges[e] == EdgeStyle::Normal) clientHasSolid = true;
    EXPECT_TRUE(clientHasSolid) << "CLIENT: Must have Solid edges";
 }
@@ -1886,16 +1891,16 @@ TEST(WallTilingTest, DestructibleMiterHook)
    constructBarrierPolygon(Point(382.5f, -510.0f), Point(510.0f, -765.0f), dummy, dummy, 10.0f, cleanSeg1);
    F32 expectedArea = area(cleanSeg0) + area(cleanSeg1);
 
-   // for(S32 t = 0; t < tiles.size(); t++)
+   // for(S32 t = 0; t < tiles.size(); ++t)
    // {
-   //    for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   //    for(S32 p = 0; p < tiles[t].polys.size(); ++p)
    //    {
    //       const WallPoly &wp = tiles[t].polys[p];
    //       F32 polyArea = 0;
    //       if(wp.numVerts() >= 3)
    //       {
    //          Vector<Point> ctr;
-   //          for(U32 v = 0; v < wp.numVerts(); v++)
+   //          for(U32 v = 0; v < wp.numVerts(); ++v)
    //             ctr.push_back(Point(wp.verts[v*2], wp.verts[v*2+1]));
    //          polyArea = area(ctr);
    //       }
@@ -1905,16 +1910,16 @@ TEST(WallTilingTest, DestructibleMiterHook)
    // Sum destructible-only poly areas and check no Solid edges (permanent) appear
    F32 totalDestArea = 0;
    bool hasSolid = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          bool allDest = true;
-         for(U32 e = 0; e < wp.edges.size(); e++)
+         for(U32 e = 0; e < wp.edges.size(); ++e)
             if(wp.edges[e] == EdgeStyle::Normal) { hasSolid = true; allDest = false; break; }
          if(!allDest) continue;
          Vector<Point> contour;
-         for(U32 v = 0; v < wp.numVerts(); v++)
+         for(U32 v = 0; v < wp.numVerts(); ++v)
             contour.push_back(Point(wp.verts[v*2], wp.verts[v*2+1]));
          totalDestArea += area(contour);
       }
@@ -1947,9 +1952,9 @@ TEST(WallTilingTest, DestructiblePolyWall)
    ASSERT_GT(tiles.size(), 0);
    bool hasDashed = false;
    bool hasSolid = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
-         for(U32 e = 0; e < tiles[t].polys[p].edges.size(); e++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+         for(U32 e = 0; e < tiles[t].polys[p].edges.size(); ++e)
          {
             if(tiles[t].polys[p].edges[e] == EdgeStyle::Destructible) hasDashed = true;
             if(tiles[t].polys[p].edges[e] == EdgeStyle::Normal)  hasSolid  = true;
@@ -1983,9 +1988,9 @@ TEST(WallTilingTest, PermanentPolyWall)
    ASSERT_GT(tiles.size(), 0);
    bool hasDashed = false;
    bool hasSolid = false;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
-         for(U32 e = 0; e < tiles[t].polys[p].edges.size(); e++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
+         for(U32 e = 0; e < tiles[t].polys[p].edges.size(); ++e)
          {
             if(tiles[t].polys[p].edges[e] == EdgeStyle::Destructible) hasDashed = true;
             if(tiles[t].polys[p].edges[e] == EdgeStyle::Normal)  hasSolid  = true;
@@ -2022,13 +2027,13 @@ TEST(WallTilingTest, PavillionDestructibleWallLeftEdge2)
    bool foundDestPoly  = false;
    bool leftEdgeOk     = false;
 
-   for(S32 i = 0; i < clientPolys.size(); i++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
    {
       const WallPoly &wp = clientPolys[i];
 
       F32 minX = F32_MAX, maxX = -F32_MAX;
       F32 minY = F32_MAX, maxY = -F32_MAX;
-      for(U32 v = 0; v < wp.numVerts(); v++)
+      for(U32 v = 0; v < wp.numVerts(); ++v)
       {
          F32 vx = wp.verts[v * 2];
          F32 vy = wp.verts[v * 2 + 1];
@@ -2042,14 +2047,14 @@ TEST(WallTilingTest, PavillionDestructibleWallLeftEdge2)
          continue;
 
       bool hasDest = false;
-      for(U32 e = 0; e < wp.edges.size(); e++)
+      for(U32 e = 0; e < wp.edges.size(); ++e)
          if(wp.edges[e] == EdgeStyle::Destructible) { hasDest = true; break; }
       if(!hasDest) continue;
 
       foundDestPoly = true;
 
       // Check: any edge near x≈4565 (left wall side) must be visible
-      for(U32 e = 0; e < wp.edges.size(); e++)
+      for(U32 e = 0; e < wp.edges.size(); ++e)
       {
          U32 v0 = e * 2;
          U32 v1 = ((e + 1) % wp.numVerts()) * 2;
@@ -2097,11 +2102,11 @@ TEST(WallTilingTest, PavillionDestructibleWallLeftEdge)
    bool foundDestPoly = false;
    bool leftEdgeOk = false;
 
-   for(S32 i = 0; i < clientPolys.size(); i++)
+   for(S32 i = 0; i < clientPolys.size(); ++i)
    {
       const WallPoly &wp = clientPolys[i];
       F32 minX = F32_MAX, maxX = -F32_MAX, minY = F32_MAX, maxY = -F32_MAX;
-      for(U32 v = 0; v < wp.numVerts(); v++)
+      for(U32 v = 0; v < wp.numVerts(); ++v)
       {
          F32 vx = wp.verts[v * 2], vy = wp.verts[v * 2 + 1];
          if(vx < minX) minX = vx; if(vx > maxX) maxX = vx;
@@ -2111,12 +2116,12 @@ TEST(WallTilingTest, PavillionDestructibleWallLeftEdge)
          continue;
 
       bool hasDest = false;
-      for(U32 e = 0; e < wp.edges.size(); e++)
+      for(U32 e = 0; e < wp.edges.size(); ++e)
          if(wp.edges[e] == EdgeStyle::Destructible) { hasDest = true; break; }
       if(!hasDest) continue;
 
       foundDestPoly = true;
-      for(U32 e = 0; e < wp.edges.size(); e++)
+      for(U32 e = 0; e < wp.edges.size(); ++e)
       {
          U32 v0 = e * 2, v1 = ((e + 1) % wp.numVerts()) * 2;
          F32 x1 = wp.verts[v0], x2 = wp.verts[v1];
@@ -2184,14 +2189,14 @@ TEST(WallTilingTest, PavillionBackwardsLInteriorEdges)
    S32 interiorDestEdges = 0;
    S32 interiorNormalEdges = 0;
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
 
-         for(U32 e = 0; e < nv; e++)
+         for(U32 e = 0; e < nv; ++e)
          {
             U32 v0 = e * 2;
             U32 v1 = ((e + 1) % nv) * 2;
@@ -2212,9 +2217,11 @@ TEST(WallTilingTest, PavillionBackwardsLInteriorEdges)
             if(inOverlap)
             {
                if(wp.edges[e] == EdgeStyle::Destructible)
-                  interiorDestEdges++;
+                  ++interiorDestEdges;
+
                else if(wp.edges[e] == EdgeStyle::Normal)
-                  interiorNormalEdges++;
+                  ++interiorNormalEdges;
+
             }
          }
       }
@@ -2272,21 +2279,21 @@ TEST(WallTilingTest, DiagnosticBackwardsLOverlapStepByStep)
 
    // --- Dump raw input outlines ---
    printf("=== Input: permanent wall (spine 0,-2295 to 0,-1530, w=50) ===\n");
-   for(S32 v = 0; v < outline1.size(); v++)
+   for(S32 v = 0; v < outline1.size(); ++v)
       printf("  v%d: (%8.1f, %8.1f)\n", v, outline1[v].x, outline1[v].y);
 
    printf("=== Input: destructible vertical (spine 4590,-2040 to 4590,-1836, w=50) ===\n");
-   for(S32 v = 0; v < outline2.size(); v++)
+   for(S32 v = 0; v < outline2.size(); ++v)
       printf("  v%d: (%8.1f, %8.1f)\n", v, outline2[v].x, outline2[v].y);
 
    printf("=== Input: destructible horizontal (spine 4437,-1861.5 to 4590,-1861.5, w=50) ===\n");
-   for(S32 v = 0; v < outline3.size(); v++)
+   for(S32 v = 0; v < outline3.size(); ++v)
       printf("  v%d: (%8.1f, %8.1f)\n", v, outline3[v].x, outline3[v].y);
 
    printf("\n=== Clipper2 output (%d tiles, tile size=%d) ===\n",
           tiles.size(), builder.getTileSize());
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
       printf("Tile %d (id=%d, bounds=(%8.1f,%8.1f)-(%8.1f,%8.1f)): %d polys\n",
              t, tiles[t].tileId,
@@ -2294,12 +2301,12 @@ TEST(WallTilingTest, DiagnosticBackwardsLOverlapStepByStep)
              tiles[t].bounds.max.x, tiles[t].bounds.max.y,
              tiles[t].polys.size());
 
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
          printf("  Poly %d: %d verts, %d edges\n", p, nv, wp.edges.size());
-         for(U32 e = 0; e < nv; e++)
+         for(U32 e = 0; e < nv; ++e)
          {
             U32 v0 = e * 2;
             U32 v1 = ((e + 1) % nv) * 2;
@@ -2315,11 +2322,11 @@ TEST(WallTilingTest, DiagnosticBackwardsLOverlapStepByStep)
 
    // --- Assertions: no Destructible edges in overlap region ---
    S32 interiorDestEdges = 0;
-   for(S32 t = 0; t < tiles.size(); t++)
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+   for(S32 t = 0; t < tiles.size(); ++t)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
-         for(U32 e = 0; e < wp.numVerts(); e++)
+         for(U32 e = 0; e < wp.numVerts(); ++e)
          {
             F32 x1 = wp.verts[e * 2];
             F32 y1 = wp.verts[e * 2 + 1];
@@ -2330,7 +2337,8 @@ TEST(WallTilingTest, DiagnosticBackwardsLOverlapStepByStep)
                my > -1886.5f + 0.1f && my < -1836.5f - 0.1f)
             {
                if(wp.edges[e] == EdgeStyle::Destructible)
-                  interiorDestEdges++;
+                  ++interiorDestEdges;
+
             }
          }
       }
@@ -2395,14 +2403,14 @@ TEST(WallTilingTest, PavillionDestructibleLeftEdgeBelowHorizontalArmIsRendered)
    bool foundEdge = false;         // An edge exists on x~4565 covering exposedY
    bool foundRenderedEdge = false; // ...and it is rendered (non-None)
 
-   for(S32 t = 0; t < tiles.size(); t++)
+   for(S32 t = 0; t < tiles.size(); ++t)
    {
-      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      for(S32 p = 0; p < tiles[t].polys.size(); ++p)
       {
          const WallPoly &wp = tiles[t].polys[p];
          U32 nv = wp.numVerts();
 
-         for(U32 e = 0; e < nv; e++)
+         for(U32 e = 0; e < nv; ++e)
          {
             U32 v0 = e * 2;
             U32 v1 = ((e + 1) % nv) * 2;

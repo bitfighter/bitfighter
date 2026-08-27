@@ -55,7 +55,7 @@ void LevelListDisplayer::render() const
 {
    if(mLevelLoadDisplay || mLevelLoadDisplayFadeTimer.getCurrent() > 0)
    {
-      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
+      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); ++i)
       {
          FontManager::pushFontContext(MenuContext);
          Renderer::get().setColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) *
@@ -81,7 +81,8 @@ void LevelListDisplayer::addProgressListItem(string item)
 
    mLevelLoadDisplayNames.push_back(item);
 
-   mLevelLoadDisplayTotal++;
+   ++mLevelLoadDisplayTotal;
+
 
    if(mLevelLoadDisplayNames.size() > MaxItems)
       mLevelLoadDisplayNames.erase(0);

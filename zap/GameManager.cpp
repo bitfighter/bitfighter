@@ -100,7 +100,7 @@ void GameManager::addClientGame(ClientGame *clientGame)
 void GameManager::idleClientGames(U32 timeDelta)
 {
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < mClientGames.size(); i++)
+   for(S32 i = 0; i < mClientGames.size(); ++i)
       mClientGames[i]->idle(timeDelta);
 #endif
 }

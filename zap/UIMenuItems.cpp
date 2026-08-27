@@ -464,7 +464,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
 void ToggleMenuItem::handleTextInput(char ascii)
 {
    if(ascii)     // Check for the first key of a menu entry.
-      for(S32 i = 0; i < mOptions.size(); i++)
+      for(S32 i = 0; i < mOptions.size(); ++i)
       {
          S32 index = (i + mIndex + 1) % mOptions.size();
          if(toLower(ascii) == toLower(mOptions[index].data()[0]))

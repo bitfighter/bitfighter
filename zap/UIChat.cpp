@@ -106,7 +106,8 @@ void AbstractChat::newMessage(const string &from, const string &message, bool is
    }
 
    mMessages[mMessageCount % MESSAGES_TO_RETAIN] = ChatMessage(from, message, color, isPrivate, isSystem);
-   mMessageCount++;
+   ++mMessageCount;
+
 
    if(fromSelf && isPrivate)     // I don't think this can ever happen!  ==> Should be !fromSelf ?
       deliverPrivateMessage(from.c_str(), message.c_str());
@@ -117,7 +118,7 @@ void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &player
 {
    mPlayersInGlobalChat.clear();
 
-   for(S32 i = 0; i < playerNicks.size(); i++)
+   for(S32 i = 0; i < playerNicks.size(); ++i)
       mPlayersInGlobalChat.push_back(playerNicks[i]);
 }
 
@@ -137,7 +138,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
    ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
-   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
+   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); ++i)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
       {
          ui->mPlayersInGlobalChat.erase_fast(i);
@@ -155,7 +156,7 @@ bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
 {
    ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
-   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
+   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); ++i)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
          return true;
 
@@ -199,7 +200,8 @@ Color AbstractChat::getNextColor()
       Color(0.48,0.41,0.93)
    };
 
-   mColorPtr++;
+   ++mColorPtr;
+
    if(mColorPtr >= ARRAYSIZE(colorList))     // Wrap-around
       mColorPtr = 0;
 
@@ -232,7 +234,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
    // Double pass.  First loop is just to calculate number of lines used, then second pass will render.
    bool renderLoop = false;
    do {
-      for(U32 i = lineCountToDisplay - 1; i != U32_MAX; i--)
+      for(U32 i = lineCountToDisplay - 1; i != U32_MAX; --i)
       {
          // No more rendering - we've rendered to the line count limit
          if(ypos <= ypos_top)
@@ -373,7 +375,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
       drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
    }
    else
-      for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
+      for(S32 i = 0; i < mPlayersInGlobalChat.size(); ++i)
       {
          const char *name = mPlayersInGlobalChat[i].getString();
 

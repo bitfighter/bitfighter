@@ -398,7 +398,7 @@ static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, cons
 {
    Vector<SymbolShapePtr> symbols;
 
-   for(S32 i = 0; i < blockSize; i++)
+   for(S32 i = 0; i < blockSize; ++i)
    {
       if(i == 0)  // First line is a little different than the rest
       {
@@ -520,7 +520,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
       { BADGE_LAST_SECOND_WIN,     "Last-Second Win",     "Win a CTF match by scoring in the last second" },
    };
 
-   for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
+   for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); ++i)
    {
       renderBadgeLine(y, textSize, badgeDescrs[i].badge, radius, badgeDescrs[i].name, badgeDescrs[i].descr);
       y += 26;
@@ -567,7 +567,7 @@ void InstructionsUserInterface::renderModulesPage() const
 
    r.setColor(Colors::white);
 
-   for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); ++i)
    {
       if(i == 2)
          r.setColor(Colors::green);
@@ -584,7 +584,7 @@ void InstructionsUserInterface::renderModulesPage() const
    y += 35;
 
 
-   for(U32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(moduleDescriptions); ++i)
    {
       S32 x = 235;
       r.setColor(Colors::yellow);
@@ -738,7 +738,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
 
    static const S32 FontSize = 20;
 
-   for(U32 i = startIndex; i < endIndex; i++)
+   for(U32 i = startIndex; i < endIndex; ++i)
    {
       const char *text = gGameObjectInfo[i * 2];
       Vector<string> desc = wrapString(gGameObjectInfo[i * 2 + 1], 350, FontSize);
@@ -753,7 +753,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       renderCenteredString(start, FontSize, text);
 
       r.setColor(Colors::white);
-      for(S32 j = 0; j < desc.size(); j++)
+      for(S32 j = 0; j < desc.size(); ++j)
          renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, desc[j].c_str());
 
       r.pushMatrix();
@@ -997,7 +997,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
    bool first = true;
    S32 section = -1;
 
-   for(S32 i = 0; i < ChatHelper::chatCmdSize && U32(chatCmds[i].helpCategory) <= page; i++)
+   for(S32 i = 0; i < ChatHelper::chatCmdSize && U32(chatCmds[i].helpCategory) <= page; ++i)
    {
       if(U32(chatCmds[i].helpCategory) < page)
          continue;
@@ -1026,7 +1026,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       string cmdString = "/" + chatCmds[i].cmdName;
       string args = "";
 
-      for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
+      for(S32 j = 0; j < chatCmds[i].cmdArgCount; ++j)
          args += " " + chatCmds[i].helpArgString[j];
 
       S32 w = drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
@@ -1067,7 +1067,7 @@ void InstructionsUserInterface::initGameTypesPage()
    symbols.push_back(SymbolString::getBlankSymbol(0, 10));
    mGameTypeInstrs.add(SymbolString(symbols));
 
-   for(U32 i = 0; i < ARRAYSIZE(typeDescriptions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(typeDescriptions); ++i)
    {
       if(typeDescriptions[i].isTeamGame && !foundTeamGame)
       {
@@ -1080,7 +1080,7 @@ void InstructionsUserInterface::initGameTypesPage()
       }
 
       Vector<string> lines = wrapString(typeDescriptions[i].description, 600, FontSize);
-      for(S32 j = 0; j < lines.size(); j++)
+      for(S32 j = 0; j < lines.size(); ++j)
       {
          symbols.clear();
 
@@ -1112,7 +1112,8 @@ void InstructionsUserInterface::renderPageGameTypes() const
 
 void InstructionsUserInterface::nextPage()
 {
-   mCurPage++;
+   ++mCurPage;
+
 
    if(mCurPage > InstructionMaxPages - 1)
       mCurPage = 0;
@@ -1121,7 +1122,8 @@ void InstructionsUserInterface::nextPage()
 
 void InstructionsUserInterface::prevPage()
 {
-   mCurPage--;
+   --mCurPage;
+
 
    if(mCurPage < 0)
       mCurPage = InstructionMaxPages - 1;

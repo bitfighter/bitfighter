@@ -117,7 +117,7 @@ const Vector<Point> *BotNavMeshZone::getCollisionPoly() const
 // Returns index of neighboring zone, or -1 if zone is not a neighbor
 S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 {
-   for(S32 i = 0; i < mNeighbors.size(); i++)
+   for(S32 i = 0; i < mNeighbors.size(); ++i)
       if(mNeighbors[i].zoneID == zoneID)
          return i;
 
@@ -178,7 +178,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
       return false;
    }
 
-   for(int i = 0; i < mesh.nverts; i++)
+   for(int i = 0; i < mesh.nverts; ++i)
       firstEdge[i] = RC_MESH_NULL_IDX;
 
    // First process edges where 1st node < 2nd node
@@ -210,7 +210,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
             nextEdge[edgeCount] = firstEdge[v0];        // Next edge on the previous vert now points to whatever was in firstEdge previously
             firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert
 
-            edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
+            ++edgeCount;                           // edgeCount never resets -- each edge gets a unique id
          }
       }
    }
@@ -254,7 +254,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
    NeighboringZone neighbor;
 
    // Now create our neighbor data
-   for(int i = 0; i < edgeCount; i++)
+   for(int i = 0; i < edgeCount; ++i)
    {
       const rcEdge& e = edges[i];
 
@@ -327,7 +327,7 @@ static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabas
    Point c;
 
    // Pick the first zone within our radius
-   for(S32 i = 0; i < zones.size(); i++)
+   for(S32 i = 0; i < zones.size(); ++i)
    {
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(zones[i]);
       poly = zone->getOutline();
@@ -353,7 +353,7 @@ void BotNavMeshZone::populateZoneList(GridDatabase *botZoneDatabase, Vector<BotN
 
    allZones->resize(objects->size());
 
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
       allZones->get(i) = static_cast<BotNavMeshZone *>(objects->get(i));
 }
 
@@ -368,13 +368,13 @@ static void linkConnectionsTeleporters(const GridDatabase *botZoneDatabase,
 
    F32 triggerRadius = F32(Teleporter::TELEPORTER_RADIUS - Ship::CollisionRadius);
 
-   for(S32 i = 0; i < teleporterData.size(); i++)
+   for(S32 i = 0; i < teleporterData.size(); ++i)
    {
       origin = teleporterData[i].first;
       BotNavMeshZone *origZone = findZoneTouchingCircle(botZoneDatabase, origin, triggerRadius);
 
       if(origZone != NULL)
-      for(S32 j = 0; j < teleporterData[i].second->size(); j++)     // Review each teleporter destination
+      for(S32 j = 0; j < teleporterData[i].second->size(); ++j)     // Review each teleporter destination
       {
          dest = teleporterData[i].second->get(j);
          BotNavMeshZone *destZone = findZoneTouchingCircle(botZoneDatabase, dest, triggerRadius);
@@ -431,7 +431,7 @@ static BfObject* findFirstCollision(const GridDatabase *gameObjDatabase, F32 &co
    BfObject *collisionObject = NULL;
    F32 closestCollisionFraction = F32_MAX;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
@@ -495,7 +495,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
    Point source, dest; // Source and destination points for the current travelling vector
 
    // Go through each known SpeedZone
-   for(S32 i = 0; i < speedZoneList.size(); i++)
+   for(S32 i = 0; i < speedZoneList.size(); ++i)
    {
       SpeedZone *speedZone = static_cast<SpeedZone *>(speedZoneList[i]);
       const Vector<Point> &szBufferedPoly = speedZonePolygons[i];  // Aligned with speedZoneList
@@ -633,7 +633,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
       // Now go through all known bot zones under speedzones
       // allZones should be a list of BotNavMeshZone ordered by their zoneId
       // We know ahead of time what ID zones below SpeedZone start at
-      for(S32 j = szBotZoneStartId; j < allZones->size(); j++)
+      for(S32 j = szBotZoneStartId; j < allZones->size(); ++j)
       {
          BotNavMeshZone *origZone = allZones->get(j);
          origin = origZone->getCenter();
@@ -717,7 +717,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
    pair<Point, const Vector<Point> *> teldat;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
 
@@ -794,7 +794,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    }
 
    // Add turrets
-   for (S32 i = 0; i < turretList.size(); i++)
+   for (S32 i = 0; i < turretList.size(); ++i)
    {
       if(turretList[i]->getObjectTypeNumber() != TurretTypeNumber)
          continue;
@@ -806,7 +806,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    }
 
    // Add forcefield projectors
-   for (S32 i = 0; i < forceFieldProjectorList.size(); i++)
+   for (S32 i = 0; i < forceFieldProjectorList.size(); ++i)
    {
       if(forceFieldProjectorList[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
          continue;
@@ -828,7 +828,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Increase buffer radius a little to handle the spinning corners
    F32 coreBufferRadius = BufferRadius + 5;
 
-   for (S32 i = 0; i < coreList.size(); i++)
+   for (S32 i = 0; i < coreList.size(); ++i)
    {
       CoreItem *core = static_cast<CoreItem *>(coreList[i]);
 
@@ -839,7 +839,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Add SpeedZones - they are one-way like areas
    Vector<Vector<Point> > speedZonePolygons;
 
-   for (S32 i = 0; i < speedZoneList.size(); i++)
+   for (S32 i = 0; i < speedZoneList.size(); ++i)
    {
       SpeedZone *speedZone = static_cast<SpeedZone *>(speedZoneList[i]);
 
@@ -855,11 +855,11 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    Vector<Vector<Point> > nonStandardPolygons = blockingPolygons;
 
    if(hasCores)
-      for(S32 i = 0; i < corePolygons.size(); i++)
+      for(S32 i = 0; i < corePolygons.size(); ++i)
          nonStandardPolygons.push_back(corePolygons[i]);
 
    if(hasSpeedZones)
-      for(S32 i = 0; i < speedZonePolygons.size(); i++)
+      for(S32 i = 0; i < speedZonePolygons.size(); ++i)
          nonStandardPolygons.push_back(speedZonePolygons[i]);
 
 
@@ -979,7 +979,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    polyToZoneMap.resize(mesh.npolys);
 
    // Generate BotNavMeshZone objects for each valid polygon
-   for(S32 i = 0; i < mesh.npolys; i++)
+   for(S32 i = 0; i < mesh.npolys; ++i)
    {
       S32 j = 0;
       botzone = NULL;
@@ -1013,7 +1013,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
          }
 
          botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
-         j++;
+         ++j;
+
       }
 
       if(botzone != NULL)
@@ -1106,7 +1107,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
    // more efficient for the zone counts we typically see in Bitfighter levels.
    if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
    {
-      for(S32 i = 0; i < MAX_ZONES; i++)
+      for(S32 i = 0; i < MAX_ZONES; ++i)
          whichList[i] = 0;
       onClosedList = 0;
    }
@@ -1142,7 +1143,8 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
          }
 
          whichList[parentZone] = onClosedList;   // add the item to the closed list
-         numberOfOpenListItems--;
+         --numberOfOpenListItems;
+
 
          //   Open List = Binary Heap: Delete this item from the open list, which
          // is maintained as a binary heap. For more information on binary heaps, see:
@@ -1190,7 +1192,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
          Vector<NeighboringZone> neighboringZones = zones->get(parentZone)->mNeighbors;
 
-         for(S32 a = 0; a < neighboringZones.size(); a++)
+         for(S32 a = 0; a < neighboringZones.size(); ++a)
          {
             NeighboringZone zone = neighboringZones[a];
             S32 zoneID = zone.zoneID;
@@ -1229,7 +1231,8 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
 
                // Finally, put zone on the open list
                whichList[zoneID] = onOpenList;
-               numberOfOpenListItems++;
+               ++numberOfOpenListItems;
+
             }
 
             // If zone is already on the open list, check to see if this
@@ -1253,7 +1256,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
                   // recorded F cost and its position on the open list to make
                   // sure that we maintain a properly ordered open list.
 
-                  for(S32 i = 1; i <= numberOfOpenListItems; i++) // Look for the item in the heap
+                  for(S32 i = 1; i <= numberOfOpenListItems; ++i) // Look for the item in the heap
                   {
                      if(openZone[openList[i]] == zoneID)
                      {

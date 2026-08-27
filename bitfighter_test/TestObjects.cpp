@@ -44,7 +44,7 @@ class ObjectTest : public testing::Test
    public:
       static void process(ServerGame *game, S32 argc, const char **argv)
       {
-         for(S32 j = 1; j <= argc; j++)
+         for(S32 j = 1; j <= argc; ++j)
          {
             game->cleanUp();
             game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level", 1);
@@ -70,7 +70,7 @@ TEST_F(ObjectTest, ProcessArgumentsSanity)
 
    // Substitute the class name for argv[0]
    U32 count = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
-   for(U32 i = 0; i < count; i++)
+   for(U32 i = 0; i < count; ++i)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       argv[0] = netClassRep->getClassName();
@@ -109,7 +109,7 @@ TEST_F(ObjectTest, GhostingSanity)
    U32 classCount = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
    Vector<GhostingRecord> ghostingRecords;
    ghostingRecords.resize(classCount);
-   for(U32 i = 0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; ++i)
    {
       ghostingRecords[i].server = false;
       ghostingRecords[i].client = false;
@@ -131,7 +131,7 @@ TEST_F(ObjectTest, GhostingSanity)
    geom_speedZone.push_back(Point(400,1));
 
    // Create one of each type of registered NetClass
-   for(U32 i = 0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; ++i)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       Object *obj = netClassRep->create();
@@ -160,9 +160,10 @@ TEST_F(ObjectTest, GhostingSanity)
    }
 
    S32 serverGhostableCount = 0;
-   for(U32 i = 0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; ++i)
       if(ghostingRecords[i].server)
-         serverGhostableCount++;
+         ++serverGhostableCount;
+
    ASSERT_GT(serverGhostableCount, 0)
          << "GhostingSanity created no server-side objects to transmit";
 
@@ -175,7 +176,7 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
       if(bfobj && bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable...
@@ -185,7 +186,7 @@ TEST_F(ObjectTest, GhostingSanity)
       }
    }
 
-   for(U32 i = 0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; ++i)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
 
@@ -262,7 +263,7 @@ TEST_F(ObjectTest, LuaSanity)
    lua_State *L = LuaScriptRunner::getL();  // Already initialized by GamePair (includes luavec.lua)
 
    // Create one of each type of registered NetClass
-   for(U32 i = 0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; ++i)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       Object *obj = netClassRep->create();
@@ -303,7 +304,7 @@ string pointsToLuaList(const Vector<Point> &points, bool asTable)
    if(asTable)
       pointList += "{ ";
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 0; i < points.size(); ++i)
    {
       pointList += "point.new(" + points[i].toString() + ")";
       if(i < points.size() - 1)
@@ -328,7 +329,7 @@ void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen,
    EXPECT_EQ(teamIndex, obj->getTeam());
 
    // Verify actual coordinates of points (getting pretty pedantic here!)
-   for(S32 i = 0; i < obj->getVertCount(); i++)
+   for(S32 i = 0; i < obj->getVertCount(); ++i)
    {
       EXPECT_EQ(geom[i].x, obj->getVert(i).x);
       EXPECT_EQ(geom[i].y, obj->getVert(i).y);

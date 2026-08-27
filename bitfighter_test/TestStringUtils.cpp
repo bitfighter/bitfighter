@@ -708,7 +708,7 @@ TEST(StringUtilsTest, getFilesFromFolder)
 
    bool foundLevel = false;
    bool foundTxt = false;
-   for(S32 i = 0; i < files.size(); i++)
+   for(S32 i = 0; i < files.size(); ++i)
    {
       if(files[i] == "test1.level") foundLevel = true;
       if(files[i] == "test2.TXT") foundTxt = true;

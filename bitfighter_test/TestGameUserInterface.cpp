@@ -38,7 +38,7 @@ TEST(GameUserInterfaceTest, Engineer)
    ASSERT_NE(nullptr, serverGame->getGameType());
    ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("i = " + itos(i));
       // Null-safe: a missing GameType means ghosting failed (see issue #821)
@@ -60,7 +60,7 @@ TEST(GameUserInterfaceTest, Engineer)
    // On this level, the ship spawn is inside a loadout zone, so loadout should take effect immediately
    GamePair::idle(10, 5);
    ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getShip()->getLoadoutString());
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("i = " + itos(i));
       ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", clientGames->get(0)->getLocalPlayerShip()->getLoadoutString());
@@ -74,7 +74,7 @@ TEST(GameUserInterfaceTest, Engineer)
    Event::onEvent(clientGame, &EventDownReleased);
    Point endPos = clientGame->getLocalPlayerShip()->getActualPos();
    ASSERT_TRUE(startPos.distSquared(endPos) > 0) << "Ship did not move!!";
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("i = " + itos(i));
       ASSERT_TRUE(clientGames->get(0)->getLocalPlayerShip()->isCarryingItem(ResourceItemTypeNumber));
@@ -91,7 +91,7 @@ TEST(GameUserInterfaceTest, Engineer)
    gameUI->onKeyDown(KEY_MOD1);     // Place exit
    GamePair::idle(100, 5);           // Let things mellow
 
-   for(S32 i = 0; i < clientGames->size(); i++)
+   for(S32 i = 0; i < clientGames->size(); ++i)
    {
       SCOPED_TRACE("i = " + itos(i));
       Vector<DatabaseObject *> fillVector;

@@ -71,7 +71,7 @@ void HighScoresUserInterface::renderScores()
    S32 col = 0;   // 0 = left col, 1 = right col
    S32 yStart;
 
-   for(S32 i = 0; i < mScoreGroups.size(); i++)
+   for(S32 i = 0; i < mScoreGroups.size(); ++i)
    {
       yStart = y;    // For future reference
 
@@ -91,7 +91,7 @@ void HighScoresUserInterface::renderScores()
       S32 w = -1;
 
       // Now draw names
-      for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
+      for(S32 j = 0; j < mScoreGroups[i].names.size(); ++j)
       {
          r.setColor(Colors::cyan);
 
@@ -140,7 +140,7 @@ void HighScoresUserInterface::renderWaitingForScores()
       Vector<string> lines;
       wrapString("Retrieving scores from Master Server", UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
 
-      for(S32 i = 0; i < lines.size(); i++)
+      for(S32 i = 0; i < lines.size(); ++i)
          symbolSet.add(SymbolString::getSymbolText(lines[i], 30, ErrorMsgContext, &Colors::blue));
 
       symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));
@@ -174,7 +174,7 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
 
    S32 scoresPerGroup = names.size() / groupNames.size();
 
-   for(S32 i = 0; i < groupNames.size(); i++)
+   for(S32 i = 0; i < groupNames.size(); ++i)
    {
       ScoreGroup scoreGroup;
       Vector<string> currNames;
@@ -183,7 +183,7 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
 
       scoreGroup.title = string(groupNames[i].getString());
 
-      for(S32 j = 0; j < scoresPerGroup; j++)
+      for(S32 j = 0; j < scoresPerGroup; ++j)
       {
          currNames .push_back(names [i * scoresPerGroup + j]);
          currScores.push_back(scores[i * scoresPerGroup + j]);

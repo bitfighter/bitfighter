@@ -214,7 +214,7 @@ void mapLevelHandler(ClientGame *game, const Vector<string> &words)
 
       // We could have sent in multiple words for a level name
       string levelName = "";
-      for(S32 i = 1; i < words.size(); i++)
+      for(S32 i = 1; i < words.size(); ++i)
       {
          if(i != 1)
             levelName = levelName + " ";
@@ -224,7 +224,7 @@ void mapLevelHandler(ClientGame *game, const Vector<string> &words)
 
       // Find our level index...  very inefficient; not sure how to do this
       // differently without a large refactor
-      for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
+      for(S32 i = 0; i < gameConnection->mLevelInfos.size(); ++i)
       {
          // This finds the first level with the name..  so don't have duplicate-named levels!
          if(stricmp(levelName.c_str(), gameConnection->mLevelInfos[i].mLevelName.getString()) == 0)
@@ -275,7 +275,7 @@ void shutdownServerHandler(ClientGame *game, const Vector<string> &words)
       }
 
       S32 first = timefound ? 2 : 1;
-      for(S32 i = first; i < words.size(); i++)
+      for(S32 i = first; i < words.size(); ++i)
       {
          if(i != first)
             reason = reason + " ";
@@ -505,7 +505,7 @@ void idleHandler(ClientGame *game, const Vector<string> &words)
 
 void showPresetsHandler(ClientGame *game, const Vector<string> &words)
 {
-   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; ++i)
    {
       string display;
 
@@ -810,7 +810,7 @@ void announceHandler(ClientGame *game, const Vector<string> &words)
    {
       // Rebuild our announcement from the split up vector
       string message = "";
-      for(S32 i = 1; i < words.size(); i++)
+      for(S32 i = 1; i < words.size(); ++i)
       {
          if(i != 1)
             message = message + " ";
@@ -832,7 +832,7 @@ void addBotHandler(ClientGame *game, const Vector<string> &words)
    {
       // Build args by skipping first word (the command)
       Vector<StringTableEntry> args;
-      for(S32 i = 1; i < words.size(); i++)
+      for(S32 i = 1; i < words.size(); ++i)
          args.push_back(StringTableEntry(words[i]));
 
       if(!fixupArgs(game, args))    // Reorder args for c2sAddBot, translate team names to indices, and do a little checking
@@ -865,7 +865,7 @@ void addBotsHandler(ClientGame *game, const Vector<string> &words)
 
       // Build args by skipping first two words (the command, and count)
       Vector<StringTableEntry> args;
-      for(S32 i = 2; i < words.size(); i++)
+      for(S32 i = 2; i < words.size(); ++i)
          args.push_back(StringTableEntry(words[i]));
 
       if(!fixupArgs(game, args))        // Reorder args for c2sAddBot translate team names to indices
@@ -1104,7 +1104,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    LevelDatabaseRateThread::LevelRating ratingEnum = LevelDatabaseRateThread::UnknownRating;
 
    if(args.size() >= 2)
-      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; i++)
+      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; ++i)
          if(args[1] == LevelDatabaseRateThread::RatingStrings[i])
          {
             ratingEnum = LevelDatabaseRateThread::getLevelRatingEnum(args[1]);
@@ -1116,7 +1116,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
       string msg = "!!! You must specify a rating (";
 
       // Enumerate all valid ratings strings
-      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; i++)
+      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; ++i)
       {
          msg += "\"" + LevelDatabaseRateThread::RatingStrings[i] + "\"";
          if(i < LevelDatabaseRateThread::RatingsCount - 2)
@@ -1144,7 +1144,7 @@ void commentMapHandler(ClientGame *game, const Vector<string> &words)
 
    // Start at first word and concatenate all the others to rebuild the comment
    string comment = words[1];
-   for(S32 i = 2; i < words.size(); i++)
+   for(S32 i = 2; i < words.size(); ++i)
       comment = comment + " " + words[i];
 
    // Comment is too small

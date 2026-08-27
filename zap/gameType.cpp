@@ -367,7 +367,7 @@ void GameType::setScript(const Vector<string> &args)
    mScriptName = args.size() > 0 ? args[0] : "";
 
    mScriptArgs.clear();       // Clear out any args from a previous Script line
-   for(S32 i = 1; i < args.size(); i++)
+   for(S32 i = 1; i < args.size(); ++i)
       mScriptArgs.push_back(args[i]);
 }
 
@@ -380,7 +380,7 @@ void GameType::printRules()
    printf("Bitfighter rules\n");
    printf("================\n\n");
    printf("Projectiles:\n\n");
-   for(S32 i = 0; i < WeaponCount; i++)
+   for(S32 i = 0; i < WeaponCount; ++i)
    {
       WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(WeaponType(i));
 
@@ -396,7 +396,7 @@ void GameType::printRules()
    printf("\n\n");
    printf("Game Types:\n\n");
 
-   for(S32 i = 0; gameTypeClassNames[i]; i++)
+   for(S32 i = 0; gameTypeClassNames[i]; ++i)
    {
       TNL::Object *theObject = TNL::Object::create(gameTypeClassNames[i]);  // Instantiate a gameType object
       GameType *gameType = dynamic_cast<GameType*>(theObject);              // and cast it
@@ -417,7 +417,7 @@ void GameType::printRules()
       printf("Configure ship: %s",   gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
       printf(  "====================================\n");
-      for(S32 j = 0; j < ScoringEventsCount; j++)
+      for(S32 j = 0; j < ScoringEventsCount; ++j)
       {
          S32 teamScore = gameType->getEventScore(GameType::TeamScore,       (ScoringEvent) j, 0);
          S32 indScore =  gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) j, 0);
@@ -527,7 +527,7 @@ const char *GameType::validateGameType(const char *gameTypeName)
    if(!stricmp(gameTypeName, "HuntersGameType"))
        return "NexusGameType";
 
-   for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
+   for(S32 i = 0; gameTypeClassNames[i]; ++i)    // Repeat until we hit NULL
       if(stricmp(gameTypeClassNames[i], gameTypeName) == 0)
          return gameTypeClassNames[i];
 
@@ -582,7 +582,7 @@ void GameType::idle_server(U32 deltaT)
          updateClientScoreboard(gc);
    }
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       // Respawn dead players
@@ -805,7 +805,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->teamStats.resize(mGame->getTeamCount());
 
 
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       TeamStats *teamStats = &gameStats->teamStats[i];
 
@@ -817,7 +817,7 @@ VersionedGameStats GameType::getGameStats()
       teamStats->score = ((Team *)(mGame->getTeam(i)))->getScore();
       teamStats->gameResult = 0;  // will be filled in later
 
-      for(S32 j = 0; j < mGame->getClientCount(); j++)
+      for(S32 j = 0; j < mGame->getClientCount(); ++j)
       {
          ClientInfo *clientInfo = mGame->getClientInfo(j);
 
@@ -885,7 +885,7 @@ VersionedGameStats GameType::getGameStats()
          Vector<U32> shots = statistics->getShotsVector();
          Vector<U32> hits = statistics->getHitsVector();
 
-         for(S32 k = 0; k < shots.size(); k++)
+         for(S32 k = 0; k < shots.size(); ++k)
          {
             WeaponStats weaponStats;
             weaponStats.weaponType = WeaponType(k);
@@ -897,7 +897,7 @@ VersionedGameStats GameType::getGameStats()
                playerStats->weaponStats.push_back(weaponStats);
          }
 
-         for(S32 k = 0; k < ModuleCount; k++)
+         for(S32 k = 0; k < ModuleCount; ++k)
          {
             ModuleStats moduleStats;
             moduleStats.shipModule = ShipModule(k);
@@ -909,7 +909,7 @@ VersionedGameStats GameType::getGameStats()
 
          Vector<U32> loadouts = statistics->getLoadouts();
 
-         for(S32 i = 0; i < loadouts.size(); i++)
+         for(S32 i = 0; i < loadouts.size(); ++i)
          {
             LoadoutStats loadoutStats;
             loadoutStats.loadoutHash = loadouts[i];
@@ -917,7 +917,8 @@ VersionedGameStats GameType::getGameStats()
                playerStats->loadoutStats.push_back(loadoutStats);
          }
 
-         gameStats->playerCount++;
+         ++gameStats->playerCount;
+
       }
    }
    return stats;
@@ -934,7 +935,7 @@ S32 QSORT_CALLBACK playerScoreSort(ClientInfo **a, ClientInfo **b)
 // Client only
 void GameType::getSortedPlayersByScore(S32 teamIndex, Vector<ClientInfo *> &playerInfos) const
 {
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *info = mGame->getClientInfo(i);
 
@@ -1059,7 +1060,7 @@ void GameType::onGameOver()
    {
       S32 teamWinner = 0;
       S32 winningScore = ((Team *)(mGame->getTeam(0)))->getScore();
-      for(S32 i = 1; i < mGame->getTeamCount(); i++)
+      for(S32 i = 1; i < mGame->getTeamCount(); ++i)
       {
          if(((Team *)(mGame->getTeam(i)))->getScore() == winningScore)
             tied = true;
@@ -1084,7 +1085,7 @@ void GameType::onGameOver()
       {
          ClientInfo *winningClient = mGame->getClientInfo(0);
 
-         for(S32 i = 1; i < clientCount; i++)
+         for(S32 i = 1; i < clientCount; ++i)
          {
             ClientInfo *clientInfo = mGame->getClientInfo(i);
 
@@ -1218,7 +1219,7 @@ void GameType::buildMapTiles(const Rect *fixedLevelBounds)
    // per-edge style classification.
    Vector<const Vector<Point> *> inputPolygons;
    Vector<bool> inputDestructible;       // Parallel: which input polygons are destructible
-   for(S32 i = 0; i < barriers.size(); i++)
+   for(S32 i = 0; i < barriers.size(); ++i)
    {
       Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
       if(barrier)
@@ -1234,7 +1235,7 @@ void GameType::buildMapTiles(const Rect *fixedLevelBounds)
 
    MapTileBuilder builder(levelBounds, 200);
 
-   for(S32 i = 0; i < inputPolygons.size(); i++)
+   for(S32 i = 0; i < inputPolygons.size(); ++i)
       builder.addWallPolygon(*inputPolygons[i], inputDestructible[i]);
 
    builder.build(mMapTiles);
@@ -1259,11 +1260,11 @@ static bool wallPolyEqual(const WallPoly &a, const WallPoly &b)
    if(a.edges.size() != b.edges.size())
       return false;
 
-   for(S32 i = 0; i < a.verts.size(); i++)
+   for(S32 i = 0; i < a.verts.size(); ++i)
       if(a.verts[i] != b.verts[i])
          return false;
 
-   for(S32 i = 0; i < a.edges.size(); i++)
+   for(S32 i = 0; i < a.edges.size(); ++i)
       if(a.edges[i] != b.edges[i])
          return false;
 
@@ -1277,7 +1278,7 @@ static bool mapTilePolyEqual(const MapTile &a, const MapTile &b)
    if(a.polys.size() != b.polys.size())
       return false;
 
-   for(S32 i = 0; i < a.polys.size(); i++)
+   for(S32 i = 0; i < a.polys.size(); ++i)
       if(!wallPolyEqual(a.polys[i], b.polys[i]))
          return false;
 
@@ -1320,13 +1321,13 @@ void GameType::rebuildWallTilesAndBotZones()
    // the same.  Therefore tileId maps to the same world position in both
    // oldTiles and mMapTiles, and we can use a simple O(n²) lookup.
    Vector<U16> changedTileIds;
-   for(S32 t = 0; t < mMapTiles.size(); t++)
+   for(S32 t = 0; t < mMapTiles.size(); ++t)
    {
       const MapTile &newTile = mMapTiles[t];
 
       // Find matching old tile by tileId
       const MapTile *oldTile = NULL;
-      for(S32 i = 0; i < oldTiles.size(); i++)
+      for(S32 i = 0; i < oldTiles.size(); ++i)
          if(oldTiles[i].tileId == newTile.tileId)
          {
             oldTile = &oldTiles[i];
@@ -1340,10 +1341,10 @@ void GameType::rebuildWallTilesAndBotZones()
    // Find tiles that existed in the old set but no longer exist in the new
    // set — these need to be sent as empty tiles so the client erases them.
    Vector<U16> removedTileIds;
-   for(S32 i = 0; i < oldTiles.size(); i++)
+   for(S32 i = 0; i < oldTiles.size(); ++i)
    {
       bool found = false;
-      for(S32 j = 0; j < mMapTiles.size(); j++)
+      for(S32 j = 0; j < mMapTiles.size(); ++j)
          if(mMapTiles[j].tileId == oldTiles[i].tileId)
          {
             found = true;
@@ -1357,7 +1358,7 @@ void GameType::rebuildWallTilesAndBotZones()
       changedTileIds.size(), removedTileIds.size());
 
    // Reset delivery state for all non-robot connections
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       if(!clientInfo || clientInfo->isRobot())
@@ -1376,7 +1377,7 @@ void GameType::rebuildWallTilesAndBotZones()
       conn->mWallDelivery.init(tileCount);
 
       // Enqueue changed tiles
-      for(S32 i = 0; i < changedTileIds.size(); i++)
+      for(S32 i = 0; i < changedTileIds.size(); ++i)
       {
          // In FOW mode, let the per-tick scope enqueue handle changed tiles;
          // sentTiles is reset so they'll be picked up when in range.
@@ -1387,7 +1388,7 @@ void GameType::rebuildWallTilesAndBotZones()
       // Enqueue removed tiles that the client may have already seen.
       // In FOW mode, these tiles are no longer in mMapTiles so the scope
       // enqueue won't find them — we must explicitly send empty tiles.
-      for(S32 i = 0; i < removedTileIds.size(); i++)
+      for(S32 i = 0; i < removedTileIds.size(); ++i)
       {
          if(!isFogOfWarEnabled() || (removedTileIds[i] < wasSent.size() && wasSent[removedTileIds[i]]))
             conn->mWallDelivery.pending.push_back(removedTileIds[i]);
@@ -1407,11 +1408,11 @@ void GameType::rebuildWallTilesAndBotZones()
             // Precompute distance for each pending tileId
             Vector<F32> dists;
             dists.reserve(conn->mWallDelivery.pending.size());
-            for(S32 p = 0; p < conn->mWallDelivery.pending.size(); p++)
+            for(S32 p = 0; p < conn->mWallDelivery.pending.size(); ++p)
             {
                U16 tid = conn->mWallDelivery.pending[p];
                bool found = false;
-               for(S32 t = 0; t < mMapTiles.size(); t++)
+               for(S32 t = 0; t < mMapTiles.size(); ++t)
                {
                   if(mMapTiles[t].tileId == tid)
                   {
@@ -1429,7 +1430,7 @@ void GameType::rebuildWallTilesAndBotZones()
 
             // Insertion sort: reorder pending and dists together by ascending distance
             Vector<U16> &pending = conn->mWallDelivery.pending;
-            for(S32 i = 1; i < pending.size(); i++)
+            for(S32 i = 1; i < pending.size(); ++i)
             {
                U16 keyTid = pending[i];
                F32 keyDist = dists[i];
@@ -1438,7 +1439,8 @@ void GameType::rebuildWallTilesAndBotZones()
                {
                   pending[j + 1] = pending[j];
                   dists[j + 1] = dists[j];
-                  j--;
+                  --j;
+
                }
                pending[j + 1] = keyTid;
                dists[j + 1] = keyDist;
@@ -1526,7 +1528,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          Vector<DatabaseObject *> loadoutZones;
          getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
          LoadoutZone *zone;
-         for(S32 i = 0; i < loadoutZones.size(); i++)
+         for(S32 i = 0; i < loadoutZones.size(); ++i)
          {
             zone = static_cast<LoadoutZone*>(loadoutZones.get(i));
             if(newShip->isOnObject(zone))
@@ -1569,7 +1571,7 @@ Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 team
 
    const Vector<DatabaseObject *> *objects = getGame()->getGameObjDatabase()->findObjects_fast();
 
-   for(S32 i = 0; i < objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); ++i)
    {
       if(objects->get(i)->getObjectTypeNumber() == typeNumber)
       {
@@ -1632,7 +1634,7 @@ void GameType::makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clien
 
 static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 {
-   for(S32 i = 0; i < ship->getMountedItemCount(); i++)
+   for(S32 i = 0; i < ship->getMountedItemCount(); ++i)
    {
       TNLAssert(ship->getMountedItem(i), "When would this item be NULL?  Do we really need to check this?");
       if(ship->getMountedItem(i))
@@ -1659,7 +1661,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
    // Make sure the "always-in-scope" objects are actually in scope
-   for(S32 i = 0; i < scopeAlwaysList.size(); i++)
+   for(S32 i = 0; i < scopeAlwaysList.size(); ++i)
       if(!scopeAlwaysList[i].isNull())
          if(scopeAlwaysList[i]->getObjectTypeNumber() != FlagTypeNumber || !((MountableItem*)(((SafePtr<BfObject> *)&scopeAlwaysList[i])->getPointer()))->isMounted())
             conn->objectInScope(scopeAlwaysList[i]);
@@ -1678,7 +1680,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    const Vector<DatabaseObject *> *spyBugs = mGame->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
    const Point scopeRange(SpyBug::SPY_BUG_RADIUS, SpyBug::SPY_BUG_RADIUS * FloatSqrt3Half);  // Bounding box of hexagon
 
-   for(S32 i = spyBugs->size() - 1; i >= 0; i--)
+   for(S32 i = spyBugs->size() - 1; i >= 0; --i)
    {
       SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
 //      shared_ptr<SpyBug> sb = shared_ptr<SpyBug>(sb);
@@ -1694,7 +1696,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, sameQuery);
          sameQuery = true;
 
-         for(S32 j = 0; j < fillVector.size(); j++)
+         for(S32 j = 0; j < fillVector.size(); ++j)
          {
             // Some objects don't have geometry (ForceFields).  Is this a bug?
             if(!fillVector[j]->hasGeometry())
@@ -1721,7 +1723,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    //if(isTeamGame())
    //{
    //   // Start by scanning over all items located in queryItemsOfInterest()
-   //   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
+   //   for(S32 i = 0; i < mItemsOfInterest.size(); ++i)
    //   {
    //      if(mItemsOfInterest[i].teamVisMask & (1 << scopeObject->getTeam()))    // Item is visible to scopeObject's team
    //      {
@@ -1746,7 +1748,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
       fillVector.clear();
       bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
 
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
+      for(S32 i = 0; i < mGame->getClientCount(); ++i)
       {
          ClientInfo *clientInfo = mGame->getClientInfo(i);
 
@@ -1788,7 +1790,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    }
 
    // Set object-in-scope for all objects found above
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
@@ -1797,7 +1799,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
 
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
-      for(S32 i = 0; i < mGame->getBotCount(); i++)
+      for(S32 i = 0; i < mGame->getBotCount(); ++i)
          connection->objectInScope(mGame->getBot(i));
 }
 
@@ -1806,7 +1808,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
 void GameType::addItemOfInterest(MoveItem *item)
 {
 #ifdef TNL_DEBUG
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
+   for(S32 i = 0; i < mItemsOfInterest.size(); ++i)
       TNLAssert(mItemsOfInterest[i].theItem.getPointer() != item, "Item already exists in ItemOfInterest!");
 #endif
 
@@ -1821,7 +1823,7 @@ void GameType::addItemOfInterest(MoveItem *item)
 // to those teams with ships close enough to see it, if any.  Called from idle()
 void GameType::queryItemsOfInterest()
 {
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
+   for(S32 i = 0; i < mItemsOfInterest.size(); ++i)
    {
       ItemOfInterest &ioi = mItemsOfInterest[i];
       if(ioi.theItem.isNull())
@@ -1842,7 +1844,7 @@ void GameType::queryItemsOfInterest()
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
 
-      for(S32 j = 0; j < fillVector.size(); j++)
+      for(S32 j = 0; j < fillVector.size(); ++j)
       {
          Ship *theShip = static_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
          Point delta = theShip->getActualPos() - pos;
@@ -1926,7 +1928,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
                              clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevelNoTeam;
    S32 minPlayers = S32_MAX;
 
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
                          counts[i][ClientInfo::ClassRobotAddedByLevel] +
@@ -1942,7 +1944,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    S32 minTeamIndex = NONE;
    F32 minRating = F32_MAX;
 
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
                          counts[i][ClientInfo::ClassRobotAddedByLevel] +
@@ -2132,7 +2134,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
 
          // Broadcast player scores for rendering on the client
          if(!isTeamGame())
-            for(S32 i = 0; i < mGame->getClientCount(); i++)  // TODO: try to get rid of this for loop
+            for(S32 i = 0; i < mGame->getClientCount(); ++i)  // TODO: try to get rid of this for loop
                if(getGame()->getClientInfo(i) == player)      // and this pointer checks (we need to get the index, for variable "i")
                   s2cSetPlayerScore(i, player->getScore());
       }
@@ -2153,7 +2155,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       // Assumes that points < 0.
       if(scoringEvent == ScoreGoalOwnTeam)
       {
-         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         for(S32 i = 0; i < mGame->getTeamCount(); ++i)
          {
             if(i != teamIndex)  // Every team but scoring team
             {
@@ -2183,7 +2185,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    {
       if(scoringEvent == ScoreGoalOwnTeam)
       {
-         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         for(S32 i = 0; i < mGame->getTeamCount(); ++i)
          {
             // Fire Lua event, but not for scoring team
             if(i != teamIndex)
@@ -2210,7 +2212,7 @@ void GameType::updateLeadingTeamAndScore()
    mLeadingTeamScore = S32_MIN;
 
    // Find the leading team...
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Bad team pointer or bad type");
       S32 score = static_cast<Team *>(mGame->getTeam(i))->getScore();
@@ -2233,7 +2235,7 @@ void GameType::updateLeadingPlayerAndScore()
    mSecondLeadingPlayer = -1;
 
    // Find the leading player
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       // Check to make sure client hasn't disappeared somehow
       if(!mGame->getClientInfo(i))
@@ -2281,7 +2283,7 @@ void GameType::updateScore(S32 teamIndex, ScoringEvent event, S32 data)
 // At game end, we need to update everyone's game-normalized ratings
 void GameType::updateRatings()
 {
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
       mGame->getClientInfo(i)->endOfGameScoringHandler();
 }
 
@@ -2563,7 +2565,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < fillVector.size(); ++i)
       {
          BfObject *obj = static_cast<BfObject *>(fillVector[i]);
 
@@ -2628,7 +2630,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    const Vector<DatabaseObject*> &database = *(getGame()->getGameObjDatabase()->findObjects_fast());
 
-   for(S32 i = database.size() - 1; i >= 0; i--)
+   for(S32 i = database.size() - 1; i >= 0; --i)
    {
       if(database[i]->getObjectTypeNumber() == PlayerShipTypeNumber || database[i]->getObjectTypeNumber() == RobotShipTypeNumber)
          ((Ship *)database[i])->findClientInfoFromName();
@@ -2701,7 +2703,7 @@ void GameType::broadcastNewRemainingTime()
 GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
 {
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       if(clientInfo->getName() == oldName)
@@ -2834,7 +2836,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < fillVector.size(); ++i)
          static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
    }
 #endif
@@ -2883,7 +2885,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
                    mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId(),
                    isFogOfWarEnabled());
 
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       Team *team = (Team *)mGame->getTeam(i);
       const Color *color = team->getColor();
@@ -2894,7 +2896,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    notifyClientsWhoHasTheFlag();
 
    // Add all the client and team information
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       GameConnection *conn = clientInfo->getConnection();
@@ -2912,7 +2914,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
          s2cClientJoinedTeam(clientInfo->getName(), team, false);
    }
 
-   //for(S32 i = 0; i < Robot::getBotCount(); i++)  //Robot is part of mClientList
+   //for(S32 i = 0; i < Robot::getBotCount(); ++i)  //Robot is part of mClientList
    //{
    //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
@@ -2928,7 +2930,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       if(!isFogOfWarEnabled())
       {
          // Non-FOW: enqueue all tiles immediately (drained per-tick at NORM rate)
-         for(S32 t = 0; t < mMapTiles.size(); t++)
+         for(S32 t = 0; t < mMapTiles.size(); ++t)
             gc->mWallDelivery.pending.push_back(mMapTiles[t].tileId);
       }
       // FOW mode: tiles are enqueued per-tick based on player position
@@ -2999,7 +3001,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
       // Tile update — remove old polys belonging to this tileId.
       // Walk backwards so removals don't shift remaining indices.
       smReceivedTilePolys.reserve(smReceivedTilePolys.size());
-      for(S32 i = smReceivedTilePolys.size() - 1; i >= 0; i--)
+      for(S32 i = smReceivedTilePolys.size() - 1; i >= 0; --i)
       {
          if(i < smReceivedTileIds.size() && smReceivedTileIds[i] == tileId)
          {
@@ -3023,7 +3025,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
    bool hasTileData = false;
 
    U32 vertOff = 0, outlineOff = 0;
-   for(U16 p = 0; p < polyCount; p++)
+   for(U16 p = 0; p < polyCount; ++p)
    {
       U32 n = polySizes[p];
       if(n < 3)
@@ -3036,12 +3038,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
       WallPoly wp;
       wp.verts.reserve(n * 2);
       wp.edges.reserve(n);
-      for(U32 v = 0; v < n * 2; v++)
+      for(U32 v = 0; v < n * 2; ++v)
       {
          F32 val = allVerts[vertOff++];
          wp.verts.push_back(val);
       }
-      for(U32 b = 0; b < n; b++)
+      for(U32 b = 0; b < n; ++b)
          wp.edges.push_back(static_cast<EdgeStyle>(allStyles[outlineOff++]));
 
       // Expand tile bounds from this poly's vertices
@@ -3123,7 +3125,7 @@ static void buildTilePolyCache(WallPoly &wp)
    // Build contour from flat verts
    Vector<Point> contour;
    contour.reserve(n);
-   for(U32 v = 0; v < n; v++)
+   for(U32 v = 0; v < n; ++v)
       contour.push_back(Point(wp.verts[v * 2], wp.verts[v * 2 + 1]));
 
    // Strip colinear vertices (introduced by tile-boundary clipping)
@@ -3131,7 +3133,7 @@ static void buildTilePolyCache(WallPoly &wp)
    {
       Vector<Point> cleaned;
       S32 cn = contour.size();
-      for(S32 c = 0; c < cn; c++)
+      for(S32 c = 0; c < cn; ++c)
       {
          const Point &prev = contour[(c + cn - 1) % cn];
          const Point &curr = contour[c];
@@ -3150,7 +3152,7 @@ static void buildTilePolyCache(WallPoly &wp)
 
    // Classify edges into normal/destructible and set cachedDestructible flag
    wp.cachedDestructible = false;
-   for(U32 v = 0; v < n; v++)
+   for(U32 v = 0; v < n; ++v)
    {
       if(v >= wp.edges.size())
          continue;
@@ -3188,7 +3190,7 @@ bool GameType::findTileWallLOS(const Point &rayStart, const Point &rayEnd, bool 
    Point bestNormal;
    static Vector<Point> polyPoints;
 
-   for(S32 i = 0; i < smReceivedTilePolys.size(); i++)
+   for(S32 i = 0; i < smReceivedTilePolys.size(); ++i)
    {
       const WallPoly &wp = smReceivedTilePolys[i];
       if(wp.numVerts() < 3)
@@ -3226,7 +3228,7 @@ bool GameType::findTileWallSweptCircle(const Point &pos, const Point &delta, F32
    Point bestCp;
    static Vector<Point> polyPoints;
 
-   for(S32 i = 0; i < smReceivedTilePolys.size(); i++)
+   for(S32 i = 0; i < smReceivedTilePolys.size(); ++i)
    {
       const WallPoly &wp = smReceivedTilePolys[i];
       if(wp.numVerts() < 3)
@@ -3315,7 +3317,7 @@ void GameType::deliverWallTileTick()
    const bool fowEnabled = isFogOfWarEnabled();
    const U32 tilesPerTick = fowEnabled ? TILES_PER_TICK_FOW : TILES_PER_TICK_NORM;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       if(!clientInfo || clientInfo->isRobot())
@@ -3342,7 +3344,7 @@ void GameType::deliverWallTileTick()
          F32 scopeRadSq = scopeRad * scopeRad;
 
          // Scan all tiles — find un-sent tiles within scope, compute distance
-         for(S32 t = 0; t < mMapTiles.size(); t++)
+         for(S32 t = 0; t < mMapTiles.size(); ++t)
          {
             const MapTile &tile = mMapTiles[t];
 
@@ -3374,7 +3376,7 @@ void GameType::deliverWallTileTick()
             {
                // Compute distance for the tile already in the list
                const MapTile *cmpTile = NULL;
-               for(S32 tt = 0; tt < mMapTiles.size(); tt++)
+               for(S32 tt = 0; tt < mMapTiles.size(); ++tt)
                {
                   if(mMapTiles[tt].tileId == deliveryState.pending[insertIdx])
                      cmpTile = &mMapTiles[tt]; break;
@@ -3382,7 +3384,8 @@ void GameType::deliverWallTileTick()
                F32 cmpDist = cmpTile ? distSqToTileCenter(shipPos, *cmpTile) : F32_MAX;
                if(tileDistSq <= cmpDist)
                   break;
-               insertIdx++;
+               ++insertIdx;
+
             }
             deliveryState.pending.insert(insertIdx, tile.tileId);
          }
@@ -3401,7 +3404,7 @@ void GameType::deliverWallTileTick()
          // in that case we send an empty tile (polyCount == 0) so the
          // client erases the old geometry.
          const MapTile *tile = NULL;
-         for(S32 t = 0; t < mMapTiles.size(); t++)
+         for(S32 t = 0; t < mMapTiles.size(); ++t)
          {
             if(mMapTiles[t].tileId == tileId)
             {
@@ -3417,13 +3420,13 @@ void GameType::deliverWallTileTick()
 
          if(tile)
          {
-            for(S32 p = 0; p < tile->polys.size(); p++)
+            for(S32 p = 0; p < tile->polys.size(); ++p)
             {
                const WallPoly &wp = tile->polys[p];
                polySizes.push_back(wp.numVerts());
-               for(S32 v = 0; v < wp.verts.size(); v++)
+               for(S32 v = 0; v < wp.verts.size(); ++v)
                   allVerts.push_back(wp.verts[v]);
-               for(S32 b = 0; b < wp.edges.size(); b++)
+               for(S32 b = 0; b < wp.edges.size(); ++b)
                   allStyles.push_back(static_cast<U8>(wp.edges[b]));
             }
          }
@@ -3434,7 +3437,8 @@ void GameType::deliverWallTileTick()
          s2cSendWallTile(tileId, static_cast<U16>(tile ? tile->polys.size() : 0), allVerts, allStyles, polySizes);
          NetObject::setRPCDestConnection(NULL);
 
-         sentThisTick++;
+         ++sentThisTick;
+
       }
    }
 }
@@ -3472,7 +3476,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
          loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());    // Why??
 
          if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
-            for(S32 i = 0; i < mGame->getClientCount(); i++)
+            for(S32 i = 0; i < mGame->getClientCount(); ++i)
                if(!mGame->getClientInfo(i)->isRobot())
                {
                   GameConnection *gc = mGame->getClientInfo(i)->getConnection();
@@ -3533,7 +3537,7 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       Vector<const char *> args_char(args.size());
 
       // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-      for(S32 i = 0; i < args.size(); i++)
+      for(S32 i = 0; i < args.size(); ++i)
          args_char.push_back(args[i].getString());
 
       string errorMessage = getGame()->addBot(args_char, ClientInfo::ClassRobotAddedByAddbots);
@@ -3575,11 +3579,12 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
 {
    S32 botsAdded = 0;
 
-   for(U32 i = 0; i < botCount; i++)
+   for(U32 i = 0; i < botCount; ++i)
    {
       // Exit the loop if there is a problem adding bots
       if(addBotFromClient(args))
-         botsAdded++;
+         ++botsAdded;
+
       else
          break;
    }
@@ -3650,7 +3655,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
       return;
 
    // Reset player scores
-   for(S32 i = 0; i < serverGame->getClientCount(); i++)
+   for(S32 i = 0; i < serverGame->getClientCount(); ++i)
    {
       if(mGame->getClientInfo(i)->getScore() != 0)
          s2cSetPlayerScore(i, 0);
@@ -3658,7 +3663,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    }
 
    // Reset team scores
-   for(S32 i = 0; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); ++i)
    {
       // broadcast it to the clients
       if(((Team *)mGame->getTeam(i))->getScore() != 0)
@@ -3858,7 +3863,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    // Now check to see if the client is connected and disconnect all of them if they are
    bool playerDisconnected = false;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
 
@@ -4134,7 +4139,7 @@ void GameType::displayAnnouncement(const string &message) const
 {
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Server only!");
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       if(mGame->getClientInfo(i)->isRobot())
          continue;
@@ -4167,7 +4172,7 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 {
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, senderName, message));
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
 
@@ -4261,7 +4266,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
    Ship *ship = static_cast<Ship *>(controlObject);
 
    S32 count = ship->getMountedItemCount();
-   for(S32 i = count - 1; i >= 0; i--)
+   for(S32 i = count - 1; i >= 0; --i)
       ship->getMountedItem(i)->dismount(DISMOUNT_NORMAL);
 }
 
@@ -4284,7 +4289,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
    fillVector.clear();
    mGame->getGameObjDatabase()->findObjects(fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);
       if(item && item->getItemId() == itemId)
@@ -4371,7 +4376,7 @@ void GameType::updateClientScoreboard(GameConnection *gc)
    mDeaths.clear();
 
    // First, list the players
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       ClientInfo *info = mGame->getClientInfo(i);
 
@@ -4398,7 +4403,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
                  (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<Int<10> > kills, Vector<Int<10> > deaths),
                  (pingTimes, kills, deaths), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); ++i)
    {
       if(i >= pingTimes.size())
          break;
@@ -4467,7 +4472,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    {
       RefPtr<NetEvent> event = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cVoiceChat, (sourceClientInfo->getName(), voiceBuffer));
 
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
+      for(S32 i = 0; i < mGame->getClientCount(); ++i)
       {
          ClientInfo *clientInfo = mGame->getClientInfo(i);
          GameConnection *dest = clientInfo->getConnection();
@@ -4566,7 +4571,7 @@ void GameType::updateWhichTeamsHaveFlags()
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
       if(flag->isMounted() && flag->getMount())
@@ -4592,7 +4597,7 @@ void GameType::notifyClientsWhoHasTheFlag()
 {
    U16 packedBits = 0;
 
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   for(S32 i = 0; i < getGame()->getTeamCount(); ++i)
       if(getGame()->getTeamHasFlag(i))
          packedBits += BIT(i);
 
@@ -4602,7 +4607,7 @@ void GameType::notifyClientsWhoHasTheFlag()
 
 GAMETYPE_RPC_S2C(GameType, s2cSendFlagPossessionStatus, (U16 packedBits), (packedBits))
 {
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   for(S32 i = 0; i < getGame()->getTeamCount(); ++i)
       getGame()->setTeamHasFlag(i, packedBits & BIT(i));
 }
 
@@ -4770,7 +4775,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
 {
    if(!isGameOver())  // Avoid flooding messages on game over.
    {
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
+      for(S32 i = 0; i < mGame->getClientCount(); ++i)
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
 
@@ -4788,7 +4793,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
 {
    if(!isGameOver())  // Avoid flooding messages on game over
    {
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
+      for(S32 i = 0; i < mGame->getClientCount(); ++i)
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
 
@@ -4836,7 +4841,7 @@ const char *GameType::getGameTypeClassName(GameTypeId gameType)
 // static
 const char *GameType::getGameTypeClassName(const string &gameTypeName)
 {
-   for(U32 i = 0; i < ARRAYSIZE(GameTypeNames); i++)
+   for(U32 i = 0; i < ARRAYSIZE(GameTypeNames); ++i)
    {
       if(strcmp(GameTypeNames[i], gameTypeName.c_str()) == 0)
          return gameTypeClassNames[i];
@@ -4852,7 +4857,7 @@ Vector<string> GameType::getGameTypeNames()
 {
    Vector<string> gameTypes;
 
-   for(U32 i = 0; i < ARRAYSIZE(GameTypeNames); i++)
+   for(U32 i = 0; i < ARRAYSIZE(GameTypeNames); ++i)
       gameTypes.push_back(GameTypeNames[i]);
 
    return gameTypes;

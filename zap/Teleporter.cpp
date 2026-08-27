@@ -90,7 +90,7 @@ void Teleporter::delDest(S32 index)
    if(getGame() && getGame()->isServer())
    {
       s2cClearDestinations();
-      for(S32 i = 0; i < mDests.size(); i++)
+      for(S32 i = 0; i < mDests.size(); ++i)
          s2cAddDestination(mDests[i]);
    }
 }
@@ -222,7 +222,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    S32 argc = 0;
    const char *argv[8];
 
-   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; ++i)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg
 
@@ -236,7 +236,8 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
          if(argc < 8)
          {
             argv[argc] = argv2[i];
-            argc++;
+            ++argc;
+
          }
       }
    }
@@ -262,7 +263,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       foundObjects.clear();
       game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
 
-      for(S32 i = 0; i < foundObjects.size(); i++)
+      for(S32 i = 0; i < foundObjects.size(); ++i)
       {
          Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
          if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
@@ -334,7 +335,7 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
    Point foundObjectCenter;
    F32 foundObjectRadius;
 
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); ++i)
    {
       BfObject *bfObject = static_cast<BfObject *>(foundObjects[i]);
 
@@ -392,7 +393,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
       stream->writeInt(dests, 16);
 
-      for(S32 i = 0; i < dests; i++)
+      for(S32 i = 0; i < dests; ++i)
          getDest(i).write(stream);
    }
 
@@ -451,7 +452,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       count = stream->readInt(16);
       resize(count);         // Prepare the list for multiple additions
 
-      for(U32 i = 0; i < count; i++)
+      for(U32 i = 0; i < count; ++i)
          read(i, stream);
 
       computeExtent();
@@ -557,7 +558,7 @@ void Teleporter::doTeleport()
    Point teleportCenter = getOrigin();
 
    bool isTriggered = false; // First, check if triggered, can come from idle timer.
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); ++i)
    {
       if((teleportCenter - static_cast<Ship *>(foundObjects[i])->getRenderPos()).lenSquared() < sq(TRIGGER_RADIUS))
       {
@@ -573,7 +574,7 @@ void Teleporter::doTeleport()
    mTeleportCooldown.reset(mTeleporterCooldown);      // Teleport needs to wait a bit before being usable again
 
    // We've triggered the teleporter.  Relocate any ships within range.  Any ship touching the teleport will be warped.
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); ++i)
    {
       Ship *ship = static_cast<Ship *>(foundObjects[i]);
       if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORT_RADIUS))
@@ -596,7 +597,7 @@ void Teleporter::doTeleport()
    Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
    queryRect.set(getDest(dest), TRIGGER_RADIUS * 2);
    findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
-   for(S32 i = 0; i < foundTeleporters.size(); i++)
+   for(S32 i = 0; i < foundTeleporters.size(); ++i)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
          static_cast<Teleporter *>(foundTeleporters[i])->doTeleport();
 }
@@ -606,7 +607,7 @@ void Teleporter::checkAllTeleporters(BfObject *obj)
    Vector<DatabaseObject *> foundTeleporters;
    Rect queryRect(obj->getPos(), TELEPORTER_RADIUS);
    obj->findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
-   for(S32 i = 0; i < foundTeleporters.size(); i++)
+   for(S32 i = 0; i < foundTeleporters.size(); ++i)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
          static_cast<Teleporter *>(foundTeleporters[i])->doTeleport();
 }
@@ -680,7 +681,7 @@ void Teleporter::generateOutlinePoints()
    F32 x = getOrigin().x;
    F32 y = getOrigin().y;
 
-   for(S32 i = 0; i < sides; i++)
+   for(S32 i = 0; i < sides; ++i)
       mOutlinePoints[i] = Point(TELEPORTER_RADIUS * cos(i * Float2Pi / sides + FloatHalfPi) + x,
                                 TELEPORTER_RADIUS * sin(i * Float2Pi / sides + FloatHalfPi) + y);
 }
@@ -820,7 +821,7 @@ void Teleporter::render()
       F32 sizeFraction = mHasExploded ? F32(mExplosionTimer.getCurrent() - implosionOffset) / implosionTime : 1;
 
       if(sizeFraction > 0)
-         for(S32 i = getDestCount() - 1; i >= 0; i--)
+         for(S32 i = getDestCount() - 1; i >= 0; --i)
             renderTeleporterOutline(getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
@@ -1031,7 +1032,7 @@ S32 Teleporter::lua_delDest(lua_State *L)
 
    S32 index = S32(getInt(L, 1, "Teleporter:delDest()", 1, getDestCount()));
 
-   index--;    // Adjust for Lua's 1-based index
+   --index;    // Adjust for Lua's 1-based index
 
    delDest(index);
 
@@ -1204,7 +1205,7 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
       clearDests();
 
       // Notify destination manager about the new destinations
-      for(S32 i = 1; i < points.size(); i++)
+      for(S32 i = 1; i < points.size(); ++i)
          addDest(points[i]);
 
       TNLAssert(getDest(0) == points[1], "Should have been set by addDest()!");
@@ -1239,7 +1240,7 @@ S32 Teleporter::lua_getGeom(lua_State *L)
 
    points.push_back(getPos());
 
-   for(S32 i = 0; i < getDestCount(); i++)
+   for(S32 i = 0; i < getDestCount(); ++i)
       points.push_back(getDest(i));
 
    return returnPoints(L, &points);

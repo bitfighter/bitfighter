@@ -37,7 +37,7 @@ static ClassChunker<ConnectionStringTable::PacketEntry> packetEntryFreeList(4096
 ConnectionStringTable::ConnectionStringTable(NetConnection *parent)
 {
    mParent = parent;
-   for(U32 i = 0; i < EntryCount; i++)
+   for(U32 i = 0; i < EntryCount; ++i)
    {
       mEntryTable[i].nextHash = NULL;
       mEntryTable[i].nextLink = &mEntryTable[i+1];

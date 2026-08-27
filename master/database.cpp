@@ -98,7 +98,7 @@ void DatabaseWriter::initialize(const char *server, const char *db, const char *
 
 static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<LoadoutStats> loadoutStats)
 {
-   for(S32 i = 0; i < loadoutStats.size(); i++)
+   for(S32 i = 0; i < loadoutStats.size(); ++i)
    {
          string sql = "INSERT INTO stats_player_loadout(stats_player_id, loadout) "
                        "VALUES(" + itos(playerId) + ", " + itos(loadoutStats[i].loadoutHash) + ");";
@@ -110,7 +110,7 @@ static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<
 
 static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<WeaponStats> weaponStats)
 {
-   for(S32 i = 0; i < weaponStats.size(); i++)
+   for(S32 i = 0; i < weaponStats.size(); ++i)
    {
       if(weaponStats[i].shots > 0)
       {
@@ -171,7 +171,7 @@ static U64 insertStatsTeam(const DbQuery &query, const TeamStats *teamStats, U64
 
    U64 teamId = query.runQuery(sql);
 
-   for(S32 i = 0; i < teamStats->playerStats.size(); i++)
+   for(S32 i = 0; i < teamStats->playerStats.size(); ++i)
       insertStatsPlayer(query, &teamStats->playerStats[i], gameId, itos(teamId));
 
    return teamId;
@@ -189,7 +189,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 
    U64 gameId = query.runQuery(sql);
 
-   for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+   for(S32 i = 0; i < gameStats->teamStats.size(); ++i)
       insertStatsTeam(query, &gameStats->teamStats[i], gameId);
 
    return gameId;
@@ -269,7 +269,7 @@ U64 DatabaseWriter::getServerID(const DbQuery &query, const string &serverName, 
 // the database each time we need to find one.  Server IDs should be unique for a given pair of server name and IP address.
 U64 DatabaseWriter::getServerIDFromCache(const string &serverName, const string &serverIP)
 {
-   for(S32 i = cachedServers.size() - 1; i >= 0; i--)    // Counting backwards to visit newest servers first
+   for(S32 i = cachedServers.size() - 1; i >= 0; --i)    // Counting backwards to visit newest servers first
       if(cachedServers[i].ip == serverIP && cachedServers[i].name == serverName)
          return cachedServers[i].id;
 
@@ -371,14 +371,14 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 
    selectHandler(sql, 2, results);
 
-   for(S32 i = 0; i < results.size(); i++)
+   for(S32 i = 0; i < results.size(); ++i)
    {
       names.push_back(results[i][0]);
       scores.push_back(results[i][1]);
    }
 
    // Make sure we have the correct number of responses, even if table doesn't have enough records
-   for(S32 i = results.size(); i < count; i++)
+   for(S32 i = results.size(); i < count; ++i)
    {
       names.push_back("");
       scores.push_back("");
@@ -417,7 +417,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 
    Vector<string> credentialStrings(results.size());
 
-   for(S32 i = 0; i < results.size(); i++)
+   for(S32 i = 0; i < results.size(); ++i)
    {
       if(results[i][0] != "" && results[i][1] != "")
          credentialStrings.push_back("username="   + results[i][0] + "&"
@@ -491,7 +491,7 @@ Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 
    S32 badges = 0;
 
-   for(S32 i = 0; i < results.size(); i++)
+   for(S32 i = 0; i < results.size(); ++i)
       badges |= BIT(atoi(results[i][0].c_str()));
 
    return (Int<BADGE_COUNT>)badges;
@@ -528,11 +528,11 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 
          S32 rows = results.num_rows();
 
-         for(S32 i = 0; i < rows; i++)
+         for(S32 i = 0; i < rows; ++i)
          {
             values.push_back(Vector<string>());     // Add another row
 
-            for(S32 j = 0; j < cols; j++)
+            for(S32 j = 0; j < cols; ++j)
                values[i].push_back(string(results[i][j]));
          }
       }
@@ -551,7 +551,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
          {
             values.push_back(Vector<string>());     // Add another row
 
-            for(S32 j = 0; j < cols; j++)
+            for(S32 j = 0; j < cols; ++j)
                values[i].push_back(results[cols + i + j]);
          }
 

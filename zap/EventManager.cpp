@@ -149,7 +149,7 @@ void EventManager::unsubscribe(LuaScriptRunner *subscriber, EventType eventType)
 
 void EventManager::removeFromPendingSubscribeList(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); ++i)
       if(pendingSubscriptions[eventType][i].subscriber == subscriber)
       {
          pendingSubscriptions[eventType].erase_fast(i);
@@ -160,7 +160,7 @@ void EventManager::removeFromPendingSubscribeList(LuaScriptRunner *subscriber, E
 
 void EventManager::removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); ++i)
       if(pendingUnsubscriptions[eventType][i] == subscriber)
       {
          pendingUnsubscriptions[eventType].erase_fast(i);
@@ -171,7 +171,7 @@ void EventManager::removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber,
 
 void EventManager::removeFromSubscribedList(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
       if(subscriptions[eventType][i].subscriber == subscriber)
       {
          subscriptions[eventType].erase_fast(i);
@@ -192,7 +192,7 @@ void EventManager::unsubscribeImmediate(LuaScriptRunner *subscriber, EventType e
 // Check if we're subscribed to an event
 bool EventManager::isSubscribed(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
       if(subscriptions[eventType][i].subscriber == subscriber)
          return true;
 
@@ -202,7 +202,7 @@ bool EventManager::isSubscribed(LuaScriptRunner *subscriber, EventType eventType
 
 bool EventManager::isPendingSubscribed(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); ++i)
       if(pendingSubscriptions[eventType][i].subscriber == subscriber)
          return true;
 
@@ -212,7 +212,7 @@ bool EventManager::isPendingSubscribed(LuaScriptRunner *subscriber, EventType ev
 
 bool EventManager::isPendingUnsubscribed(LuaScriptRunner *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); ++i)
       if(pendingUnsubscriptions[eventType][i] == subscriber)
          return true;
 
@@ -225,15 +225,15 @@ void EventManager::update()
 {
    if(anyPending)
    {
-      for(S32 i = 0; i < EventTypes; i++)
-         for(S32 j = 0; j < pendingUnsubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+      for(S32 i = 0; i < EventTypes; ++i)
+         for(S32 j = 0; j < pendingUnsubscriptions[i].size(); ++j)     // Unsubscribing first means less searching!
             removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
 
-      for(S32 i = 0; i < EventTypes; i++)
-         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)
+      for(S32 i = 0; i < EventTypes; ++i)
+         for(S32 j = 0; j < pendingSubscriptions[i].size(); ++j)
             subscriptions[i].push_back(pendingSubscriptions[i][j]);
 
-      for(S32 i = 0; i < EventTypes; i++)
+      for(S32 i = 0; i < EventTypes; ++i)
       {
          pendingSubscriptions[i].clear();
          pendingUnsubscriptions[i].clear();
@@ -254,7 +254,7 @@ void EventManager::fireEvent(EventType eventType)
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 0, subscriptions[eventType][i].context);
 
@@ -264,7 +264,8 @@ void EventManager::fireEvent(EventType eventType)
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -277,13 +278,14 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       return;
 
    if(eventType == TickEvent)
-      mStepCount--;
+      --mStepCount;
+
 
    lua_State *L = LuaScriptRunner::getL();
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       lua_pushinteger(L, deltaT);   // -- deltaT
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
@@ -294,7 +296,8 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -310,7 +313,7 @@ void EventManager::fireEvent(EventType eventType, CoreItem *core)
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       core->push(L);                // -- core
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
@@ -321,7 +324,8 @@ void EventManager::fireEvent(EventType eventType, CoreItem *core)
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -337,7 +341,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       ship->push(L);                // -- ship
       bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
@@ -348,7 +352,8 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -364,7 +369,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damaging
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       ship->push(L);                // -- ship
 
@@ -386,7 +391,8 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damaging
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -404,7 +410,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       if(sender == subscriptions[eventType][i].subscriber)    // Don't alert sender about own message!
          continue;
@@ -426,7 +432,8 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 
@@ -451,7 +458,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
    // we need to make a copy of them first so we can add them back for subsequent calls.
 
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       if(sender == subscriptions[eventType][i].subscriber)    // Don't alert sender about own message!
          continue;
@@ -459,7 +466,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
       Subscription subscription = subscriptions[eventType][i];
 
       // Duplicate the first argCount items on the stack
-      for(S32 j = 1; j <= argCount; j++)
+      for(S32 j = 1; j <= argCount; ++j)
          lua_pushvalue(L, j);
 
       bool error = fire(L, subscription.subscriber, eventDefs[eventType].function, argCount, subscription.context);
@@ -474,7 +481,8 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
          // subscription.subscriber is getting deleted in the bowels of fire()
          //unsubscribeImmediate(subscription.subscriber, eventType);  /// <===== WHy does this break tests????
          lua_settop(L, argCount);
-         i--;
+         --i;
+
       }
 
       TNLAssert(lua_gettop(L) == argCount, "Expect args to still be on the stack!");
@@ -494,7 +502,7 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       if(player == subscriptions[eventType][i].subscriber)    // Don't trouble player with own joinage or leavage!
          continue;
@@ -508,7 +516,8 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -524,7 +533,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       // Passing ship, zone, zoneType, zoneId
       ship->push(L);                                     // -- ship
@@ -540,7 +549,8 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -556,7 +566,7 @@ void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       // Passing object, zone, zoneType, zoneId
       object->push(L);                                   // -- object
@@ -572,7 +582,8 @@ void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }
@@ -588,7 +599,7 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < subscriptions[eventType].size(); ++i)
    {
       lua_pushinteger(L, score);   // -- score
       lua_pushinteger(L, team);    // -- score, team
@@ -606,7 +617,8 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
       if(error)
       {
          clearStack(L);
-         i--;
+         --i;
+
       }
    }
 }

@@ -208,7 +208,7 @@ namespace Types
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
       val->resize(size);
-      for(TNL::S32 i = 0; i < val->size(); i++)
+      for(TNL::S32 i = 0; i < val->size(); ++i)
       {
          TNLAssert(s.isValid(), "Error reading vector");
          if(!s.isValid())      // Error, don't read any more!
@@ -234,7 +234,7 @@ namespace Types
       else
          s.writeInt(val.size(), VectorSizeBitSize8);
 
-      for(TNL::S32 i = 0; i < val.size(); i++)
+      for(TNL::S32 i = 0; i < val.size(); ++i)
          write(s, val[i]);
    }
 
@@ -249,7 +249,7 @@ namespace Types
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
       val->resize(size);
-      for(TNL::S32 i = 0; i < val->size(); i++)
+      for(TNL::S32 i = 0; i < val->size(); ++i)
       {
          TNLAssert(s.isValid(), "Error reading vector");
          if(!s.isValid())      // Error, don't read any more!
@@ -274,7 +274,7 @@ namespace Types
       else
          s.writeInt(val.size(), VectorSizeBitSize8);
 
-      for(TNL::S32 i = 0; i < val.size(); i++)
+      for(TNL::S32 i = 0; i < val.size(); ++i)
          write(s, val[i], arg1);
    }
 };

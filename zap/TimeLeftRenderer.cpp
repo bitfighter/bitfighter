@@ -80,7 +80,7 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
 
    S32 teamCount = game->getTeamCount();
 
-   for(S32 i = teamCount - 1; i >= 0; i--)
+   for(S32 i = teamCount - 1; i >= 0; --i)
    {
       if(render)
          gameType->renderScoreboardOrnament(i, xpos, ypos);
@@ -101,7 +101,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 
    Renderer::get().setColor(Colors::white);
 
-   for(S32 i = teamCount - 1; i >= 0; i--)
+   for(S32 i = teamCount - 1; i >= 0; --i)
    {
       TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Bad team pointer or bad type");
       S32 score = static_cast<Team *>(game->getTeam(i))->getScore();

@@ -34,7 +34,7 @@ TEST_F(LevelLoaderTest, longLine)
 
    Vector<Point> geom;
    geom.resize(TEST_POINTS);     // Preallocate for speed
-   for(U32 i = 0; i < TEST_POINTS; i++)
+   for(U32 i = 0; i < TEST_POINTS; ++i)
       geom[i].set(i, i % 2);
 
    WallItem wall;

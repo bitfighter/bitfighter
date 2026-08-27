@@ -112,7 +112,8 @@ ByteBufferPtr VoiceDecoder::decompressBuffer(const ByteBufferPtr &compressedBuff
       // Decode a frame and advance our buffer offset
       bufferOffset = decompressFrame(decodedBufferPtr + frameCount * samplesPerFrame, compressedBufferPtr + i, compressedSize - i);
 
-      frameCount++;
+      ++frameCount;
+
    }
 
    // Finally resize the buffer to correspond to how many frames we've decompressed

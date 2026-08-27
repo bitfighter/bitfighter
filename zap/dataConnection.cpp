@@ -248,7 +248,8 @@ void DataSender::sendNextLine()
    if(mLineCtr < mLines.size())
    {
       connection->s2rSendLine(mLines[mLineCtr].c_str());
-      mLineCtr++;
+      ++mLineCtr;
+
    }
    else
    {

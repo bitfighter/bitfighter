@@ -351,7 +351,8 @@ inline bool BitStream::readFlag()
    }
    S32 mask = 1 << (bitNum & 0x7);
    bool ret = (*(getBuffer() + (bitNum >> 3)) & mask) != 0;
-   bitNum++;
+   ++bitNum;
+
    return ret;
 }
 //extern void logprintf(const char *format, ...);

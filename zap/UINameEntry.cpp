@@ -189,7 +189,7 @@ void LevelNameEntryUserInterface::onActivate()
    mLevels = getGame()->getSettings()->getLevelList();
 
    // Remove the extension from the level file
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = 0; i < mLevels.size(); ++i)
        mLevels[i] = stripExtension(mLevels[i]);
 
    mFoundLevel = setLevelIndex();
@@ -199,7 +199,7 @@ void LevelNameEntryUserInterface::onActivate()
 // See if the current level is on the list -- if so, set mLevelIndex to that level and return true
 bool LevelNameEntryUserInterface::setLevelIndex()
 {
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = 0; i < mLevels.size(); ++i)
    {
       // Exact match
       if(mLevels[i] == lineEditor.getString())
@@ -209,7 +209,7 @@ bool LevelNameEntryUserInterface::setLevelIndex()
       }
    }
    // is mLevels sorted correctly?
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = 0; i < mLevels.size(); ++i)
    {
       // No exact match, but we just passed the item and have selected the closest one alphabetically following
       if(mLevels[i] > lineEditor.getString())
@@ -239,10 +239,11 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
       {
          completePartial();      // Resets mFoundLevel
          if(!mFoundLevel)
-            mLevelIndex--;       // Counteract increment below
+            --mLevelIndex;       // Counteract increment below
       }
 
-      mLevelIndex++;
+      ++mLevelIndex;
+
       if(mLevelIndex >= mLevels.size())
          mLevelIndex = 0;
 
@@ -257,7 +258,8 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
       if(!mFoundLevel)
          completePartial();
 
-      mLevelIndex--;
+      --mLevelIndex;
+
       if(mLevelIndex < 0)
          mLevelIndex = mLevels.size() - 1;
 
@@ -314,7 +316,7 @@ void LevelNameEntryUserInterface::render()
    Renderer::get().setColor(Colors::gray20);
    FontManager::pushFontContext(MenuContext);
 
-   for(S32 i = startIndex; i <= endIndex; i++)
+   for(S32 i = startIndex; i <= endIndex; ++i)
    {
       if(i != mLevelIndex)
          drawCenteredString(TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f), getFontSize(), mLevels[i].c_str());

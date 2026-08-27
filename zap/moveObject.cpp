@@ -227,7 +227,7 @@ void MoveObject::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang
 
 void MoveObject::setPosVelAng(const Point &pos, const Point &vel, F32 ang)
 {
-   for(U32 i = 0; i < MoveStateCount; i++)
+   for(U32 i = 0; i < MoveStateCount; ++i)
    {
       setPos(i, pos);
       setVel(i, vel);
@@ -343,7 +343,8 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
 
    while(moveTime > moveTimeEpsilon && tryCount < TRY_COUNT_MAX)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
-      tryCount++;
+      ++tryCount;
+
 
       // Ignore tiny movements unless we're processing a collision
       if(!isBeingDisplaced && getVel(stateIndex).len() < velocityEpsilon)
@@ -379,7 +380,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
       {
          disabledList.push_back(objectHit);
          objectHit->disableCollision();
-         tryCount--;   // Don't count as tryCount
+         --tryCount;   // Don't count as tryCount
       }
       else if(objectHit->isMoveObject())     // Collided with a MoveObject (including a ship)
       {
@@ -394,7 +395,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
          if(isBeingDisplaced)
          {
             bool hit = false;
-            for(S32 i = 0; i < displacerList.size(); i++)
+            for(S32 i = 0; i < displacerList.size(); ++i)
                if(moveObjectThatWasHit == displacerList[i])
                  hit = true;
             if(hit) break;
@@ -425,7 +426,8 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
                moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList);
-               mHitLimit--;
+               --mHitLimit;
+
             }
          }
       }
@@ -435,7 +437,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
       moveTime -= collisionTime;
    }
 
-   for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
+   for(S32 i = 0; i < disabledList.size(); ++i)   // enable any disabled collision
       if(disabledList[i].isValid())
          disabledList[i]->enableCollision();
 
@@ -496,7 +498,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
 
    BfObject *collisionObject = NULL;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
@@ -602,11 +604,11 @@ void MoveObject::checkForZones()
    getZonesObjectIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
 
    // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
-   for(S32 i = 0; i < currZoneList.size(); i++)
+   for(S32 i = 0; i < currZoneList.size(); ++i)
       if(!prevZoneList.contains(currZoneList[i]))
          onEnteredZone(currZoneList[i].getPointer());
 
-   for(S32 i = 0; i < prevZoneList.size(); i++)
+   for(S32 i = 0; i < prevZoneList.size(); ++i)
       // Zone can sometimes disappear if removed from the game via Lua, check if valid first
       if(prevZoneList[i].isValid() && !currZoneList.contains(prevZoneList[i]))
          onLeftZone(prevZoneList[i].getPointer());
@@ -641,7 +643,7 @@ void MoveObject::getZonesObjectIsIn(Vector<SafePtr<Zone> > &zoneList)
    findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the object might be in
 
    // Extents overlap...  now check for actual overlap
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
@@ -689,7 +691,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
          Color bumpC(scale/3, scale/3, scale);
 
-         for(S32 i = 0; i < 4 * pow((F32)scale, 0.5f); i++)
+         for(S32 i = 0; i < 4 * pow((F32)scale, 0.5f); ++i)
          {
             Point chaos(TNL::Random::readF(), TNL::Random::readF());
             chaos *= scale + 1;
@@ -1614,7 +1616,7 @@ F32 Asteroid::getEditorRadius(F32 currentScale)
 
 const Vector<Point> *Asteroid::getCollisionPoly() const
 {
-   //for(S32 i = 0; i < ASTEROID_POINTS; i++)
+   //for(S32 i = 0; i < ASTEROID_POINTS; ++i)
    //{
    //   Point p = Point(mMoveState[MoveObject::ActualState].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
    //                   mMoveState[MoveObject::ActualState].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
@@ -1636,7 +1638,8 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
       shooter->getStatistics()->mAsteroidsKilled++;
 
    // Compute impulse direction
-   mSizeLeft--;
+   --mSizeLeft;
+
 
    if(mSizeLeft <= 0)    // Kill small items
    {
@@ -1761,7 +1764,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
    S32 argc = 0;
    const char *argv[8];                // 8 is ok for now..
 
-   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; ++i)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg
 
@@ -1777,7 +1780,8 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
          if(argc < 8)
          {
             argv[argc] = argv2[i];
-            argc++;
+            ++argc;
+
          }
       }
    }
@@ -2009,7 +2013,7 @@ void TestItem::damageObject(DamageInfo *damageInfo)
 
 const Vector<Point> *TestItem::getCollisionPoly() const
 {
-   //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
+   //for(S32 i = 0; i < 8; ++i)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{
    //   Point p = Point(60 * cos(i * Float2Pi / TEST_ITEM_SIDES + FloatHalfPi) + getActualPos().x, 60 * sin(i * Float2Pi / TEST_ITEM_SIDES + FloatHalfPi) + getActualPos().y);
    //   polyPoints.push_back(p);

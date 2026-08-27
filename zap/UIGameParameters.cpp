@@ -108,7 +108,7 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 {
    const Vector<string> keys = getGame()->getGameType()->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys.size(); ++i)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
@@ -178,7 +178,7 @@ void GameParamUserInterface::updateMenuItems()
 
    const Vector<string> keys = gameType->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys.size(); ++i)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
@@ -214,7 +214,7 @@ void GameParamUserInterface::onEscape()
 
    const Vector<string> keys = gameType->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys.size(); ++i)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 

@@ -83,7 +83,7 @@ void GhostConnection::setGhostFrom(bool ghostFrom)
       if(!mGhostLookupTable)
       {
          mGhostLookupTable = new GhostInfo *[GhostLookupTableSize];
-         for(i = 0; i < GhostLookupTableSize; i++)
+         for(i = 0; i < GhostLookupTableSize; ++i)
             mGhostLookupTable[i] = 0;
       }
    }
@@ -200,7 +200,7 @@ void GhostConnection::prepareWritePacket()
 
    if(mGhostFreeIndex > MaxGhostCount - 10)  // almost running out of GhostFreeIndex, free some objects not in scope.
    {
-      for(S32 i = mGhostZeroUpdateIndex; i < mGhostFreeIndex; i++)
+      for(S32 i = mGhostZeroUpdateIndex; i < mGhostFreeIndex; ++i)
       {
          GhostInfo *walk = mGhostArray[i];
          if(!(walk->flags & GhostInfo::ScopeLocalAlways))
@@ -224,11 +224,12 @@ void GhostConnection::prepareWritePacket()
    // If the object has a zero update mask, we wait to remove it until it requests
    // an update.
 
-   for(S32 i = 0; i < mGhostZeroUpdateIndex; i++)
+   for(S32 i = 0; i < mGhostZeroUpdateIndex; ++i)
    {
       // Increment the updateSkip for everyone... it's all good
       GhostInfo *walk = mGhostArray[i];
-      walk->updateSkipCount++;
+      ++walk->updateSkipCount;
+
       if(!(walk->flags & (GhostInfo::ScopeLocalAlways)))
          walk->flags &= ~GhostInfo::InScope;
    }
@@ -269,14 +270,14 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
    GhostInfo *walk;
 
-   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; i--)
+   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; --i)
    {
       if(!(mGhostArray[i]->flags & GhostInfo::InScope))
          detachObject(mGhostArray[i]);
    }
 
    U32 maxIndex = 0;
-   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; i--)
+   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; --i)
    {
       walk = mGhostArray[i];
       if(walk->index > maxIndex)
@@ -304,14 +305,15 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    if(mGhostZeroUpdateIndex != 0)
       qsort(&mGhostArray[0], mGhostZeroUpdateIndex, sizeof(GhostInfo *), UQECompare);
    // reset the array indices...
-   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; i--)
+   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; --i)
       mGhostArray[i]->arrayIndex = i;
 
    U8 sendSize = 0;
    while(maxIndex != 0)
    {
       maxIndex >>= 1;
-      sendSize++;
+      ++sendSize;
+
    }
 
    if(sendSize < ID_BIT_OFFSET)
@@ -321,7 +323,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
    U32 count = 0;
    bool have_something_to_send = bstream->getBitPosition() >= 256;
-   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0 && !bstream->isFull(); i--)
+   for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0 && !bstream->isFull(); --i)
    {
       GhostInfo *walk = mGhostArray[i];
       if(walk->flags & (GhostInfo::KillingGhost | GhostInfo::Ghosting))
@@ -426,7 +428,8 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
             ghostPushToZero(walk);
          upd->mask = updateMask & ~retMask;
          walk->updateSkipCount = 0;
-         count++;
+         ++count;
+
       }
    }
    // count # of ghosts have been updated,
@@ -647,7 +650,7 @@ bool GhostConnection::validateGhostArray()
       TNLAssert(mGhostArray[i]->arrayIndex == i, "Invalid array index.");
       TNLAssert(mGhostArray[i]->updateMask == 0, "Invalid ghost mask.");
    }
-   for(; i < mGhostArray.size(); i++)
+   for(; i < mGhostArray.size(); ++i)
    {
       TNLAssert(mGhostArray[i]->arrayIndex == i, "Invalid array index.");
    }
@@ -726,7 +729,8 @@ void GhostConnection::activateGhosting()
    if(!doesGhostFrom())    // Leave if we have no objects to ghost to the remote host
       return;
 
-   mGhostingSequence++;
+   ++mGhostingSequence;
+
    logprintf(LogConsumer::LogGhostConnection, "Ghosting activated - %d", mGhostingSequence);
 
    TNLAssert((mGhostFreeIndex == 0) && (mGhostZeroUpdateIndex == 0), "Error: ghosts in the ghost list before activate.");
@@ -786,7 +790,7 @@ void GhostConnection::deleteLocalGhosts()
 
    // just delete all the local ghosts,
    // and delete all the ghosts in the current save list
-   for(S32 i = 0; i < mLocalGhosts.size(); i++)
+   for(S32 i = 0; i < mLocalGhosts.size(); ++i)
    {
       if(mLocalGhosts[i])
       {
@@ -823,7 +827,7 @@ void GhostConnection::clearGhostInfo()
    }
    TNLAssert((mGhostFreeIndex == 0) && (mGhostZeroUpdateIndex == 0), "Invalid indices.");
 
-   for(U32 j = 0; j < U32(mGhostRefs.size()); j++)
+   for(U32 j = 0; j < U32(mGhostRefs.size()); ++j)
       delete mGhostRefs[j];
    mGhostRefs.clear();
    mGhostArray.clear();
@@ -839,7 +843,8 @@ void GhostConnection::resetGhosting()
    mGhosting = false;
    mScoping = false;
    rpcEndGhosting();
-   mGhostingSequence++;
+   ++mGhostingSequence;
+
    clearGhostInfo();
    //TNLAssert(validateGhostArray(), "Invalid ghost array!");
 }

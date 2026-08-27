@@ -536,7 +536,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" provided incorrect password.",
                                                getNetAddressString(), mClientInfo->getName().getString());
-      mWrongPasswordCount++;
+      ++mWrongPasswordCount;
+
       if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
          disconnect(NetConnection::ReasonError, "Too many wrong passwords");
    }
@@ -696,7 +697,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       folderManager->levelDir = folder;
 
       // Send the new list of levels to all levelchangers
-      for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+      for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
       {
          ClientInfo *clientInfo = mServerGame->getClientInfo(i);
          GameConnection *conn = clientInfo->getConnection();
@@ -792,7 +793,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       // If we're clearing the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
-         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+         for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
@@ -810,7 +811,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       }
       else  // If setting a password, remove everyone's permissions (except admins)
       {
-         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+         for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
@@ -834,7 +835,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       // Revoke all admin permissions upon password change (except Owner)
       if(mClientInfo->isOwner())
       {
-         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+         for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
@@ -860,7 +861,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       msg = serverNameChanged;
 
       // If we've changed the server name, notify all the clients
-      for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+      for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
          if(mServerGame->getClientInfo(i)->getConnection())
             mServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
@@ -1164,7 +1165,7 @@ void GameConnection::sendLevelList()
    s2cAddLevel("", NoGameType);
 
    // Build list remotely by sending level names one-by-one
-   for(S32 i = 0; i < mServerGame->getLevelCount(); i++)
+   for(S32 i = 0; i < mServerGame->getLevelCount(); ++i)
    {
       LevelInfo levelInfo = mServerGame->getLevelInfo(i);
       s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
@@ -1352,7 +1353,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
    mServerGame->setShuttingDown(true, time, this, reason.getString());
 
    // Broadcast the message
-   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
    {
       GameConnection *conn = mServerGame->getClientInfo(i)->getConnection();
       if(conn)
@@ -1378,7 +1379,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
    logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientInfo->getName().getString());
 
    // Broadcast the message
-   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
    {
       GameConnection *conn = mServerGame->getClientInfo(i)->getConnection();
 
@@ -1424,7 +1425,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
 
    mIsBusy = isBusy;
 
-   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < mServerGame->getClientCount(); ++i)
    {
       ClientInfo *clientInfo = mServerGame->getClientInfo(i);
 
@@ -1507,7 +1508,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
       mLevelSource = levelSource;
 
       c2sRemoveLevel(-1); // clears all levels
-      for(S32 i = 0; i < levelSource->getLevelCount(); i++)
+      for(S32 i = 0; i < levelSource->getLevelCount(); ++i)
       {
          string filename = mSettings->getFolderManager()->findLevelFile(levelSource->getLevelFileName(i));
          levelSource->populateLevelInfoFromSource(filename, i);
@@ -1579,7 +1580,8 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
                foundscript = true;
                break;
             }
-            c++;
+            ++c;
+
          }
          if(foundscript)
          {  // Found a line, write a modified Script filename we will soon write to.
@@ -1591,12 +1593,14 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
             //fputc('"', f);  // End with quotation mark
             c += 6;
             while(c < levelsize && leveldata[c] == 32) // First one or more spaces.
-               c++;
+               ++c;
+
             bool isInQuote = false; // to ignore spaces while in quotoation marks
             while(c < levelsize && leveldata[c] >= 32 && (isInQuote || leveldata[c] != 32)) // Go to end of second arg
             {
                isInQuote = isInQuote != (leveldata[c] == '"');
-               c++;
+               ++c;
+
             }
          }
          else
@@ -1750,7 +1754,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
       GameRecorderServer *g = mServerGame->getGameRecorder();
       if(g)
       {
-         for(S32 i = 0; i < levels.size(); i++)
+         for(S32 i = 0; i < levels.size(); ++i)
             if(levels[i] == g->mFileName)
             {
                levels.erase(i);
@@ -1848,7 +1852,7 @@ bool GameConnection::TransferLevelFile(const char *filename)
 
                   // Vector deleteAndClear doesn't work for SafePtr on OSX, so we do it the
                   // old-fashioned way
-                  for(S32 i = 0; i < mPendingTransferData.size(); i++)
+                  for(S32 i = 0; i < mPendingTransferData.size(); ++i)
                      delete mPendingTransferData[i].getPointer();
                   mPendingTransferData.clear();
 
@@ -1879,9 +1883,9 @@ bool GameConnection::TransferLevelFile(const char *filename)
       }
 
       s2rTransferFileSize(totalTransferSize);
-      for(U32 i=0; i < pendingleveltransfer; i++)
+      for(U32 i=0; i < pendingleveltransfer; ++i)
          s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(mPendingTransferData[i]));
-      for(U32 i=pendingleveltransfer; i < U32(mPendingTransferData.size()); i++)
+      for(U32 i=pendingleveltransfer; i < U32(mPendingTransferData.size()); ++i)
          s2rSendDataParts(TransmissionLevelGenFile, ByteBufferPtr(mPendingTransferData[i]));
 
       s2rSendDataParts(TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
@@ -1927,7 +1931,7 @@ bool GameConnection::TransferRecordedGameplay(const char *filename)
 
       s2cSetFilename(filename);
       s2rTransferFileSize(totalTransferSize);
-      for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; i++)
+      for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; ++i)
          s2rSendDataParts(TransmissionRecordedGame, ByteBufferPtr(mPendingTransferData[i]));
 
       s2rSendDataParts(TransmissionRecordedGame | TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
@@ -1950,9 +1954,10 @@ F32 GameConnection::getFileProgressMeter()
    {
       // Sent data becomes NULL, which we can use to see the upload progress.
       S32 numberOfNull = 0;
-      for(S32 i = 0; i < mPendingTransferData.size(); i++)
+      for(S32 i = 0; i < mPendingTransferData.size(); ++i)
          if(mPendingTransferData[i].isNull())
-            numberOfNull++;
+            ++numberOfNull;
+
       if(numberOfNull == mPendingTransferData.size())
          mPendingTransferData.resize(0); // Everything is now NULL, zero size the Vector.
       else
@@ -2058,14 +2063,17 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    char *name = buf;
    while(len && *name == ' ')
    {
-      name++;
-      len--;
+      ++name;
+
+      --len;
+
    }
    while(len && name[len-1] == ' ')
-      len--;
+      --len;
+
 
    // Remove invisible chars and quotes
-   for(std::size_t i = 0; i < len; i++)
+   for(std::size_t i = 0; i < len; ++i)
       if(name[i] < ' ' || name[i] > '~' || name[i] == '"')
          name[i] = 'X';
 
@@ -2146,7 +2154,8 @@ bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::Termina
 void GameConnection::resetAuthenticationTimer()
 {
    mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY_TIME + 1000);
-   mAuthenticationCounter++;
+   ++mAuthenticationCounter;
+
 }
 
 
@@ -2346,7 +2355,7 @@ void GameConnection::onConnectionEstablished_client()
       string addr = getNetAddressString();
       bool found = false;
 
-      for(S32 i = 0; i < mSettings->getIniSettings()->prevServerListFromMaster.size(); i++)
+      for(S32 i = 0; i < mSettings->getIniSettings()->prevServerListFromMaster.size(); ++i)
          if(mSettings->getIniSettings()->prevServerListFromMaster[i].compare(addr) == 0)
          {
             found = true;

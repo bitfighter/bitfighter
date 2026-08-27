@@ -41,7 +41,7 @@ namespace Zap
 
       this->verts.resize(verts.size());
 
-      for(S32 i = 0; i < verts.size(); i++)
+      for(S32 i = 0; i < verts.size(); ++i)
          this->verts[i] = verts[i];
    }
 
@@ -52,7 +52,7 @@ namespace Zap
       width = (F32) wallItem->getWidth();
       solid = false;
 
-      for(S32 i = 0; i < wallItem->getVertCount(); i++)
+      for(S32 i = 0; i < wallItem->getVertCount(); ++i)
       {
          verts.push_back(wallItem->getVert(i).x);
          verts.push_back(wallItem->getVert(i).y);
@@ -70,7 +70,7 @@ namespace Zap
       solid = true;
       destructible = polyWall->mDestructible;
 
-      for(S32 i = 0; i < polyWall->getVertCount(); i++)
+      for(S32 i = 0; i < polyWall->getVertCount(); ++i)
       {
          verts.push_back(polyWall->getVert(i).x);
          verts.push_back(polyWall->getVert(i).y);
@@ -112,7 +112,7 @@ namespace Zap
          Vector<Vector<Point> > segmentData;
          barrierLineToSegmentData(vec, segmentData);
 
-         for(S32 i = 0; i < segmentData.size(); i++)
+         for(S32 i = 0; i < segmentData.size(); ++i)
          {
             Barrier *b = Barrier::createBarrier(segmentData[i], width, false);    // false = not solid
             if(b)
@@ -262,7 +262,7 @@ namespace Zap
 
              Vector<DatabaseObject *> ffps;
              game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, ffps);
-             for(S32 i = 0; i < ffps.size(); i++)
+             for(S32 i = 0; i < ffps.size(); ++i)
              {
                 ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(ffps[i]);
                 if(!ffp || !ffp->isEnabled())
@@ -307,7 +307,7 @@ namespace Zap
           // bot zones reads forcefield endpoints, so they must be updated
           // first to avoid stale geometry in the nav mesh.
           // Skip any projectors that were deleted by removeMountedItems().
-          for(S32 i = 0; i < affectedProjectors.size(); i++)
+          for(S32 i = 0; i < affectedProjectors.size(); ++i)
              if(affectedProjectors[i].isValid())
                 affectedProjectors[i]->recomputeFieldGeometry();
 
@@ -338,7 +338,7 @@ namespace Zap
        static const F32 MOUNT_MARGIN = 5.0f;
        F32 tolerance_squared = sq((mSolid ? 0.0f : mWidth / 2.0f) + MOUNT_MARGIN);
 
-       for(S32 i = 0; i < mountedItems.size(); i++)
+       for(S32 i = 0; i < mountedItems.size(); ++i)
        {
           EngineeredItem *item = dynamic_cast<EngineeredItem *>(mountedItems[i]);
           if(!item)
@@ -349,7 +349,7 @@ namespace Zap
 
           if(mSolid)  // Polywall — check each edge of the polygon (mPoints == outline == centerline)
           {
-             for(S32 j = 0; j < mPoints.size(); j++)
+             for(S32 j = 0; j < mPoints.size(); ++j)
              {
                 const Point &a = mPoints[j];
                 const Point &b = mPoints[(j + 1) % mPoints.size()];
@@ -451,7 +451,7 @@ namespace Zap
       const Point &destroyedStart = destroyedBarrier->mPoints[1];
       const Point &destroyedEnd   = destroyedBarrier->mPoints[2];
 
-      for(S32 i = 0; i < barriers.size(); i++)
+      for(S32 i = 0; i < barriers.size(); ++i)
       {
          Barrier *b = dynamic_cast<Barrier *>(barriers[i]);
          if(!b || b == destroyedBarrier || b->mSolid)
@@ -490,7 +490,7 @@ namespace Zap
       Vector<const Vector<Point> *> inputPolygons;
       Vector<Point> points;
 
-      for(S32 i = 0; i < barriers.size(); i++)
+      for(S32 i = 0; i < barriers.size(); ++i)
       {
          if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
             continue;
@@ -560,11 +560,13 @@ namespace Zap
       if(argv[argIdx][0] == 'D' && argv[argIdx][1] == '\0')
       {
          destructible = true;
-         argIdx++;
+         ++argIdx;
+
       }
 
       setWidth(atoi(argv[argIdx]));
-      argIdx++;
+      ++argIdx;
+
 
       // Read remaining args as geometry (x,y pairs)
       readGeom(argc, argv, argIdx, game->getLegacyGridSize());
@@ -940,7 +942,8 @@ namespace Zap
       if(argv[argIdx][0] == 'D' && argv[argIdx][1] == '\0')
       {
          mDestructible = true;
-         argIdx++;
+         ++argIdx;
+
       }
 
       readGeom(argc, argv, argIdx, game->getLegacyGridSize());

@@ -71,7 +71,7 @@ void calcPolygonVerts(const Point &center, S32 sides, F32 radius, F32 angle, Vec
    F32 theta = 0;
    F32 dTheta = FloatTau / sides;
 
-   for(S32 i = 0; i < sides; i++)
+   for(S32 i = 0; i < sides; ++i)
    {
       F32 x = center.x + cos(theta + angle) * radius;
       F32 y = center.y + sin(theta + angle) * radius;
@@ -98,7 +98,7 @@ bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &p
 
    // loop through all edges of the polygon
    S32 nextIndex;
-   for (S32 i = 0; i < vertexCount; i++)
+   for (S32 i = 0; i < vertexCount; ++i)
    {
       nextIndex = (i+1)%vertexCount;
       if (vertices[i].y <= point.y)
@@ -132,7 +132,7 @@ static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2
 
    // loop through all edges of the polygon
    S32 nextIndex;
-   for (S32 i = 0; i < vertexCount; i++)
+   for (S32 i = 0; i < vertexCount; ++i)
    {
       nextIndex = (i+1)%vertexCount;
       if (vertices[i]->y <= point->y)
@@ -157,22 +157,24 @@ static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 {
    // Check for duplicate points
-   for(S32 i = 1; i < (S32)points.size(); i++)
+   for(S32 i = 1; i < (S32)points.size(); ++i)
       if(points[i-1] == points[i])
       {
          points.erase(i);
-         i--;
+         --i;
+
       }
 
    if(points.size() < 3)
       return;
 
-   for(S32 i = 1; i < points.size() - 1; i++)
+   for(S32 i = 1; i < points.size() - 1; ++i)
    {
       if((points[i] - points[i-1]).ATAN2() == (points[i+1] - points[i]).ATAN2())
       {
          points.erase(i);
-         i--;
+         --i;
+
       }
    }
 
@@ -259,7 +261,7 @@ bool isConvex(const Vector<Point> *verts)
       return true;
 
    double sign = 0;
-   for(int i = 0; i < n; i++)
+   for(int i = 0; i < n; ++i)
    {
       const Point &p1 = verts->get(i);
       const Point &p2 = verts->get((i + 1) % n);
@@ -364,7 +366,7 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
    const Point *pointPrev = &points[points.size() - 1];
    F32 ct;
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 0; i < points.size(); ++i)
    {
       if(segmentsIntersect(start, end, *pointPrev, points[i], ct))
          return true;
@@ -386,13 +388,13 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
    F32 ct;
    const Point *rp1 = &p1[p1.size() - 1];
 
-   for(S32 i = 0; i < p1.size(); i++)
+   for(S32 i = 0; i < p1.size(); ++i)
    {
       const Point *rp2 = &p1[i];
 
       const Point *cp1 = &p2[p2.size() - 1];
 
-      for(S32 j = 0; j < p2.size(); j++)
+      for(S32 j = 0; j < p2.size(); ++j)
       {
          const Point *cp2 = &p2[j];
          if(segmentsIntersect(*rp1, *rp2, *cp1, *cp2, ct))
@@ -673,7 +675,7 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
    F32 dist = F32_MAX;
    S32 closest = -1;
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 0; i < points.size(); ++i)
    {
       F32 d = points[i].distSquared(point);
 
@@ -700,7 +702,7 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
    const Point *pi1, *pi2, *pj1, *pj2;
 
    // Now, do we actually touch?  Let's look, segment by segment
-   for(S32 i = 0; i < zone1->size(); i++)
+   for(S32 i = 0; i < zone1->size(); ++i)
    {
       pi1 = &zone1->get(i);
       if(i == zone1->size() - 1)
@@ -708,7 +710,7 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
       else
          pi2 = &zone1->get(i + 1);
 
-      for(S32 j = 0; j < zone2->size(); j++)
+      for(S32 j = 0; j < zone2->size(); ++j)
       {
          pj1 = &zone2->get(j);
          if(j == zone2->size() - 1)
@@ -866,7 +868,7 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
 
   if ( EPSILON > (((Bx-Ax)*(Cy-Ay)) - ((By-Ay)*(Cx-Ax))) ) return false;
 
-  for (p=0;p<n;p++)
+  for (p=0;p<n;++p)
   {
     if( (p == u) || (p == v) || (p == w) ) continue;
     Px = contour[V[p]].x;
@@ -892,10 +894,10 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
    /* we want a counter-clockwise polygon in V */
 
    if(area(contour) > 0)
-      for (int v=0; v < n; v++)
+      for (int v=0; v < n; ++v)
          V[v] = v;
    else
-      for(int v = 0; v < n; v++)
+      for(int v = 0; v < n; ++v)
          V[v] = (n-1)-v;
 
    int nv = n;
@@ -938,13 +940,15 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
          result.push_back( contour[b] );
          result.push_back( contour[c] );
 
-         m++;
+         ++m;
+
 
          /* remove v from remaining polygon */
-         for(s = v, t = v+1; t < nv; s++, t++)
+         for(s = v, t = v+1; t < nv; ++s, ++t)
             V[s] = V[t];
 
-         nv--;
+         --nv;
+
 
          /* reset error detection counter */
          count = 2*nv;
@@ -966,11 +970,11 @@ Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
 
    outputPolygons.resize(inputPolygons.size());
 
-   for(S32 i = 0; i < inputPolygons.size(); i++)
+   for(S32 i = 0; i < inputPolygons.size(); ++i)
    {
       outputPolygons[i].resize(inputPolygons[i]->size());
 
-      for(S32 j = 0; j < inputPolygons[i]->size(); j++)
+      for(S32 j = 0; j < inputPolygons[i]->size(); ++j)
          outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
    }
 
@@ -985,11 +989,11 @@ Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 
    outputPolygons.resize(inputPolygons.size());
 
-   for(S32 i = 0; i < inputPolygons.size(); i++)
+   for(S32 i = 0; i < inputPolygons.size(); ++i)
    {
       outputPolygons[i].resize(inputPolygons[i].size());
 
-      for(S32 j = 0; j < inputPolygons[i].size(); j++)
+      for(S32 j = 0; j < inputPolygons[i].size(); ++j)
          outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
    }
 
@@ -1003,11 +1007,11 @@ Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons)
 
    outputPolygons.resize((U32)inputPolygons.size());
 
-   for(U32 i = 0; i < inputPolygons.size(); i++)
+   for(U32 i = 0; i < inputPolygons.size(); ++i)
    {
       outputPolygons[i].resize((U32)inputPolygons[i].size());
 
-      for(U32 j = 0; j < inputPolygons[i].size(); j++)
+      for(U32 j = 0; j < inputPolygons[i].size(); ++j)
          outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) * CLIPPER_SCALE_FACT_INVERSE, F32(inputPolygons[i][j].Y) * CLIPPER_SCALE_FACT_INVERSE);
    }
 
@@ -1064,11 +1068,11 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
 {
    result.clear();
    result.reserve(mesh.npolys);
-   for(S32 i = 0; i < mesh.npolys; i++)
+   for(S32 i = 0; i < mesh.npolys; ++i)
    {
       Vector<Point> poly;
       poly.reserve(mesh.nvp);
-      for(S32 j = 0; j < mesh.nvp; j++)
+      for(S32 j = 0; j < mesh.nvp; ++j)
       {
          // index of the next vertex
          U16 vertIndex = mesh.polys[i * mesh.nvp + j];
@@ -1259,10 +1263,10 @@ static void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<P
 
    bool polyWasSplit = false;
    // for each segment as i
-   for(U32 i = 0; i < size && !polyWasSplit; i++)
+   for(U32 i = 0; i < size && !polyWasSplit; ++i)
    {
       // for each segment after after i as j
-      for(U32 j = i + 2; j < size && !polyWasSplit; j++)
+      for(U32 j = i + 2; j < size && !polyWasSplit; ++j)
       {
          // exclude segments adjacent to i
          if(i == 0 && j == size - 1)
@@ -1309,7 +1313,7 @@ static void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<P
  */
 void splitSelfIntersectingPolys(const Vector<Vector<Point> > input, Vector<Vector<Point> > &result)
 {
-   for(S32 i = 0; i < input.size(); i++)
+   for(S32 i = 0; i < input.size(); ++i)
    {
       splitSelfIntersectingPoly(input[i], result);
    }
@@ -1326,12 +1330,12 @@ bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &out
    rcPolyMesh mesh;
    Vector<Point> triangles;
 
-   for(S32 i = 0; i < input.size(); i++)
+   for(S32 i = 0; i < input.size(); ++i)
    {
       if(input[i].size() != 3)
          continue;
 
-      for(S32 j = 0; j < input[i].size(); j++)
+      for(S32 j = 0; j < input[i].size(); ++j)
       {
          triangles.push_back(input[i][j]);
       }
@@ -1402,19 +1406,19 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
    // Precomputing list size improves performance dramatically
    S32 segments = 0;
 
-   for(S32 i = 0; i < solution.size(); i++)
+   for(S32 i = 0; i < solution.size(); ++i)
       segments += solution[i].size();
 
    lineSegmentPoints.resize(segments * 2);      // 2 points per line segment
 
    S32 index = 0;
 
-   for(S32 i = 0; i < solution.size(); i++)
+   for(S32 i = 0; i < solution.size(); ++i)
    {
       if(solution[i].size() == 0)
          continue;
 
-      for(S32 j = 1; j < solution[i].size(); j++)
+      for(S32 j = 1; j < solution[i].size(); ++j)
       {
          lineSegmentPoints[index++] = solution[i][j - 1];
          lineSegmentPoints[index++] = solution[i][j];
@@ -1557,7 +1561,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
    F64 finalSum = 0;
    S32 i_prev = inputPoly.size() - 1;
 
-   for(S32 i = 0; i < inputPoly.size(); i++)
+   for(S32 i = 0; i < inputPoly.size(); ++i)
    {
       // (x2-x1)(y2+y1)
       finalSum += (F64(inputPoly[i].x) - inputPoly[i_prev].x) * (F64(inputPoly[i].y) + inputPoly[i_prev].y);
@@ -1620,7 +1624,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
       {
          // Build up this polyline in poly2tri's format (downscale Clipper points)
          Vector<p2t::Point*> polyline;
-         for(U32 j = 0; j < currentNode->Contour.size(); j++)
+         for(U32 j = 0; j < currentNode->Contour.size(); ++j)
             polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X), F64(currentNode->Contour[j].Y)));
 
          polylinesRegistry.push_back(polyline);  // Memory
@@ -1629,12 +1633,12 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          p2t::CDT* cdt = new p2t::CDT(polyline.getStlVector());
          cdtRegistry.push_back(cdt);
 
-         for(U32 j = 0; j < currentNode->Childs.size(); j++)
+         for(U32 j = 0; j < currentNode->Childs.size(); ++j)
          {
             PolyNode *childNode = currentNode->Childs[j];
 
             Vector<p2t::Point*> hole;
-            for(U32 k = 0; k < childNode->Contour.size(); k++)
+            for(U32 k = 0; k < childNode->Contour.size(); ++k)
                hole.push_back(new p2t::Point(F64(childNode->Contour[k].X), F64(childNode->Contour[k].Y)));
 
             holesRegistry.push_back(hole);  // Memory
@@ -1658,7 +1662,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
          // Copy our data to TNL::Point and to our output Vector
          p2t::Triangle *currentTriangle;
-         for(U32 j = 0; j < currentOutput.size(); j++)
+         for(U32 j = 0; j < currentOutput.size(); ++j)
          {
             currentTriangle = currentOutput[j];
             outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(0)->y * CLIPPER_SCALE_FACT_INVERSE));
@@ -1674,18 +1678,18 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
    // Clean up memory used with poly2tri
    //
    // Clean-up workers
-   for(S32 i = 0; i < cdtRegistry.size(); i++)
+   for(S32 i = 0; i < cdtRegistry.size(); ++i)
       delete cdtRegistry[i];
 
    // Free the polylines
-   for(S32 i = 0; i < polylinesRegistry.size(); i++)
+   for(S32 i = 0; i < polylinesRegistry.size(); ++i)
    {
       Vector<p2t::Point*> &polyline = polylinesRegistry[i];
       polyline.deleteAndClear();
    }
 
    // Free the holes
-   for(S32 i = 0; i < holesRegistry.size(); i++)
+   for(S32 i = 0; i < holesRegistry.size(); ++i)
    {
       Vector<p2t::Point*> &hole = holesRegistry[i];
       hole.deleteAndClear();
@@ -1716,7 +1720,7 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
    if(pointCount > U16_MAX) // too many points for rcBuildPolyMesh
       return false;
 
-   for(S32 i = 0; i < pointCount; i++)
+   for(S32 i = 0; i < pointCount; ++i)
    {
       intPoints[2*i]   = (S32)round(triangleData[i].x) + mesh.offsetX;
       intPoints[2*i+1] = (S32)round(triangleData[i].y) + mesh.offsetY;
@@ -1740,7 +1744,7 @@ Point mean2d(const Vector<Point> &polyPoints)
    F64 y = 0;
    Point p1;
 
-   for(S32 i = 0; i < size; i++)
+   for(S32 i = 0; i < size; ++i)
    {
       p1 = polyPoints[i];
 //      p1.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
@@ -1776,7 +1780,7 @@ Point findCentroid(const Vector<Point> &polyPoints)
    Point p2;
 
    // All segments except last
-   for(S32 i = 0; i < size - 1; i++)
+   for(S32 i = 0; i < size - 1; ++i)
    {
       p1 = polyPoints[i];
       p2 = polyPoints[i+1];
@@ -1824,7 +1828,7 @@ F32 angleOfLongestSide(const Vector<Point> &polyPoints)
    F32 maxlen = -1;
    F32 ang = 0;
 
-   for(S32 i = 0; i < polyPoints.size(); i++)
+   for(S32 i = 0; i < polyPoints.size(); ++i)
    {
       Point p1 = polyPoints[i];
       Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
@@ -1969,7 +1973,7 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
       return;
 
    S32 last = corners.size() - 1;
-   for(S32 i = 0; i < corners.size(); i++)
+   for(S32 i = 0; i < corners.size(); ++i)
    {
       edges.push_back(corners[last]);
       edges.push_back(corners[i]);
@@ -1991,7 +1995,7 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
    bool loop = (points->first() == points->last());      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
-   for(S32 i = 0; i < points->size() - 1; i++)
+   for(S32 i = 0; i < points->size() - 1; ++i)
    {
       Point e = points->get(i+1) - points->get(i);
       e.normalize();
@@ -2001,7 +2005,7 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
    Point lastEdge = edgeVector[edgeVector.size() - 1];
    Vector<F32> extend;
 
-   for(S32 i = 0; i < edgeVector.size(); i++)
+   for(S32 i = 0; i < edgeVector.size(); ++i)
    {
       Point curEdge = edgeVector[i];
       double cosTheta = curEdge.dot(lastEdge);
@@ -2025,7 +2029,7 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
    F32 first = extend[0];
    extend.push_back(first);
 
-   for(S32 i = 0; i < edgeVector.size(); i++)
+   for(S32 i = 0; i < edgeVector.size(); ++i)
    {
       F32 extendBack = extend[i];
       F32 extendForward = extend[i+1];
@@ -2234,7 +2238,7 @@ void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &o
 
 
    // Extract segment with pre/post points
-   for(S32 i = 0; i < pointCount - 1; i++)  // One less than full loop to guarantee nextPoint(s)
+   for(S32 i = 0; i < pointCount - 1; ++i)  // One less than full loop to guarantee nextPoint(s)
    {
       pts.clear();
 
@@ -2280,7 +2284,7 @@ static void pushPolyNode(lua_State *L, const PolyNode *node)
 
    // set the points
    lua_createtable(L, (int)node->Contour.size(), 0);   // -- node, points
-   for(U32 i = 1; i <= node->Contour.size(); i++)
+   for(U32 i = 1; i <= node->Contour.size(); ++i)
    {
       const Path &poly = node->Contour;
       lua_pushnumber(L, i);                       // -- node, points, i
@@ -2292,7 +2296,7 @@ static void pushPolyNode(lua_State *L, const PolyNode *node)
 
    // set the children
    lua_createtable(L, (int)node->Childs.size(), 0);    // -- node, children
-   for(U32 i = 1; i <= node->Childs.size(); i++)
+   for(U32 i = 1; i <= node->Childs.size(); ++i)
    {
       lua_pushnumber(L, i);                       // -- node, children, i
       pushPolyNode(L, node->Childs[i-1]);         // -- node, children, i, child

@@ -191,7 +191,8 @@ bool NetConnection::checkTimeout(U32 time)
          if(mPingSendCount >= timeoutCount)
             return true;
       mLastPingSendTime = time;
-      mPingSendCount++;
+      ++mPingSendCount;
+
       sendPingPacket();
    }
    return false;
@@ -249,7 +250,8 @@ void NetConnection::writeRawPacket(BitStream *bstream, NetPacketType packetType)
    }
    mPacketSendBytesLast = bstream->getBytePosition();
    mPacketSendBytesTotal += mPacketSendBytesLast;
-   mPacketSendCount++;
+   ++mPacketSendCount;
+
 }
 
 void NetConnection::readRawPacket(BitStream *bstream)
@@ -261,7 +263,8 @@ void NetConnection::readRawPacket(BitStream *bstream)
    }
    mPacketRecvBytesLast = bstream->getMaxReadBitPosition() >> 3;
    mPacketRecvBytesTotal += mPacketRecvBytesLast;
-   mPacketRecvCount++;
+   ++mPacketRecvCount;
+
    logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECV- %d bytes", mNetAddress.toString(), mPacketRecvBytesLast);
 
    mErrorBuffer[0] = 0;
@@ -295,7 +298,8 @@ void NetConnection::writePacketHeader(BitStream *stream, NetPacketType packetTyp
    TNLAssert(ackByteCount <= MaxAckByteCount, "ackByteCount exceeds MaxAckByteCount!");
    
    if(packetType == DataPacket)
-      mLastSendSeq++;
+      ++mLastSendSeq;
+
       
    stream->writeInt(packetType, 2);
    stream->writeInt(mLastSendSeq, 5); // write the first 5 bits of the send sequence
@@ -308,7 +312,7 @@ void NetConnection::writePacketHeader(BitStream *stream, NetPacketType packetTyp
 
    U32 wordCount = (ackByteCount + 3) >> 2;
 
-   for(U32 i = 0; i < wordCount; i++)
+   for(U32 i = 0; i < wordCount; ++i)
       stream->writeInt(mAckMask[i], i == wordCount - 1 ?
          (ackByteCount - (i * 4)) * 8 : 32);
    
@@ -417,7 +421,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    U32 pkAckMask[MaxAckMaskSize];
    U32 pkAckWordCount = (pkAckByteCount + 3) >> 2;
 
-   for(U32 i = 0; i < pkAckWordCount; i++)
+   for(U32 i = 0; i < pkAckWordCount; ++i)
       pkAckMask[i] = pstream->readInt(i == pkAckWordCount - 1 ? 
             (pkAckByteCount - (i * 4)) * 8 : 32);
 
@@ -429,9 +433,10 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
 
    U32 pkSendDelay = (pstream->readInt(8) << 3) + 4;
 
-   for(U32 i = mLastSeqRecvd+1; i < pkSequenceNumber; i++)
+   for(U32 i = mLastSeqRecvd+1; i < pkSequenceNumber; ++i)
    {
-      mPacketRecvDropped++;
+      ++mPacketRecvDropped;
+
       logprintf(LogConsumer::LogConnectionProtocol, "Not recv %d", i);
    }
 
@@ -445,7 +450,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    // if we've missed more than a full word of packets, shift up by words
    while(ackMaskShift > 32)
    {
-      for(S32 i = MaxAckMaskSize - 1; i > 0; i--)
+      for(S32 i = MaxAckMaskSize - 1; i > 0; --i)
          mAckMask[i] = mAckMask[i-1];
       mAckMask[0] = 0;
       ackMaskShift -= 32;
@@ -455,7 +460,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    // 1 if this is a data packet (i.e. not a ping packet or an ack packet)
    U32 upShifted = (pkPacketType == DataPacket) ? 1 : 0; 
 
-   for(U32 i = 0; i < MaxAckMaskSize; i++)
+   for(U32 i = 0; i < MaxAckMaskSize; ++i)
    {
       U32 nextShift = mAckMask[i] >> (32 - ackMaskShift);
       mAckMask[i] = (mAckMask[i] << ackMaskShift) | upShifted;
@@ -464,7 +469,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
 
    // do all the notifies...
    U32 notifyCount = pkHighestAck - mHighestAckedSeq;
-   for(U32 i = 0; i < notifyCount; i++) 
+   for(U32 i = 0; i < notifyCount; ++i) 
    {
       U32 notifyIndex = mHighestAckedSeq + i + 1;
 
@@ -634,7 +639,8 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
          if(cwnd < ssthresh)
          {
             // Slow start strategy
-            cwnd++;
+            ++cwnd;
+
             logprintf(LogConsumer::LogNetConnection, "PKT SSOK - ssthresh = %f     cwnd=%f", ssthresh, cwnd);
 
          } else {
@@ -655,7 +661,8 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
       {
          // Deal with updating our cwnd and ssthresh...
          ssthresh = (0.5f * ssthresh < 2) ? 2 : (0.5f * ssthresh);
-         cwnd -= 1;
+         --cwnd;
+
          if(cwnd < 2) cwnd = 2;
 
 /*         logprintf(LogConsumer::LogNetConnection, "  * ack=%f   pktDt=%d    time=%f (%d)     seq=%d %d %d %d",
@@ -672,7 +679,8 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
       }
 
       packetDropped(note);
-      mPacketSendDropped++;
+      ++mPacketSendDropped;
+
    }
    delete note;
 }

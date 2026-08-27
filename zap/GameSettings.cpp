@@ -692,19 +692,20 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
 
 
    // Now, remove any levels listed in the skip list from levelList.  Not foolproof!
-   for(S32 i = 0; i < levelList.size(); i++)
+   for(S32 i = 0; i < levelList.size(); ++i)
    {
       // Make sure we have the right extension
       string filename_i = lcase(levelList[i]);
       if(filename_i.find(".level") == string::npos)
          filename_i += ".level";
 
-      for(S32 j = 0; j < mLevelSkipList.size(); j++)
+      for(S32 j = 0; j < mLevelSkipList.size(); ++j)
          if(filename_i == mLevelSkipList[j])
          {
             logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", levelList[i].c_str());
             levelList.erase(i);
-            i--;
+            --i;
+
             break;
          }
    }
@@ -787,7 +788,7 @@ static S32 getParams(ParamRequirements argsRequired, const S32 paramPtr, const S
       if(!hasAdditionalArg)
          parameterError(errorMsg);
 
-      for(S32 j = argPtr; j < argc; j++)
+      for(S32 j = argPtr; j < argc; ++j)
          params.push_back(argv[j]);
 
       return argc;
@@ -813,7 +814,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       if(arg.substr(0, 2) == "--")
          arg = arg.substr(1);
 
-      argPtr++;      // Advance argPtr to location of first parameter argument
+      ++argPtr;      // Advance argPtr to location of first parameter argument
 
       // Mac adds on a 'Process Serial Number' to every application launched from a .app bundle
       // we should just ignore it and not exit the game
@@ -826,7 +827,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
 #endif
 
       // Scan through the possible params
-      for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
+      for(U32 i = 0; i < ARRAYSIZE(paramDefs); ++i)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
@@ -840,7 +841,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       // Didn't find a matching parameter... let's try the commands
       if(!found)
       {
-         for(U32 i = 0; i < ARRAYSIZE(directiveDefs); i++)
+         for(U32 i = 0; i < ARRAYSIZE(directiveDefs); ++i)
          {
             if(arg == "-" + directiveDefs[i].paramName)
             {
@@ -871,7 +872,7 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
 // If any directives were specified on the cmd line, run them
 void GameSettings::runCmdLineDirectives()
 {
-   for(S32 i = 0; i < S32(ARRAYSIZE(directiveDefs)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(directiveDefs)); ++i)
    {
       if(mCmdLineParams[directiveDefs[i].paramId].size() > 0)
       {
@@ -1058,7 +1059,7 @@ static string makePad(U32 len)
 {
    string padding = "";
 
-   for(U32 i = 0; i < len; i++)
+   for(U32 i = 0; i < len; ++i)
       padding += " ";
 
    return padding;
@@ -1163,13 +1164,13 @@ static void printHelpEntry(const string &paramName, const string &paramString, c
 
 void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
-   for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
+   for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); ++i)
    {
       // Make an initial sweep through to check on the sizes of things, to ensure we get the indentation right
       // This first chunk just determies the longest command to figure out how much padding is needed.
       U32 maxSize = 0;
 
-      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); ++j)
          if(paramDefs[j].docLevel == i)
          {
             U32 len = (U32) makeParamStr(paramDefs[j].paramName, paramDefs[j].paramString).length();
@@ -1178,7 +1179,7 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
                maxSize = len;
          }
 
-      for(S32 j = 0; j < S32(ARRAYSIZE(directiveDefs)); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(directiveDefs)); ++j)
          if(directiveDefs[j].docLevel == i)
          {
             U32 len = (U32) makeParamStr(directiveDefs[j].paramName, directiveDefs[j].paramString).length();
@@ -1189,7 +1190,7 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 
       bool firstInSection = true;
 
-      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(paramDefs)); ++j)
       {
          if(paramDefs[j].docLevel != i)
             continue;
@@ -1200,7 +1201,7 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
          firstInSection = false;
       }
 
-      for(S32 j = 0; j < S32(ARRAYSIZE(directiveDefs)); j++)
+      for(S32 j = 0; j < S32(ARRAYSIZE(directiveDefs)); ++j)
       {
          if(directiveDefs[j].docLevel != i)
             continue;
@@ -1279,7 +1280,7 @@ void GameSettings::deleteServerPassword(const string &serverName)
 
 bool GameSettings::isLevelOnSkipList(const string &filename) const
 {
-   for(S32 i = 0; i < mLevelSkipList.size(); i++)
+   for(S32 i = 0; i < mLevelSkipList.size(); ++i)
       if(mLevelSkipList[i] == filename)    // Already on our list!
          return true;
 
@@ -1296,7 +1297,7 @@ void GameSettings::addLevelToSkipList(const string &filename)
 
 void GameSettings::removeLevelFromSkipList(const string &filename)
 {
-   for(S32 i = 0; i < mLevelSkipList.size(); i++)
+   for(S32 i = 0; i < mLevelSkipList.size(); ++i)
       if(mLevelSkipList[i] == filename)
       {
          mLevelSkipList.erase(i);

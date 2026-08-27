@@ -118,7 +118,7 @@ void Rect::set(const Vector<Point> &p)
    min = p[0];
    max = p[0];
 
-   for(int i = 1; i < p.size(); i++)
+   for(int i = 1; i < p.size(); ++i)
       unionPoint(p[i]);
 }
 

@@ -184,7 +184,8 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 static S32 getNextDefaultId()
 {
    static S32 nextId = 0;
-   nextId--;
+   --nextId;
+
    return nextId;
 }
 
@@ -314,7 +315,7 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
       // Go through each point
       else
       {
-         for(S32 i = 0; i < points.size(); i++)
+         for(S32 i = 0; i < points.size(); ++i)
          {
             if(points[i] != GeomObject::getOutline()->get(i))
             {
@@ -459,7 +460,7 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    F32 radius = getEditorRadius(currentScale);
 
    // Label and highlight any selected or lit up vertices.  This will also highlight point items.
-   for(S32 i = 0; i < getVertCount(); i++)
+   for(S32 i = 0; i < getVertCount(); ++i)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
          const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ?
@@ -636,7 +637,7 @@ void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
       LuaScriptRunner *scriptRunner = dynamic_cast<LuaScriptRunner *>(this);
 
       if(scriptRunner)
-         for(S32 i = 0; i < EventManager::EventTypes; i++)
+         for(S32 i = 0; i < EventManager::EventTypes; ++i)
             EventManager::get()->unsubscribeImmediate(scriptRunner, EventManager::EventType(i));
 
       mGame->addToDeleteList(this, deleteTimeInterval);
@@ -780,7 +781,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
 
    S32 shipsHit = 0;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
@@ -837,7 +838,8 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
       if(isShipType(foundObject->getObjectTypeNumber()))
-         shipsHit++;
+         ++shipsHit;
+
 
       foundObject->damageObject(&localInfo);
    }
@@ -894,7 +896,8 @@ BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, const
 
 void BfObject::onAddedToGame(Game *game)
 {
-   game->mObjectsLoaded++;
+   ++game->mObjectsLoaded;
+
 }
 
 
@@ -980,14 +983,16 @@ void BfObject::renderLayer(S32 layerIndex)
 void BfObject::disableCollision()
 {
    TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions");
-   mDisableCollisionCount++;
+   ++mDisableCollisionCount;
+
 }
 
 
 void BfObject::enableCollision()
 {
    TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled");
-   mDisableCollisionCount--;
+   --mDisableCollisionCount;
+
 }
 
 

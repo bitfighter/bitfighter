@@ -70,7 +70,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    string urlList = "";
    string otherParamString = otherParams + (otherParams != "" ? "&" : "");
 
-   for(S32 i = 0; i < credentialStrings.size(); i++)
+   for(S32 i = 0; i < credentialStrings.size(); ++i)
    {
       string url = baseUrl + "?" + gameIdString + "&" + otherParamString + credentialStrings[i];
 
@@ -190,7 +190,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    string nameList = "";  // Comma separated list of quoted, sanitized names ready to pass to a SQL IN() function
    S32 nameCount = 0;
 
-   for(S32 i = 0; i < clientList->size(); i++)
+   for(S32 i = 0; i < clientList->size(); ++i)
    {
       if(clientList->get(i) && clientList->get(i)->mAuthenticated)
       {
@@ -199,7 +199,8 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
             nameList += ", ";
 
          nameList += "'" + name + "'";
-         nameCount++;
+         ++nameCount;
+
       }
    }
 

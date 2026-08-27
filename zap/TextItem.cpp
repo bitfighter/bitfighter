@@ -199,7 +199,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 
    // Assemble any remaining args into a string
    mText = "";
-   for(S32 i = 6; i < argc; i++)
+   for(S32 i = 6; i < argc; ++i)
    {
       mText += argv[i];
       if(i < argc - 1)

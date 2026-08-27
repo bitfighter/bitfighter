@@ -37,7 +37,7 @@ void ClientPuzzleManager::NonceTable::reset()
    mChunker.freeBlocks();
    mHashTableSize = Random::readI(MinHashTableSize, MaxHashTableSize) * 2 + 1;
    mHashTable = (Entry **) mChunker.alloc(sizeof(Entry *) * mHashTableSize);
-   for(U32 i = 0; i < mHashTableSize; i++)
+   for(U32 i = 0; i < mHashTableSize; ++i)
       mHashTable[i] = NULL;
 }
 
@@ -127,7 +127,8 @@ bool ClientPuzzleManager::checkOneSolution(U32 solution, Nonce &clientNonce, Non
    {
       if(hash[index])
          return false;
-      index++;
+      ++index;
+
       puzzleDifficulty -= 8;
    }
    U8 mask = 0xFF << (8 - puzzleDifficulty);
@@ -161,7 +162,7 @@ bool ClientPuzzleManager::solvePuzzle(U32 *solution, Nonce &clientNonce, Nonce &
    for(;;)
    {
       U32 nextValue = startValue + SolutionFragmentIterations;
-      for(;startValue < nextValue; startValue++)
+      for(;startValue < nextValue; ++startValue)
       {
          if(checkOneSolution(startValue, clientNonce, serverNonce, puzzleDifficulty, clientIdentity))
          {

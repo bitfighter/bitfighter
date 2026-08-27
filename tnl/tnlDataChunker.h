@@ -108,7 +108,8 @@ public:
    /// Allocates and properly constructs in place a new element.
    T *alloc()
    {
-      numAllocated++;
+      ++numAllocated;
+
       if(freeListHead == NULL)
          return constructInPlace(reinterpret_cast<T*>(DataChunker::alloc(elementSize)));
       T* ret = freeListHead;
@@ -120,7 +121,8 @@ public:
    void free(T* elem)
    {
       destructInPlace(elem);
-      numAllocated--;
+      --numAllocated;
+
       *(reinterpret_cast<T**>(elem)) = freeListHead;
       freeListHead = elem;
    }

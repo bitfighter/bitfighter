@@ -135,7 +135,7 @@ bool UIManager::hasPrevUI()
 
 void UIManager::clearPrevUIs()
 {
-   //for(UiIterator it = mUis.begin(); it != mUis.end(); it++)
+   //for(UiIterator it = mUis.begin(); it != mUis.end(); ++it)
    //   delete it->second;
 
    mUis.clear();
@@ -156,7 +156,7 @@ void UIManager::renderPrevUI(const UserInterface *ui)
       return;
    }
 
-   for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // Not >= 0, because of the [i-1] below
+   for(S32 i = mPrevUIs.size() - 1; i > 0; --i)    // Not >= 0, because of the [i-1] below
       if(mPrevUIs[i] == ui)
       {
          mPrevUIs[i-1]->render();
@@ -218,7 +218,7 @@ void UIManager::printUIStack()
          logprintf("%s (current)", x.first->name());
 
    // Print stack, starting from most recent UI
-   for(int i = mPrevUIs.size() - 1; i > 0; i--)
+   for(int i = mPrevUIs.size() - 1; i > 0; --i)
       for(auto const& x : mUis)
          if(x.second.get() == mPrevUIs[i])
             logprintf("%s", x.first->name());
@@ -776,7 +776,7 @@ void UIManager::displayMessageBox(const StringTableEntry &title, const StringTab
                                   const Vector<StringTableEntry> &messages)
 {
    string msg = "";
-   for(S32 i = 0; i < messages.size(); i++)
+   for(S32 i = 0; i < messages.size(); ++i)
       msg += string(messages[i].getString()) + "\n";
 
    displayMessageBox(title.getString(), instr.getString(), msg);
@@ -787,7 +787,7 @@ void UIManager::displayMessageBox(const string &title, const string &instr, cons
 {
    string msg = "";
 
-   for(S32 i = 0; i < messages.size(); i++)
+   for(S32 i = 0; i < messages.size(); ++i)
       msg += messages[i] + "\n";
 
    displayMessageBox(title, instr, msg);

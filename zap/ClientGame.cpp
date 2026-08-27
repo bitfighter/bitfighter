@@ -47,10 +47,10 @@ static void initializeHelpItemForObjects()
    if(initialized)
       return;
 
-   for(S32 i = 0; i < TypesNumbers; i++)
+   for(S32 i = 0; i < TypesNumbers; ++i)
       hasHelpItemForObjects[i] = false;
 
-   for(S32 i = 0; i < HelpItemCount; i++)
+   for(S32 i = 0; i < HelpItemCount; ++i)
    {
       U8 objectType = HelpItemManager::getAssociatedObjectType(HelpItem(i));
       if(objectType != UnknownTypeNumber)
@@ -72,7 +72,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    // TODO: Make this a ref instead of a pointer
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
 
-   for(S32 i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++)
+   for(S32 i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i)
       normalizedAxesValues[i] = 0;
 
    initializeHelpItemForObjects();
@@ -820,7 +820,7 @@ void ClientGame::idle(U32 timeDelta)
          const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
 
          // Visit each game object, handling moves and running its idle method
-         for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+         for(S32 i = gameObjects->size() - 1; i >= 0; --i)
          {
             BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
@@ -857,7 +857,7 @@ void ClientGame::idle(U32 timeDelta)
             mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
 
             if(getUIManager()->isShowingInGameHelp())
-               for(S32 i = 0; i < fillVector.size(); i++)
+               for(S32 i = 0; i < fillVector.size(); ++i)
                {
                   BfObject *obj = static_cast<BfObject *>(fillVector[i]);
                   addInlineHelpItem(obj->getObjectTypeNumber(), obj->getTeam(), localPlayerShip->getTeam());
@@ -1405,7 +1405,7 @@ void ClientGame::addToMuteList(const string &name)
 void ClientGame::removeFromMuteList(const string &name)
 {
 
-   for(S32 i = 0; i < mMuteList.size(); i++)
+   for(S32 i = 0; i < mMuteList.size(); ++i)
       if(mMuteList[i] == name)
       {
          mMuteList.erase_fast(i);
@@ -1416,7 +1416,7 @@ void ClientGame::removeFromMuteList(const string &name)
 
 bool ClientGame::isOnMuteList(const string &name)
 {
-   for(S32 i = 0; i < mMuteList.size(); i++)
+   for(S32 i = 0; i < mMuteList.size(); ++i)
       if(mMuteList[i] == name)
          return true;
 
@@ -1433,7 +1433,7 @@ void ClientGame::addToVoiceMuteList(const string &name)
 void ClientGame::removeFromVoiceMuteList(const string &name)
 {
 
-   for(S32 i = 0; i < mVoiceMuteList.size(); i++)
+   for(S32 i = 0; i < mVoiceMuteList.size(); ++i)
       if(mVoiceMuteList[i] == name)
       {
          mVoiceMuteList.erase_fast(i);
@@ -1444,7 +1444,7 @@ void ClientGame::removeFromVoiceMuteList(const string &name)
 
 bool ClientGame::isOnVoiceMuteList(const string &name)
 {
-   for(S32 i = 0; i < mVoiceMuteList.size(); i++)
+   for(S32 i = 0; i < mVoiceMuteList.size(); ++i)
       if(mVoiceMuteList[i] == name)
          return true;
 
@@ -1562,7 +1562,7 @@ bool ClientGame::checkName(string &name)
    S32 potentials = 0;
    string correctedName = name;
 
-   for(S32 i = 0; i < getClientCount(); i++)
+   for(S32 i = 0; i < getClientCount(); ++i)
    {
       StringTableEntry n = Parent::getClientInfo(i)->getName();
 
@@ -1571,7 +1571,8 @@ bool ClientGame::checkName(string &name)
 
       else if(!stricmp(n.getString(), name.c_str()))     // Case insensitive match
       {
-         potentials++;
+         ++potentials;
+
          correctedName = n.getString();
       }
    }
@@ -1746,7 +1747,8 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       if(database == getGameObjDatabase())
       {
-         mObjectsLoaded++;
+         ++mObjectsLoaded;
+
          return true;
       }
 
@@ -1768,7 +1770,8 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       if(database == getGameObjDatabase())
       {
-         mObjectsLoaded++;
+         ++mObjectsLoaded;
+
          return true;
       }
 
@@ -1809,7 +1812,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       // full-fledged objects on the server (instead of pseudoItems here).
       string robotLine = "";
 
-      for(S32 i = 0; i < argc; i++)
+      for(S32 i = 0; i < argc; ++i)
       {
          if(i > 0)
             robotLine.append(" ");

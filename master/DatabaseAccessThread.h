@@ -79,7 +79,8 @@ public:
          if(mEntryThread != mEntryEnd)
          {
             mEntry[mEntryThread]->run();
-            mEntryThread++;
+            ++mEntryThread;
+
             if(mEntryThread >= mEntrySize)
                mEntryThread = 0;
          }
@@ -99,7 +100,8 @@ public:
       {
          mEntry[mEntryStart]->finish();
          mEntry[mEntryStart].set(NULL);  // RefPtr, we can just set to NULL and it will delete itself
-         mEntryStart++;
+         ++mEntryStart;
+
 
          if(mEntryStart >= mEntrySize)
             mEntryStart = 0;

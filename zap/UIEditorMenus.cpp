@@ -140,7 +140,7 @@ void QuickMenuUI::render()
 
    S32 y = yStart;
 
-   for(S32 i = 0; i < getMenuItemCount(); i++)
+   for(S32 i = 0; i < getMenuItemCount(); ++i)
    {
       MenuItemSize size = getMenuItem(i)->getSize();
       S32 itemTextSize = getTextSize(size);
@@ -240,7 +240,7 @@ S32 QuickMenuUI::getMenuWidth()
 {
    S32 width = 0;
 
-   for(S32 i = 0; i < getMenuItemCount(); i++)
+   for(S32 i = 0; i < getMenuItemCount(); ++i)
    {
       S32 itemWidth = getMenuItem(i)->getWidth(getTextSize(getMenuItem(i)->getSize()));
 

@@ -31,7 +31,7 @@ struct FxManager::TeleporterEffect
 
 FxManager::FxManager()
 {
-   for(U32 i = 0; i < SparkTypeCount; i++)
+   for(U32 i = 0; i < SparkTypeCount; ++i)
    {
       firstFreeIndex[i] = 0;
       lastOverwrittenIndex[i] = MAX_SPARKS / 4;   // Use a value proportional to MAX_SPARKS
@@ -224,7 +224,7 @@ void FxManager::idle(U32 timeDelta)
    F32 dTsecs = timeDelta * .001f;
 
    // We have two spark arrays -- one for points, one for lines.  Loop through both.
-   for (U32 j = 0; j < SparkTypeCount; j++)
+   for (U32 j = 0; j < SparkTypeCount; ++j)
    {
       U32 slotsPerSpark = (j == SparkTypeLine) ? 2 : 1;
 
@@ -277,12 +277,13 @@ void FxManager::idle(U32 timeDelta)
 
 
    // Kill off any old debris chunks, advance the others
-   for(S32 i = 0; i < mDebrisChunks.size(); i++)
+   for(S32 i = 0; i < mDebrisChunks.size(); ++i)
    {
       if(mDebrisChunks[i].ttl < (S32)timeDelta)
       {
          mDebrisChunks.erase_fast(i);
-         i--;
+         --i;
+
       }
       else
          mDebrisChunks[i].idle(timeDelta);
@@ -290,12 +291,13 @@ void FxManager::idle(U32 timeDelta)
 
 
    // Same for our TextEffects
-   for(S32 i = 0; i < mTextEffects.size(); i++)
+   for(S32 i = 0; i < mTextEffects.size(); ++i)
    {
       if(mTextEffects[i].ttl < (S32)timeDelta)
       {
          mTextEffects.erase_fast(i);
-         i--;
+         --i;
+
       }
       else
          mTextEffects[i].idle(timeDelta);
@@ -361,10 +363,10 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
             sizeof(Spark));         // Stride
       }
 
-      for(S32 i = 0; i < mDebrisChunks.size(); i++)
+      for(S32 i = 0; i < mDebrisChunks.size(); ++i)
          mDebrisChunks[i].render();
 
-      for(S32 i = 0; i < mTextEffects.size(); i++)
+      for(S32 i = 0; i < mTextEffects.size(); ++i)
          mTextEffects[i].render();
    }
 }
@@ -375,7 +377,7 @@ void FxManager::emitBlast(const Point &pos, U32 size)
 {
    const F32 speed = 800.0f;
 
-   for(F32 i = 0.0f; i < 360.0f; i += 1)
+   for(F32 i = 0.0f; i < 360.0f; ++i)
    {
       Point dir = Point(cos(dr(i)), sin(dr(i)));
       // Emit a ring of bright orange sparks, as well as a whole host of yellow ones
@@ -387,7 +389,7 @@ void FxManager::emitBlast(const Point &pos, U32 size)
 
 void FxManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
 {
-   for(U32 i = 0; i < (250.0 * size); i++)
+   for(U32 i = 0; i < (250.0 * size); ++i)
    {
       F32 th = TNL::Random::readF() * 2 * 3.14f;
       F32 f = (TNL::Random::readF() * 2 - 1) * 400 * size;
@@ -410,7 +412,7 @@ void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &col
 {
    F32 size = 1;
 
-   for(U32 i = 0; i < sparkCount; i++)
+   for(U32 i = 0; i < sparkCount; ++i)
    {
 
       F32 th = TNL::Random::readF() * 2 * FloatPi;                // angle
@@ -432,7 +434,7 @@ void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &col
 void FxManager::clearSparks()
 {
    // Remove all sparks
-   for(U32 j = 0; j < SparkTypeCount; j++)
+   for(U32 j = 0; j < SparkTypeCount; ++j)
    {
       U32 slotsPerSpark = (j == SparkTypeLine) ? 2 : 1;
 
@@ -505,7 +507,7 @@ void FxTrail::render() const
    static F32 FxTrailVertexArray[64];     // 2 coordinates per node
    static F32 FxTrailColorArray[128];     // 4 colors components per node
 
-   for(S32 i = 0; i < mNodes.size(); i++)
+   for(S32 i = 0; i < mNodes.size(); ++i)
    {
       F32 t = ((F32)i / (F32)mNodes.size());
 

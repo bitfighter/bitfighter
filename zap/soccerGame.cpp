@@ -165,7 +165,8 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
       // If our current scorer was the last scorer and is wasn't an own-goal
       if(clientInfo == mPossibleHatTrickPlayer && !isOwnGoal)
       {
-         mHatTrickCounter++;
+         ++mHatTrickCounter;
+
 
          // Now test if we got the badge!
          if(mHatTrickCounter == 3 &&                              // Must have scored 3 in a row !
@@ -208,7 +209,7 @@ void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) c
 
    const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
 
-   for(S32 i = 0; i < zones->size(); i++)
+   for(S32 i = 0; i < zones->size(); ++i)
    {
       GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 

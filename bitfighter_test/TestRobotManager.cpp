@@ -82,28 +82,29 @@ static string getTeams(const GamePair &gamePair)
    Vector<Vector<S32> > teamStrings;
 
    teamStrings.resize(gamePair.server->getTeamCount());
-   for(S32 i = 0; i < teamStrings.size(); i++)
+   for(S32 i = 0; i < teamStrings.size(); ++i)
    {
       teamStrings[i].resize((S32)ClientInfo::ClassCount);
-      for(S32 j = 0; j < teamStrings[i].size(); j++)
+      for(S32 j = 0; j < teamStrings[i].size(); ++j)
          teamStrings[i][j] = 0;
    }
 
    const Vector<RefPtr<ClientInfo> > *clientInfos = gamePair.server->getClientInfos();
 
-   for(S32 i = 0; i < clientInfos->size(); i++)
+   for(S32 i = 0; i < clientInfos->size(); ++i)
    {
       S32 team = clientInfos->get(i)->getTeamIndex();
       S32 cc   = clientInfos->get(i).getPointer()->getClientClass();
 
-      teamStrings[team][cc]++;
+      ++teamStrings[team][cc];
+
    }
 
    string teamDescr = "";
-   for(S32 i = 0; i < teamStrings.size(); i++)
+   for(S32 i = 0; i < teamStrings.size(); ++i)
    {
       S32 total = 0;
-      for(S32 j = 0; j < teamStrings[i].size(); j++)
+      for(S32 j = 0; j < teamStrings[i].size(); ++j)
       {
          S32 count = teamStrings[i][j];
          teamDescr += string(count, getChar(j));
@@ -133,11 +134,11 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
    S32 teams = words.size();
 
    // Add teams -- a fresh gamePair will have 0 players and 1 team
-   for(S32 i = 1; i < teams; i++)
+   for(S32 i = 1; i < teams; ++i)
       gamePair.server->addTeam(new Team());
 
-   for(S32 i = 0; i < words.size(); i++)           // Iterate over teams
-      for(S32 j = 0; j < words[i].size(); j++)     // Iterate over chars
+   for(S32 i = 0; i < words.size(); ++i)           // Iterate over teams
+      for(S32 j = 0; j < words[i].size(); ++j)     // Iterate over chars
       {
          if(words[i][j] == 'H')
             gamePair.addClient("Human " + itos(i) + " " + itos(j), i);

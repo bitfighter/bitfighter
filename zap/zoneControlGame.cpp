@@ -141,7 +141,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    updateScore(s, CaptureZone);
 
    // Does team control all zones? ...
-   for(S32 i = 0; i < zoneCount; i++)
+   for(S32 i = 0; i < zoneCount; ++i)
       if(static_cast<GoalZone *>(zones->get(i))->getTeam() != s->getTeam())   // ...no?...
          return;                                                              // ...then bail
 
@@ -151,7 +151,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
 
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   for(S32 i = 0; i < getGame()->getClientCount(); ++i)
    {
       GameConnection *gc = getGame()->getClientInfo(i)->getConnection();
       if(gc)
@@ -173,7 +173,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       if(mPossibleZcBadgeAchiever == NULL)
          mPossibleZcBadgeAchiever = static_cast<GoalZone *>(zones->first())->getCapturer();
 
-      for(S32 i = 0; i < zoneCount; i++)
+      for(S32 i = 0; i < zoneCount; ++i)
       {
          if(static_cast<GoalZone *>(zones->get(i))->getCapturer() != mPossibleZcBadgeAchiever)
          {
@@ -184,7 +184,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    }
 
    // Reset zones to neutral
-   for(S32 i = 0; i < zoneCount; i++)
+   for(S32 i = 0; i < zoneCount; ++i)
    {
       GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 
@@ -193,7 +193,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    }
 
    // Return the flag to spawn point
-   for(S32 i = 0; i < s->getMountedItemCount(); i++)
+   for(S32 i = 0; i < s->getMountedItemCount(); ++i)
    {
       MountableItem *item = s->getMountedItem(i);
       if(item->getObjectTypeNumber() != FlagTypeNumber)
@@ -217,7 +217,7 @@ void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientIn
    S32 uTeam = scopeObject->getTeam();
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
-   for(S32 i = 0; i < flags->size(); i++)
+   for(S32 i = 0; i < flags->size(); ++i)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
@@ -255,7 +255,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
    if(localClientHasFlag)
    {
       // Show all the GoalZones to go to
-      for(S32 i = 0; i < zoneCount; i++)
+      for(S32 i = 0; i < zoneCount; ++i)
       {
          GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 
@@ -270,7 +270,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
       const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
       // Show all flags that can be picked up or is on the ship
-      for(S32 i = 0; i < flags->size(); i++)
+      for(S32 i = 0; i < flags->size(); ++i)
       {
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
          if(flag->getTeam() == TEAM_NEUTRAL || flag->getTeam() == ship->getTeam() || flag->isMounted())
@@ -284,7 +284,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
       }
 
       S32 whichTeamHasFlag = -1;
-      for(S32 i = getGame()->getTeamCount() - 1; i >= 0; i--)
+      for(S32 i = getGame()->getTeamCount() - 1; i >= 0; --i)
          if(getGame()->getTeamHasFlag(i))
          {
             if(whichTeamHasFlag != -1)
@@ -297,7 +297,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
 
       // Show all zones the ship holding flag can go to
       if(whichTeamHasFlag != -1)
-         for(S32 i = 0; i < zoneCount; i++)
+         for(S32 i = 0; i < zoneCount; ++i)
          {
             GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 
@@ -345,7 +345,7 @@ void ZoneControlGameType::majorScoringEventOccurred(S32 team)
    const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
 
    // ...and make sure they're not flashing...
-   for(S32 i = 0; i < goalZones->size(); i++)
+   for(S32 i = 0; i < goalZones->size(); ++i)
    {
       GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(i));
       if(goalZone)

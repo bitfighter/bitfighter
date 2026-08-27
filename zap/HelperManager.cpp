@@ -77,7 +77,7 @@ void HelperManager::reset()
 
 void HelperManager::idle(U32 timeDelta)
 {
-   for(S32 i = 0; i < mHelperStack.size(); i++)
+   for(S32 i = 0; i < mHelperStack.size(); ++i)
       mHelperStack[i]->idle(timeDelta);
 
    if(mOffDeckHelper)
@@ -88,7 +88,7 @@ void HelperManager::idle(U32 timeDelta)
 void HelperManager::render() const
 {
    // Higher indexed helpers render on top
-   for(S32 i = 0; i < mHelperStack.size(); i++)
+   for(S32 i = 0; i < mHelperStack.size(); ++i)
       mHelperStack[i]->render();
 
    if(mOffDeckHelper)

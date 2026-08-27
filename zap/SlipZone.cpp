@@ -76,7 +76,7 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[Geometry::MAX_POLY_POINTS * 2 + 1];
-   for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   for(S32 i = 0; i < argc2; ++i)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
       //switch(c)
@@ -87,7 +87,8 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
       {
 			if(argc < Geometry::MAX_POLY_POINTS * 2 + 1)
          {  argv[argc] = argv2[i];
-            argc++;
+            ++argc;
+
          }
       }
    }

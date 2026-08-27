@@ -111,7 +111,7 @@ public:
    template <typename T>
    bool cameFrom()
    {
-      for(S32 i = 0; i < mPrevUIs.size(); i++)
+      for(S32 i = 0; i < mPrevUIs.size(); ++i)
          if(mPrevUIs[i] == mUis[getTypeInfo<T>()].get())
             return true;
 

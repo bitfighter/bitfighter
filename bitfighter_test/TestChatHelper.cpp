@@ -53,7 +53,7 @@ static ChatHelper *enterCommandChat(GameUserInterface *gameUI)
 static void clearChat(ChatHelper *chatHelper)
 {
    S32 len = (S32)strlen(chatHelper->getChatMessage());
-   for(S32 i = 0; i < len; i++)
+   for(S32 i = 0; i < len; ++i)
       chatHelper->processInputCode(KEY_BACKSPACE);
 }
 

@@ -214,7 +214,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    fillVector.clear();
    gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(fillVector[i]);
 
@@ -237,7 +237,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
 
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < fillVector.size(); ++i)
       {
          ForceFieldProjector *proj = static_cast<ForceFieldProjector *>(fillVector[i]);
 
@@ -288,7 +288,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    // Search for wall segments within query
    gameObjectDatabase->findObjects(isWallType, fillVector, queryRect);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       // Exclude the end segment from our search
       if(terminatingWallObject && terminatingWallObject == fillVector[i])
@@ -315,7 +315,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    fillVector.clear();
    gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       Turret *turret = static_cast<Turret *>(fillVector[i]);
 
@@ -895,7 +895,7 @@ bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, co
    Rect queryRect(thisBounds);
    gb->findObjects((TestFunc) isForceFieldCollideableType, foundObjects, queryRect);
 
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); ++i)
    {
       const Vector<Point> *foundObjectBounds = static_cast<BfObject *>(foundObjects[i])->getCollisionPoly();
       if(polygonsIntersect(thisBounds, *foundObjectBounds))     // Do they intersect?
@@ -2087,7 +2087,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    S32 argc1 = 0;
    const char *argv1[32];
-   for(S32 i = 0; i < argc2; i++)
+   for(S32 i = 0; i < argc2; ++i)
    {
       const char *token = argv2[i];
       unsigned char firstChar = token[0];
@@ -2123,7 +2123,8 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
          if(argc1 < 32)
          {
             argv1[argc1] = token;
-            argc1++;
+            ++argc1;
+
          }
       }
 
@@ -2286,7 +2287,7 @@ void Turret::idle(IdleCallPath path)
    Point bestDelta;
 
    Point delta;
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < fillVector.size(); ++i)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {

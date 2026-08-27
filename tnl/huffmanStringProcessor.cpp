@@ -91,7 +91,7 @@ void HuffmanStringProcessor::buildTables()
    mHuffLeaves.resize(256);
    mHuffNodes.reserve(256);
    mHuffNodes.resize(mHuffNodes.size() + 1);
-   for (i = 0; i < 256; i++) {
+   for (i = 0; i < 256; ++i) {
       HuffLeaf& rLeaf = mHuffLeaves[i];
 
       rLeaf.pop    = mCharFreqs[i] + 1;
@@ -103,7 +103,7 @@ void HuffmanStringProcessor::buildTables()
 
    S32 currWraps = 256;
    HuffWrap* pWrap = new HuffWrap[256];
-   for (i = 0; i < 256; i++) {
+   for (i = 0; i < 256; ++i) {
       pWrap[i].set(&mHuffLeaves[i]);
    }
 
@@ -111,7 +111,7 @@ void HuffmanStringProcessor::buildTables()
       U32 min1 = 0xfffffffe, min2 = 0xffffffff;
       S32 index1 = -1, index2 = -1;
 
-      for (i = 0; i < currWraps; i++) {
+      for (i = 0; i < currWraps; ++i) {
          if (pWrap[i].getPop() < min1) {
             min2   = min1;
             index2 = index1;
@@ -139,7 +139,8 @@ void HuffmanStringProcessor::buildTables()
       if (index2 != (currWraps - 1)) {
          pWrap[nukeIndex] = pWrap[currWraps - 1];
       }
-      currWraps--;
+      --currWraps;
+
    }
    TNLAssert(currWraps == 1, "wrong wraps?");
    TNLAssert(pWrap[0].pNode != NULL && pWrap[0].pLeaf == NULL, "Wrong wrap type!");
@@ -199,7 +200,7 @@ bool HuffmanStringProcessor::readHuffBuffer(BitStream* pStream, char* out_pBuffe
 
    if (pStream->readFlag()) {
       U32 len = pStream->readInt(8);
-      for (U32 i = 0; i < len; i++) {
+      for (U32 i = 0; i < len; ++i) {
          S32 index = 0;
          while (true) {
             if (index >= 0) {
@@ -243,7 +244,7 @@ bool HuffmanStringProcessor::writeHuffBuffer(BitStream* pStream, const char* out
 
    U32 numBits = 0;
    U32 i;
-   for (i = 0; i < len; i++)
+   for (i = 0; i < len; ++i)
       numBits += mHuffLeaves[(unsigned char)out_pBuffer[i]].numBits;
 
    if (numBits >= (len * 8)) {
@@ -253,7 +254,7 @@ bool HuffmanStringProcessor::writeHuffBuffer(BitStream* pStream, const char* out
    } else {
       pStream->writeFlag(true);
       pStream->writeInt(len, 8);
-      for (i = 0; i < len; i++) {
+      for (i = 0; i < len; ++i) {
          HuffLeaf& rLeaf = mHuffLeaves[((unsigned char)out_pBuffer[i])];
          pStream->writeBits(rLeaf.numBits, &rLeaf.code);
       }
