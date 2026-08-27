@@ -392,8 +392,6 @@ U32 x86UNIXGetTickCountMicro()
    return (U32)(secs * 1000000 + uSecs);
 }
 
-//--------------------------------------
-
 U32 Platform::getRealMilliseconds()
 {
    return x86UNIXGetTickCount();
