@@ -67,11 +67,12 @@ FoundRowsOption::set(DBDriver* dbd)
 Option::Error
 GuessConnectionOption::set(DBDriver* dbd)
 {
-#if MYSQL_VERSION_ID >= 40101
+#if defined(MYSQL_OPT_GUESS_CONNECTION) && (MYSQL_VERSION_ID >= 40101)
 	return dbd->connected() ? Option::err_connected :
 			dbd->set_option(MYSQL_OPT_GUESS_CONNECTION) ?
 				Option::err_NONE : Option::err_api_reject;
 #else
+	(void)dbd;
 	return Option::err_api_limit;
 #endif
 }
@@ -259,11 +260,12 @@ ReportDataTruncationOption::set(DBDriver* dbd)
 Option::Error
 SecureAuthOption::set(DBDriver* dbd)
 {
-#if MYSQL_VERSION_ID >= 40101
+#if defined(MYSQL_SECURE_AUTH) && (MYSQL_VERSION_ID >= 40101)
 	return dbd->connected() ? Option::err_connected :
 			dbd->set_option(MYSQL_SECURE_AUTH, &arg_) ?
 				Option::err_NONE : Option::err_api_reject;
 #else
+	(void)dbd;
 	return Option::err_api_limit;
 #endif
 }
@@ -290,11 +292,12 @@ SetCharsetNameOption::set(DBDriver* dbd)
 Option::Error
 SetClientIpOption::set(DBDriver* dbd)
 {
-#if MYSQL_VERSION_ID >= 40101
+#if defined(MYSQL_SET_CLIENT_IP) && (MYSQL_VERSION_ID >= 40101)
 	return dbd->connected() ? Option::err_connected :
 			dbd->set_option(MYSQL_SET_CLIENT_IP, arg_.c_str()) ?
 				Option::err_NONE : Option::err_api_reject;
 #else
+	(void)dbd;
 	return Option::err_api_limit;
 #endif
 }
@@ -335,11 +338,12 @@ SslOption::set(DBDriver* dbd)
 Option::Error
 UseEmbeddedConnectionOption::set(DBDriver* dbd)
 {
-#if MYSQL_VERSION_ID >= 40101
+#if defined(MYSQL_OPT_USE_EMBEDDED_CONNECTION) && (MYSQL_VERSION_ID >= 40101)
 	return dbd->connected() ? Option::err_connected :
 			dbd->set_option(MYSQL_OPT_USE_EMBEDDED_CONNECTION) ?
 				Option::err_NONE : Option::err_api_reject;
 #else
+	(void)dbd;
 	return Option::err_api_limit;
 #endif
 }
@@ -348,11 +352,12 @@ UseEmbeddedConnectionOption::set(DBDriver* dbd)
 Option::Error
 UseRemoteConnectionOption::set(DBDriver* dbd)
 {
-#if MYSQL_VERSION_ID >= 40101
+#if defined(MYSQL_OPT_USE_REMOTE_CONNECTION) && (MYSQL_VERSION_ID >= 40101)
 	return dbd->connected() ? Option::err_connected :
 			dbd->set_option(MYSQL_OPT_USE_REMOTE_CONNECTION) ?
 				Option::err_NONE : Option::err_api_reject;
 #else
+	(void)dbd;
 	return Option::err_api_limit;
 #endif
 }
