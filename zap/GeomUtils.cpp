@@ -991,9 +991,10 @@ Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 
    for(S32 i = 0; i < inputPolygons.size(); ++i)
    {
-      outputPolygons[i].resize(inputPolygons[i].size());
+      S32 polys_sz = inputPolygons[i].size();
+      outputPolygons[i].resize(polys_sz);
 
-      for(S32 j = 0; j < inputPolygons[i].size(); ++j)
+      for(S32 j = 0; j < polys_sz; ++j)
          outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
    }
 
@@ -1332,10 +1333,11 @@ bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &out
 
    for(S32 i = 0; i < input.size(); ++i)
    {
-      if(input[i].size() != 3)
+      S32 input_sz = input[i].size();
+      if(input_sz != 3)
          continue;
 
-      for(S32 j = 0; j < input[i].size(); ++j)
+      for(S32 j = 0; j < input_sz; ++j)
       {
          triangles.push_back(input[i][j]);
       }
@@ -1415,17 +1417,18 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 
    for(S32 i = 0; i < solution.size(); ++i)
    {
-      if(solution[i].size() == 0)
+      S32 sol_sz = solution[i].size();
+      if(sol_sz == 0)
          continue;
 
-      for(S32 j = 1; j < solution[i].size(); ++j)
+      for(S32 j = 1; j < sol_sz; ++j)
       {
          lineSegmentPoints[index++] = solution[i][j - 1];
          lineSegmentPoints[index++] = solution[i][j];
       }
 
       // Close the loop
-      lineSegmentPoints[index++] = solution[i][solution[i].size() - 1];
+      lineSegmentPoints[index++] = solution[i][sol_sz - 1];
       lineSegmentPoints[index++] = solution[i][0];
    }
 }
