@@ -57,7 +57,7 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
    // The standard way of doing this is by computing: x = (-b +/- Sqrt(b^2 - 4 a c)) / 2 a
    // is not numerically stable when a is close to zero.
-   // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
+   // Solve the equation according to "Numerical Recipes in C" paragraph 5.6
    F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
@@ -87,14 +87,15 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
 
 // Round numToRound up to the nearest multiple of multiple
-// Source: http://stackoverflow.com/a/3407254/103252
 S32 roundUp(S32 numToRound, S32 multiple)
 {
-   if(multiple == 0)
+   S64 multiple64 = std::abs((S64)multiple);
+
+   if(multiple64 == 0)
       return numToRound;
 
-   // Use U32 to safely handle S32_MIN
-   U32 absMultiple = (multiple < 0) ? -(U32)multiple : (U32)multiple;
+   S64 numToRound64 = numToRound;
+   S64 remainder = numToRound64 % multiple64;
 
    if(numToRound >= 0)
    {
@@ -103,18 +104,10 @@ S32 roundUp(S32 numToRound, S32 multiple)
       if(remainder == 0)
          return numToRound;
 
-      return (S32)((U32)numToRound + absMultiple - remainder);
-   }
-   else
-   {
-      U32 absNum = -(U32)numToRound;
-      U32 remainder = absNum % absMultiple;
+   if(numToRound64 < 0)
+      return (S32)(numToRound64 - remainder);
 
-      if(remainder == 0)
-         return numToRound;
-
-      return numToRound + (S32)remainder;
-   }
+   return (S32)(numToRound64 + multiple64 - remainder);
 }
 
 };

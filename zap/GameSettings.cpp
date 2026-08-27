@@ -9,7 +9,7 @@
 #include "BanList.h"
 #include "DisplayManager.h"
 #include "stringUtils.h"      // For itos
-#include "LuaWrapper.h"       // For printing Lua class hiearchy
+#include "LuaWrapper.h"       // For printing Lua class hierarchy
 #include "LevelSource.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
@@ -65,7 +65,7 @@ ParamInfo paramDefs[] = {
 { "password",              ONE_REQUIRED,   LOGIN_PASSWORD,        0, "<string>",    "Specify your password",                                                                   "You must enter a password with the -password option" },
 { "window",                NO_PARAMETERS,  WINDOW_MODE,           0, "",            "Start in windowed mode",                                       "" },
 { "fullscreen",            NO_PARAMETERS,  FULLSCREEN_MODE,       0, "",            "Start in fullscreen mode (no stretching)",                     "" },
-{ "fullscreen-stretch",    NO_PARAMETERS,  FULLSCREEN_STRETCH,    0, "",            "Start in fullscreen mode (gaphics stretched to fill monitor)", "" },
+{ "fullscreen-stretch",    NO_PARAMETERS,  FULLSCREEN_STRETCH,    0, "",            "Start in fullscreen mode (graphics stretched to fill monitor)", "" },
 { "winpos",                TWO_REQUIRED,   WINDOW_POS,            0, "<int> <int>", "Specify x,y location of game window (note that this is the position of the UL corner of the game canvas, and does not account for the window frame)", "You must specify the x and y position of the window with the -winpos option" },
 { "winwidth",              ONE_REQUIRED,   WINDOW_WIDTH,          0, "<int>",       "Specify width of game window. Height will be set automatically. Note that the specified width is the width of the game canvas itself, and does not take account of window borders. Therefore, the entire window width will exceed the size specified slightly.", "You must specify the width of the game window with the -winwidth option" },
 { "usestick",              ONE_REQUIRED,   USE_STICK,             0, "<int>",       "Specify which joystick or other input device to use. Default is 1.", "You must specify the joystick you want to use with the -usestick option" },
@@ -76,7 +76,7 @@ ParamInfo paramDefs[] = {
 { "dedicated",             NO_PARAMETERS,  DEDICATED,             1, "",          "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
 { "hostondedicated",       NO_PARAMETERS,  HOST_ON_DEDICATED,     1, "",          "Run as a dedicated game server using host's maps and settings" ,                         "" },
 { "serverpassword",        ONE_REQUIRED,   SERVER_PASSWORD,       1, "<string>",  "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
-{ "ownerpassword",         ONE_REQUIRED,   OWNER_PASSWORD,        1, "<string>",  "Specify an owner password (allowing those with the password to have all admin priveleges and power over admins) when you host a game or run a dedicated server", "You must specify an owner password with the -ownerpassword option" },
+{ "ownerpassword",         ONE_REQUIRED,   OWNER_PASSWORD,        1, "<string>",  "Specify an owner password (allowing those with the password to have all admin privileges and power over admins) when you host a game or run a dedicated server", "You must specify an owner password with the -ownerpassword option" },
 { "adminpassword",         ONE_REQUIRED,   ADMIN_PASSWORD,        1, "<string>",  "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
 { "noadminpassword",       NO_PARAMETERS,  NO_ADMIN_PASSWORD,     1, "",          "Overrides admin password specified in the INI (or cmd line), and will not allow anyone to have admin permissions", "" },
 { "levelchangepassword",   ONE_REQUIRED,   LEVEL_CHANGE_PASSWORD, 1, "<string>",  "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
@@ -91,7 +91,7 @@ ParamInfo paramDefs[] = {
 { "playlist",              ALL_REMAINING,  USE_FILE,              2, "<path>", "Specify the location of a playlist of levels, which is a text file that specifies what levels the user want to be played. you must specify its relative location (relative to the Bitfighter binaries) with the -playlist option"},
 
 // Specifying folders
-{ "rootdatadir",           ONE_REQUIRED,   ROOT_DATA_DIR,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -shaderdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/shaders\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
+{ "rootdatadir",           ONE_REQUIRED,   ROOT_DATA_DIR,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -shaderdir, -screenshotdir, and -leveldir parameters. The application will automatically append \"/robots\", \"/shaders\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
 { "leveldir",              ONE_REQUIRED,   LEVEL_DIR,             2, "<folder or subfolder>", "Load all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
 { "logdir",                ONE_REQUIRED,   LOG_DIR,               3, "<path>",                "Folder where logfiles will be written",      "You must specify your log folder with the -logdir option" },
 { "scriptsdir",            ONE_REQUIRED,   SCRIPTS_DIR,           3, "<path>",                "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
@@ -527,7 +527,7 @@ string GameSettings::getLevelDir(SettingSource source) const
 
 
 // Returns the string passed to the commandline option -useplaylist
-// Will return the path if using the param, and "" if you arent
+// Will return the path if using the param, and "" if you aren't
 string GameSettings::getPlaylistFile()
 {
 	return getString(USE_FILE);
@@ -1165,7 +1165,7 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
-      // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
+      // Make an initial sweep through to check on the sizes of things, to ensure we get the indentation right
       // This first chunk just determies the longest command to figure out how much padding is needed.
       U32 maxSize = 0;
 

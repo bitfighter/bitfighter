@@ -121,7 +121,7 @@ void ChatDisplay::advanceLast()
 void ChatDisplay::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
    FontManager::pushFontContext(ChatMessageContext);
-   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
+   Vector<string> lines = wrapString(substituteVars(msg), mWrapWidth, mFontSize, "      ");
    FontManager::popFontContext();
 
    for(S32 i = 0; i < lines.size(); i++)
@@ -139,7 +139,7 @@ void ChatDisplay::onChatMessageReceived(const Color &msgColor, const string &msg
 }
 
 
-string ChatDisplay::substitueVars(const string &str)
+string ChatDisplay::substituteVars(const string &str)
 {
    string s = str;
 
@@ -175,7 +175,7 @@ string ChatDisplay::substitueVars(const string &str)
 }
 
 
-void ChatDisplay::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha) const
+void ChatDisplay::render(S32 anchorPos, bool helperVisible, bool announcementActive, F32 alpha) const
 {
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
 
@@ -210,7 +210,7 @@ void ChatDisplay::render(S32 anchorPos, bool helperVisible, bool anouncementActi
    }
 
    U32 last = mLast;
-   if(anouncementActive)
+   if(announcementActive)
    {
       if(!mExpire && mFirst >= (U32)mMessages.size() - 1)
          last++;

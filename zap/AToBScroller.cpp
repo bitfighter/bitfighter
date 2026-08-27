@@ -55,7 +55,7 @@ void AToBScroller::resetScrollTimer()
 
 
 // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition.
-// This function caluclates the new position of an item given its original position and the one it's transitioning to.
+// This function calculates the new position of an item given its original position and the one it's transitioning to.
 S32 AToBScroller::getTransitionPos(S32 fromPos, S32 toPos) const
 {
    if(toPos == S32_MIN)

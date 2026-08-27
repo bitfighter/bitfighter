@@ -3,79 +3,21 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-// Bitfighter Tests
+// Bitfighter Tests - main entry point
+//
+// NOTE: We link gtest (not gtest_main) because on Windows SDL2main.lib
+// requires a function named SDL_main (via #define main SDL_main in SDL.h).
+// gtest_main's built-in main() is compiled without SDL.h and thus isn't
+// renamed, causing an unresolved external.  By providing our own main() in a
+// file that includes SDL.h (transitively through BitfighterTestEnvironment.h),
+// the SDL_main rename is applied correctly.
 
-#define BF_TEST
-
-#include "DisplayManager.h"
-#include "FontManager.h"
-#include "Renderer.h"
-#include "TestRenderer.h"
-#include "tnlLog.h"
-
-#include "stringUtils.h"
-
-#include "tnl.h"
-
+#include "BitfighterTestEnvironment.h"
 #include <gtest/gtest.h>
 
-#ifndef ARRAYSIZE
-#  define ARRAYSIZE(a) sizeof(a)/sizeof(a[0])
-#endif
 
-
-namespace Zap
+int main(int argc, char **argv)
 {
-void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
-void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
-}
-
-/**
- * Don't put tests in here! Use one file per class. Your tests go in the file
- * corresponding to the class which is the main subject of your tests.
- */
-
-using namespace Zap;
-
-
-// Returns true if all resource folders are in place, false otherwise
-bool checkResources()
-{
-   const string dirs[] = { "editor_plugins", "fonts", "levels", "music", "robots", "scripts", "sfx", "testing" };
-
-   for(S32 i = 0; i < ARRAYSIZE(dirs); i++)
-      if(!fileExists(dirs[i]))
-         return false;
-
-   return true;
-}
-
-
-int main(int argc, char **argv) 
-{
-   // Uncomment to see lots of events... we should do this from time to time and eliminate as many messages as possible
-   //const S32 consoleEvents = LogConsumer::AllErrorTypes |
-   //                          LogConsumer::LuaScriptMessage |
-   //                          LogConsumer::ConsoleMsg;
-   //StdoutLogConsumer StdoutLog;
-   //StdoutLog.setMsgTypes(consoleEvents);
-
    testing::InitGoogleTest(&argc, argv);
-
-   if(!checkResources())
-   {
-      printf("FAILED: Invalid test environment! Are you sure you copied everything from 'resources/' into 'exe/'?\n");
-      testing::internal::posix::Abort();
-   }
-
-
-   DisplayManager::initialize();
-   TestRenderer::install();
-   int returnvalue = RUN_ALL_TESTS();
-   FontManager::cleanup();   // Must precede Renderer::shutdown(); sth_delete calls Renderer::get()
-   Renderer::shutdown();
-   DisplayManager::cleanup();
-
-   return returnvalue;
+   return RUN_ALL_TESTS();
 }
-

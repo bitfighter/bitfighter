@@ -222,7 +222,7 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
    himgr.addInlineHelpItem(ControlsModulesItem);
    checkQueues(2, 0, 0);                       // Two high priority items queued, none displayed
 
-   himgr.idle(himgr.InitialDelayPeriod, game);        // Wait past the intial delay period; first item will be displayed
+   himgr.idle(himgr.InitialDelayPeriod, game);        // Wait past the initial delay period; first item will be displayed
    checkQueues(1, 0, 1, ControlsKBItem);       // One item queued, one displayed
 
    idleUntilItemExpiredMinusOne();
@@ -258,7 +258,7 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
    idleFullCycle();
    checkQueues(0, 0, 1, CmdrsMapItem);               // One item displayed, none in the queues
    idleFullCycleMinusOne();
-   checkQueues(0, 0, 0);                             // No items dispalyed, queues are empty
+   checkQueues(0, 0, 0);                             // No items displayed, queues are empty
 
    himgr.clearAlreadySeenList();    // Allows us to add the same items again
 

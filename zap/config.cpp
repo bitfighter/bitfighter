@@ -568,7 +568,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 
       if(words.size() < 3)
       {
-         logprintf(LogConsumer::LogError, "Error parsing EditorPlugin defnition in INI: too few values (read: %s)", values[i].c_str());
+         logprintf(LogConsumer::LogError, "Error parsing EditorPlugin definition in INI: too few values (read: %s)", values[i].c_str());
          continue;
       }
 
@@ -755,7 +755,7 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
     BINDING_TABLE
 #undef BINDING
 
-   // Keys where savedInIni is false are not user-defineable at the moment, mostly because we want consistency
+   // Keys where savedInIni is false are not user-definable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
    // keyHELP = KEY_F1;
    // keyOUTGAMECHAT = KEY_F5;
@@ -1263,7 +1263,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
    ini->SetValue("QuickChatMessagesGroup6", "Key", InputCodeManager::inputCodeToString(KEY_R));
    ini->SetValue("QuickChatMessagesGroup6", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
    ini->SetValue("QuickChatMessagesGroup6", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup6", "Caption", "Reponses");
+   ini->SetValue("QuickChatMessagesGroup6", "Caption", "Responses");
 
       ini->SetValue("QuickChatMessagesGroup6_Message1", "Key", InputCodeManager::inputCodeToString(KEY_A));
       ini->SetValue("QuickChatMessagesGroup6_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
@@ -1556,7 +1556,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LogConnection - High level logging connections with remote machines (Yes/No)");
       ini->sectionComment(section, " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
       ini->sectionComment(section, " LogLevelError - Log errors and warnings about levels loaded (Yes/No)");
-      ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
+      ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruction of lua objects (Yes/No)");
       ini->sectionComment(section, " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
       ini->sectionComment(section, " LuaScriptMessage - Message from scripts (Yes/No)");
       ini->sectionComment(section, " ServerFilter - For logging messages specific to hosting games (Yes/No)");
@@ -1780,7 +1780,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
       addComment(" GlobalLevelScript - Specify a levelgen that will get run on every level");
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
-      addComment("                                 database server, database name, login, and password as a comma delimeted list");
+      addComment("                                 database server, database name, login, and password as a comma delimited list");
       addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
       addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
       addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
@@ -1853,7 +1853,7 @@ static void writeLevels(CIniFile *ini)
       ini->sectionComment("Levels", " Level1=ctf.level");
       ini->sectionComment("Levels", " Level2=zonecontrol.level");
       ini->sectionComment("Levels", " ... etc ...");
-      ini->sectionComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
+      ini->sectionComment("Levels", "This list can be overridden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
       ini->sectionComment("Levels", "----------------");
    }
 }
@@ -1952,7 +1952,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeDefaultQuickChatMessages(ini, iniSettings);  // Does nothing if there are already chat messages in the INI
 
    // only needed for users using custom joystick
-   // or joystick that maps differenly in LINUX
+   // or joystick that maps differently in LINUX
    // This adds 200+ lines.
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());

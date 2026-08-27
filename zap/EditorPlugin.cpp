@@ -54,8 +54,8 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
    return false;
 
 #else
-   // We'll load the functin first to see if it exists, then throw it away.  It will be loaded again when we attempt
-   // to run it.  This is inefficient; however, it makes our architecture cleaner, and it is in a higly performance
+   // We'll load the function first to see if it exists, then throw it away.  It will be loaded again when we attempt
+   // to run it.  This is inefficient; however, it makes our architecture cleaner, and it is in a highly performance
    // insensitive area, so it will probably be ok.
 
    // First check if function exists... if it does not, there will be no menu items, so we can return false.
@@ -106,7 +106,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
          }
          else if(lua_isstring(L, i))
          {
-            // Any strings found are interpretted as the menu title, plugin
+            // Any strings found are interpreted as the menu title, plugin
             // description, and requested keybinding (in that order), ignoring
             // empty strings.
             if(menuTitle == "")
@@ -205,7 +205,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
          //   local items = { }  -- Create an empty table to hold our menu items
          //
          //   -- Create the menu items we need for this script, adding them to our items table
-         //   table.insert(items, ToggleMenuItem:new("Run mode:", { "One", "Two", "Mulitple" }, 1, false, "Specify run mode" ))
+         //   table.insert(items, ToggleMenuItem:new("Run mode:", { "One", "Two", "Multiple" }, 1, false, "Specify run mode" ))
          //   table.insert(items, Point:new(1,2))
          //
          //   return "Menu title", items

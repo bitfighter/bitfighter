@@ -62,7 +62,7 @@ EngineerHelper::~EngineerHelper()
 S32 EngineerHelper::getWidthOfItems() const
 {
    // With this one, the title is wider than the text (at the moment at least), so we should consider the title width.  This
-   // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
+   // is a bit tricky, however, since the menu items are normally indented, and that indentation is added to the menu width
    // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a
    // much wider menu than necessary.  Add the horizMargin to make things look balanced.
    S32 maxItemWidth = getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo));

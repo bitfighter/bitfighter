@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "Timer.h"
+#include "tnlPlatform.h"
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -121,6 +122,25 @@ TEST(TimerTest, ExtendUnderflow)
    t.extend(-150);
    EXPECT_EQ(0u, t.getPeriod());
    EXPECT_EQ(0u, t.getCurrent());
+}
+
+TEST(TimerTest, GetRealMicrosecondsMonotonic)
+{
+   U32 start = TNL::Platform::getRealMicroseconds();
+
+   // Busy wait for about 1.1 seconds to ensure we cross a second boundary
+   U32 elapsedMs = 0;
+   U32 startMs = TNL::Platform::getRealMilliseconds();
+   while(elapsedMs < 1100)
+   {
+      elapsedMs = TNL::Platform::getRealMilliseconds() - startMs;
+   }
+
+   U32 end = TNL::Platform::getRealMicroseconds();
+
+   // End should be greater than start, and significantly so (at least 1 second)
+   EXPECT_GT(end, start);
+   EXPECT_GE(end - start, 1000000u);
 }
 
 TEST(TimerTest, InvertPrecisionBug)

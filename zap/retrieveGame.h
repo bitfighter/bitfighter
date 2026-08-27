@@ -38,8 +38,8 @@ public:
    void shipTouchZone(Ship *s, GoalZone *z);
 
 
-   // A major scoring event has ocurred -- in this case, it's all flags being collected by one team
-   void majorScoringEventOcurred(S32 team);
+   // A major scoring event has occurred -- in this case, it's all flags being collected by one team
+   void majorScoringEventOccurred(S32 team);
 
    // Same code as in HTF, CTF
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);

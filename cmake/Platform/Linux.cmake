@@ -127,7 +127,12 @@ function(BF_PLATFORM_INSTALL targetName)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
-	
+
+endfunction()
+
+
+function(BF_PLATFORM_BUNDLE_DEPENDENCIES targetName)
+	# macOS-only (.app bundling); nothing to do here
 endfunction()
 
 

@@ -101,8 +101,14 @@ bool EngineerModuleDeployer::findDeployPoint(const Ship *ship, U32 objectType, P
          // Computes collisionTime and deployNormal -- deployNormal will have been normalized to length of 1
          BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
                                                      collisionTime, deployNormal);
+         bool hitWall = (hitObject != NULL);
 
-         if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
+#ifndef ZAP_DEDICATED
+         if(!hitObject && GameType::findTileWallLOS(startPoint, endPoint, true, collisionTime, deployNormal))
+            hitWall = true;
+#endif
+
+         if(!hitWall)    // No appropriate walls found, can't deploy, sorry!
             return false;
 
 
@@ -330,7 +336,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
       return false;
    }
 
-   return true;     // We've run the gammut -- this location is OK
+   return true;     // We've run the gamut -- this location is OK
 }
 
 
@@ -396,7 +402,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       return false;
    }
 
-   // It worked!  Object depolyed!
+   // It worked!  Object deployed!
    engineerable->computeExtent();      // Recomputes extents
 
    deployedObject->setOwner(clientInfo);
@@ -540,7 +546,7 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
-// Polulates anchor and normal
+// Populates anchor and normal
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist,
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, Point &anchor, Point &normal)
@@ -1035,6 +1041,17 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
    // Anchor objects to the correct point
    if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
+#ifndef ZAP_DEDICATED
+      if(GameType::findTileWallAnchorPointAndNormal(pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+      {
+         setPos(anchor + normal);
+         mAnchorNormal.set(normal);
+         computeObjectGeometry();
+         computeExtent();
+         return;
+      }
+#endif
+
       setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
    }
@@ -1098,12 +1115,12 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
  * module, can be destroyed by enemy fire, and can be healed (and sometimes
  * captured) with the Repair module.  All EngineeredItems have a health value
  * that ranges from 0 to 1, where 0 is completely dead and 1 is fully healthy.
- * When health falls below a certain threshold (see getDisabledThrehold()), the
+ * When health falls below a certain threshold (see getDisabledThreshold()), the
  * item becomes inactive and must be repaired or regenerate itself to be
  * functional again.
  *
  * If an EngineeredItem has a heal rate greater than zero, it will slowly repair
- * damage to iteself. For more info see setHealRate()
+ * damage to itself. For more info see setHealRate()
  */
 //               Fn name              Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
@@ -1130,7 +1147,7 @@ REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
  * @luafunc bool EngineeredItem::isActive()
  *
  * @brief Determine if the item is active (i.e. its health is above the
- * disbaledThreshold).
+ * disabledThreshold).
  *
  * @descr A player can activate an inactive item by repairing it. To set whether
  * an EngineeredItem as active or disabled, use setHealth()
@@ -1374,7 +1391,7 @@ void ForceFieldProjector::initialize()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
-   onGeomChanged();     // Can't be placed on parent, as parent constructor must initalized first
+   onGeomChanged();     // Can't be placed on parent, as parent constructor must initialized first
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1480,6 +1497,18 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
+Barrier *ForceFieldProjector::getTerminatingBarrier() const
+{
+   return mTerminatingBarrier;
+}
+
+
+void ForceFieldProjector::setTerminatingBarrier(Barrier *b)
+{
+   mTerminatingBarrier = b;
+}
+
+
 WallSegment *ForceFieldProjector::getEndSegment()
 {
    return mForceFieldEndSegment;
@@ -1517,6 +1546,13 @@ void ForceFieldProjector::onEnabled()
 
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+
+      // Remember which wall segment this beam terminates at
+      setEndSegment(dynamic_cast<WallSegment *>(collObj));
+
+      // Remember which barrier this beam terminates at (server-side), used for
+      // targeted recalculation when a barrier is destroyed.
+      setTerminatingBarrier(dynamic_cast<Barrier *>(collObj));
    }
 }
 
@@ -1608,6 +1644,35 @@ void ForceFieldProjector::onGeomChanged()
       findForceFieldEnd();
 
    Parent::onGeomChanged();
+}
+
+
+// Called when the barrier this forcefield terminates at is destroyed.
+// Recompute the forcefield beam to extend to the next wall (or max length).
+// Uses the same pattern as lua_setPos() which updates forcefield endpoints.
+void ForceFieldProjector::recomputeFieldGeometry()
+{
+   if(!getDatabase() || !isEnabled())
+      return;
+
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   DatabaseObject *collObj;
+
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+   // Update the stored end segment with the new terminating wall
+   setEndSegment(dynamic_cast<WallSegment *>(collObj));
+
+   // Update which barrier this beam terminates at (server-side)
+   setTerminatingBarrier(dynamic_cast<Barrier *>(collObj));
+
+   // Update existing forcefield endpoints if we have an active one
+   if(mField.isValid())
+   {
+      mField->setEndPoints(start, end);
+      mField->setMaskBits(ForceField::InitialMask);
+   }
 }
 
 

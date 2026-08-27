@@ -83,7 +83,7 @@ public:
       T *ui = nullptr;
       auto it = mUis.find(typeinfo);
 
-      // Whenver we do a [] lookup on the map, if the key isn't found, a nullptr entry is added, so sometimes we'll
+      // Whenever we do a [] lookup on the map, if the key isn't found, a nullptr entry is added, so sometimes we'll
       // see a nullptr if we previously looked for something that wasn't there.
       if(it == mUis.end() || mUis[typeinfo] == nullptr) {
          // We need to create the pointer first, then move it, otherwise we get type issues during compilation

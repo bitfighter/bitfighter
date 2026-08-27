@@ -8,6 +8,7 @@ set(ALURE_SEARCH_PATHS
 	${ALURE_SEARCH_PATHS}
 	~/Library/Frameworks
 	/Library/Frameworks
+	/opt/homebrew # Homebrew on Apple Silicon
 	/usr/local
 	/usr
 	/sw # Fink

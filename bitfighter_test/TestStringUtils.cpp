@@ -488,6 +488,13 @@ TEST(StringUtilsTest, findPointerOfArg)
    // Bug fix: NULL input
    EXPECT_STREQ("", findPointerOfArg(NULL, 0));
 
+   // Tests for leading and multiple spaces
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
+  
    // New tests for leading and multiple spaces
    EXPECT_STREQ("word1 word2", findPointerOfArg("  word1 word2", 0));
    EXPECT_STREQ("word2", findPointerOfArg("  word1 word2", 1));
@@ -608,7 +615,7 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\"quoted\\\"", sanitizeForJson("\"quoted\""));
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
-   EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("&<>", sanitizeForJson("&<>")); // Should NOT escape HTML entities
    EXPECT_EQ("", sanitizeForJson(NULL));
 
    // Control characters
@@ -863,7 +870,7 @@ TEST(StringUtilsTest, charTypeChecks)
 }
 
 
-// These are comparitors for the actual sort function; they do not do sorting themselves.
+// These are comparators for the actual sort function; they do not do sorting themselves.
 TEST(StringUtilsTest, sorting)
 {
    EXPECT_TRUE(alphaSort("a", "b"));
@@ -885,7 +892,7 @@ TEST(StringUtilsTest, sorting)
    EXPECT_FALSE(alphaNumberSort("abc", "10"));
    EXPECT_FALSE(alphaNumberSort("2xyz", "1xyz"));
 
-   // Positive itegers sort numerically
+   // Positive integers sort numerically
    EXPECT_TRUE(alphaNumberSort("2", "11"));
    EXPECT_FALSE(alphaNumberSort("2", "1"));
 
@@ -1061,6 +1068,28 @@ TEST(StringUtilsTest, s_fprintfTruncationBug)
    EXPECT_EQ(longString, readContent);
 
    remove(testFile.c_str());
+}
+
+
+// Regression for #820/#824: getExecutableDir must be a directory, not the
+// binary path. On macOS it used to return .../bitfighter_test, so luaDir became
+// .../bitfighter_test/scripts and LuaScriptRunner::startLua failed (L=null).
+TEST(StringUtilsTest, getExecutableDirIsContainingDirectory)
+{
+   string dir = getExecutableDir();
+   ASSERT_FALSE(dir.empty());
+
+   // Must not end with the test binary name (the old macOS bug)
+   string base = dir;
+   string::size_type slash = base.find_last_of("/\\");
+   if(slash != string::npos)
+      base = base.substr(slash + 1);
+   EXPECT_NE("bitfighter_test", base)
+         << "getExecutableDir() returned the binary path, not its parent: " << dir;
+
+   // Loose test runner is always launched from exe/ with scripts/ beside it
+   EXPECT_TRUE(fileExists(joindir(dir, "scripts")))
+         << "Expected scripts/ next to getExecutableDir() (" << dir << ")";
 }
 
 };

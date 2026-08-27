@@ -147,6 +147,11 @@ extern void logGameStats(VersionedGameStats *stats);
 
 namespace Types
 {
+   extern void writeCompressedS32(TNL::BitStream &s, S32 value);
+   extern S32 readCompressedS32(TNL::BitStream &s);
+   extern void writeCompressedU32(TNL::BitStream &s, U32 value);
+   extern U32 readCompressedU32(TNL::BitStream &s);
+
    extern void read (TNL::BitStream &s, Zap::LoadoutStats *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version);
    extern void read (TNL::BitStream &s, Zap::WeaponStats  *val, U8 version);

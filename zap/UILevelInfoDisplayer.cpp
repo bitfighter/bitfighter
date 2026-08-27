@@ -219,7 +219,7 @@ void LevelInfoDisplayer::render() const
    r.popMatrix();
 
    /////
-   // Auxilliary side panel
+   // Auxiliary side panel
 
    r.pushMatrix();
    r.translate(-getInsideEdge(), 0, 0);

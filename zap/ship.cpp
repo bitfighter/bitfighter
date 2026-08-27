@@ -53,7 +53,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 }
 
 
-// Combined Lua / C++ default constructor -- this is used by Lua and by TNL, so we need to programatically separate the two
+// Combined Lua / C++ default constructor -- this is used by Lua and by TNL, so we need to programmatically separate the two
 Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 {
    if(L)
@@ -345,7 +345,7 @@ F32 Ship::processMove(U32 stateIndex)
 
 
 // Returns the zone in question if this ship is in any zone.
-// If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
+// If ship is in multiple zones, an arbitrary one will be returned, and the level designer will be flogged.
 BfObject *Ship::isInAnyZone() const
 {
    findObjectsUnderShip((TestFunc)isZoneType);  // Fills fillVector
@@ -354,7 +354,7 @@ BfObject *Ship::isInAnyZone() const
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType.
-// If ship is in multiple zones of type zoneTypeNumber, an aribtrary one will be returned, and the level designer will be flogged.
+// If ship is in multiple zones of type zoneTypeNumber, an arbitrary one will be returned, and the level designer will be flogged.
 BfObject *Ship::isInZone(U8 zoneTypeNumber) const
 {
    findObjectsUnderShip(zoneTypeNumber);        // Fills fillVector
@@ -1095,11 +1095,11 @@ void Ship::damageObject(DamageInfo *theInfo)
    // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea || theInfo->damageType == DamageTypeVector)
    {
-      static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.25f;
+      static const F32 ARMOR_IMPULSE_ABSORPTION_FACTOR = 0.25f;
 
       // Armor pads impulses.  Here comes the tank!
       if(hasArmor)
-         mImpulseVector += (theInfo->impulseVector * ARMOR_IMPULSE_ABSORBTION_FACTOR);
+         mImpulseVector += (theInfo->impulseVector * ARMOR_IMPULSE_ABSORPTION_FACTOR);
       else
          mImpulseVector += theInfo->impulseVector;
    }
@@ -1407,7 +1407,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
-   // Send position if this is our intial update or this ship does not represent the client that owns this ship
+   // Send position if this is our initial update or this ship does not represent the client that owns this ship
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
 
    if(!shouldWritePosition)
@@ -1853,7 +1853,7 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
 
    if(!silent)
    {
-      // Notifiy user
+      // Notify user
       GameConnection *cc = getControllingClient();
 
       if(cc)
@@ -2209,7 +2209,7 @@ void Ship::renderLayer(S32 layerIndex)
    const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
    const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
 
-   // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
+   // Calculate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
    const string shipName = clientInfo ? clientInfo->getName().getString() : "";

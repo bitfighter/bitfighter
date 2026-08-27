@@ -50,7 +50,7 @@ enum InputCode : U32 {
    // Locks
    KEY_NUMLOCK, KEY_CAPSLOCK, KEY_SCROLLOCK,
 
-   // And these are pseudo modifers, that may represent multiple events
+   // And these are pseudo modifiers, that may represent multiple events
    // (e.g. KEY_SHIFT means KEY_LSHIFT or KEY_RSHIFT)
    // Keep these together
    KEY_SHIFT,   KEY_CTRL,   KEY_ALT,   KEY_META,  KEY_SUPER,

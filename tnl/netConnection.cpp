@@ -552,6 +552,10 @@ void NetConnection::readPacketRateInfo(BitStream *bstream)
 void NetConnection::useZeroLatencyForTesting()
 {
    mUseZeroLatencyForTesting = true;
+   // Flag is only consulted in computeNegotiatedRate(); apply the period now so
+   // tests are not gated on wall-clock send pacing (critical on fast hosts).
+   // Leave mCurrentPacketSendSize alone — it was computed from the prior rate.
+   mCurrentPacketSendPeriod = 0;
 }
 
 void NetConnection::computeNegotiatedRate()

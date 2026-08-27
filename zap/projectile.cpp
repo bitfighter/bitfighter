@@ -8,6 +8,7 @@
 #include "safeZone.h"
 #include "game.h"
 #include "gameConnection.h"
+#include "gameType.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -145,7 +146,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for getGame()->playSoundEffect
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before initial for getGame()->playSoundEffect
    {
       static Point pos;    // Reusable container
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
@@ -279,6 +280,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          }
 
          BfObject *hitObject;
+         bool hitTileWall = false;
 
          F32 collisionTime;
          Point surfNormal;
@@ -287,6 +289,22 @@ void Projectile::idle(BfObject::IdleCallPath path)
          while(true)
          {
             hitObject = findObjectLOS((TestFunc)isWeaponCollideableType, RenderState, startPos, endPos, collisionTime, surfNormal);
+
+#ifndef ZAP_DEDICATED
+            F32 tileCollisionTime;
+            Point tileSurfNormal;
+            hitTileWall = GameType::findTileWallLOS(startPos, endPos, true, tileCollisionTime, tileSurfNormal) && tileCollisionTime < collisionTime;
+            if(hitTileWall)
+            {
+               // Tile wall hit — keep hitObject (it may be a destructible Barrier
+               // that needs damageObject called), but use the tile wall's collision
+               // time/surface normal since tile clipping may have shifted the edge
+               // slightly relative to the original barrier polygon.
+               collisionTime = tileCollisionTime;
+               surfNormal = tileSurfNormal;
+               break;
+            }
+#endif
 
             if((!hitObject || hitObject->collide(this)))
                break;
@@ -297,7 +315,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
             hitObject->disableCollision();
          }
 
-         // Re-enable collison flag for ship and items in our path that don't want to be collided with
+         // Re-enable collision flag for ship and items in our path that don't want to be collided with
          // Note that if we hit an object that does want to be collided with, it won't be in disabledList
          // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
          // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
@@ -308,20 +326,20 @@ void Projectile::idle(BfObject::IdleCallPath path)
          // object search will return the same order of objects during this time frame
          //
          // If we already hit this object, don't do it again
-         if(hitObject == mLastHitObject)
+         if(!hitTileWall && hitObject == mLastHitObject)
             hitObject = NULL;
          // Otherwise save the one we found for next iteration
-         else
+         else if(!hitTileWall)
             mLastHitObject = hitObject;
 
 
-         if(hitObject)  // Hit something...  should we bounce?
+         if(hitObject || hitTileWall)  // Hit something...  should we bounce?
          {
             bool bounce = false;
-            bool hitAShip = isShipType(hitObject->getObjectTypeNumber());
+            bool hitAShip = hitObject && isShipType(hitObject->getObjectTypeNumber());
 
             // Bounce off a wall and off a ship that has its shields up
-            if(mStyle == ProjectileStyleBouncer && isWallType(hitObject->getObjectTypeNumber()))
+            if(mStyle == ProjectileStyleBouncer && (hitTileWall || (hitObject && isWallType(hitObject->getObjectTypeNumber()))))
                bounce = true;
             else if(hitAShip)
             {
@@ -359,7 +377,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                setPos(collisionPoint + surfNormal);
                timeLeft = timeLeft * (1 - collisionTime);
 
-               if(hitObject->isMoveObject())
+               if(hitObject && hitObject->isMoveObject())
                {
                   MoveObject *obj = static_cast<MoveObject *>(hitObject);
 
@@ -384,7 +402,21 @@ void Projectile::idle(BfObject::IdleCallPath path)
                // Since we didn't bounce, advance to location of collision
                startPos = getPos();
                collisionPoint = startPos + (endPos - startPos) * collisionTime;
-               handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
+               if(hitTileWall)
+               {
+                  mCollided = true;
+                  hitShip = false;
+                  mTimeRemaining = 0;
+                  // Tile wall hit alone doesn't damage — but if there is also a
+                  // real Barrier behind the tile wall, damage it so destructible
+                  // barriers receive hits properly.
+                  if(hitObject && !isGhost())
+                     handleCollision(hitObject, collisionPoint);
+                  else
+                     explode(NULL, collisionPoint);
+               }
+               else
+                  handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
 
                // Advance the railgun through ships
                if((mWeaponType == WeaponRailgun) && hitAShip)
@@ -396,7 +428,6 @@ void Projectile::idle(BfObject::IdleCallPath path)
          else        // Hit nothing, advance projectile to endPos
          {
             timeLeft = 0;
-
             setPos(endPos);
          }
       }
@@ -1474,7 +1505,7 @@ const F32 Seeker::Mass = 0.2f;
 const U32 Seeker::SpeedIncreasePerSecond = 300;
 const U32 Seeker::TargetAcquisitionRadius = 400;
 const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2.0f;
-const F32 Seeker::TargetSearchAngle = FloatTau * 0.6f;  // Anglular spread in front of ship to search for targets
+const F32 Seeker::TargetSearchAngle = FloatTau * 0.6f;  // Angular spread in front of ship to search for targets
 
 const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
 
@@ -1600,7 +1631,7 @@ void Seeker::idle(IdleCallPath path)
          // Create a new velocity vector for the seeker to slowly go towards the target.
          // Adjust the vector to always:
          //  - keep a minimum velocity (projectile default)
-         //  - only change angle to a maxium amount from the original direction
+         //  - only change angle to a maximum amount from the original direction
          //  - increase speed each tick
 
          // Set velocity vector towards the target for now

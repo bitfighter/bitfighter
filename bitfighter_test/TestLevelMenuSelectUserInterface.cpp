@@ -24,7 +24,7 @@ TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
    // These should be alphabetically sorted
    ui->addMenuItem(new MenuItem("Aardvark"));    //  0
    ui->addMenuItem(new MenuItem("Assinine"));    //  1
-   ui->addMenuItem(new MenuItem("Bouy"));        //  2
+   ui->addMenuItem(new MenuItem("Buoy"));        //  2
    ui->addMenuItem(new MenuItem("Boy"));         //  3
    ui->addMenuItem(new MenuItem("C"));           //  4
    ui->addMenuItem(new MenuItem("Cat"));         //  5

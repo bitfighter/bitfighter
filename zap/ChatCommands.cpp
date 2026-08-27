@@ -61,7 +61,7 @@ void addTimeHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
-// Set specified volume to the specefied level
+// Set specified volume to the specified level
 static void setVolume(ClientGame *game, VolumeType volType, const Vector<string> &words)
 {
    S32 vol;
@@ -355,6 +355,23 @@ void showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Zones can only be displayed on a test server"))
       game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMeshZones();
+}
+
+
+void showMapTilesHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(isLocalTestServer(game, "!!! Map tiles can only be displayed on a test server"))
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMapTiles();
+}
+
+
+// /showedgeids — Toggles edge ID numbers drawn on each visible wall edge.
+// Edge IDs use the same canonicalization as the test helpers in
+// TestMapTiling.cpp, so IDs seen in-game match those used in test expectations.
+void showEdgeIdsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(isLocalTestServer(game, "!!! Edge ids can only be displayed on a test server"))
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingEdgeIds();
 }
 
 
@@ -1125,7 +1142,7 @@ void commentMapHandler(ClientGame *game, const Vector<string> &words)
    if(!game->canCommentLevel())      // Will display any appropriate error messages
       return;
 
-   // Start at first word and concatentate all the others to rebuild the comment
+   // Start at first word and concatenate all the others to rebuild the comment
    string comment = words[1];
    for(S32 i = 2; i < words.size(); i++)
       comment = comment + " " + words[i];

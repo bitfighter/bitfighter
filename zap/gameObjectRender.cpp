@@ -20,6 +20,7 @@
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
 #include "Asteroid.h"
+#include "barrier.h"             // WallItem, PolyWall for destructibility check
 
 #include "Colors.h"
 
@@ -2027,7 +2028,7 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
-// Render a circle with gaps at the specfied angles.  Currently hardwired for 4, could be generalized.
+// Render a circle with gaps at the specified angles.  Currently hardwired for 4, could be generalized.
 // Pass in a sorted list, with all angles between 0 and Tau.
 static void drawInterruptedCircle(const Point &center, F32 radius, const F32 angles[4], F32 halfGap)
 {
@@ -2062,7 +2063,7 @@ void renderSafeZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 
    static const F32 BAR_HALF_WIDTH_RATIO = .08f;      // <<< This controls how thick the bars are
 
-   // No user servicable parts below!
+   // No user serviceable parts below!
    Renderer& r = Renderer::get();
    static const F32 SQRT3_OVER_2 = sqrt(3) / 2;
    const F32 outerR = (F32)radius;
@@ -2574,6 +2575,60 @@ void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Colo
    Renderer& r = Renderer::get();
    r.setColor(outlineColor, alpha);
    r.renderPointVector(&edges, offset, RenderType::Lines);
+}
+
+
+/// Render tiled wall geometry received via s2cSendWallTile.
+/// Each poly is filled, then only edges with outline[i]==true are drawn
+/// (edges introduced by tile clipping have outline[i]==false and are skipped).
+/// Triangulation and edge classification are precomputed in WallPoly::cached*
+/// by buildTilePolyCache() when tile data arrives, so this function only does
+/// the actual rendering calls.
+void renderTilePolys(const Vector<WallPoly> &wallPolys, const Color &fillColor, const Color &outlineColor)
+{
+   if(wallPolys.size() == 0)
+      return;
+
+   Renderer &r = Renderer::get();
+
+   // Pass 1: fill all polys using precomputed triangulation
+   static const Color DEST_FILL(0.04f, 0.15f, 0.06f);  // green = destructible fill
+   r.setColor(fillColor);
+   for(S32 i = 0; i < wallPolys.size(); i++)
+   {
+      const WallPoly &wallPoly = wallPolys[i];
+      if(wallPoly.cachedFill.size() < 3)
+         continue;
+
+      if(wallPoly.cachedDestructible)
+         r.setColor(DEST_FILL);
+
+      r.renderPointVector(&wallPoly.cachedFill, RenderType::Triangles);
+
+      if(wallPoly.cachedDestructible)
+         r.setColor(fillColor);
+   }
+
+   // Pass 2: draw outline edges — normal edges in outlineColor,
+   // destructible edges in DEST_COLOR (green)
+   static const Color DEST_COLOR(0.0f, 1.0f, 0.0f);  // green = destructible outline
+   r.setColor(outlineColor);
+   for(S32 i = 0; i < wallPolys.size(); i++)
+   {
+      const WallPoly &wallPoly = wallPolys[i];
+      if(wallPoly.numVerts() < 3)
+         continue;
+
+      if(wallPoly.cachedNormalEdges.size() > 0)
+         r.renderPointVector(&wallPoly.cachedNormalEdges, RenderType::Lines);
+
+      if(wallPoly.cachedDestructibleEdges.size() > 0)
+      {
+         r.setColor(DEST_COLOR);
+         r.renderPointVector(&wallPoly.cachedDestructibleEdges, RenderType::Lines);
+         r.setColor(outlineColor);
+      }
+   }
 }
 
 
@@ -3106,7 +3161,7 @@ void renderBitfighterLogo(U32 mask)
 }
 
 
-// Draw logo centered on screen horzontally, and on yPos vertically, scaled and rotated according to parameters
+// Draw logo centered on screen horizontally, and on yPos vertically, scaled and rotated according to parameters
 void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 {
    Renderer& r = Renderer::get();
@@ -3834,7 +3889,8 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 
 void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints,
                  const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor,
-                 const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                 const Color &fillColor, const Color &destFillColor, const GridDatabase *editorDb,
+                 F32 currentScale, bool dragMode, bool drawSelected,
                  const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
@@ -3853,18 +3909,41 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
          }
       }
 
-      // hack for now
-      Color color;
-      if(alpha < 1)
-         color = Colors::gray67;
-      else
-         color = fillColor * alpha;
-
       for(S32 i = 0; i < count; i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(!moved || !wallSegment->isSelected())
-            wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
+         {
+            // Determine fill color based on owner wall's destructibility
+            Color color;
+            if(alpha < 1)
+               color = Colors::gray67;
+            else
+               color = fillColor * alpha;
+
+            if(editorDb)
+            {
+               S32 ownerId = wallSegment->getOwner();
+               const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
+               for(S32 o = 0; o < objs->size(); o++)
+               {
+                  BfObject *obj = static_cast<BfObject *>(objs->get(o));
+                  if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
+                  {
+                     bool dest = false;
+                     if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+                        dest = static_cast<WallItem *>(obj)->mDestructible;
+                     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+                        dest = static_cast<PolyWall *>(obj)->mDestructible;
+                     if(dest)
+                        color = destFillColor * alpha;
+                     break;
+                  }
+               }
+            }
+
+            wallSegment->renderFill(selectedItemOffset, color);
+         }
       }
 
       renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
@@ -3875,7 +3954,31 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
          if(wallSegment->isSelected())
-            wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
+         {
+            // Determine fill color based on owner wall's destructibility
+            Color color = fillColor * alpha;
+            if(editorDb)
+            {
+               S32 ownerId = wallSegment->getOwner();
+               const Vector<DatabaseObject *> *objs = editorDb->findObjects_fast();
+               for(S32 o = 0; o < objs->size(); o++)
+               {
+                  BfObject *obj = static_cast<BfObject *>(objs->get(o));
+                  if(isWallType(obj->getObjectTypeNumber()) && obj->getSerialNumber() == ownerId)
+                  {
+                     bool dest = false;
+                     if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+                        dest = static_cast<WallItem *>(obj)->mDestructible;
+                     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+                        dest = static_cast<PolyWall *>(obj)->mDestructible;
+                     if(dest)
+                        color = destFillColor * alpha;
+                     break;
+                  }
+               }
+            }
+            wallSegment->renderFill(selectedItemOffset, color);
+         }
       }
 
       // Render wall outlines for selected walls only
@@ -3943,7 +4046,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
    if(dist < 50)
       alpha *= dist * 0.02f;
 
-   // Scale arrow accorging to distance from objective --> doesn't look very nice
+   // Scale arrow according to distance from objective --> doesn't look very nice
    //F32 scale = max(1 - (min(max(dist,100),1000) - 100) / 900, .5);
    F32 scale = 1.0;
 
