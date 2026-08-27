@@ -366,6 +366,9 @@ static void x86UNIXInitTimer()
    }
 }
 
+static bool sg_initialized = false;
+static timeval sg_startTime;
+
 static void x86UNIXTimerInit()
 {
    if (sg_initialized == false) {
@@ -510,8 +513,8 @@ int stricmp(const char *str1, const char *str2)
 {
    while(toUpper(*str1) == toUpper(*str2) && *str1)
    {
-      str1++;
-      str2++;
+      ++str1;
+      ++str2;
    }
    unsigned char c1 = (unsigned char)toUpper(*str1);
    unsigned char c2 = (unsigned char)toUpper(*str2);
@@ -520,7 +523,7 @@ int stricmp(const char *str1, const char *str2)
 
 int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
-   for(unsigned int i = 0; i < len; i++)
+   for(unsigned int i = 0; i < len; ++i)
    {
       unsigned char c1 = (unsigned char)toUpper(str1[i]);
       unsigned char c2 = (unsigned char)toUpper(str2[i]);
