@@ -316,7 +316,7 @@ if(COMPILE_CLIENT)
 	)
 
 	if(COMPILE_TEST_SUITE)
-		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/include)
+		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/googletest/include)
 	endif()
 endif()
 

@@ -21,6 +21,10 @@
 #include "gameType.h"
 #include "robot.h"
 
+#include <cmath>
+#include <map>
+#include <set>
+
 namespace Zap
 {
 
@@ -29,12 +33,14 @@ void DebugOverlayRenderer::toggleShowingObjectIds()  { mDebugShowObjectIds  = !m
 void DebugOverlayRenderer::toggleShowingMeshZones()  { mDebugShowMeshZones  = !mDebugShowMeshZones;  }
 void DebugOverlayRenderer::toggleShowDebugBots()     { mShowDebugBots       = !mShowDebugBots;       }
 void DebugOverlayRenderer::toggleShowingMapTiles()   { mDebugShowMapTiles   = !mDebugShowMapTiles;   }
+void DebugOverlayRenderer::toggleShowingEdgeIds()    { mDebugShowEdgeIds    = !mDebugShowEdgeIds;    }
 
 bool DebugOverlayRenderer::isShowingDebugShipCoords() const { return mDebugShowShipCoords; }
 bool DebugOverlayRenderer::renderingObjectIds() const    { return mDebugShowObjectIds; }
 bool DebugOverlayRenderer::renderingMeshZones() const    { return mDebugShowMeshZones; }
 bool DebugOverlayRenderer::renderingBotPaths() const     { return mShowDebugBots; }
 bool DebugOverlayRenderer::renderingMapTiles() const     { return mDebugShowMapTiles; }
+bool DebugOverlayRenderer::renderingEdgeIds() const      { return mDebugShowEdgeIds; }
 
 
 void DebugOverlayRenderer::appendBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects) const
@@ -64,7 +70,7 @@ void DebugOverlayRenderer::populateRenderZones(ClientGame *game, const Rect *ext
 
 void DebugOverlayRenderer::renderDebugStatus() const
 {
-   // When bots are frozen, render large pause icon in lower left
+   // When bots are fr        ozen, render large pause icon in lower left
    if(EventManager::get()->isPaused())
    {
       Renderer::get().setColor(Colors::white);
@@ -236,6 +242,145 @@ void DebugOverlayRenderer::renderMapTiles(const ClientGame *game) const
       F32 cy = (tile.bounds.min.y + tile.bounds.max.y) / 2;
       r.setColor(Colors::white);
       drawStringf(cx, cy, 12, "%d", tile.tileId);
+   }
+}
+
+
+void DebugOverlayRenderer::renderEdgeIds(const ClientGame *game) const
+{
+   // Access the server's GameType directly (local test server only)
+   ServerGame *serverGame = game->getServerGame();
+   if(!serverGame)
+      return;
+   GameType *gt = serverGame->getGameType();
+   if(!gt)
+      return;
+
+   const Vector<MapTile> &tiles = gt->getMapTiles();
+   if(tiles.size() == 0)
+      return;
+
+   Renderer &r = Renderer::get();
+
+   // Build the same canonical edge→ID map used by the test harness
+   // (see buildEdgeIdMaps in bitfighter_test/TestMapTiling.cpp).
+   static const F32 EDGE_SNAP_TOL = 0.1f;
+
+   struct EdgeKey
+   {
+      F32 x1, y1, x2, y2;
+
+      EdgeKey(F32 ax, F32 ay, F32 bx, F32 by)
+      {
+         F32 rx1 = roundf(ax / EDGE_SNAP_TOL) * EDGE_SNAP_TOL;
+         F32 ry1 = roundf(ay / EDGE_SNAP_TOL) * EDGE_SNAP_TOL;
+         F32 rx2 = roundf(bx / EDGE_SNAP_TOL) * EDGE_SNAP_TOL;
+         F32 ry2 = roundf(by / EDGE_SNAP_TOL) * EDGE_SNAP_TOL;
+
+         if(rx1 < rx2 || (rx1 == rx2 && ry1 < ry2))
+            { x1 = rx1; y1 = ry1; x2 = rx2; y2 = ry2; }
+         else
+            { x1 = rx2; y1 = ry2; x2 = rx1; y2 = ry1; }
+      }
+
+      bool operator<(const EdgeKey &o) const
+      {
+         if(x1 != o.x1) return x1 < o.x1;
+         if(y1 != o.y1) return y1 < o.y1;
+         if(x2 != o.x2) return x2 < o.x2;
+         return y2 < o.y2;
+      }
+   };
+
+   // Gather unique canonical keys for visible edges
+   std::set<EdgeKey> keys;
+   std::map<EdgeKey, Point> keyMidpoints;  // midpoint for label placement
+
+   for(S32 t = 0; t < tiles.size(); t++)
+   {
+      for(S32 p = 0; p < tiles[t].polys.size(); p++)
+      {
+         const WallPoly &wp = tiles[t].polys[p];
+         U32 nv = wp.numVerts();
+
+         for(U32 e = 0; e < nv; e++)
+         {
+            // Include ALL edges — including EdgeStyle::None (tile boundary /
+            // interior overlap edges).  This is so /showedgeids shows every
+            // edge the tile builder produced, helping the author identify which
+            // edges are incorrectly hidden.  If an EdgeStyle::None edge should
+            // actually be visible, its ID will appear on the offending edge.
+            U32 v0 = e * 2;
+            U32 v1 = ((e + 1) % nv) * 2;
+            F32 ax = wp.verts[v0], ay = wp.verts[v0 + 1];
+            F32 bx = wp.verts[v1], by = wp.verts[v1 + 1];
+            EdgeKey key(ax, ay, bx, by);
+            keys.insert(key);
+            keyMidpoints[key] = Point((ax + bx) / 2, (ay + by) / 2);
+         }
+      }
+   }
+
+   // Assign IDs in sorted order and render.
+   // Labels are jittered by a few pixels, colored, and size-varied so that
+   // edges sharing the same midpoint (e.g. collinear seams from adjacent
+   // tiles) remain individually readable.
+   static const Color labelColors[] = {
+      Colors::yellow,
+      Colors::cyan,
+      Colors::magenta,
+      Colors::orange67,
+      Colors::paleGreen,
+      Colors::gold,
+      Colors::red80,
+      Colors::blue80,
+      Colors::green65,
+      Colors::gray70,
+   };
+   static const S32 NUM_COLORS = sizeof(labelColors) / sizeof(labelColors[0]);
+
+   // Deterministic jitter offsets (world units).  A few units of offset is
+   // enough to separate labels that land on the same midpoint while still
+   // keeping each label visually associated with its edge.
+   static const F32 JITTER_PX = 8.0f;
+   static const F32 jitterAngles[] = {
+      0.3f, 2.0f, -2.0f, 0.9f, -0.5f,  2.4f, -1.9f, 0.1f,  1.4f, -2.6f,
+      0.6f, 2.8f, -1.1f, 1.8f, -0.8f, -3.0f, 2.2f, -2.2f, 0.4f,  1.1f,
+   };
+   static const S32 NUM_JITTER = sizeof(jitterAngles) / sizeof(jitterAngles[0]);
+
+   int nextId = 0;
+   for(const auto &key : keys)
+   {
+      Point mid = keyMidpoints[key];
+
+      // Angular jitter: offset the label from the edge midpoint by a small,
+      // deterministic amount.  Using the edge ID keeps the pattern stable
+      // across frames and between the in-game display and test expectations.
+      const S32 ji = nextId % NUM_JITTER;
+      const F32 ang = jitterAngles[ji];
+      const F32 dx = cosf(ang) * JITTER_PX;
+      const F32 dy = sinf(ang) * JITTER_PX;
+
+      const Color &col = labelColors[nextId % NUM_COLORS];
+      const F32 fontSize = 12.0f + (nextId % 3);   // 12, 13, or 14
+
+      // Draw a short leader line from the jittered label position back to the
+      // edge midpoint, in the same color as the number, so it's clear which
+      // segment each ID refers to.
+      const F32 labelX = mid.x + dx;
+      const F32 labelY = mid.y + dy;
+
+      Vector<Point> leader;
+      leader.push_back(Point(labelX, labelY));
+      leader.push_back(Point(mid.x, mid.y));
+      r.setColor(col, 0.85f);
+      r.setLineWidth(1);
+      r.renderPointVector(&leader, RenderType::Lines);
+
+      r.setColor(col);
+      drawStringf(labelX, labelY, fontSize, "%d", nextId);
+      nextId++;
    }
 }
 

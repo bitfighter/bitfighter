@@ -90,9 +90,10 @@ namespace Zap
    { "setadminpass",       &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
    { "shutdown",           &ChatCommands::shutdownServerHandler,     { xINT, STR },  2, OWNER_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
 
-   { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show ship coordinates" },
-   { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show bot nav mesh zones" },
-   { "showids",    &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show object ids" },
+   { "showcoords",  &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show ship coordinates" },
+   { "showzones",   &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show bot nav mesh zones" },
+   { "showids",     &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show object ids" },
+   { "showedgeids", &ChatCommands::showEdgeIdsHandler,   {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show edge ID numbers on tiled wall edges" },
    { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show robot navigation paths" },
    { "showbots",   &ChatCommands::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show all robots" },
    { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Pause all bots; reissue to start again" },

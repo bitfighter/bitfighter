@@ -392,6 +392,7 @@ void GameUserInterface::toggleShowingObjectIds()  { mDebugOverlayRenderer.toggle
 void GameUserInterface::toggleShowingMeshZones()  { mDebugOverlayRenderer.toggleShowingMeshZones();  }
 void GameUserInterface::toggleShowDebugBots()     { mDebugOverlayRenderer.toggleShowDebugBots();     }
 void GameUserInterface::toggleShowingMapTiles()   { mDebugOverlayRenderer.toggleShowingMapTiles();   }
+void GameUserInterface::toggleShowingEdgeIds()    { mDebugOverlayRenderer.toggleShowingEdgeIds();    }
 
 
 bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugOverlayRenderer.isShowingDebugShipCoords(); }
@@ -897,7 +898,44 @@ void GameUserInterface::renderReticle() const
 #undef COLOR_RGB
 #undef RETICLE_COLOR
 
-   Renderer::get().renderColored(vertices, colors, ARRAYSIZE(vertices) / 2, RenderType::Lines);
+   Renderer& r = Renderer::get();
+   r.renderColored(vertices, colors, ARRAYSIZE(vertices) / 2, RenderType::Lines);
+
+   // Activated with /showcoords, for debugging
+   if(getGame()->isShowingDebugShipCoords())
+   {
+      // Convert screen-space mMousePoint to absolute game-world coordinates
+      Ship *ship = getGame()->getLocalPlayerShip();
+      Point gameCoords;
+      if(ship)
+      {
+         Point shipPos = ship->getRenderPos();
+         Point visExt = getGame()->computePlayerVisArea(ship);
+         S32 canvasW = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+         S32 canvasH = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+         Point scaleFactor((canvasW / 2) / visExt.x, (canvasH / 2) / visExt.y);
+
+         // mMousePoint = (mouseScreenPos - canvasCenter)
+         // worldToScreen: screen = (world - shipPos) * scaleFactor + canvasCenter
+         // Inverse:       world  = mMousePoint / scaleFactor + shipPos
+         gameCoords.x = shipPos.x + mMousePoint.x / scaleFactor.x;
+         gameCoords.y = shipPos.y + mMousePoint.y / scaleFactor.y;
+      }
+      else
+         gameCoords = mMousePoint;   // fallback
+
+      string str = string("@") + itos((S32) gameCoords.x) + "," + itos((S32) gameCoords.y);
+      const U32 textSize = 14;
+
+      r.setLineWidth(gLineWidth1);
+      r.setColor(Colors::white);
+
+      FontManager::pushFontContext(OldSkoolContext);
+      drawStringc(offsetMouse.x + 20, offsetMouse.y + 20, textSize, str.c_str());
+      FontManager::popFontContext();
+
+      r.setLineWidth(gDefaultLineWidth);
+   }
 }
 
 
@@ -2115,6 +2153,9 @@ void GameUserInterface::renderGameNormal()
    if(mDebugOverlayRenderer.renderingMapTiles())
       mDebugOverlayRenderer.renderMapTiles(getGame());
 
+   if(mDebugOverlayRenderer.renderingEdgeIds())
+      mDebugOverlayRenderer.renderEdgeIds(getGame());
+
    r.popMatrix();
 
    // Render current ship's energy
@@ -2336,6 +2377,9 @@ void GameUserInterface::renderGameCommander()
 
    if(mDebugOverlayRenderer.renderingMapTiles())
       mDebugOverlayRenderer.renderMapTiles(getGame());
+
+   if(mDebugOverlayRenderer.renderingEdgeIds())
+      mDebugOverlayRenderer.renderEdgeIds(getGame());
 
    for(S32 i = 0; i < renderObjects.size(); i++)
    {

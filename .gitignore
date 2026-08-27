@@ -284,3 +284,7 @@ resource/music/menu_old.ogg
 .claude/settings.local.json
 
 .vscode/
+
+.idea/
+
+vnv.bat

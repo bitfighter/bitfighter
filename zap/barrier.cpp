@@ -246,28 +246,56 @@ namespace Zap
          Game *game = mGame;
          fixAdjacentBarrierOutlines(game, this);
 
-          // Remove any turrets or forcefield projectors mounted on this barrier
-          removeMountedItems(game);
-
-          // Save mSolid before this object is deleted
+          // Save mSolid before any objects are deleted
           bool solid = mSolid;
 
           // Collect forcefield projectors whose beams terminate at this
-          // barrier BEFORE the barrier is deleted.  After deletion, both
-          // 'this' becomes a dangling pointer and the SafePtr references
-          // are auto-nullified, so we must capture the list now.
-          Vector<ForceFieldProjector *> affectedProjectors;
+          // barrier BEFORE any projectors are deleted (by removeMountedItems
+          // or removeFromGame).  After deletion, both 'this' becomes a
+          // dangling pointer and the SafePtr references are auto-nullified,
+          // so we must capture the list now.
+          Vector<SafePtr<ForceFieldProjector>> affectedProjectors;
           if(!solid)
           {
+             // Save spine endpoints for spatial fallback below
+             Point spineA = mPoints[1], spineB = mPoints[2];
+
              Vector<DatabaseObject *> ffps;
              game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, ffps);
              for(S32 i = 0; i < ffps.size(); i++)
              {
                 ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(ffps[i]);
-                if(ffp && ffp->isEnabled() && ffp->getTerminatingBarrier() == this)
+                if(!ffp || !ffp->isEnabled())
+                   continue;
+
+                // Fast check: pointer comparison
+                if(ffp->getTerminatingBarrier() == this)
+                {
+                   affectedProjectors.push_back(ffp);
+                   continue;
+                }
+
+                // Fallback: spatial proximity — does the forcefield
+                // endpoint touch this barrier's spine?  Needed when the
+                // projector is mounted ON this barrier and the LOS sweep
+                // starts inside its outline, hitting the mount barrier
+                // rather than the target barrier.
+                Point start, end;
+                ffp->getForceFieldStartAndEndPoints(start, end);
+                Point closest;
+                F32 distSq;
+                if(findNormalPoint(end, spineA, spineB, closest))
+                   distSq = end.distSquared(closest);
+                else
+                   distSq = min(end.distSquared(spineA), end.distSquared(spineB));
+
+                if(distSq <= 4.0f)
                    affectedProjectors.push_back(ffp);
              }
           }
+
+          // Remove any turrets or forcefield projectors mounted on this barrier
+          removeMountedItems(game);
 
           // Barrier is destroyed — remove it from the game
          GameType *gt = game->getGameType();
@@ -278,8 +306,10 @@ namespace Zap
           // sweeps will reach through the gap to the next wall.  Rebuilding
           // bot zones reads forcefield endpoints, so they must be updated
           // first to avoid stale geometry in the nav mesh.
+          // Skip any projectors that were deleted by removeMountedItems().
           for(S32 i = 0; i < affectedProjectors.size(); i++)
-             affectedProjectors[i]->recomputeFieldGeometry();
+             if(affectedProjectors[i].isValid())
+                affectedProjectors[i]->recomputeFieldGeometry();
 
           // Now rebuild wall tiles and bot zones with current forcefields
           gt->rebuildWallTilesAndBotZones();

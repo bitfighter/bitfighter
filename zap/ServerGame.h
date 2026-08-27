@@ -47,6 +47,7 @@ private:
    };
 
    bool mTestMode;                        // True if being tested from editor
+   bool mIsLoadingLevel;                  // True while loading a level; used to suppress redundant bot zone rebuilds
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
 

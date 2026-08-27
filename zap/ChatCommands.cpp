@@ -365,6 +365,16 @@ void showMapTilesHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+// /showedgeids — Toggles edge ID numbers drawn on each visible wall edge.
+// Edge IDs use the same canonicalization as the test helpers in
+// TestMapTiling.cpp, so IDs seen in-game match those used in test expectations.
+void showEdgeIdsHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(isLocalTestServer(game, "!!! Edge ids can only be displayed on a test server"))
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingEdgeIds();
+}
+
+
 // Will work on any server, but offers advantage of being able to see out-of-scope bots; increases network traffic somewhat
 void showBotsHandler(ClientGame *game, const Vector<string> &words)
 {

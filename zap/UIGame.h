@@ -233,6 +233,7 @@ public:
    void toggleShowingMeshZones();
    void toggleShowDebugBots();
    void toggleShowingMapTiles();
+   void toggleShowingEdgeIds();
 
    void addInlineHelpItem(HelpItem item);
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);

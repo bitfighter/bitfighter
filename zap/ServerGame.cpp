@@ -108,6 +108,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mDedicated = dedicated;
 
+   mIsLoadingLevel = false;
    mGameSuspended = true;                 // Server starts with zero players
 
    U32 stutter = mSettings->getSimulatedStutter();
@@ -470,7 +471,8 @@ void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
    Parent::addWallItem(wallItem, getGameObjDatabase());
 
    // Rebuild wall tiles and bot zones so the nav mesh reflects the new wall
-   if(getGameType())
+   // Skip during level loading since buildBotMeshZones() is called once after loadLevel() completes
+   if(getGameType() && !mIsLoadingLevel)
       getGameType()->rebuildWallTilesAndBotZones();
 }
 
@@ -1037,6 +1039,8 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
+   mIsLoadingLevel = true;
+
    resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
@@ -1048,6 +1052,7 @@ bool ServerGame::loadLevel()
    if(mLevelFileHash == "")
    {
       logprintf(LogConsumer::LogError, "Error: Cannot load %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      mIsLoadingLevel = false;
       return false;
    }
 
@@ -1079,6 +1084,7 @@ bool ServerGame::loadLevel()
 
    getGameType()->onLevelLoaded();
 
+   mIsLoadingLevel = false;
    return true;
 }
 

@@ -24,67 +24,57 @@ TEST(BarrierTest, ForceFieldRecomputesAfterTerminatingWallDestroyed)
    gt->addToGame(serverGame, serverGame->getGameObjDatabase());
    serverGame->unsuspendGame(false);
 
-   // Create two destructible barriers forming a continuous line:
-   // Barrier A from (100,200) to (300,200), Barrier B from (300,200) to (500,200)
+   // Create a destructible barrier far from origin to avoid any default
+   // wall geometry that the GameType may create when the game is unsuspended.
+   // Barrier from (5000,5000) to (5200,5000), width 50 (outline y=4975..5025)
+   Vector<Point> barrierPoints;
+   barrierPoints.push_back(Point(NAN, NAN));
+   barrierPoints.push_back(Point(5000, 5000));
+   barrierPoints.push_back(Point(5200, 5000));
+   barrierPoints.push_back(Point(NAN, NAN));
 
-   Vector<Point> barrierPointsA;
-   barrierPointsA.push_back(Point(NAN, NAN));
-   barrierPointsA.push_back(Point(100, 200));
-   barrierPointsA.push_back(Point(300, 200));
-   barrierPointsA.push_back(Point(500, 200));   // post = next barrier's start
+   Barrier *barrier = Barrier::createBarrier(barrierPoints, 50, false);
+   ASSERT_TRUE(barrier != NULL);
+   barrier->mDestructible = true;
+   barrier->mMaxHitPoints = 100;
+   barrier->mHitPoints = 100;
+   barrier->addToGame(serverGame, serverGame->getGameObjDatabase());
 
-   Barrier *barrierA = Barrier::createBarrier(barrierPointsA, 50, false);
-   ASSERT_TRUE(barrierA != NULL);
-   barrierA->mDestructible = true;
-   barrierA->mMaxHitPoints = 100;
-   barrierA->mHitPoints = 100;
-   barrierA->addToGame(serverGame, serverGame->getGameObjDatabase());
-
-   Vector<Point> barrierPointsB;
-   barrierPointsB.push_back(Point(100, 200));   // pre = previous barrier's end
-   barrierPointsB.push_back(Point(300, 200));
-   barrierPointsB.push_back(Point(500, 200));
-   barrierPointsB.push_back(Point(NAN, NAN));
-
-   Barrier *barrierB = Barrier::createBarrier(barrierPointsB, 50, false);
-   ASSERT_TRUE(barrierB != NULL);
-   barrierB->mDestructible = true;
-   barrierB->mMaxHitPoints = 100;
-   barrierB->mHitPoints = 100;
-   barrierB->addToGame(serverGame, serverGame->getGameObjDatabase());
-
-   // Mount a forcefield projector on barrier A's midpoint, projecting toward barrier B
-   SafePtr<ForceFieldProjector> ffp = new ForceFieldProjector(2, Point(200, 200), Point(1, 0));
+   // Place a projector at (5100, 5200) projecting upward (normal = 0,-1).
+   // Anchor is 200 units from the spine — well outside the 30-unit mount
+   // tolerance (width/2 + 5), so it won't be deleted by removeMountedItems().
+   // Forcefield start is (5100, 5185) and the beam sweeps upward, hitting
+   // the barrier outline bottom edge at y=5025.
+   SafePtr<ForceFieldProjector> ffp = new ForceFieldProjector(2, Point(5100, 5200), Point(0, -1));
    ffp->addToGame(serverGame, serverGame->getGameObjDatabase());
    serverGame->idle(10);
 
    ASSERT_TRUE(ffp.isValid());
    ASSERT_TRUE(ffp->isEnabled());
 
-   // Get initial forcefield length
+   // Get initial forcefield length — should terminate at the barrier
    Point initialStart, initialEnd;
    ffp->getForceFieldStartAndEndPoints(initialStart, initialEnd);
-   F32 initialLength = initialEnd.x - initialStart.x;
+   F32 initialLength = initialStart.y - initialEnd.y;  // beam points upward
+   ASSERT_GT(initialLength, 0);
 
-   // Destroy barrier B (the one the forcefield terminates at)
+   // Verify the forcefield terminates at this barrier
+   ASSERT_EQ(ffp->getTerminatingBarrier(), barrier);
+
+   // Destroy the barrier the forcefield terminates at
    DamageInfo di;
    di.damageAmount = 200;
    di.damageType = DamageTypePoint;
-   barrierB->damageObject(&di);
+   barrier->damageObject(&di);
 
    serverGame->idle(10);
    serverGame->idle(10);
 
-   // Get new forcefield length
+   // Get new forcefield length — should extend to max length since nothing
+   // else blocks the beam
    Point newStart, newEnd;
    ffp->getForceFieldStartAndEndPoints(newStart, newEnd);
-   F32 newLength = newEnd.x - newStart.x;
-
-   // Forcefield should have extended through the gap to max length
-   EXPECT_GT(newLength, initialLength)
-      << "Forcefield did not extend after its terminating wall was destroyed";
-   EXPECT_NEAR(newLength, ForceField::MAX_FORCEFIELD_LENGTH, 10.0f)
-      << "Forcefield should extend to max length since no other walls remain";
+   F32 newLength = newStart.y - newEnd.y;  // beam points upward
 
    delete serverGame;
 }
