@@ -146,7 +146,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for getGame()->playSoundEffect
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before initial for getGame()->playSoundEffect
    {
       static Point pos;    // Reusable container
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
@@ -315,7 +315,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
             hitObject->disableCollision();
          }
 
-         // Re-enable collison flag for ship and items in our path that don't want to be collided with
+         // Re-enable collision flag for ship and items in our path that don't want to be collided with
          // Note that if we hit an object that does want to be collided with, it won't be in disabledList
          // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
          // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
@@ -1505,7 +1505,7 @@ const F32 Seeker::Mass = 0.2f;
 const U32 Seeker::SpeedIncreasePerSecond = 300;
 const U32 Seeker::TargetAcquisitionRadius = 400;
 const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2.0f;
-const F32 Seeker::TargetSearchAngle = FloatTau * 0.6f;  // Anglular spread in front of ship to search for targets
+const F32 Seeker::TargetSearchAngle = FloatTau * 0.6f;  // Angular spread in front of ship to search for targets
 
 const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
 
@@ -1631,7 +1631,7 @@ void Seeker::idle(IdleCallPath path)
          // Create a new velocity vector for the seeker to slowly go towards the target.
          // Adjust the vector to always:
          //  - keep a minimum velocity (projectile default)
-         //  - only change angle to a maxium amount from the original direction
+         //  - only change angle to a maximum amount from the original direction
          //  - increase speed each tick
 
          // Set velocity vector towards the target for now

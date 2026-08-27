@@ -21,7 +21,7 @@ using namespace chrono;
 BanList::BanList(const string &iniDir)
 {
    banListTokenDelimiter = "|";
-   banListWildcardCharater = "*";
+   banListWildcardCharacter = "*";
 
    defaultBanDurationMinutes = 60;
    kickDurationMilliseconds = 30 * 1000;     // 30 seconds is a good breather
@@ -135,7 +135,7 @@ bool BanList::processBanListLine(const string &line)
    string durationMinutes = words[3];
 
    // Validate IP address string
-   if (!(Address(address.c_str()).isValid()) && address.compare(banListWildcardCharater) != 0)
+   if (!(Address(address.c_str()).isValid()) && address.compare(banListWildcardCharacter) != 0)
       return false;
 
    // nickname could be anything...
@@ -242,7 +242,7 @@ string BanList::getDelimiter()
 
 string BanList::getWildcard()
 {
-   return banListWildcardCharater;
+   return banListWildcardCharacter;
 }
 
 

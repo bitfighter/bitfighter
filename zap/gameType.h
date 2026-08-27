@@ -398,7 +398,7 @@ public:
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 
-   void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
+   void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeight) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
    void renderObjectiveArrow(const Point &p, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
 #endif
@@ -556,7 +556,7 @@ public:
    Timer mZoneGlowTimer;
    S32 mGlowingZoneTeam;      // Which team's zones are glowing, -1 for all
 
-   virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
+   virtual void majorScoringEventOccurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
    bool canClientAddBots(GameConnection *source, bool checkDefaultBot = true);

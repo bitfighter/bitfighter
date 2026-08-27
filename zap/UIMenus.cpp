@@ -182,7 +182,7 @@ void MenuUserInterface::idle(U32 timeDelta)
 }
 
 
-// Return index offset to account for scrolling menus; basically caluclates index of topmost visible item
+// Return index offset to account for scrolling menus; basically calculates index of topmost visible item
 S32 MenuUserInterface::getOffset()
 {
    S32 offset = 0;
@@ -364,8 +364,8 @@ void MenuUserInterface::render()
          drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact            + highlightVertOffset,
                                canvasWidth, y + textsize + gap / 2 - shrinkfact + highlightVertOffset);
 
-      S32 indx = i + offset;
-      mMenuItems[indx]->render(y, textsize, selectedIndex == indx);
+      S32 index = i + offset;
+      mMenuItems[index]->render(y, textsize, selectedIndex == index);
 
       y += textsize + gap;
    }

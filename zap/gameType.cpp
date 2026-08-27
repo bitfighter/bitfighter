@@ -508,7 +508,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
       case ScoreGoalOwnTeam:
          return "Score a goal against own team";
 
-      // Core specifig:
+      // Core specific:
       case EnemyCoreDestroyed:
          return "Destroyed a Core on enemy team";
       case OwnCoreDestroyed:
@@ -732,7 +732,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
    Point point = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
 
    // Seems inefficient to do this every time we render an objective arrow, given that all objective arrows on a
-   // given fram will have the same value.  However, performance testing shows this takes less than a microsecond
+   // given frame will have the same value.  However, performance testing shows this takes less than a microsecond
    // to run, so even when we have 100 objective arrows, that's not very much time!  Usually we have just a handful.
    F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
 
@@ -1157,7 +1157,7 @@ bool GameType::isTeamGame() const
 }
 
 
-// Only runs on server or when loadig a level into the editor
+// Only runs on server or when loading a level into the editor
 bool GameType::addWall(const WallRec &wall, Game *game)
 {
    mWalls.push_back(wall);              // Add wall to our list of walls
@@ -1998,7 +1998,7 @@ void GameType::handleNewClient(ClientInfo *clientInfo)
 // Determines who can damage what.  Can be overridden by individual games.  Currently only overridden by Rabbit.
 bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 {
-   if(!damager)            // Anonomyous projectiles are deadly to all!
+   if(!damager)            // Anonymous projectiles are deadly to all!
       return true;
 
    if(!victim->getOwner()) // Perhaps the victim is dead?!?  Turrets loaded with levels?
@@ -2133,7 +2133,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          // Broadcast player scores for rendering on the client
          if(!isTeamGame())
             for(S32 i = 0; i < mGame->getClientCount(); i++)  // TODO: try to get rid of this for loop
-               if(getGame()->getClientInfo(i) == player)      // and this pointer checks (we need to get the index, for veriable "i")
+               if(getGame()->getClientInfo(i) == player)      // and this pointer checks (we need to get the index, for variable "i")
                   s2cSetPlayerScore(i, player->getScore());
       }
    }
@@ -2158,7 +2158,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
             if(i != teamIndex)  // Every team but scoring team
             {
                // Adjust score of everyone, scoring team will have it changed back again after this loop
-               ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
+               ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitude of negative score to all teams
                s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());  // Broadcast result
             }
          }
@@ -2529,7 +2529,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
 }
 
 
-// Add some more time to the game (exercized by a user with admin privs)
+// Add some more time to the game (exercised by a user with admin privs)
 void GameType::addTime(U32 time)
 {
    c2sAddTime(time);
@@ -2712,7 +2712,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
       }
    }
 
-   // Notifiy the player
+   // Notify the player
    mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "An admin has renamed %s to %s", oldName.getString(), newName.getString());
 #endif
 }
@@ -3138,7 +3138,7 @@ static void buildTilePolyCache(WallPoly &wp)
          const Point &next = contour[(c + 1) % cn];
          F32 cross = (curr.x - prev.x) * (next.y - curr.y)
             - (curr.y - prev.y) * (next.x - curr.x);
-         if(fabs(cross) > 0.000001f)  // not colinear
+         if(fabs(cross) > 0.000001f)  // not collinear
             cleaned.push_back(curr);
       }
       if(cleaned.size() >= 3)
@@ -4349,13 +4349,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 
 
 // Client tells server that they chose the specified weapon
-GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
+GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index), (index))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    BfObject *controlObject = source->getControlObject();
 
    if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
-      static_cast<Ship *>(controlObject)->selectWeapon(indx);
+      static_cast<Ship *>(controlObject)->selectWeapon(index);
 }
 
 
@@ -4577,7 +4577,7 @@ void GameType::updateWhichTeamsHaveFlags()
 }
 
 
-// A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can
+// A flag was mounted on a ship -- in some GameTypes we need to notify the clients so they can
 // update their displays to show who has the flag.  Will be overridden in some GameTypes.
 // Server only!
 void GameType::onFlagMounted(S32 teamIndex)
@@ -5017,7 +5017,7 @@ void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
 void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
-void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
+void GameType::majorScoringEventOccurred(S32 team)       { /* Do nothing */ }
 
 };
 

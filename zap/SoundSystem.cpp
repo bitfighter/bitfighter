@@ -502,7 +502,7 @@ void SoundSystem::playSoundEffect(const SFXHandle &effect)
       return;
    else
    {
-      // See if it's aleady on the play list:
+      // See if it's already on the play list:
       for(S32 i = 0; i < gPlayList.size(); i++)
          if(effect == gPlayList[i].getPointer())
             return;

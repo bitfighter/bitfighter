@@ -10,7 +10,7 @@ namespace Zap
 {
 /**
  * @luaenum GameType(1,3)
- * The GameType enum represets the different types of game.
+ * The GameType enum represents the different types of game.
  */                                           //      LuaEnum not used?
 //                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions
 #define GAME_TYPE_TABLE \

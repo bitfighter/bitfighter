@@ -46,7 +46,7 @@ private:
    void initialize();
 
    time_t joinTime;
-   bool mAcheivedConnection;
+   bool mAchievedConnection;
 
    // For saving passwords
    string mLastEnteredPassword;
@@ -213,7 +213,7 @@ public:
 
    TNL_DECLARE_RPC(s2cDisableWeaponsAndModules, (bool disable));
 
-   // Chage passwords on the server
+   // Change passwords on the server
    void changeParam(const char *param, ParamType type);
 
    TNL_DECLARE_RPC(c2sSubmitPassword, (StringPtr pass));

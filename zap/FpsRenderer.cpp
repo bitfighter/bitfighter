@@ -79,11 +79,11 @@ void FpsRenderer::idle(U32 timeDelta)
    }
 
 
-   U32 indx = mFrameIndex % FPS_AVG_COUNT;
-   mIdleTimeDelta[indx] = timeDelta;
+   U32 index = mFrameIndex % FPS_AVG_COUNT;
+   mIdleTimeDelta[index] = timeDelta;
 
    if(mGame->getConnectionToServer())
-      mPing[indx] = (U32)mGame->getConnectionToServer()->getRoundTripTime();
+      mPing[index] = (U32)mGame->getConnectionToServer()->getRoundTripTime();
 
    mFrameIndex++;
 }

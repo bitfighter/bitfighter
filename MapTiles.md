@@ -214,7 +214,7 @@ ScopeRadius >= 1.5 * TileSize  // ensure player's tile and one ring around it ar
 
 1. **Polygon clipping library:** Use Clipper2
 
-2. **Scope sharing:** Not yet implmented; add a stub hook in the tile-enqueueing logic for future use.
+2. **Scope sharing:** Not yet implemented; add a stub hook in the tile-enqueueing logic for future use.
 
 3. **Performance profiling:** once Phase 3 is working, measure memory usage per connection (`BitSet` + queue overhead) and CPU cost of per-tick tile enqueueing on maps with thousands of tiles.
 

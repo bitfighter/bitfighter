@@ -214,7 +214,7 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
 }
 
 
-// Looks in database to find server mathcing the one in gameStats... returns server_id, or -1 if no match was found
+// Looks in database to find server matching the one in gameStats... returns server_id, or -1 if no match was found
 S32 DatabaseWriter::getServerIdFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    // Find server in database
@@ -445,8 +445,8 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 
    if(rating > S16_MAX)
       return S16_MAX;
-   else if(rating < MinumumLegitimateRating)
-      return MinumumLegitimateRating;
+   else if(rating < MinimumLegitimateRating)
+      return MinimumLegitimateRating;
 
    return rating;
 }
@@ -671,7 +671,7 @@ U64 DbQuery::runQuery(const string &sql) const
       sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
 
       if(err)
-         logprintf("Database error accessing sqlite databse: %s", err);
+         logprintf("Database error accessing sqlite database: %s", err);
 
       sqlite3_free(err);
 

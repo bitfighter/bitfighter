@@ -102,7 +102,7 @@ void GL2Renderer::setPointSize(F32 size)
    mPointSize = size;
 
 #ifndef BF_USE_GLES
-   // GL2 does not support vertex shader gl_PointSize, while GLES2 does not suport glPointSize().
+   // GL2 does not support vertex shader gl_PointSize, while GLES2 does not support glPointSize().
    glPointSize(size);
 #endif
 }

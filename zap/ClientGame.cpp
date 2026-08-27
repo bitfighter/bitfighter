@@ -731,7 +731,7 @@ void ClientGame::requestLoadoutPreset(S32 index)
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
+void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccessString,
                                                                                 const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
@@ -755,7 +755,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    GameType *gt = getGameType();
 
    // Show new loadout
-   displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
+   displaySuccessMessage("%s %s", baseSuccessString.c_str(), loadout.toString(false).c_str());
 
    displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" :
                                                            "Changes will be activated when you respawn");

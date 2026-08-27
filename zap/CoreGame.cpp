@@ -208,7 +208,7 @@ void CoreGameType::addCore(CoreItem *core, S32 teamIndex)
 }
 
 
-// Dont't need to handle scores here; will be handled elsewhere
+// Don't need to handle scores here; will be handled elsewhere
 void CoreGameType::removeCore(CoreItem *core)
 {
    S32 index = mCores.getIndex(core);
@@ -233,7 +233,7 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
    if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
    {
       Team *thisTeam = (Team *)getGame()->getTeam(team);
-      thisTeam->addScore(-1); // Count down when a core is destoryed
+      thisTeam->addScore(-1); // Count down when a core is destroyed
       s2cSetTeamScore(team, thisTeam->getScore());     // Broadcast result
 
 
@@ -429,7 +429,7 @@ void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
 
             ClientInfo *clientInfo = players[i];
 
-            // Grab team from sorted list, approprate team should be first after
+            // Grab team from sorted list, appropriate team should be first after
             // re-sort
             Team *receivingTeam = balancedSortedTeams[0];
 

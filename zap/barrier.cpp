@@ -650,7 +650,7 @@ namespace Zap
    }
 
 
-   // Only called in editor during preview mode -- basicaly prevents parent class from rendering spine of wall
+   // Only called in editor during preview mode -- basically prevents parent class from rendering spine of wall
    void WallItem::render()
    {
       // Do nothing
@@ -1156,7 +1156,7 @@ namespace Zap
    }
 
 
-   // Intialize, only called from constructors above
+   // Initialize, only called from constructors above
    void WallSegment::init(GridDatabase *database, S32 owner)
    {
       // Recompute the edges based on our new corner points

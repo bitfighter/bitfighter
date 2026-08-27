@@ -118,7 +118,7 @@ public:
    WallSegment *getMountSegment();
    void setMountSegment(WallSegment *mountSeg);
 
-   // These methods are overriden in ForceFieldProjector
+   // These methods are overridden in ForceFieldProjector
    virtual WallSegment *getEndSegment();
    virtual void setEndSegment(WallSegment *endSegment);
 

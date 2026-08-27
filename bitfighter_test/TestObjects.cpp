@@ -275,7 +275,7 @@ void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen,
    EXPECT_EQ(geom.size(), obj->getVertCount());
    EXPECT_EQ(teamIndex, obj->getTeam());
 
-   // Verify actual coordiates of points (getting pretty pedantic here!)
+   // Verify actual coordinates of points (getting pretty pedantic here!)
    for(S32 i = 0; i < obj->getVertCount(); i++)
    {
       EXPECT_EQ(geom[i].x, obj->getVert(i).x);

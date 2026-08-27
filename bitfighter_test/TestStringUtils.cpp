@@ -870,7 +870,7 @@ TEST(StringUtilsTest, charTypeChecks)
 }
 
 
-// These are comparitors for the actual sort function; they do not do sorting themselves.
+// These are comparators for the actual sort function; they do not do sorting themselves.
 TEST(StringUtilsTest, sorting)
 {
    EXPECT_TRUE(alphaSort("a", "b"));
@@ -892,7 +892,7 @@ TEST(StringUtilsTest, sorting)
    EXPECT_FALSE(alphaNumberSort("abc", "10"));
    EXPECT_FALSE(alphaNumberSort("2xyz", "1xyz"));
 
-   // Positive itegers sort numerically
+   // Positive integers sort numerically
    EXPECT_TRUE(alphaNumberSort("2", "11"));
    EXPECT_FALSE(alphaNumberSort("2", "1"));
 

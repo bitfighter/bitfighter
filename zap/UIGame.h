@@ -50,7 +50,7 @@ private:
    enum MessageDisplayMode {
       ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
       ShortFixed,              // Same length as ShortTimeout, but without timeout
-      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
+      LongFixed,               // Long form: Display MessageStoreCount messages, no timeout
       MessageDisplayModes
    };
 
@@ -112,7 +112,7 @@ private:
    void onMissionKeyPressed();
    void onMissionKeyReleased();
 
-   StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
+   StringTableEntry mShutdownName;  // Name of user who initiated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
    bool mShutdownInitiator;         // True if local client initiated shutdown (and can therefore cancel it)
 

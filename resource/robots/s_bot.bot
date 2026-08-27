@@ -41,7 +41,7 @@ function main()
     game = bf:getGameInfo()
 
     difficulty         = tonumber(arg[1]) or .5
-    agression          = tonumber(arg[2]) or 0.5
+    aggression         = tonumber(arg[2]) or 0.5
     defense            = tonumber(arg[3]) or 0
     speed              = tonumber(arg[4]) or 1
     directionThreshold = tonumber(arg[5]) or .25
@@ -553,7 +553,7 @@ function doObjective(closestEnemy)
     elseif(gameType == GameType.Nexus) then
         -- Grab any flags that are found, and go to nexus when it opens
         local otherFlag = getObjective(ObjType.Flag)            -- Find any flags
-        if otherFlag ~= nil then                                -- If there is a flag avalible
+        if otherFlag ~= nil then                                -- If there is a flag available
             gotoPosition(otherFlag:getPos()) 
         end
 
@@ -574,13 +574,13 @@ function doObjective(closestEnemy)
         -- Grab the flag and put it into goal zones
         -- Robot keeps trying to pick up the flags that is already in the goalZones
         if bot:hasFlag() then                                                           -- If the bot has the flag
-            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndex(), true)   -- Find an avalible GoalZone on our team
-            if otherFlag ~= nil then                                                    -- If there is an avalible GoalZone
+            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndex(), true)   -- Find an available GoalZone on our team
+            if otherFlag ~= nil then                                                    -- If there is an available GoalZone
                 gotoPosition(otherFlag:getPos())                                        -- Go to it
             end
         else                                                                            -- If the bot doesn't have the flag
             local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), true)       -- Find flags on our team
-            if otherFlag ~= nil then                                                    -- If there is a flag avalible
+            if otherFlag ~= nil then                                                    -- If there is a flag available
                 gotoPosition(otherFlag:getPos())                                        -- Go to it
             end
         end
@@ -622,7 +622,7 @@ function doObjective(closestEnemy)
         else
             if bot:hasFlag() then                                                -- If the bot has a flag and has more than .5 defense
                 gotoPosition(myFlag:getPos())                                    -- Go to team flag
-            elseif myFlag:isInInitLoc() then                                     -- If the bot doesn't have a flag and the team flag is in intial location
+            elseif myFlag:isInInitLoc() then                                     -- If the bot doesn't have a flag and the team flag is in initial location
                 gotoAndOrbitPosition(myFlag:getPos())                            -- Go and orbit team flag
             else
                 if myFlag:isOnShip() then                                        -- If team flag is on a ship
@@ -701,7 +701,7 @@ function onTick(deltaTime)
     local closestEnemy = bot:findClosestEnemy()
     
     -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
-    attackNearbyEnemies(closestEnemy, 1 - agression)
+    attackNearbyEnemies(closestEnemy, 1 - aggression)
     doObjective(closestEnemy)   -- Set bot's objective
 
     goInDirection()             -- Move the ship

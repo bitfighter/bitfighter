@@ -99,7 +99,7 @@ public:
    S32 getHorizPhysicalMargin() const;
    S32 getVertPhysicalMargin() const;
 
-   // Dimensions of black bars in physical pixes, based on current window mode
+   // Dimensions of black bars in physical pixels, based on current window mode
    S32 getHorizPhysicalMargin(DisplayMode mode) const;
    S32 getVertPhysicalMargin (DisplayMode mode) const;
 

@@ -79,7 +79,7 @@ void KeyDefMenuUserInterface::onActivate()
    selectedIndex = 0;                     // First item selected when we begin
    changingItem = NONE;                   // Not changing anything at the moment...
 
-   // Display an intitial message to users
+   // Display an initial message to users
    errorMsgTimer.clear();
    errorMsg = "";
 

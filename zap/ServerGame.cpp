@@ -831,7 +831,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 
    else if(nextLevel == NEXT_LEVEL)      // Next level
    {
-      // If game is supended, then we are waiting for another player to join.  That means that (probably)
+      // If game is suspended, then we are waiting for another player to join.  That means that (probably)
       // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
       S32 playerCount = getPlayerCount();
       if(mGameSuspended)
@@ -1021,7 +1021,7 @@ void ServerGame::unsuspendIfActivePlayers()
 }
 
 
-// Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
+// Need to handle both forward and backward slashes... will return pathname with trailing delimiter.
 inline string getPathFromFilename(const string &filename)
 {
    std::size_t pos1 = filename.rfind("/");

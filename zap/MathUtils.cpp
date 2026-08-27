@@ -57,7 +57,7 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
    // The standard way of doing this is by computing: x = (-b +/- Sqrt(b^2 - 4 a c)) / 2 a
    // is not numerically stable when a is close to zero.
-   // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
+   // Solve the equation according to "Numerical Recipes in C" paragraph 5.6
    F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below

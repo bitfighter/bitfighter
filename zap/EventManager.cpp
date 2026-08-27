@@ -95,7 +95,7 @@ void EventManager::shutdown()
 EventManager *EventManager::get()
 {
    if(!eventManager)
-      eventManager = new EventManager();      // Deleted in shutdown(), which is called from Game destuctor
+      eventManager = new EventManager();      // Deleted in shutdown(), which is called from Game destructor
 
    return eventManager;
 }

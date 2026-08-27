@@ -361,7 +361,7 @@ void EditorInstructionsUserInterface::render()
 }
 
 
-// This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
+// This has become rather ugly and inelegant.  But you should see UIInstructions.cpp!!!
 void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
 {
    S32 y = 60;             // Is 65 in UIInstructions::render()...

@@ -239,7 +239,7 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getCurrentHealth(lua_State *L);    // Current health = FullHealth - damage sustained
-   S32 lua_getFullHealth(lua_State *L);       // Health with no damange
+   S32 lua_getFullHealth(lua_State *L);       // Health with no damage
    S32 lua_setFullHealth(lua_State *L);
    S32 lua_setTeam(lua_State *L);
 

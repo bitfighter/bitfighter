@@ -18,7 +18,7 @@ class ThreadEntry : public RefPtrData
 public:
    virtual ~ThreadEntry() {};
 
-   virtual void run() = 0;    // runs on seperate thread
+   virtual void run() = 0;    // runs on separate thread
    virtual void finish() {};  // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
 };
 
