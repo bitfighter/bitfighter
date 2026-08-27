@@ -61,7 +61,7 @@ namespace mysqlpp {
 #endif
 
 
-BeecryptMutex::BeecryptMutex() throw (MutexFailed)
+BeecryptMutex::BeecryptMutex()
 #if defined(ACTUALLY_DOES_SOMETHING)
 	: pmutex_(new bc_mutex_t)
 #endif
@@ -103,7 +103,7 @@ BeecryptMutex::~BeecryptMutex()
 
 
 void
-BeecryptMutex::lock() throw (MutexFailed)
+BeecryptMutex::lock()
 {
 #if defined(MYSQLPP_PLATFORM_WINDOWS)
 	if (WaitForSingleObject(impl_val(pmutex_), INFINITE) == WAIT_OBJECT_0)
@@ -125,7 +125,7 @@ BeecryptMutex::lock() throw (MutexFailed)
 
 
 bool
-BeecryptMutex::trylock() throw (MutexFailed)
+BeecryptMutex::trylock()
 {
 #if defined(ACTUALLY_DOES_SOMETHING)
 #	if defined(MYSQLPP_PLATFORM_WINDOWS)
@@ -160,7 +160,7 @@ BeecryptMutex::trylock() throw (MutexFailed)
 
 
 void
-BeecryptMutex::unlock() throw (MutexFailed)
+BeecryptMutex::unlock()
 {
 #if defined(MYSQLPP_PLATFORM_WINDOWS)
 	if (!ReleaseMutex(impl_val(pmutex_)))
