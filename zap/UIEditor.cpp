@@ -901,9 +901,11 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    // Restore previous values, if available
    string key = getPluginSignature();
 
-   if(mPluginMenuValues.count(key) == 1)    // i.e. the key exists; use count to avoid creating new entry if it does not exist
-      for(S32 i = 0; i < mPluginMenuValues[key].size(); ++i)
+   if(mPluginMenuValues.count(key) == 1) {   // i.e. the key exists; use count to avoid creating new entry if it does not exist
+      S32 menu_sz = mPluginMenuValues[key].size();
+      for(S32 i = 0; i < menu_sz; ++i)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
+   }
 
    getGame()->getUIManager()->activate(mPluginMenu.get());
 }
@@ -3657,7 +3659,8 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
          firstItem->deleteVert(firstItem->getVertCount() - 1);
 
       // Add the new points
-      for(S32 i = 0; i < outputPolygons[0].size(); ++i)
+      S32 polys_sz = outputPolygons[0].size();
+      for(S32 i = 0; i < polys_sz; ++i)
          ok &= firstItem->addVert(outputPolygons[0][i], true);
 
       if(ok)
