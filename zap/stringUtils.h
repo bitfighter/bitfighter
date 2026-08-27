@@ -55,14 +55,15 @@ string ftos(F32 f);
 F64 stof(const string &s);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
+string replaceString(const char *in, const char *find, const char *replace);
 string stripExtension(string filename);
 
-string listToString(const Vector<string> &words, const string &seperator);
+string listToString(const Vector<string> &words, const string &separator);
 
 // TODO: Merge these methods
 Vector<string> parseString(const string &line);
-void parseString(const char *inputString, Vector<string> &words, char seperator = ' ');
-void parseString(const string &inputString, Vector<string> &words, char seperator = ' ');
+void parseString(const char *inputString, Vector<string> &words, char separator = ' ');
+void parseString(const string &inputString, Vector<string> &words, char separator = ' ');
 Vector<string> parseStringAndStripLeadingSlash(const char *str);
 
 const char *findPointerOfArg(const char *message, S32 count);
@@ -73,10 +74,6 @@ string lcase(string strToConvert);
 string ucase(string strToConvert);
 
 bool isPositiveInteger(const char *str);
-
-bool isAlpha(char c);
-bool isDigit(char c);
-bool isAlNum(char c);
 
 string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
@@ -108,7 +105,7 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 
 // By default we'll mimic the behavior or PHP.  Because that's something to aspire to!
 // http://lu1.php.net/trim
-#define DEFAULT_TRIM_CHARS " \n\r\t\0\x0B"
+#define DEFAULT_TRIM_CHARS " \n\r\t\v"
 
 string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
@@ -146,12 +143,28 @@ string toString(YesNo yesNo);
 string toString(RelAbs relAbs);
 string toString(ColorEntryMode colorMode);
 
-bool isPrintable(char c);
-bool isHex(char c);
 bool isHex(const string &str);
 
 bool alphaSort(const string &a, const string &b);
 bool alphaNumberSort(const string &a, const string &b);
+
+
+template <std::size_t N>
+static void safecopy(const char *src, char(&dest)[N])
+{
+   if(!src)
+   {
+      dest[0] = '\0';
+      return;
+   }
+
+   std::string_view sv(src);
+   const std::size_t len = (sv.size() < N - 1) ? sv.size() : (N - 1);
+
+   std::memcpy(dest, sv.data(), len);
+   dest[len] = '\0';
+}
+
 
 };
 

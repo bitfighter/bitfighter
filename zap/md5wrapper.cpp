@@ -7,7 +7,7 @@
  *	This is part of my wrapper-class to create
  *	a MD5 Hash from a string and a file.
  *
- *	This code is completly free, you
+ *	This code is completely free, you
  *	can copy it, modify it, or do
  *	what ever you want with it.
  *
@@ -30,6 +30,7 @@
 #include "tnlPlatform.h"
 
 using namespace TNL;
+#include "stringUtils.h"
 
 
 
@@ -76,7 +77,7 @@ std::string md5wrapper::convToString(unsigned char *bytes)
 std::string lcase(std::string strToConvert)
 {
    for(std::string::size_type i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = tolower(strToConvert[i]);
+      strToConvert[i] = TNL::toLower(strToConvert[i]);
    return strToConvert;
 }
 

@@ -201,7 +201,8 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       "[[BULLET]] Drag and drop individual vertices or an entire wall",
       "[[BULLET]] Split wall at selected vertex with [[\\]]",
       "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]",
-      "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)"
+      "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)",
+      "[[BULLET]] Make walls destructible with [[ToggleWallDestructibility]]",
    };
 
    pack(mWallInstr, wallInstructions, ARRAYSIZE(wallInstructions));
@@ -221,7 +222,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       "",
       "A full scripting reference and some basic tutorials can be found on the Bitfighter",
       "wiki.",
-         // Coming in 020
+      // Coming in 020
       //"",
       //"The current levels folder is: [[FOLDER_NAME:level]]",
       //"",
@@ -360,7 +361,7 @@ void EditorInstructionsUserInterface::render()
 }
 
 
-// This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
+// This has become rather ugly and inelegant.  But you should see UIInstructions.cpp!!!
 void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
 {
    S32 y = 60;             // Is 65 in UIInstructions::render()...
@@ -561,6 +562,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
    // F1 has dual use... advance page, then quit out of help when done
    else if(checkInputCode(BINDING_HELP, inputCode))
    {
+      playBoop();
       if(mCurPage < getPageCount())
          nextPage();
       else

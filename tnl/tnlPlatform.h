@@ -31,6 +31,8 @@
 #include "tnlTypes.h"
 #endif
 
+#include <ctype.h>
+
 namespace TNL {
 
 /// Platform specific functionality is gathered here to enable easier porting.
@@ -128,14 +130,18 @@ extern int    dSprintf(char *buffer, U32 bufferSize, const char *format, ...);
 inline char dToupper(const char c) { if (c >= char('a') && c <= char('z')) return char(c + 'A' - 'a'); else return c; } ///< Converts an ASCII character to upper case.
 inline char dTolower(const char c) { if (c >= char('A') && c <= char('Z')) return char(c - 'A' + 'a'); else return c; } ///< Converts an ASCII character to lower case.
 
-} // namespace TNL
+// Safe versions of <cctype> functions that handle signed characters correctly
+inline char toLower(char c) { return (char)tolower((unsigned char)c); }
+inline char toUpper(char c) { return (char)toupper((unsigned char)c); }
 
-#include <cctype>
+inline bool isSpace(char c) { return isspace((unsigned char)c);  }
+inline bool isAlpha(char c) { return isalpha((unsigned char)c);  }
+inline bool isDigit(char c) { return isdigit((unsigned char)c);  }
+inline bool isAlNum(char c) { return isalnum((unsigned char)c);  }
+inline bool isPrintable(char c) { return isprint((unsigned char)c);  }
+inline bool isPunct(char c) { return ispunct((unsigned char)c);  }
+inline bool isHex(char c)   { return isxdigit((unsigned char)c); }
 
-namespace TNL {
-// Safe overloads for tolower and toupper to prevent UB when called with signed char
-inline int tolower(char c) { return std::tolower((unsigned char)c); }
-inline int toupper(char c) { return std::toupper((unsigned char)c); }
 
 #define QSORT_CALLBACK FN_CDECL
 

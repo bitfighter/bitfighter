@@ -195,7 +195,7 @@ public:
    explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
    virtual ~Ship();                                                                // Destructor
 
-   bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparitor, but accounting for differences btwn client and server
+   bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparator, but accounting for differences btwn client and server
 
    F32 getHealth() const;
    S32 getEnergy() const;

@@ -692,22 +692,22 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
-      S32 indx = S32(floor((DisplayManager::getScreenInfo()->getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) +
+      S32 index = S32(floor((DisplayManager::getScreenInfo()->getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) +
                      getFirstServerIndexOnCurrentPage() ); // fixes mouse offset problem by removing this part: - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0)
 
       // Bounds checking and such
-      if(indx < 0)
-         indx = 0;
-      else if(indx >= servers.size())
-         indx = servers.size() - 1;
+      if(index < 0)
+         index = 0;
+      else if(index >= servers.size())
+         index = servers.size() - 1;
 
-      // Even after that check, we can still have an indx that extends below the bottom of our screen
-      if(indx < getFirstServerIndexOnCurrentPage())
-         indx = getFirstServerIndexOnCurrentPage();
-      else if(indx > getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1)
-         indx = getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1;
+      // Even after that check, we can still have an index that extends below the bottom of our screen
+      if(index < getFirstServerIndexOnCurrentPage())
+         index = getFirstServerIndexOnCurrentPage();
+      else if(index > getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1)
+         index = getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1;
 
-      return indx;
+      return index;
    }
    else
    {
@@ -1116,13 +1116,13 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 
 void QueryServersUserInterface::recalcCurrentIndex()
 {
-   S32 indx = mPage * getServersPerPage() + selectedId % getServersPerPage() - 1;
-   if(indx < 0)
-      indx = 0;
-   if(indx >= servers.size())
-      indx = servers.size() - 1;
+   S32 index = mPage * getServersPerPage() + selectedId % getServersPerPage() - 1;
+   if(index < 0)
+      index = 0;
+   if(index >= servers.size())
+      index = servers.size() - 1;
 
-   selectedId = servers[indx].id;
+   selectedId = servers[index].id;
 }
 
 
@@ -1612,7 +1612,7 @@ void QueryServersUserInterface::issueChat()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Contstructor -- x,y are UL corner of button
+// Constructor -- x,y are UL corner of button
 Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void (*onClickCallback)(ClientGame *))
 {
    mGame = game;

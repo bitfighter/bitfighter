@@ -16,9 +16,9 @@
 #ifndef BF_NO_AUDIO
 #  include <alc.h>
 #  include <al.h>
-#  include <AL/alure.h>
+#  include <AL/alure2.h>
 #else
-   class alureStream;
+   namespace alure { class Decoder; }
 #endif
 
 #include "tnlTypes.h"
@@ -77,15 +77,24 @@ struct MusicData
    MusicLocation previousLocation;
    MusicCommand command;            // Command to target a different music state
    MusicState state;                // Current music state
+#ifndef BF_NO_AUDIO
    ALfloat volume;
    ALuint source;
-   alureStream* stream;
+   alure::SharedPtr<alure::Decoder> decoder;
+#endif
 };
 
 
 class SoundSystem
 {
 private:
+   // ALURE 2.x objects
+#ifndef BF_NO_AUDIO
+   static alure::DeviceManager mDeviceMgr;
+   static alure::Device mDevice;
+   static alure::Context mContext;
+#endif
+
    static const S32 NumMusicStreamBuffers = 3;
    static const S32 MusicChunkSize = 250000;
    static const S32 NumVoiceChatBuffers = 32;
@@ -94,9 +103,7 @@ private:
    // Sound Effect functions
    static void updateGain(SFXHandle& effect, F32 sfxVolLevel, F32 voiceVolLevel);
    static void playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol);
-
-   static void music_end_callback(void* userData, ALuint source);
-   static void menu_music_end_callback(void* userData, ALuint source);
+   static bool queueNextMusicBuffer();
 
    static MusicData mMusicData;
 

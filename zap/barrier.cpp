@@ -6,16 +6,24 @@
 #include "barrier.h"
 
 #include "WallSegmentManager.h"
-#include "BotNavMeshZone.h"         // For BufferRadius
 #include "gameObjectRender.h"
 #include "game.h"
+#include "gameType.h"
 #include "Colors.h"
 #include "stringUtils.h"
 #include "GeomUtils.h"
+#include "EngineeredItem.h"
+
+#include <cmath>
+#include <math.h>
+
+#ifndef ZAP_DEDICATED
+#  include "renderer.h"
+#endif
+
 
 #include "tnlLog.h"
 
-#include <cmath>
 
 
 using namespace TNL;
@@ -24,9 +32,6 @@ namespace Zap
 {
 
    using namespace LuaArgs;
-
-   Vector<Point> Barrier::mRenderLineSegments;
-
 
    // Constructor
    WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
@@ -52,6 +57,9 @@ namespace Zap
          verts.push_back(wallItem->getVert(i).x);
          verts.push_back(wallItem->getVert(i).y);
       }
+
+      // Copy destructible segment flags
+      destructible = wallItem->mDestructible;
    }
 
 
@@ -60,6 +68,7 @@ namespace Zap
    {
       width = 1;      // Doesn't really matter... will be ignored
       solid = true;
+      destructible = polyWall->mDestructible;
 
       for(S32 i = 0; i < polyWall->getVertCount(); i++)
       {
@@ -88,6 +97,13 @@ namespace Zap
          if(!b)
             return false;
 
+         if(destructible)
+         {
+            b->mDestructible = true;
+            b->mMaxHitPoints = 10;
+            b->mHitPoints = b->mMaxHitPoints;
+         }
+
          b->addToGame(game, game->getGameObjDatabase());
          return true;
       }
@@ -100,7 +116,17 @@ namespace Zap
          {
             Barrier *b = Barrier::createBarrier(segmentData[i], width, false);    // false = not solid
             if(b)
+            {
+               // Mark as destructible if this segment index is flagged
+               if(destructible)
+               {
+                  b->mDestructible = true;
+                  b->mMaxHitPoints = 10;
+                  b->mHitPoints = b->mMaxHitPoints;
+               }
+
                b->addToGame(game, game->getGameObjDatabase());
+            }
          }
 
          return true;
@@ -122,7 +148,6 @@ namespace Zap
       if(mSolid)  // Polywall
       {
          mOutline = mPoints;     // Set collision polygon
-         mRenderFillGeometry = fillGeometry;
          setNewGeometry(geomPolygon);
       }
       else        // Normal wall
@@ -147,10 +172,6 @@ namespace Zap
             // Smart method that will handle mitering based on pre/post segments
             constructBarrierPolygon(start, end, pre, post, mWidth, mOutline);
          }
-
-         // Set rendering fill geometry for line-loop rendering, should already be CCW
-         mRenderFillGeometry = mOutline;
-
          setNewGeometry(geomPolyLine);
       }
 
@@ -209,6 +230,246 @@ namespace Zap
    }
 
 
+   // Handle damage for destructible barriers.
+   // Server only — clients don't process projectile physics.
+   void Barrier::damageObject(DamageInfo *damageInfo)
+   {
+      if(!mDestructible || isGhost())
+         return;
+
+      mHitPoints -= damageInfo->damageAmount;
+      if(mHitPoints <= 0)
+      {
+         // Before removing this barrier, fix adjacent barriers that shared a
+         // joint point — they need their mitered outlines replaced with butt
+         // end caps at the now-exposed joint.
+         Game *game = mGame;
+         fixAdjacentBarrierOutlines(game, this);
+
+          // Save mSolid before any objects are deleted
+          bool solid = mSolid;
+
+          // Collect forcefield projectors whose beams terminate at this
+          // barrier BEFORE any projectors are deleted (by removeMountedItems
+          // or removeFromGame).  After deletion, both 'this' becomes a
+          // dangling pointer and the SafePtr references are auto-nullified,
+          // so we must capture the list now.
+          Vector<SafePtr<ForceFieldProjector>> affectedProjectors;
+          if(!solid)
+          {
+             // Save spine endpoints for spatial fallback below
+             Point spineA = mPoints[1], spineB = mPoints[2];
+
+             Vector<DatabaseObject *> ffps;
+             game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, ffps);
+             for(S32 i = 0; i < ffps.size(); i++)
+             {
+                ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(ffps[i]);
+                if(!ffp || !ffp->isEnabled())
+                   continue;
+
+                // Fast check: pointer comparison
+                if(ffp->getTerminatingBarrier() == this)
+                {
+                   affectedProjectors.push_back(ffp);
+                   continue;
+                }
+
+                // Fallback: spatial proximity — does the forcefield
+                // endpoint touch this barrier's spine?  Needed when the
+                // projector is mounted ON this barrier and the LOS sweep
+                // starts inside its outline, hitting the mount barrier
+                // rather than the target barrier.
+                Point start, end;
+                ffp->getForceFieldStartAndEndPoints(start, end);
+                Point closest;
+                F32 distSq;
+                if(findNormalPoint(end, spineA, spineB, closest))
+                   distSq = end.distSquared(closest);
+                else
+                   distSq = min(end.distSquared(spineA), end.distSquared(spineB));
+
+                if(distSq <= 4.0f)
+                   affectedProjectors.push_back(ffp);
+             }
+          }
+
+          // Remove any turrets or forcefield projectors mounted on this barrier
+          removeMountedItems(game);
+
+          // Barrier is destroyed — remove it from the game
+         GameType *gt = game->getGameType();
+         removeFromGame(true);   // deletes the object, nullifies SafePtrs
+
+          // Recompute forcefield projectors BEFORE rebuilding wall tiles
+          // and bot zones.  The barrier is gone from the database, so LOS
+          // sweeps will reach through the gap to the next wall.  Rebuilding
+          // bot zones reads forcefield endpoints, so they must be updated
+          // first to avoid stale geometry in the nav mesh.
+          // Skip any projectors that were deleted by removeMountedItems().
+          for(S32 i = 0; i < affectedProjectors.size(); i++)
+             if(affectedProjectors[i].isValid())
+                affectedProjectors[i]->recomputeFieldGeometry();
+
+          // Now rebuild wall tiles and bot zones with current forcefields
+          gt->rebuildWallTilesAndBotZones();
+      }
+   }
+
+
+    // Find and remove any EngineeredItems (turrets, forcefield projectors) that
+    // are mounted on this barrier.  Uses spatial proximity: the item's anchor
+    // point (getPos()) sits on the barrier's centerline (spine), offset by a
+    // small amount along the mount normal.  We check whether the anchor is within
+    // the barrier's width-extruded region plus a small margin.
+    void Barrier::removeMountedItems(Game *game)
+    {
+       if(!game || !game->isServer())
+          return;
+
+       // Collect all turrets and forcefield projectors in the game
+       Vector<DatabaseObject *> mountedItems;
+       game->getGameObjDatabase()->findObjects(TurretTypeNumber, mountedItems);
+       game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, mountedItems);
+
+       // Tolerance: items sit on the barrier centerline with a ~1 unit offset
+       // along the anchor normal, so include half the wall width plus margin.
+       // For polywalls (solid), the polygon IS the centerline.
+       static const F32 MOUNT_MARGIN = 5.0f;
+       F32 tolerance_squared = sq((mSolid ? 0.0f : mWidth / 2.0f) + MOUNT_MARGIN);
+
+       for(S32 i = 0; i < mountedItems.size(); i++)
+       {
+          EngineeredItem *item = dynamic_cast<EngineeredItem *>(mountedItems[i]);
+          if(!item)
+             continue;
+
+          const Point &anchor = item->getPos();
+          bool mounted = false;
+
+          if(mSolid)  // Polywall — check each edge of the polygon (mPoints == outline == centerline)
+          {
+             for(S32 j = 0; j < mPoints.size(); j++)
+             {
+                const Point &a = mPoints[j];
+                const Point &b = mPoints[(j + 1) % mPoints.size()];
+
+                Point closest;
+                F32 dist_squared;
+                if(findNormalPoint(anchor, a, b, closest))
+                   dist_squared = anchor.distSquared(closest);
+                else
+                   dist_squared = min(anchor.distSquared(a), anchor.distSquared(b));
+
+                if(dist_squared <= tolerance_squared)
+                {
+                   mounted = true;
+                   break;
+                }
+             }
+          }
+          else        // Normal barrier — check spine segment mPoints[1]→mPoints[2]
+          {
+             if(mPoints.size() >= 3)
+             {
+                const Point &start = mPoints[1];
+                const Point &end   = mPoints[2];
+
+                Point closest;
+                F32 dist_squared;
+                if(findNormalPoint(anchor, start, end, closest))
+                   dist_squared = anchor.distSquared(closest);
+                else
+                   dist_squared = min(anchor.distSquared(start), anchor.distSquared(end));
+
+                if(dist_squared <= tolerance_squared)
+                   mounted = true;
+             }
+          }
+
+          if(mounted)
+          {
+             // Disable the forcefield if this is a projector, then remove the item
+             ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(item);
+             if(ffp)
+                ffp->onDisabled();
+
+             item->deleteObject(0);
+          }
+       }
+    }
+
+
+
+   // Reconstruct this barrier's outline from its stored mPoints data.
+   // If makePreDummy is true, the pre point (mPoints[0]) is set to NAN,NAN,
+   // producing a butt end cap at the start instead of a mitered joint.
+   // If makePostDummy is true, the post point (mPoints[3]) is set to NAN,NAN,
+   // producing a butt end cap at the end instead of a mitered joint.
+   void Barrier::reconstructOutline(bool makePreDummy, bool makePostDummy)
+   {
+      if(mSolid)
+         return;   // Polywalls don't have pre/post segments
+
+      if(makePreDummy)
+         mPoints[0] = Point(NAN, NAN);
+      if(makePostDummy)
+         mPoints[3] = Point(NAN, NAN);
+
+      Point pre   = mPoints[0];
+      Point start = mPoints[1];
+      Point end   = mPoints[2];
+      Point post  = mPoints[3];
+
+      if(start == end)
+         end += Point(0, 0.5f);
+
+      if(mWidth != 0)
+      {
+         mOutline.clear();
+         constructBarrierPolygon(start, end, pre, post, mWidth, mOutline);
+      }
+
+      Rect extent(mOutline);
+      setExtent(extent);
+   }
+
+
+   // After a barrier is destroyed, find any remaining barriers that shared a
+   // joint point (mPoints[1]=start or mPoints[2]=end) with the destroyed
+   // barrier.  Reconstruct each such barrier's outline with a butt end cap
+   // at the shared joint, since the mitered wedge is no longer valid.
+   void Barrier::fixAdjacentBarrierOutlines(Game *game, const Barrier *destroyedBarrier)
+   {
+      if(destroyedBarrier->mSolid)
+         return;   // Polywalls don't have mitered joints
+
+      // Collect all remaining barriers in the game
+      Vector<DatabaseObject *> barriers;
+      game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barriers);
+
+      const Point &destroyedStart = destroyedBarrier->mPoints[1];
+      const Point &destroyedEnd   = destroyedBarrier->mPoints[2];
+
+      for(S32 i = 0; i < barriers.size(); i++)
+      {
+         Barrier *b = dynamic_cast<Barrier *>(barriers[i]);
+         if(!b || b == destroyedBarrier || b->mSolid)
+            continue;
+
+         // Check if this barrier shares the start point of the destroyed barrier
+         // (i.e. this barrier's end == destroyed barrier's start → butt at this barrier's end)
+         if(b->mPoints.size() >= 4 && b->mPoints[2] == destroyedStart)
+            b->reconstructOutline(false, true);   // Butt at end
+
+         // Check if this barrier shares the end point of the destroyed barrier
+         // (i.e. this barrier's start == destroyed barrier's end → butt at this barrier's start)
+         if(b->mPoints.size() >= 4 && b->mPoints[1] == destroyedEnd)
+            b->reconstructOutline(true, false);   // Butt at start
+      }
+   }
+
+
    bool Barrier::collide(BfObject *otherObject)
    {
       return true;
@@ -220,39 +481,6 @@ namespace Zap
    {
       // Use a clipper library to buffer walls; should be CCW outline here
       offsetPolygon(&mOutline, points, bufferRadius);
-   }
-
-
-   void Barrier::clearRenderItems()
-   {
-      mRenderLineSegments.clear();
-   }
-
-
-   // Merges wall outlines together, client only
-   // This is used for barriers and polywalls
-   void Barrier::prepareRenderingGeometry(Game *game)    // static
-   {
-      mRenderLineSegments.clear();
-
-      Vector<DatabaseObject *> barrierList;
-
-      game->getGameObjDatabase()->findObjects((TestFunc) isWallType, barrierList);
-
-      clipRenderLinesToPoly(barrierList, mRenderLineSegments);
-   }
-
-
-   // Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
-   // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets
-   // refined as each additional intersecting barrier gets processed.
-   void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)
-   {
-      Vector<Vector<Point> > solution;
-
-      unionBarriers(barrierList, solution);
-
-      unpackPolygons(solution, lineSegmentPoints);
    }
 
 
@@ -271,30 +499,6 @@ namespace Zap
       }
 
       return mergePolys(inputPolygons, solution);
-   }
-
-
-   // Render wall fill only for this wall; all edges rendered in a single pass later
-   void Barrier::renderLayer(S32 layerIndex)
-   {
-#ifndef ZAP_DEDICATED
-      if(layerIndex == 0)           // First pass: draw the fill
-         renderWallFill(&mRenderFillGeometry, *getGame()->getSettings()->getWallFillColor(), mSolid);
-#endif
-   }
-
-
-   // Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose
-   void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)  // static
-   {
-      if(layerIndex == 1)
-         renderWallEdges(mRenderLineSegments, outlineColor);
-   }
-
-
-   S32 Barrier::getRenderSortValue()
-   {
-      return 0;
    }
 
 
@@ -342,17 +546,31 @@ namespace Zap
 
 
    // Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
-   // BarrierMaker <width> <x> <y> <x> <y> ...
+   // BarrierMaker [{D}] <width> <x> <y> <x> <y> ...
+   // The optional D flag (before width) marks all segments as destructible.
    bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
    {
       if(argc < 6)         // "BarrierMaker" keyword, width, and two or more x,y pairs
          return false;
 
-      setWidth(atoi(argv[1]));
+      S32 argIdx = 1;      // argv[0] = "BarrierMaker"
 
-      readGeom(argc, argv, 2, game->getLegacyGridSize());
+      // Check for optional D flag before width
+      bool destructible = false;
+      if(argv[argIdx][0] == 'D' && argv[argIdx][1] == '\0')
+      {
+         destructible = true;
+         argIdx++;
+      }
 
+      setWidth(atoi(argv[argIdx]));
+      argIdx++;
+
+      // Read remaining args as geometry (x,y pairs)
+      readGeom(argc, argv, argIdx, game->getLegacyGridSize());
       updateExtentInDatabase();
+
+      mDestructible = destructible;
 
       return true;
    }
@@ -360,7 +578,15 @@ namespace Zap
 
    string WallItem::toLevelCode() const
    {
-      return appendId("BarrierMaker") + " " + itos(getWidth()) + " " + geomToLevelCode();
+      string code = appendId("BarrierMaker");
+
+      bool destructible = mDestructible;
+
+      if(destructible)
+         code += " D";
+
+      code += " " + itos(getWidth()) + " " + geomToLevelCode();
+      return code;
    }
 
 
@@ -424,7 +650,7 @@ namespace Zap
    }
 
 
-   // Only called in editor during preview mode -- basicaly prevents parent class from rendering spine of wall
+   // Only called in editor during preview mode -- basically prevents parent class from rendering spine of wall
    void WallItem::render()
    {
       // Do nothing
@@ -707,7 +933,17 @@ namespace Zap
          offset = 1;
       }
 
-      readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
+      S32 argIdx = 1 + offset;
+
+      // Check for optional D flag before geometry
+      mDestructible = false;
+      if(argv[argIdx][0] == 'D' && argv[argIdx][1] == '\0')
+      {
+         mDestructible = true;
+         argIdx++;
+      }
+
+      readGeom(argc, argv, argIdx, game->getLegacyGridSize());
 
       if(getFill()->size() == 0)
          return false;
@@ -718,7 +954,10 @@ namespace Zap
 
    string PolyWall::toLevelCode() const
    {
-      return string(appendId(getClassName())) + " " + geomToLevelCode();
+      string code = appendId(getClassName());
+      if(mDestructible)
+         code += " D";
+      return code + " " + geomToLevelCode();
    }
 
 
@@ -917,7 +1156,7 @@ namespace Zap
    }
 
 
-   // Intialize, only called from constructors above
+   // Initialize, only called from constructors above
    void WallSegment::init(GridDatabase *database, S32 owner)
    {
       // Recompute the edges based on our new corner points

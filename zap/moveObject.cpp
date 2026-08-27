@@ -10,11 +10,11 @@
 
 #include "game.h"
 #include "gameConnection.h"
+#include "gameType.h"       // For tile poly collision checking
 #include "ship.h"
 #include "Zone.h"
 #include "Asteroid.h"
 
-#include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "MathUtils.h"     // For findLowestRootIninterval()
@@ -270,8 +270,8 @@ void MoveObject::setMass(F32 mass)
 //    }
 //    else
 //    {
-//       computeMinimumSeperationTime(ObjHit);
-//       displaceObject(ObjHit, seperationTime);
+//       computeMinimumSeparationTime(ObjHit);
+//       displaceObject(ObjHit, separationTime);
 //    }
 // }
 //
@@ -288,15 +288,15 @@ void MoveObject::setMass(F32 mass)
 //       }
 //       else
 //       {
-//          computeMinimumSeperationTime(ObjHit);
-//          displaceObject(ObjHit, seperationTime);
+//          computeMinimumSeparationTime(ObjHit);
+//          displaceObject(ObjHit, separationTime);
 //       }
 //    }
 // }
 
 
 // See http://flipcode.com/archives/Theory_Practice-Issue_01_Collision_Detection.shtml --> Example 1  May or may not be relevant
-F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
+F32 MoveObject::computeMinSeparationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
 {
    F32 myRadius;
    F32 contactShipRadius;
@@ -355,6 +355,16 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
       BfObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
+         // Check tile wall polys for collision (barrier ghosts may not be on client)
+         if(checkTileCollision(stateIndex, collisionTime, collisionPoint))
+         {
+            newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;
+            setPos(stateIndex, newPos);
+            computeCollisionResponseBarrier(stateIndex, collisionPoint);
+            moveTime -= collisionTime;
+            continue;
+         }
+
          newPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;   // Move to desired destination
          setPos(stateIndex, newPos);
          break;
@@ -401,7 +411,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
             Point intendedPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;    // x = x + vt
 
             F32 displaceEpsilon = 0.002f;
-            F32 t = computeMinSeperationTime(stateIndex, moveObjectThatWasHit, intendedPos);
+            F32 t = computeMinSeparationTime(stateIndex, moveObjectThatWasHit, intendedPos);
             if(t <= 0)
                break;   // Some kind of math error, couldn't find result: stop simulating this ship
 
@@ -451,6 +461,20 @@ TestFunc MoveObject::collideTypes()
 static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
 {
    return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
+}
+
+
+/// Check if the moving object's swept circle collides with any tile wall poly.
+/// Returns true and sets collisionTime/collisionPoint if a hit is found.
+/// This provides client-side wall collision when barrier ghosts are absent.
+bool MoveObject::checkTileCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
+{
+#ifndef ZAP_DEDICATED
+   return GameType::findTileWallSweptCircle(getPos(stateIndex), getVel(stateIndex) * collisionTime,
+                                            mRadius, collisionTime, collisionPoint);
+#else
+   return false;
+#endif
 }
 
 
@@ -563,6 +587,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
          }
       }
    }
+
    return collisionObject;
 }
 
@@ -1071,7 +1096,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    U32 retMask = 0;
    if(stream->writeFlag(updateMask & InitialMask))
-      stream->writeRangedU32(getItemId(), 0, U16_MAX);      // Send id in inital packet
+      stream->writeRangedU32(getItemId(), 0, U16_MAX);      // Send id in initial packet
 
    if(stream->writeFlag(updateMask & PositionMask))
    {
@@ -1433,7 +1458,7 @@ VelocityItem::VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass) : 
 {
    mInherentSpeed = speed;
 
-   // Give the objects some intial motion in a random direction
+   // Give the objects some initial motion in a random direction
    setPosAng(pos, TNL::Random::readF() * FloatTau);
 }
 

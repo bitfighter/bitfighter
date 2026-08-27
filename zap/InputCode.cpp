@@ -340,7 +340,7 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
          if(code == inputCode)
             break;
 
-         // Othewise, keep looking
+         // Otherwise, keep looking
       }
    }
 
@@ -394,7 +394,7 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2)
 }
 
 
-// Check to see if three modifers are all pressed (i.e. Ctrl+Alt+Shift)
+// Check to see if three modifiers are all pressed (i.e. Ctrl+Alt+Shift)
 bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
 {
    S32 foundCount = 0;
@@ -467,7 +467,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
 }
 
 
-// A valid input string will consist of one or more modifiers, seperated by "+", followed by a valid inputCode.
+// A valid input string will consist of one or more modifiers, separated by "+", followed by a valid inputCode.
 // Modifier order and case are significant!!  Use normalizeInputString to get case and modifiers fixed up.
 bool InputCodeManager::isValidInputString(const string &inputString)
 {
@@ -1426,7 +1426,7 @@ string InputCodeManager::getModifierString(InputCode inputCode)
 
 const Vector<string> *InputCodeManager::getModifierNames()
 {
-   TNLAssert(modifierNames.size() > 0, "modifierNames has not been intialized!");
+   TNLAssert(modifierNames.size() > 0, "modifierNames has not been initialized!");
    return &modifierNames;
 }
 

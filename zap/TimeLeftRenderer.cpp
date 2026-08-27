@@ -124,8 +124,13 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 // right-align text
 static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 {
-   for(S32 i = (S32)s.length() - 1; i >= 0; i--)
-      x -= drawStringr(x, y, textsize, s.substr(i, 1).c_str());
+   char digit[2] = { '\0', '\0' };
+
+   for(string::const_reverse_iterator it = s.rbegin(); it != s.rend(); ++it)
+   {
+      digit[0] = *it;
+      x -= drawStringr(x, y, textsize, digit);
+   }
 }
 
 

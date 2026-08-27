@@ -412,7 +412,7 @@ TEST(GeomUtilsTest, pointInHexagon)
    EXPECT_TRUE(pointInHexagon(Point(0, 0), Point(0, 0), 9));
    EXPECT_TRUE(pointInHexagon(Point(0, 0), Point(1, 1), 9));
 
-   // Ouside, but within bounding box
+   // Outside, but within bounding box
    EXPECT_FALSE(pointInHexagon(Point(-0.9, FloatSqrt3Half - .0001), Point(0, 0), 1));
 
    Point PointOnOutside(FloatSqrt3Half * cos(30 * DEGREES_TO_RADIANS), FloatSqrt3Half * sin(30 * DEGREES_TO_RADIANS));
@@ -574,6 +574,27 @@ TEST(GeomUtilsTest, segmentsIntersectNearButNotCrossing)
                                   Point(6, 6), Point(10, 0), ct));
 }
 
+TEST(GeomUtilsTest, segmentsIntersectPrecisionBug)
+{
+   F32 ct;
+   F32 offset = 1e6f;
+
+   // A: (offset, offset) -> (offset + 10, offset + 10)
+   // B: (offset, offset + 10) -> (offset + 10, offset)
+   // These should intersect at (offset + 5, offset + 5)
+
+   EXPECT_TRUE(segmentsIntersect(Point(offset, offset), Point(offset + 10, offset + 10),
+                                 Point(offset, offset + 10), Point(offset + 10, offset), ct));
+   EXPECT_NEAR(0.5f, ct, 0.001f);
+
+   // Nearly parallel
+   // A: (offset, offset) -> (offset + 100, offset + 100)
+   // B: (offset, offset + 100.0001) -> (offset + 100, offset + 0.0001)
+   // These should intersect at (offset + 50, offset + 50.0001)
+   EXPECT_TRUE(segmentsIntersect(Point(offset, offset), Point(offset + 100, offset + 100),
+                                 Point(offset, offset + 100.0001f), Point(offset + 100, offset + 0.0001f), ct));
+}
+
 
 // ============================================================
 // findIntersection
@@ -586,6 +607,18 @@ TEST(GeomUtilsTest, findIntersectionCrossing)
                                 Point(0, 10), Point(10, 0), intersection));
    EXPECT_NEAR(5.0f, intersection.x, 0.001f);
    EXPECT_NEAR(5.0f, intersection.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, findIntersectionPrecisionBug)
+{
+   Point intersection;
+   F32 offset = 1e6f;
+
+   // Intersection at (offset + 5, offset + 5)
+   EXPECT_TRUE(findIntersection(Point(offset, offset), Point(offset + 10, offset + 10),
+                                Point(offset, offset + 10), Point(offset + 10, offset), intersection));
+   EXPECT_NEAR(offset + 5.0f, intersection.x, 1.0f);
+   EXPECT_NEAR(offset + 5.0f, intersection.y, 1.0f);
 }
 
 TEST(GeomUtilsTest, findIntersectionParallel)
@@ -1955,4 +1988,60 @@ TEST(GeomUtilsTest, isConvexConcaveC)
 
    EXPECT_FALSE(isConvex(&cshape));
 }
+
+TEST(GeomUtilsTest, polygonCircleIntersectDegenerateEdge)
+{
+   // Single vertex polygon - forms a degenerate edge with itself (v1=v2)
+   Point vertex(100, 100);
+   Point center(100.5f, 100.5f);
+   F32 radiusSq = 1.0f; // radius 1, dist is sqrt(0.5) < 1
+   Point outPoint;
+
+   // This should return true and not crash/divide by zero
+   EXPECT_TRUE(polygonCircleIntersect(&vertex, 1, center, radiusSq, outPoint));
+   EXPECT_EQ(vertex, outPoint);
+}
+
+TEST(GeomUtilsTest, TriangulateInsideTriangleWinding)
+{
+   // CCW Triangle
+   // (0,0), (10,0), (5,10)
+   EXPECT_TRUE(Triangulate::InsideTriangle(0, 0, 10, 0, 5, 10, 5, 5));
+   EXPECT_FALSE(Triangulate::InsideTriangle(0, 0, 10, 0, 5, 10, 15, 5));
+
+   // CW Triangle
+   // (0,0), (5,10), (10,0)
+   EXPECT_TRUE(Triangulate::InsideTriangle(0, 0, 5, 10, 10, 0, 5, 5));
+   EXPECT_FALSE(Triangulate::InsideTriangle(0, 0, 5, 10, 10, 0, 15, 5));
+}
+
+TEST(GeomUtilsTest, TriangulateInsideTriangleLargeCoords)
+{
+   // Large world coordinates where float precision might fail
+   // float has about 7 decimal digits of precision.
+   // 1e7 is 10,000,000, which is near the limit of exact integer representation for float (2^24 ~ 1.6e7)
+   F32 offset = 1e7;
+
+   // Triangle at large offset: (offset, offset), (offset+10, offset), (offset+5, offset+10)
+   float Ax = offset, Ay = offset;
+   float Bx = offset + 10.0f, By = offset;
+   float Cx = offset + 5.0f, Cy = offset + 10.0f;
+
+   // Point inside: (offset+5, offset+5)
+   EXPECT_TRUE(Triangulate::InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, offset + 5.0f, offset + 5.0f));
+
+   // Point outside: (offset+5, offset-5)
+   EXPECT_FALSE(Triangulate::InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, offset + 5.0f, offset - 5.0f));
+
+   // A point very close to the edge of a large triangle
+   // (1e7, 1e7), (1e7 + 10, 1e7), (1e7, 1e7 + 10)
+   // Inside point: (1e7 + 1, 1e7 + 1)
+   // Outside point: (1e7 + 11, 1e7 + 1)
+   EXPECT_TRUE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset, offset + 10.0f, offset + 1.0f, offset + 1.0f));
+   EXPECT_FALSE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset, offset + 10.0f, offset + 11.0f, offset + 1.0f));
+
+   // Point exactly on the edge
+   EXPECT_TRUE(Triangulate::InsideTriangle(offset, offset, offset + 10.0f, offset, offset, offset + 10.0f, offset + 5.0f, offset));
+}
+
 }; // namespace Zap

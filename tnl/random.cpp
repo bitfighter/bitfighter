@@ -45,7 +45,9 @@ static void initialize()
    // it is compiled with LTM_DESC, so we register LibTomMath here.
    // On systems where a system libtomcrypt is used, ltc_mp is already
    // initialised by that library; registering ltm_desc again is harmless.
+#ifdef LTM_DESC
    ltc_mp = ltm_desc;
+#endif
    yarrow_start(&prng);
    yarrow_ready(&prng);
 }

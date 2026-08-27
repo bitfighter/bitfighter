@@ -221,7 +221,7 @@ static FlagItem *findFirstFlag(Ship *ship)
 }
 
 
-// The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items.
+// The flag will come from ship->mount.  *item is used as it is possible to carry and drop multiple items.
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
@@ -516,7 +516,7 @@ void NexusGameType::setNexusState(bool open)
    else
       closeNexus(getRemainingGameTime());
 
-   s2cSetNexusTimer(mNexusChangeAtTime, open);      // Broacast new Nexus opening hours
+   s2cSetNexusTimer(mNexusChangeAtTime, open);      // Broadcast new Nexus opening hours
 }
 
 

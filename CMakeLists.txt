@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.10)		# Updated Nov 2025
 project (bitfighter)
 
+enable_testing()
+
 # cmake_policy(VERSION 3.27)
 # cmake_policy(SET CMP0177 NEW)
 
@@ -22,13 +24,14 @@ option(DISCORD "Integrate Discord RPC calls." YES)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-# Require use c++14 compiler
-set(CMAKE_CXX_STANDARD 14)
+# Require use c++17 compiler
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use compiler extensions like -std=gnu++11
 # set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
+    # Prevent ambiguity between Windows SDK's ::byte and C++17's std::byte
     add_compile_definitions(_HAS_STD_BYTE=0)
 endif()
 
@@ -68,10 +71,10 @@ if(SDL2_FOUND)
 	set(SDL_LIBRARY ${SDL2_LIBRARY})
 endif()
 
-# Searches for OpenGL and enables GLES if GL isnt found in the system
+# Searches for OpenGL and enables GLES if GL isn't found in the system
 message(STATUS "Determining system GL provider")
 if(NOT USE_GLES)
-	message(STATUS "Atempting to use standard OpenGL")
+	message(STATUS "Attempting to use standard OpenGL")
 	find_package(OpenGL)
 	set(USE_STANDARD_GL 1)
 	set(GL_LIBRARY ${OPENGL_LIBRARY})
@@ -79,7 +82,7 @@ if(NOT USE_GLES)
 endif()
 
 if(USE_GLES OR NOT USE_STANDARD_GL)
-	message(STATUS "Atempting to use OpenGL ES")
+	message(STATUS "Attempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
 
@@ -139,14 +142,15 @@ endfunction()
 # ALURE
 find_with_fallback(ALURE ALURE alure)
 if(NOT ALURE_FOUND)
-	if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
-		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
+	if(NOT OPENAL_FOUND)
+		message(WARNING "OpenAL not found.  Bitfighter will be compiled without audio")
 		add_definitions(-DBF_NO_AUDIO)
 		set(OPENAL_INCLUDE_DIR "")
 	else()
 		message(STATUS "Using in-tree ALURE")
-		add_definitions(-DALURE_STATIC_LIBRARY)
 		add_subdirectory(alure)
+		set(ALURE_LIBRARIES alure)
+		set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure/include")
 	endif()
 endif()
 
@@ -163,10 +167,11 @@ endif()
 add_subdirectory(libtommath)
 
 # libtomcrypt
-find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
+find_with_fallback(TomCrypt TOMCRYPT libtomcrypt)
 if(NOT TOMCRYPT_FOUND)
 	message(STATUS "Using in-tree libtomcrypt")
 	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libtomcrypt/src/headers")
+	set(TOMCRYPT_LIBRARIES tomcrypt)
 	add_subdirectory(libtomcrypt)
 endif()
 
@@ -186,6 +191,18 @@ if(NOT CLIPPER_FOUND)
 	add_subdirectory(clipper)
 endif()
 
+# Clipper2
+find_with_fallback(Clipper2 CLIPPER2 Clipper2Lib)
+if(NOT CLIPPER2_FOUND)
+	message(STATUS "Using in-tree Clipper2")
+	add_subdirectory(Clipper2Lib)
+	# find_with_fallback sets LIBRARIES to the dirname string; override
+	# with the actual CMake target name so linking works correctly.
+	set(CLIPPER2_LIBRARIES clipper2)
+	# Headers are under include/, not at the root of the directory.
+	set(CLIPPER2_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Clipper2Lib/include")
+endif()
+
 
 # poly2tri
 find_with_fallback(Poly2tri POLY2TRI poly2tri)
@@ -196,6 +213,20 @@ endif()
 
 
 # LuaJIT / Lua
+#
+# The in-tree LuaJIT is 2.0.5, which predates Apple Silicon and cannot target
+# arm64 macOS.  Require a system LuaJIT 2.1 (e.g. `brew install luajit`) there.
+# CMAKE_OSX_ARCHITECTURES may be a list (e.g. a universal "arm64;x86_64"), so test
+# for membership rather than equality -- the bundled LuaJIT can't build an arm64
+# slice in that case either.
+if(APPLE AND LUAJIT_BUILTIN AND "arm64" IN_LIST CMAKE_OSX_ARCHITECTURES)
+	message(FATAL_ERROR
+		"The bundled LuaJIT 2.0.5 cannot be built for arm64 macOS.\n"
+		"Install LuaJIT 2.1 and configure with the system copy:\n"
+		"    brew install luajit\n"
+		"    cmake .. -DLUAJIT_BUILTIN=NO")
+endif()
+
 if(NOT LUAJIT_BUILTIN)
 find_with_fallback(LuaJit LUAJIT lua)
 endif()

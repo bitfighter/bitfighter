@@ -30,7 +30,7 @@
 // These functions allow you to manipulate arbitrary classes just like you
 // would the primitive types (e.g. numbers or strings). If you are familiar
 // with the normal Lua API the behavior of these functions should be very
-// intuative.
+// intuitive.
 //
 // For more information see the README and the comments below
 
@@ -110,7 +110,7 @@ void luaW_defaultdeallocator(lua_State*, T* obj)
 
 // The identifier function is responsible for pushing a value unique to each
 // object on to the stack. Most of the time, this can simply be the address
-// of the pointer, but sometimes that is not adaquate. For example, if you
+// of the pointer, but sometimes that is not adequate. For example, if you
 // are using shared_ptr you would need to push the address of the object the
 // shared_ptr represents, rather than the address of the shared_ptr itself.
 template <typename T>
@@ -182,7 +182,7 @@ inline void luaW_wrapperfield(lua_State* L, const char* field)
 // Analogous to lua_is(boolean|string|*)
 //
 // Returns 1 if the value at the given acceptable index is of type T (or if
-// strict is false, convertable to type T) and 0 otherwise.
+// strict is false, convertible to type T) and 0 otherwise.
 //
 // Stack should have two elements: a userdata and a function name (e.g. -- <userdata> 'getRad')
 template <typename T>
@@ -272,7 +272,7 @@ inline void luaW_clearUsingProxy(lua_State* L, void *objptr)
 // Analogous to lua_to(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
-// convertable to) type T; otherwise, returns NULL.
+// convertible to) type T; otherwise, returns NULL.
 template <typename T>
 T* luaW_to(lua_State* L, int index, bool strict = false)
 {
@@ -323,7 +323,7 @@ LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
 // Analogous to luaL_check(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
-// convertable to) type T; otherwise, an error is raised.
+// convertible to) type T; otherwise, an error is raised.
 template <typename T>
 T* luaW_check(lua_State* L, int index, bool strict = false)
 {
@@ -539,7 +539,7 @@ void luaW_release(lua_State* L, T* obj)
 // are below it. This runs the LUAW_POSTCTOR_KEY function on T's metatable,
 // using the object as the first argument and whatever else is below it as
 // the rest of the arguments This exists to allow types to adjust values in
-// thier storage table, which can not be created until after the constructor is
+// their storage table, which can not be created until after the constructor is
 // called.
 template <typename T>
 void luaW_postconstructor(lua_State* L, int numargs)
@@ -585,7 +585,7 @@ int luaW_new(lua_State* L)
 // The default metamethod to call when indexing into lua userdata representing
 // an object of type T. This will first check the userdata's environment table
 // and if it's not found there it will check the metatable. This is done so
-// individual userdata can be treated as a table, and can hold thier own
+// individual userdata can be treated as a table, and can hold their own
 // values.
 template <typename T>
 int luaW_index(lua_State* L)
@@ -620,7 +620,7 @@ int luaW_index(lua_State* L)
 // The default metamethod to call when creating a new index on lua userdata
 // representing an object of type T. This will index into the the userdata's
 // environment table that it keeps for personal storage. This is done so
-// individual userdata can be treated as a table, and can hold thier own
+// individual userdata can be treated as a table, and can hold their own
 // values.
 template <typename T>
 int luaW_newindex(lua_State* L)
@@ -796,7 +796,7 @@ inline void luaW_initialize(lua_State* L)
 //
 // luaW_register will set table as the new value of the global of the given
 // name. luaW_setfuncs is identical to luaW_register, but it does not set the
-// table globally.  As with luaL_register and luaL_setfuncs, both funcstions
+// table globally.  As with luaL_register and luaL_setfuncs, both functions
 // leave the new table on the top of the stack.
 // Allocator -> constructor, Deallocator => destructor
 template <typename T>
@@ -877,7 +877,7 @@ void luaW_register(lua_State* L, const char* classname, const luaL_Reg* table, c
 // luaW_extend is used to declare that class T inherits from class U. All
 // functions in the base class will be available to the derived class (except
 // when they share a function name, in which case the derived class's function
-// wins). This also allows luaW_to<T> to cast your object apropriately, as
+// wins). This also allows luaW_to<T> to cast your object appropriately, as
 // casts straight through a void pointer do not work.
 template <typename T, typename U>
 void luaW_extend(lua_State* L)
@@ -1025,7 +1025,7 @@ private:
    }
 
 
-   // Helper function -- move function from unorderdClassList to orderedClassList list
+   // Helper function -- move function from unorderedClassList to orderedClassList list
    static void moveToOrderedList(int i)
    {
       getOrderedClassList().push_back(getUnorderedClassList()[i].name);
@@ -1043,7 +1043,7 @@ private:
       // Iterate through unordered objects -- these should all have parents that are already in orderedClassList
       while(itemsRemainingInList > 0)
       {
-         bool foundAtLeastOneThisIteration = false;      // For detecting and preventing endless loops due to hiearchy problems
+         bool foundAtLeastOneThisIteration = false;      // For detecting and preventing endless loops due to hierarchy problems
 
          for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)    // Descending order for greater efficiency
             // If parent is in orderedClassList, we can move the item to the orderedClassList

@@ -10,7 +10,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
+        run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev libtomcrypt-dev libtommath-dev
       - name: Build project
         run: |
           cd build
@@ -18,3 +18,23 @@ jobs:
           make
       - name: Copy resources
         run: cp -R resource/* exe/
+
+  Build-macOS-arm64:
+    runs-on: macos-14                 # Apple Silicon (arm64) runner
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install luajit sdl2 libpng libogg libvorbis speex libmodplug openal-soft
+      - name: Build project
+        run: |
+          cd build
+          cmake .. -DLUAJIT_BUILTIN=NO   # bundled LuaJIT 2.0.5 has no arm64; use Homebrew 2.1
+          make
+          make bitfighter_test           # EXCLUDE_FROM_ALL, so build it explicitly
+      - name: Copy resources
+        run: cp -R resource/* exe/
+      - name: Run tests
+        run: |
+          cd exe
+          ./bitfighter_test

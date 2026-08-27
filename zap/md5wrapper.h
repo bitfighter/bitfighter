@@ -7,7 +7,7 @@
  *	This is my wrapper-class to create
  *	a MD5 Hash from a string and a file.
  *
- *	This code is completly free, you
+ *	This code is completely free, you
  *	can copy it, modify it, or do
  *	what ever you want with it.
  *

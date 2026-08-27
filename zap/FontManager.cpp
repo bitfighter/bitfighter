@@ -24,7 +24,7 @@
 
 using namespace std;
 
-// Theses values should be plenty for the fonts we have
+// These values should be plenty for the fonts we have
 static const unsigned MAX_STRING_LENGTH = 255;
 static const unsigned MAX_STRIPS_PER_CHARACTER = 32;
 static const unsigned MAX_POINTS_PER_STRIP = 128;
@@ -167,7 +167,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 }
 
 
-// Runs intialize preserving mUsingExternalFonts
+// Runs initialize preserving mUsingExternalFonts
 void FontManager::reinitialize(GameSettings *settings)
 {
    initialize(settings, mUsingExternalFonts);

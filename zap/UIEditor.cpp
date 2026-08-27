@@ -84,7 +84,7 @@ static void backToMainMenuCallback(ClientGame *game)
 {
    UIManager *uiManager = game->getUIManager();
 
-   uiManager->getUI<EditorUserInterface>()->onQuitted();
+   uiManager->getUI<EditorUserInterface>()->onQuit();
    uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
 }
 
@@ -181,7 +181,7 @@ void EditorUserInterface::setDatabase(shared_ptr<GridDatabase> database)
 
 
 // Really quitting... no going back!
-void EditorUserInterface::onQuitted()
+void EditorUserInterface::onQuit()
 {
    cleanUp(false);
    getGame()->clearAddTarget();
@@ -906,7 +906,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
    saveUndoState();
 
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
-   // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
+   // provides some protection against the script being changed while Bitfighter is running.  Probably not really
    // necessary, but we can afford it here.
    string key = getPluginSignature();
 
@@ -1051,7 +1051,7 @@ void EditorUserInterface::validateLevel()
    bool foundTeamFlags      = hasTeamFlags (gridDatabase);
    bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
 
-   // "Unversal errors" -- levelgens can't (yet) change gametype
+   // "Universal errors" -- levelgens can't (yet) change gametype
 
    GameType *gameType = getGame()->getGameType();
 
@@ -1848,7 +1848,7 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 void EditorUserInterface::renderItemInfoPanel()
 {
    Renderer& r = Renderer::get();
-   string itemName;     // All intialized to ""
+   string itemName;     // All initialized to ""
 
    S32 hitCount = 0;
    bool multipleKindsOfObjectsSelected = false;
@@ -2009,7 +2009,7 @@ void EditorUserInterface::render()
       r.scale(getCurrentScale());
 
       // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
-      // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rahter obvoius fact
+      // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rather obvious fact
       // that walls that are not being dragged should be rendered in place.
       static Point delta;
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
@@ -2158,7 +2158,8 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : *settings->getWallOutlineColor();
 
    renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), outlineColor,
-               fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode,
+               fillColor, Colors::EDITOR_DEST_WALL_FILL, database,
+               mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode,
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
 
@@ -2526,8 +2527,6 @@ bool EditorUserInterface::canRotate() const
 }
 
 
-
-
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
@@ -2727,7 +2726,6 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    Point min, max;
    database->computeSelectionMinMax(min, max);
-//   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
@@ -2754,6 +2752,56 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    setNeedToSave(true);
    autoSave();
+}
+
+
+void EditorUserInterface::toggleDestructibleWallSegment()
+{
+   if(!canRotate())
+      return;
+
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   bool modifiedWalls = false;
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected())
+      {
+         if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         {
+            WallItem *wall = dynamic_cast<WallItem *>(static_cast<BfObject *>(obj));
+            TNLAssert(wall, "Expected a WallItem!");
+
+            if(!modifiedWalls)
+               saveUndoState();
+
+            wall->mDestructible = !wall->mDestructible;
+            modifiedWalls = true;
+         }
+         else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+         {
+            PolyWall *wall = dynamic_cast<PolyWall *>(static_cast<BfObject *>(obj));
+            TNLAssert(wall, "Expected a PolyWall!");
+
+            if(!modifiedWalls)
+               saveUndoState();
+
+            wall->mDestructible = !wall->mDestructible;
+            modifiedWalls = true;
+            continue;
+         }
+      }
+   }
+
+   if(modifiedWalls)
+   {
+      mLastUndoStateWasBarrierWidthChange = false;
+      setNeedToSave(true);
+      autoSave();
+   }
 }
 
 
@@ -3412,7 +3460,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
 
    if(deletedWall)
-      doneDeleteingWalls();
+      doneDeletingWalls();
 
    if(deleted)
    {
@@ -3644,7 +3692,7 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
             i--;
          }
 
-         // First vertex conincides with final vertex 3 2 1 | 5 4 3
+         // First vertex coincides with final vertex 3 2 1 | 5 4 3
          else if(firstItem->getVert(0).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)
          {
             if(!joinedObj)
@@ -3659,7 +3707,7 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
             i--;
          }
 
-         // Last vertex conincides with first 1 2 3 | 3 4 5
+         // Last vertex coincides with first 1 2 3 | 3 4 5
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(0)) < .0001)
          {
             if(!joinedObj)
@@ -3709,7 +3757,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
       database->removeFromDatabase(obj, true);
 
       if(!batchMode)
-         doneDeleteingWalls();
+         doneDeletingWalls();
    }
    else
       database->removeFromDatabase(obj, true);
@@ -3720,7 +3768,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 
 
 // After deleting a bunch of items, clean up
-void EditorUserInterface::doneDeleteingWalls()
+void EditorUserInterface::doneDeletingWalls()
 {
    WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
@@ -3963,11 +4011,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       onMouseClicked_left();
 
    // Neither mouse button, let's try some keys
-   else if(inputString == "D" || inputString == "Shift+D")                                  // Pan right
+   else if(inputString == "D" || inputString == "Shift+D")                                   // Pan right
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))          // Flip horizontal
+   else if(inputString == getEditorBindingString(settings, BINDING_TOGGLE_WALL_DESTRUCTIBILITY))   // Make wall destructible (or not)
+      toggleDestructibleWallSegment();
+   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))              // Flip horizontal
       flipSelectionHorizontal();
 	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))     // Paste selection
       pasteSelection();
@@ -3993,7 +4043,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset veiw
+	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset view
       centerView();
 	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))       // Run levelgen script, or clear last results
    {
@@ -4778,7 +4828,7 @@ void EditorUserInterface::onFinishedDragging()
          if(deletedSomething)
          {
             if(deletedWall)
-               doneDeleteingWalls();
+               doneDeletingWalls();
 
             doneDeleting();
 
@@ -4797,7 +4847,7 @@ void EditorUserInterface::onFinishedDragging()
       // If our snap vertex has moved then all selected items have moved
       bool itemsMoved = mDragCopying || (mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
 
-      if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+      if(itemsMoved)    // Move consummated... update any moved items, and save our autosave
       {
          bool wallMoved = false;
 

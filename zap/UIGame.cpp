@@ -135,8 +135,6 @@ void GameUserInterface::onActivate()
 
    clearDisplayers();
 
-   // Clear out any walls we were using in a previous run
-   Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
    mLevelInfoDisplayer.clearDisplayTimer();
 
    mLoadoutIndicator.reset();
@@ -181,7 +179,6 @@ void GameUserInterface::onReactivate()
 void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
-   Barrier::clearRenderItems();
    mHasShipPos = false;
 
    mHelpItemManager.addStartingHelpItemsToQueue(getGame());      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
@@ -251,6 +248,15 @@ void GameUserInterface::doneLoadingLevel()
    mShowProgressBar = false;
    mProgressBarFadeTimer.reset();
    mDispWorldExtents.set(getGame()->getWorldExtents());
+}
+
+
+// Expand mDispWorldExtents to encompass the given bounds.
+// Called by the tile delivery RPC (s2cSendWallTile) so the commander's map
+// shows the full tiled area immediately, without waiting for rectifyExtents().
+void GameUserInterface::expandDispWorldExtents(const Rect &bounds)
+{
+   mDispWorldExtents.unionRect(bounds);
 }
 
 
@@ -385,6 +391,8 @@ void GameUserInterface::toggleShowingShipCoords() { mDebugOverlayRenderer.toggle
 void GameUserInterface::toggleShowingObjectIds()  { mDebugOverlayRenderer.toggleShowingObjectIds();  }
 void GameUserInterface::toggleShowingMeshZones()  { mDebugOverlayRenderer.toggleShowingMeshZones();  }
 void GameUserInterface::toggleShowDebugBots()     { mDebugOverlayRenderer.toggleShowDebugBots();     }
+void GameUserInterface::toggleShowingMapTiles()   { mDebugOverlayRenderer.toggleShowingMapTiles();   }
+void GameUserInterface::toggleShowingEdgeIds()    { mDebugOverlayRenderer.toggleShowingEdgeIds();    }
 
 
 bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugOverlayRenderer.isShowingDebugShipCoords(); }
@@ -688,12 +696,12 @@ void GameUserInterface::renderShutdownMessage() const
       char timemsg[255];
       dSprintf(timemsg, sizeof(timemsg), "Server is shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
 
-      if(mShutdownInitiator)     // Local client intitiated the shutdown
+      if(mShutdownInitiator)     // Local client initiated the shutdown
       {
-         string msg = string(timemsg) + "\n\nShutdown sequence intitated by you.\n\n" + mShutdownReason.getString();
+         string msg = string(timemsg) + "\n\nShutdown sequence initiated by you.\n\n" + mShutdownReason.getString();
          renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [[Esc]] to cancel shutdown", msg, 7);
       }
-      else                       // Remote user intiated the shutdown
+      else                       // Remote user initiated the shutdown
       {
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
@@ -868,7 +876,7 @@ void GameUserInterface::renderReticle() const
 #define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b
 
    static F32 colors[] = {
-   //    R,G,B   aplha
+   //    R,G,B   alpha
       COLOR_RGB, 0.7f,
       COLOR_RGB, 0.7f,
       COLOR_RGB, 0.7f,
@@ -890,7 +898,44 @@ void GameUserInterface::renderReticle() const
 #undef COLOR_RGB
 #undef RETICLE_COLOR
 
-   Renderer::get().renderColored(vertices, colors, ARRAYSIZE(vertices) / 2, RenderType::Lines);
+   Renderer& r = Renderer::get();
+   r.renderColored(vertices, colors, ARRAYSIZE(vertices) / 2, RenderType::Lines);
+
+   // Activated with /showcoords, for debugging
+   if(getGame()->isShowingDebugShipCoords())
+   {
+      // Convert screen-space mMousePoint to absolute game-world coordinates
+      Ship *ship = getGame()->getLocalPlayerShip();
+      Point gameCoords;
+      if(ship)
+      {
+         Point shipPos = ship->getRenderPos();
+         Point visExt = getGame()->computePlayerVisArea(ship);
+         S32 canvasW = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+         S32 canvasH = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+         Point scaleFactor((canvasW / 2) / visExt.x, (canvasH / 2) / visExt.y);
+
+         // mMousePoint = (mouseScreenPos - canvasCenter)
+         // worldToScreen: screen = (world - shipPos) * scaleFactor + canvasCenter
+         // Inverse:       world  = mMousePoint / scaleFactor + shipPos
+         gameCoords.x = shipPos.x + mMousePoint.x / scaleFactor.x;
+         gameCoords.y = shipPos.y + mMousePoint.y / scaleFactor.y;
+      }
+      else
+         gameCoords = mMousePoint;   // fallback
+
+      string str = string("@") + itos((S32) gameCoords.x) + "," + itos((S32) gameCoords.y);
+      const U32 textSize = 14;
+
+      r.setLineWidth(gLineWidth1);
+      r.setColor(Colors::white);
+
+      FontManager::pushFontContext(OldSkoolContext);
+      drawStringc(offsetMouse.x + 20, offsetMouse.y + 20, textSize, str.c_str());
+      FontManager::popFontContext();
+
+      r.setLineWidth(gDefaultLineWidth);
+   }
 }
 
 
@@ -1079,11 +1124,11 @@ void GameUserInterface::choosePrevWeapon()
 
 
 // Select a weapon by its index
-void GameUserInterface::selectWeapon(U32 indx)
+void GameUserInterface::selectWeapon(U32 index)
 {
    GameType *gameType = getGame()->getGameType();
    if(gameType)
-      gameType->c2sSelectWeapon(indx);
+      gameType->c2sSelectWeapon(index);
 
    mHelpItemManager.removeInlineHelpItem(ChangeWeaponsItem, true);      // User has demonstrated this skill
 }
@@ -1268,7 +1313,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl+M, for now, to cycle through message dispaly modes
+   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl+M, for now, to cycle through message display modes
    {
       toggleChatDisplayMode();
       return true;
@@ -1793,7 +1838,7 @@ Move *GameUserInterface::getCurrentMove()
    }
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
-   // we need to udate the move a little
+   // we need to update the move a little
    if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
@@ -1884,7 +1929,7 @@ void GameUserInterface::renderLevelInfo()
    if(shouldRenderLevelInfo())
    {
       mLevelInfoDisplayer.render();
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Suppress mode change alert if this message is displayed...
    }
 }
 
@@ -2069,10 +2114,10 @@ void GameUserInterface::renderGameNormal()
    renderObjects.sort(renderSortCompare);
 
    // Render in three passes, to ensure some objects are drawn above others
+   bool hasTileWalls = (GameType::getTilePolys().size() > 0);
+
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
-
       if(mDebugOverlayRenderer.renderingMeshZones())
          mDebugOverlayRenderer.renderMeshZones(i);
 
@@ -2080,6 +2125,15 @@ void GameUserInterface::renderGameNormal()
          renderObjects[j]->renderLayer(i);
 
       mFxManager.render(i, getCommanderZoomFraction());
+   }
+
+   // If tiled wall geometry has been received, render it instead of old Barrier objects.
+   // Tile walls are stored as flat WallPoly arrays with per-edge outline flags.
+   if(hasTileWalls)
+   {
+      const Color &fillColor = *getGame()->getSettings()->getWallFillColor();
+      const Color &outlineColor = *getGame()->getSettings()->getWallOutlineColor();
+      renderTilePolys(GameType::getTilePolys(), fillColor, outlineColor);
    }
 
    S32 team = NONE;
@@ -2095,6 +2149,12 @@ void GameUserInterface::renderGameNormal()
    // the result is that we can only see zones on our local server.
    if(mDebugOverlayRenderer.renderingObjectIds())
       mDebugOverlayRenderer.renderObjectIds(getGame());
+
+   if(mDebugOverlayRenderer.renderingMapTiles())
+      mDebugOverlayRenderer.renderMapTiles(getGame());
+
+   if(mDebugOverlayRenderer.renderingEdgeIds())
+      mDebugOverlayRenderer.renderEdgeIds(getGame());
 
    r.popMatrix();
 
@@ -2298,15 +2358,28 @@ void GameUserInterface::renderGameCommander()
    if(mDebugOverlayRenderer.renderingMeshZones())
       mDebugOverlayRenderer.renderMeshZones(0);
 
+   bool hasTileWalls = (GameType::getTilePolys().size() > 0);
+
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
       renderObjects[i]->renderLayer(0);
 
-   // Second pass
-   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+   // Render tiled wall geometry
+   if(hasTileWalls)
+   {
+      const Color &fillColor = *getGame()->getSettings()->getWallFillColor();
+      const Color &outlineColor = *getGame()->getSettings()->getWallOutlineColor();
+      renderTilePolys(GameType::getTilePolys(), fillColor, outlineColor);
+   }
 
    if(mDebugOverlayRenderer.renderingMeshZones())
       mDebugOverlayRenderer.renderMeshZones(1);
+
+   if(mDebugOverlayRenderer.renderingMapTiles())
+      mDebugOverlayRenderer.renderMapTiles(getGame());
+
+   if(mDebugOverlayRenderer.renderingEdgeIds())
+      mDebugOverlayRenderer.renderEdgeIds(getGame());
 
    for(S32 i = 0; i < renderObjects.size(); i++)
    {

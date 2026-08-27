@@ -68,7 +68,7 @@ protected:
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
+   std::vector<U8> innerVector;  // Use U8 to ensure address() returns a 1-byte aligned pointer compatible with bool
 };
 
 
@@ -92,6 +92,7 @@ public:
 
    void push_front(const T&);
    void push_back(const T&);
+   void push_back(T&&);             // Move-aware overload: steals heap buffers instead of deep-copying (e.g. std::vector members)
    void pop_front();
    void pop_back();
 
@@ -208,12 +209,14 @@ template<class T> inline void Vector<T>::insert(U32 index)
    this->innerVector.insert(this->innerVector.begin() + index, 1, T());
 }
 
+
 // inserts an object at a specified index
 template<class T> inline void Vector<T>::insert(U32 index, const T &x)
 {
    TNLAssert(index <= this->innerVector.size(), "index out of range");
    this->innerVector.insert(this->innerVector.begin() + index, x);
 }
+
 
 template<class T> inline void Vector<T>::erase(U32 index)
 {
@@ -345,6 +348,15 @@ template<class T> inline void Vector<T>::push_front(const T &x)
 template<class T> inline void Vector<T>::push_back(const T &x)
 {
    this->innerVector.push_back(x);
+}
+
+// Move-aware push_back: forwards to std::vector::push_back(T&&), which moves
+// the element instead of copying it.  This is important for types that own
+// heap-allocated data (e.g. types with std::vector or std::string members).
+// Without this overload, std::move() arguments silently degrade to copies.
+template<class T> inline void Vector<T>::push_back(T &&x)
+{
+   this->innerVector.push_back(std::move(x));
 }
 
 template<class T> inline void Vector<T>::pop_front()

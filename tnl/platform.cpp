@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include "../zap/stringUtils.h"
 #include <stdio.h>
 #include "tnlRandom.h"
 #include "tnlLog.h"
@@ -367,51 +368,42 @@ U32 Platform::getRealMicroseconds()
    return x86UNIXGetTickCountMicro();
 }
 
-static bool   sg_initialized = false;
-static U32 sg_secsOffset  = 0;
+static bool sg_initialized = false;
+static timeval sg_startTime;
+
+static void x86UNIXTimerInit()
+{
+   if (sg_initialized == false) {
+      sg_initialized = true;
+      ::gettimeofday(&sg_startTime, NULL);
+   }
+}
 
 U32 x86UNIXGetTickCount()
 {
-   // TODO: What happens when crossing a day boundary?
-   //
+   x86UNIXTimerInit();
+
    timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_secsOffset = t.tv_sec;
-   }
-
    ::gettimeofday(&t, NULL);
 
-   U32 secs  = t.tv_sec - sg_secsOffset;
-   U32 uSecs = t.tv_usec;
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
 
    // Make granularity 1 ms
-   return (secs * 1000) + (uSecs / 1000);
+   return (U32)(secs * 1000 + uSecs / 1000);
 }
-
-static U32 sg_uSecsOffset = 0;
 
 U32 x86UNIXGetTickCountMicro()
 {
-   // TODO: What happens when crossing a day boundary?
-   //
+   x86UNIXTimerInit();
+
    timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_uSecsOffset = t.tv_usec;
-   }
-
    ::gettimeofday(&t, NULL);
 
-   U32 uSecs  = t.tv_usec - sg_uSecsOffset;
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
 
-   return uSecs;
+   return (U32)(secs * 1000000 + uSecs);
 }
 
 class UnixTimer
@@ -521,21 +513,26 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 
 int stricmp(const char *str1, const char *str2)
 {
-   while(TNL::toupper(*str1) == TNL::toupper(*str2) && *str1)
+   while(toUpper(*str1) == toUpper(*str2) && *str1)
    {
       str1++;
       str2++;
    }
-   return (TNL::toupper(*str1) > TNL::toupper(*str2)) ? 1 : ((TNL::toupper(*str1) < TNL::toupper(*str2)) ? -1 : 0);
+   unsigned char c1 = (unsigned char)toUpper(*str1);
+   unsigned char c2 = (unsigned char)toUpper(*str2);
+   return (c1 > c2) ? 1 : ((c1 < c2) ? -1 : 0);
 }
 
 int strnicmp(const char *str1, const char *str2, unsigned int len)
 {
    for(unsigned int i = 0; i < len; i++)
    {
-      if(TNL::toupper(str1[i]) == TNL::toupper(str2[i]))
-         continue;
-      return (TNL::toupper(str1[i]) > TNL::toupper(str2[i])) ? 1 : ((TNL::toupper(str1[i]) < TNL::toupper(str2[i])) ? -1 : 0);
+      unsigned char c1 = (unsigned char)toUpper(str1[i]);
+      unsigned char c2 = (unsigned char)toUpper(str2[i]);
+      if(c1 != c2)
+         return (c1 > c2) ? 1 : -1;
+      if(!c1)
+         break;
    }
    return 0;
 }

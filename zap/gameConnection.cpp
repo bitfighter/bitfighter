@@ -86,7 +86,7 @@ void GameConnection::initialize()
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
 
-   mAcheivedConnection = false;
+   mAchievedConnection = false;
    mLastEnteredPassword = "";
 
    // Things related to verification
@@ -125,7 +125,7 @@ GameConnection::~GameConnection()
       if(mServerGame->getSuspendor() == this)
          mServerGame->suspenderLeftGame();
 
-      if(mAcheivedConnection)
+      if(mAchievedConnection)
       {
         // Compute time we were connected
         time_t quitTime;
@@ -789,7 +789,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    {
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
 
-      // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
+      // If we're clearing the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
          for(S32 i = 0; i < mServerGame->getClientCount(); i++)
@@ -1021,7 +1021,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    {
       setGotPermissionsReply(true);
 
-      // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
+      // If we're not waiting, don't show us a message.  Suppresses superfluous messages on startup.
       if(waitingForPermissionsReply() && notify)
          mClientGame->gotPermissionsReply(newRole);
    }
@@ -1144,7 +1144,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
    GameType* gt = mClientGame->getGameType();
    if(gt)
    {
-      gt->majorScoringEventOcurred(team);
+      gt->majorScoringEventOccurred(team);
       mClientGame->emitTextEffect("Touchdown!", *gt->getTeamColor(team), scorePos);
    }
 #endif
@@ -1730,7 +1730,7 @@ static S32 QSORT_CALLBACK numberAlphaSort(string *a, string *b)
    if(aNum != bNum)
       return bNum - aNum;
 
-   return stricmp(a->c_str(), b->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+   return stricmp(a->c_str(), b->c_str());        // Is there something analogous to stricmp for strings (as opposed to c_strs)?
 }
 
 
@@ -2378,7 +2378,7 @@ void GameConnection::onConnectionEstablished_server()
    displayWelcomeMessage();
 
    time(&joinTime);
-   mAcheivedConnection = true;
+   mAchievedConnection = true;
 
    // Notify the bots that a new player has joined
    EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
