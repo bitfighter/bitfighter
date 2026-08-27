@@ -1752,7 +1752,7 @@ Point mean2d(const Vector<Point> &polyPoints)
    x /= (F64)size;
    y /= (F64)size;
 
-   return Point(x,y);
+   return Point((F32)x, (F32)y);
 }
 
 

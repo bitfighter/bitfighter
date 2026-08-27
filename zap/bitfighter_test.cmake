@@ -11,6 +11,7 @@ set(TEST_SOURCES
  	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBarrier.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBugFixes.cpp    
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBitSet.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameStats.cpp

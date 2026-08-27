@@ -354,18 +354,16 @@ void Platform::forceQuit()
 }
 
 
-U32 x86UNIXGetTickCount();
-U32 x86UNIXGetTickCountMicro();
-//--------------------------------------
+static bool sg_initialized = false;
+static timeval sg_startTime;
 
-U32 Platform::getRealMilliseconds()
+static void x86UNIXInitTimer()
 {
-   return x86UNIXGetTickCount();
-}
-
-U32 Platform::getRealMicroseconds()
-{
-   return x86UNIXGetTickCountMicro();
+   if(!sg_initialized)
+   {
+      sg_initialized = true;
+      ::gettimeofday(&sg_startTime, NULL);
+   }
 }
 
 static bool sg_initialized = false;
