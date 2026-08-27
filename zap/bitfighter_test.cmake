@@ -82,6 +82,7 @@ endif()
 target_link_libraries(bitfighter_test
 	${CLIENT_LIBS}
 	${SHARED_LIBS}
+	${MASTER_LIBS}
 	GTest::gtest
 )
 
@@ -89,6 +90,7 @@ add_dependencies(bitfighter_test
 	bitfighter_client
 	master_lib
 	gtest
+	${MASTER_DEPS}
 )
 
 # Help CLion associate this target with gtest for gutter-run icon detection.
