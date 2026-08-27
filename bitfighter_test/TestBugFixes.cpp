@@ -3,6 +3,11 @@
 #include "tnlPlatform.h"
 #include "tnlVector.h"
 
+#ifndef TNL_OS_WIN32
+#  include <unistd.h>
+#endif
+
+
 namespace Zap {
 
 TEST(BugFixTest, Mean2DPrecision)
