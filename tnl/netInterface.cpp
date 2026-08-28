@@ -786,12 +786,17 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
       theParams.mUsingCrypto = true;
       theParams.mPublicKey = new AsymmetricKey(stream);
+      if(!theParams.mPublicKey->isValid())
+         return;
+
       theParams.mPrivateKey = mPrivateKey;
 
       U32 decryptPos = stream->getBytePosition();
 
       stream->setBytePosition(decryptPos);
       theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
+      if(theParams.mSharedSecret.isNull())
+         return;
 
       SymmetricCipher theCipher(theParams.mSharedSecret);
 

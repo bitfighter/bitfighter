@@ -326,6 +326,8 @@ string HttpRequest::receiveResponse()
    mResponse = "";
    S32 startTime = Platform::getRealMilliseconds();
 
+   static const U32 MaxHttpResponseSize = 10 * 1024 * 1024; // 10MB limit
+
    bool receivedData = false;
    while(receivedData || Platform::getRealMilliseconds() - startTime < mTimeout)
    {
@@ -343,6 +345,13 @@ string HttpRequest::receiveResponse()
       if(recvError == TNL::UnknownError)
       {
          mResponse = "";
+         break;
+      }
+
+      if(mResponse.size() + bytesRead > MaxHttpResponseSize)
+      {
+         mResponse = "";
+         mError = "Response exceeds maximum size limit";
          break;
       }
 
