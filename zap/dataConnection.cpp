@@ -374,6 +374,14 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    }
    else              // Client wants to send us a file -- get ready for incoming data!
    {
+      string filenameStr = filename.getString();
+      if(!safeFilename(filenameStr.c_str()) || extractFilename(filenameStr) != filenameStr || filenameStr.find("..") != string::npos)
+      {
+         logprintf("Invalid or unsafe filename for upload: %s", filenameStr.c_str());
+         disconnect(ReasonError, "Invalid or unsafe filename");
+         return;
+      }
+
       FolderManager *folderManager = settings->getFolderManager();
 
       string folder = getOutputFolder(folderManager, (FileType)(U32)filetype);

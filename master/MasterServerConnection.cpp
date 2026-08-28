@@ -1801,6 +1801,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
 
          if(command == "dropserver")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "dropserver: missing address argument");
+               return;
+            }
             bool droppedServer = false;
             Address addr(words[1].c_str());
 
@@ -1839,6 +1844,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
          }
          else if(command == "hideplayer")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "hideplayer: missing player argument");
+               return;
+            }
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
@@ -1858,6 +1868,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
          }
          else if(command == "hideip")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "hideip: missing address argument");
+               return;
+            }
             Address addr(words[1].c_str());
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();

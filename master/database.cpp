@@ -547,12 +547,12 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
          sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
 
          // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
-         for(S32 i = 0; i < rows * cols; i += cols)
+         for(S32 i = 0; i < rows; i++)
          {
             values.push_back(Vector<string>());     // Add another row
 
             for(S32 j = 0; j < cols; j++)
-               values[i].push_back(results[cols + i + j]);
+               values[i].push_back(results[cols + i * cols + j]);
          }
 
          sqlite3_free_table(results);

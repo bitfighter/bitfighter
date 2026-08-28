@@ -172,7 +172,12 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
 {
    mScoreGroups.clear();
 
+   if(groupNames.size() == 0 || names.size() == 0)
+      return;
+
    S32 scoresPerGroup = names.size() / groupNames.size();
+   if(scoresPerGroup == 0 || scores.size() < groupNames.size() * scoresPerGroup)
+      return;
 
    for(S32 i = 0; i < groupNames.size(); i++)
    {

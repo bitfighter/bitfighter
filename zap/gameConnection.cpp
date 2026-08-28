@@ -1118,6 +1118,8 @@ Color colors[] =
 void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 #ifndef ZAP_DEDICATED
+   if(colorIndex >= sizeof(colors)/sizeof(colors[0]))
+      colorIndex = 0;
    mClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       mClientGame->playSoundEffect(sfxEnum);

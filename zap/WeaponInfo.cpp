@@ -31,6 +31,13 @@ const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 
 
 // Define a list of WeaponInfos
+WeaponInfo *WeaponInfo::getWeaponInfo(WeaponType weaponType)
+{
+   S32 index = (S32)weaponType;
+   if(index < 0 || index >= sizeof(weaponInfo)/sizeof(weaponInfo[0]))
+      return &weaponInfo[0];
+   return &weaponInfo[index];
+}
 WeaponInfo weaponInfo[] = {
 #  define WEAPON_ITEM(a, name, c, delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType) \
    { StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType },

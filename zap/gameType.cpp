@@ -4469,7 +4469,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    // Broadcast this to all clients on the same team; only send back to the source if echo is true
 
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source)
+      return;
+
    ClientInfo *sourceClientInfo = source->getClientInfo();
+   if(!sourceClientInfo)
+      return;
 
    // If globally muted or voice chat is disabled on the server, don't send to anyone
    if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->enableServerVoiceChat)
@@ -4832,7 +4837,8 @@ const char *GameTypeNames[] = {
 // Return string like "Capture The Flag" -- static
 const char *GameType::getGameTypeName(GameTypeId gameType)
 {
-   TNLAssert(gameType < ARRAYSIZE(GameTypeNames), "Array index out of bounds!");
+   if((U32)gameType >= ARRAYSIZE(GameTypeNames))
+      return "Unknown";
    return GameTypeNames[gameType];
 }
 
@@ -4840,7 +4846,8 @@ const char *GameType::getGameTypeName(GameTypeId gameType)
 // Return string like "CTFGameType" -- static
 const char *GameType::getGameTypeClassName(GameTypeId gameType)
 {
-   TNLAssert(gameType < ARRAYSIZE(GameTypeNames), "Array index out of bounds!");
+   if((U32)gameType >= ARRAYSIZE(GameTypeNames))
+      return "Bitmatch";
    return gameTypeClassNames[gameType];
 }
 

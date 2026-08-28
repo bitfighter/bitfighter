@@ -720,6 +720,11 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
    else if(!stricmp(argv[0], "LevelDatabaseId"))
    {
+      if(argc < 2)
+      {
+         logprintf(LogConsumer::LogLevelError, "Missing LevelDatabaseId value (line %d)", lineNum);
+         return;
+      }
       U32 id = atoi(argv[1]);
       if(id == 0)
       {

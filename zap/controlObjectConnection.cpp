@@ -259,9 +259,9 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
                   pendingMoves.size() != 0)
                      prepareReplay();
                controlObject->readControlState(bstream);
+               mServerPosition = controlObject->getPos();
+               mNeedReplayMoves = true;
             }
-            mServerPosition = controlObject->getPos();
-            mNeedReplayMoves = true;
          }
          else
             controlObject = NULL;
