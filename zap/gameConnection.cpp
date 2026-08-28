@@ -314,7 +314,9 @@ const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 void GameConnection::submitPassword(const char *password)
 {
    string encrypted = Game::md5.getSaltedHashFromString(password);
-   c2sSubmitPassword(encrypted.c_str());
+   string nonceStr = getNonce().toString();
+   string challengedHash = Game::md5.getHashFromString(encrypted + nonceStr);
+   c2sSubmitPassword(challengedHash.c_str());
 
    mLastEnteredPassword = password;
 
@@ -531,7 +533,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If level change password is blank, it should already been granted to all clients
-   else if(checkPass(levChangePW, pass))
+   else if(checkPass(this, levChangePW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;

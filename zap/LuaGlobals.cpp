@@ -205,7 +205,7 @@ S32 lua_readFromFile(lua_State *L)
 
    string filename = extractFilename(getString(L, 1, ""));
 
-   if(filename == "")
+   if(filename == "" || filename == ".." || filename == "." || filename.find("..") != string::npos || !safeFilename(filename.c_str()))
       returnNil(L);
 
    FolderManager *folderManager = GameSettings::getFolderManager();
@@ -243,7 +243,7 @@ S32 lua_writeToFile(lua_State *L)
    if(profile == 1)
       append = getBool(L, 3);
 
-   if(filename != "" && contents != "")
+   if(filename != "" && filename != ".." && filename != "." && filename.find("..") == string::npos && safeFilename(filename.c_str()) && contents != "")
    {
       FolderManager *folderManager = GameSettings::getFolderManager();
 

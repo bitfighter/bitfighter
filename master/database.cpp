@@ -367,7 +367,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
                 "LIMIT " + itos(count) + ";";
 
-   Vector<Vector<string> > results(count);
+   Vector<Vector<string> > results;
 
    selectHandler(sql, 2, results);
 
@@ -411,11 +411,11 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
 
-   Vector<Vector<string> > results(nameCount);
+   Vector<Vector<string> > results;
 
    selectHandler(sql, 2, results);
 
-   Vector<string> credentialStrings(results.size());
+   Vector<string> credentialStrings;
 
    for(S32 i = 0; i < results.size(); i++)
    {
@@ -472,7 +472,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 
    Vector<Vector<string> > results;
 
-   selectHandler(sql, 1, results);
+   selectHandler(sql, 2, results);
 
    if(results.size() == 0)    // <== signifies an error getting the rating
       return UnknownRating;

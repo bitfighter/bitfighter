@@ -457,9 +457,12 @@ void DataConnection::onConnectionEstablished()
 {
    if(isInitiator())    // i.e. client
    {
+      string pwdHash = Game::md5.getSaltedHashFromString(mPassword);
+      string challengedHash = Game::md5.getHashFromString(pwdHash + getNonce().toString());
+
       if(mAction == SEND_FILE)
       {
-         c2sSendOrRequestFile(mPassword.c_str(), mFileType, false, mFilename.c_str());
+         c2sSendOrRequestFile(challengedHash.c_str(), mFileType, false, mFilename.c_str());
       }
 
       else if(mAction == REQUEST_FILE)
@@ -484,7 +487,7 @@ void DataConnection::onConnectionEstablished()
             return;
          }
 
-         c2sSendOrRequestFile(mPassword.c_str(), mFileType, true, mFilename.c_str());
+         c2sSendOrRequestFile(challengedHash.c_str(), mFileType, true, mFilename.c_str());
       }
    }
 }

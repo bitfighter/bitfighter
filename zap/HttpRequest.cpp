@@ -23,7 +23,7 @@ const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
 const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
-const string HttpRequest::LevelDatabaseBaseUrl = "bitfighter.org/pleiades";
+const string HttpRequest::LevelDatabaseBaseUrl = "https://bitfighter.org/pleiades";
 
 HttpRequest::HttpRequest(const string &url)
    : mUrl(url),
@@ -47,12 +47,21 @@ void HttpRequest::setUrl(const string &url)
 {
    mUrl = url;
 
+   string workingUrl = mUrl;
+   if(workingUrl.compare(0, 8, "https://") == 0)
+      workingUrl = workingUrl.substr(8);
+   else if(workingUrl.compare(0, 7, "http://") == 0)
+      workingUrl = workingUrl.substr(7);
+
    // hostname is anything before the first '/'
-   size_t index = mUrl.find('/');
-   string host = mUrl.substr(0, index);
+   size_t index = workingUrl.find('/');
+   string host = (index == string::npos) ? workingUrl : workingUrl.substr(0, index);
+
    string addressString;
    if(host.find(':') != string::npos)
       addressString = "ip:" + host;
+   else if(mUrl.compare(0, 8, "https://") == 0)
+      addressString = "ip:" + host + ":443";
    else
       addressString = "ip:" + host + ":80";
 
