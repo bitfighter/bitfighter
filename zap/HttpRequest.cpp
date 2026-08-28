@@ -23,7 +23,7 @@ const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
 const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
-const string HttpRequest::LevelDatabaseBaseUrl = "https://bitfighter.org/pleiades";
+const string HttpRequest::LevelDatabaseBaseUrl = "http://bitfighter.org/pleiades";
 
 HttpRequest::HttpRequest(const string &url)
    : mUrl(url),

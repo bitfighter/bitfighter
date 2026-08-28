@@ -1126,7 +1126,7 @@ void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *mes
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i),
                   (color, sfx, formatString, e, s, i),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
@@ -1137,7 +1137,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e), (color, sfx, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1146,7 +1146,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos),
+                  (RangedU32<0, NumSFXBuffers - 1> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos),
                   (sfx, team, formatString, e, scorePos),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1186,7 +1186,7 @@ void GameConnection::sendLevelList()
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString),
                   (color, sfx, formatString),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1957,7 +1957,7 @@ bool GameConnection::TransferRecordedGameplay(const char *filename)
 
       s2cSetFilename(extractFilename(filename).c_str());
       s2rTransferFileSize(totalTransferSize);
-      for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; i++)
+      for(U32 i = 0; i < mPendingTransferData.size(); i++)
          s2rSendDataParts(TransmissionRecordedGame, ByteBufferPtr(mPendingTransferData[i]));
 
       s2rSendDataParts(TransmissionRecordedGame | TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));

@@ -54,6 +54,9 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 
 void Event::inputCodeUp(UserInterface *currentUI, InputCode inputCode)
 {
+   if((S32)inputCode < 0 || (S32)inputCode >= MAX_INPUT_CODES)
+      return;
+
    InputCodeManager::setState(inputCode, false);
 
    if(currentUI)
@@ -67,6 +70,9 @@ void Event::inputCodeUp(UserInterface *currentUI, InputCode inputCode)
 
 bool Event::inputCodeDown(UserInterface *currentUI, InputCode inputCode)
 {
+   if((S32)inputCode < 0 || (S32)inputCode >= MAX_INPUT_CODES)
+      return false;
+
    InputCodeManager::setState(inputCode, true);
 
    if(currentUI)

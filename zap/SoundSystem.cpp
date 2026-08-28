@@ -473,6 +473,8 @@ SFXHandle SoundSystem::playRecordedBuffer(ByteBufferPtr p, F32 gain)
 
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
 {
+   if(profileIndex >= NumSFXBuffers)
+      return SFXHandle();
    SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, Point(), Point());
    playSoundEffect(ret);
    return ret;
@@ -481,12 +483,16 @@ SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
 
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position)
 {
+   if(profileIndex >= NumSFXBuffers)
+      return SFXHandle();
    return playSoundEffect(profileIndex, position, Point(0,0));
 }
 
 
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain)
 {
+   if(profileIndex >= NumSFXBuffers)
+      return SFXHandle();
    SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, position, velocity);
    playSoundEffect(ret);
    return ret;

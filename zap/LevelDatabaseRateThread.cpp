@@ -16,7 +16,7 @@ namespace Zap
 {
 
 // Define statics
-const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "https://bitfighter.org/pleiades/levels/rate/";
+const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "http://bitfighter.org/pleiades/levels/rate/";
 
 const string LevelDatabaseRateThread::RatingStrings[] = {
 #define LEVEL_RATING(a, strval) strval,
