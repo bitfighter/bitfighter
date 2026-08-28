@@ -254,6 +254,12 @@ namespace Types
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
+      if(size > 2048)
+      {
+         s.setError();
+         return;
+      }
+
       val->resize(size);
       for(TNL::S32 i = 0; i < val->size(); i++)
       {

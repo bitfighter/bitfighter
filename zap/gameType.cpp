@@ -3022,6 +3022,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
 
    bool hasTileData = false;
 
+   if(polySizes.size() < polyCount)
+      return;
+
    U32 vertOff = 0, outlineOff = 0;
    for(U16 p = 0; p < polyCount; p++)
    {
@@ -3032,6 +3035,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
          outlineOff += n;
          continue;
       }
+
+      if(vertOff + n * 2 > allVerts.size() || outlineOff + n > allStyles.size())
+         return;
 
       WallPoly wp;
       wp.verts.reserve(n * 2);
@@ -3960,12 +3966,12 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
 
 GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
 {
-   LuaScriptRunner::clearScriptCache();
    ClientInfo *clientInfo = ((GameConnection *) getRPCSourceConnection())->getClientInfo();
 
-   if(!clientInfo->isAdmin())    // Error message handled client-side
+   if(!clientInfo || !clientInfo->isAdmin())    // Error message handled client-side
       return;
 
+   LuaScriptRunner::clearScriptCache();
    clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
 }
 
@@ -4252,10 +4258,12 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 {
    //logprintf("%s GameType->c2sDropItem", isGhost()? "Client:" : "Server:");
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source)
+      return;
 
    BfObject *controlObject = source->getControlObject();
 
-   if(!isShipType(controlObject->getObjectTypeNumber()))
+   if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
       return;
 
    Ship *ship = static_cast<Ship *>(controlObject);
@@ -4400,7 +4408,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-      if(i >= pingTimes.size())
+      if(i >= pingTimes.size() || i >= kills.size() || i >= deaths.size())
          break;
 
       ClientInfo *client = mGame->getClientInfo(i);

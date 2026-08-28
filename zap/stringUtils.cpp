@@ -353,22 +353,23 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
             S32 index = 0;
             while(isDigit(*src))
             {
-               index = index * 10 + (*src - '0');
+               if(index < 10000)
+                  index = index * 10 + (*src - '0');
                src++;
             }
 
             switch(*type)
             {
                case 'e':
-                  if(index < e.size())
+                  if(index >= 0 && index < (S32)e.size())
                      result += e[index].getString();
                   break;
                case 's':
-                  if(index < s.size())
+                  if(index >= 0 && index < (S32)s.size())
                      result += s[index].getString();
                   break;
                case 'i':
-                  if(index < i.size())
+                  if(index >= 0 && index < (S32)i.size())
                      result += itos(i[index]);
                   break;
             }

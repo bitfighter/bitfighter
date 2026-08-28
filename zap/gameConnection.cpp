@@ -1677,17 +1677,25 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
    ByteBuffer *&dataBuffer = (type & 2 ? mDataBufferLevelGen : mDataBuffer);
 
+   static const U32 maxClientDataBufferSize = 100 * 1024 * 1024; // 100MB limit on clients
+   U32 maxAllowed = isInitiator() ? maxClientDataBufferSize : maxDataBufferSize;
+
    if(dataBuffer)
    {
-      if(dataBuffer->getBufferSize() + data->getBufferSize() <= maxDataBufferSize || isInitiator())  // Limit memory consumption (no limit on clients due to how big game recordings can be)
+      if(dataBuffer->getBufferSize() + data->getBufferSize() <= maxAllowed)
          dataBuffer->appendBuffer(*data.getPointer());
       else
          return;
    }
    else
    {
-      dataBuffer = new ByteBuffer(*data.getPointer());
-      dataBuffer->takeOwnership();
+      if(data->getBufferSize() <= maxAllowed)
+      {
+         dataBuffer = new ByteBuffer(*data.getPointer());
+         dataBuffer->takeOwnership();
+      }
+      else
+         return;
    }
 
    if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)

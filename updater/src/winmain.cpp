@@ -354,6 +354,11 @@ static DWORD WINAPI launchProgressBar(void *)
 
 bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServerInfo, bool isSilentMode, pair<string, string> stoppedMessage)
 {
+	if (urlFrom.compare(0, 8, "https://") != 0)
+	{
+		return false;
+	}
+
 	FILE* pFile = fopen(destTo.c_str(), "wb");
 
 	//  Download the install package from indicated location
@@ -363,6 +368,8 @@ bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServer
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_URL, urlFrom.c_str());
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getDownloadData);

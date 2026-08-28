@@ -231,7 +231,14 @@ GupDownloadInfo::GupDownloadInfo(const char * xmlString) : _updateVersion(""), _
 		if (!locVal || !(*locVal))
 			throw exception("Location is missed.");
 		
-		_updateLocation = locVal;
+		string locStr = locVal;
+		if (locStr.compare(0, 8, "https://") != 0 ||
+          (locStr.compare(8, 14, "bitfighter.org") != 0 &&
+           locStr.compare(8, 18, "www.bitfighter.org") != 0))
+		{
+			throw exception("Invalid or untrusted update location.");
+		}
+		_updateLocation = locStr;
 	}
 }
 

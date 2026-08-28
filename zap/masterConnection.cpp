@@ -591,7 +591,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(controllerName);
 
       bstream->writeString(clientGame->getPlayerName().c_str());          // User's nickname
-      bstream->writeString(clientGame->getPlayerPassword().c_str());      // and whatever password they supplied
+      string pw = clientGame->getPlayerPassword();
+      string pwHash = pw.empty() ? "" : Game::md5.getSaltedHashFromString(pw);
+      bstream->writeString(pwHash.c_str());
 
       // Starting with MASTER_PROTOCOL_VERSION 6 we will write an 8 bit set of flags
       bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);

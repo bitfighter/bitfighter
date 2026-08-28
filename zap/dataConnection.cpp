@@ -337,8 +337,15 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    string adminPW = settings->getAdminPassword();
    string ownerPW = settings->getOwnerPassword();
 
-   bool goodOwnerPW = ownerPW != "" && strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
-   bool goodAdminPW = adminPW != "" && strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
+   string adminHash = adminPW != "" ? Game::md5.getSaltedHashFromString(adminPW) : "";
+   string ownerHash = ownerPW != "" ? Game::md5.getSaltedHashFromString(ownerPW) : "";
+
+   string nonceStr = getNonce().toString();
+   string challengedAdminHash = adminHash != "" ? Game::md5.getHashFromString(adminHash + nonceStr) : "";
+   string challengedOwnerHash = ownerHash != "" ? Game::md5.getHashFromString(ownerHash + nonceStr) : "";
+
+   bool goodOwnerPW = ownerPW != "" && (strcmp(ownerHash.c_str(), password) == 0 || strcmp(challengedOwnerHash.c_str(), password) == 0);
+   bool goodAdminPW = adminPW != "" && (strcmp(adminHash.c_str(), password) == 0 || strcmp(challengedAdminHash.c_str(), password) == 0);
 
    if(!goodOwnerPW && !goodAdminPW)
    {

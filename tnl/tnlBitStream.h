@@ -343,7 +343,7 @@ inline bool BitStream::read(const U32 in_numBytes,  void* out_pBuffer)
 
 inline bool BitStream::readFlag()
 {
-   if(bitNum > maxReadBitNum)
+   if(bitNum >= maxReadBitNum)
    {
       error = true;
       TNLAssert(false, "Out of range read");
