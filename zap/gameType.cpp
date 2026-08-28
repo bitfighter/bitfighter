@@ -3568,6 +3568,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBot,
    if(addBotFromClient(args))
    {
       GameConnection *source = (GameConnection *) getRPCSourceConnection();
+      if(!source || !source->getClientInfo())
+         return;
 
       StringTableEntry msg = StringTableEntry("Robot added by %e0");
       messageVals.clear();
@@ -3597,6 +3599,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
    if(botsAdded > 0)
    {
       GameConnection *source = (GameConnection *) getRPCSourceConnection();
+      if(!source || !source->getClientInfo())
+         return;
 
       StringTableEntry msg = StringTableEntry("%e0 %e1 added by %e2");
       messageVals.clear();
@@ -3614,6 +3618,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
 GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *clientInfo = source->getClientInfo();
    GameSettings *settings = getGame()->getSettings();
 
@@ -3644,6 +3650,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
 GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *clientInfo = source->getClientInfo();
 
    // Level changers and above
@@ -3807,6 +3815,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
 GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 duration), (playerName, duration))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *clientInfo = source->getClientInfo();
    GameSettings *settings = getGame()->getSettings();
 
@@ -3827,7 +3837,10 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(bannedClientInfo->isRobot())
       return;  // Error message handled client-side
 
-   Address ipAddress = bannedClientInfo->getConnection()->getNetAddress();
+   GameConnection *bannedConn = bannedClientInfo->getConnection();
+   if(!bannedConn)
+      return;
+   Address ipAddress = bannedConn->getNetAddress();
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
@@ -3912,6 +3925,8 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
 GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, StringTableEntry newName), (playerName, newName))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *clientInfo = source->getClientInfo();
 
    if(!clientInfo->isAdmin())
@@ -3934,13 +3949,16 @@ GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, String
    updateClientChangedName(renamedClientInfo, uniqueName);
 
    GameConnection *conn = clientInfo->getConnection();
-   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player has been renamed"));
+   if(conn)
+      conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, StringTableEntry("Player has been renamed"));
 }
 
 
 GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (playerName))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *clientInfo = source->getClientInfo();
 
    if(!clientInfo->isAdmin())
@@ -4066,6 +4084,8 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
 GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
 
    processServerCommand(source->getClientInfo(), cmd.getString(), args);
 }
@@ -4075,6 +4095,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    if(!sourceClientInfo->isAdmin())
@@ -4088,6 +4110,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    ClientInfo *clientInfo = mGame->findClientInfo(toName.getString());
@@ -4112,8 +4136,12 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
    if(!source->checkMessage(message.getString(), 2))     // Check message for flooding, etc.
       return;
 
+   GameConnection *targetConn = clientInfo->getConnection();
+   if(!targetConn)
+      return;
+
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (sourceClientInfo->getName(), toName, message));
-   clientInfo->getConnection()->postNetEvent(theEvent);
+   targetConn->postNetEvent(theEvent);
    source->postNetEvent(theEvent);
 }
 
@@ -4122,6 +4150,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    if(!source->checkMessage(message.getString(), global ? 0 : 1))
@@ -4173,6 +4203,8 @@ void GameType::displayAnnouncement(const string &message) const
 GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source || !source->getClientInfo())
+      return;
 
    if(!source->checkMessage(message.getString(), global ? 0 : 1))
       return;
