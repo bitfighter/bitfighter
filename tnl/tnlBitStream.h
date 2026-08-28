@@ -61,7 +61,7 @@ struct Point3F
 ///       broken template functionality.  Thanks MS!
 #define DeclareTemplatizedReadWrite(T) \
 inline bool write(T value) { T temp = convertHostToLEndian(value); return write(sizeof(T), &temp); } \
-inline bool read(T *value) { T temp; bool success = read(sizeof(T), &temp); *value = convertLEndianToHost(temp); return success;}
+inline bool read(T *value) { T temp = T(); bool success = read(sizeof(T), &temp); if(success) *value = convertLEndianToHost(temp); else *value = T(); return success;}
 
 /// BitStream provides a bit-level stream interface to a data buffer.
 class BitStream : public ByteBuffer

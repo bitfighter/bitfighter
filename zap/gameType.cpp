@@ -3025,14 +3025,18 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSendWallTile, (U16 tileId, U16 polyCoun
    if(polySizes.size() < polyCount)
       return;
 
+   static const U32 MAX_WALL_POLY_VERTS = 1000;
    U32 vertOff = 0, outlineOff = 0;
    for(U16 p = 0; p < polyCount; p++)
    {
       U32 n = polySizes[p];
-      if(n < 3)
+      if(n < 3 || n > MAX_WALL_POLY_VERTS)
       {
-         vertOff += n * 2;
-         outlineOff += n;
+         if(n <= MAX_WALL_POLY_VERTS)
+         {
+            vertOff += n * 2;
+            outlineOff += n;
+         }
          continue;
       }
 

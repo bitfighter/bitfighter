@@ -370,7 +370,7 @@ bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServer
 		curl_easy_setopt(curl, CURLOPT_URL, urlFrom.c_str());
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, FALSE);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getDownloadData);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, pFile);
@@ -448,7 +448,7 @@ bool getUpdateInfo(string &info2get, const GupParameters& gupParams, const GupEx
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, FALSE);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getUpdateInfoCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &info2get);

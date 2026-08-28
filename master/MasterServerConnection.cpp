@@ -535,7 +535,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
          fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                      first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()).c_str(),
-                     server->mCSProtocolVersion, server->mLevelName.getString(), server->mLevelType.getString(), server->mPlayerCount);
+                     server->mCSProtocolVersion, sanitizeForJson(server->mLevelName.getString()).c_str(), sanitizeForJson(server->mLevelType.getString()).c_str(), server->mPlayerCount);
          playerCount += server->mPlayerCount;
          serverCount++;
          first = false;
@@ -1393,6 +1393,9 @@ U32 PlayerLevelRating::getCacheExpiryTime() { return TEN_MINUTES; }
 // The client has rated the level and sent it to us
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 databaseId, RangedU32<0, 2> rating))
 {
+   if(!mPlayerOrServerName.getString()[0] || !isAuthenticated())
+      return;
+
    // Do nothing if client sent us an invalid id
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return;

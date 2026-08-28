@@ -51,14 +51,6 @@ io = nil
 debug = nil
 require = nil
 ffi = nil
-_G = nil
-newproxy = nil
-jit = nil
-
--- Unsafe functions mixed with safe functions of some packages
-string.dump = nil
-math.randomseed = nil
-
 -- Most 'os' stuff is unsafe - we only keep 'clock', 'difftime', 'time'
 os.date = nil
 os.execute = nil
@@ -83,3 +75,7 @@ local protected_modules = "coroutine math os string table"
 protected_modules:gsub('%S+', function(module_name)
   _G[module_name] = protect_module(_G[module_name], module_name)
 end)
+
+_G = nil
+newproxy = nil
+jit = nil
