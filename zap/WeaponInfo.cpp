@@ -22,7 +22,11 @@ const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 #  undef WEAPON_ITEM
    };
 
-   return weaponName[(S32)weaponType];
+   S32 index = (S32)weaponType;
+   if(index < 0 || index >= sizeof(weaponName)/sizeof(weaponName[0]))
+      return "Unknown";
+
+   return weaponName[index];
 }
 
 

@@ -116,6 +116,9 @@ public:
    /// sets the ConnectionStringTable for compressing string table entries across the network
    void setStringTable(ConnectionStringTable *table) { mStringTable = table; }
 
+   /// sets the error state
+   void setError() { error = true; }
+
    /// clears the error state from an attempted read or write overrun
    void clearError() { error = false; }
 

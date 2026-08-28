@@ -32,6 +32,9 @@ FileType getResourceType(const char *fileType)
 
 static string getFullFilename(const FolderManager *configDirs, string filename, FileType fileType)
 {
+   if(extractFilename(filename) != filename || filename.find("..") != string::npos || filename.find('/') != string::npos || filename.find('\\') != string::npos)
+      return "";
+
    // Don't return "" if empty directory, allow client load the file if on the same directory as EXE.
    string name;
    if(fileType == BOT_TYPE)

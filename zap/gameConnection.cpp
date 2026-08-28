@@ -419,9 +419,24 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
 
 
 // Return true if passwords match, false if not
-static bool checkPass(const string &password, const char *enteredPassword)
+static bool checkPass(const NetConnection *conn, const string &password, const char *enteredPassword)
 {
-   return strcmp(Game::md5.getSaltedHashFromString(password).c_str(), enteredPassword) == 0;
+   if(password.empty() || !enteredPassword)
+      return false;
+
+   string hash = Game::md5.getSaltedHashFromString(password);
+   if(strcmp(hash.c_str(), enteredPassword) == 0)
+      return true;
+
+   if(conn)
+   {
+      string nonceStr = conn->getNonce().toString();
+      string challengedHash = Game::md5.getHashFromString(hash + nonceStr);
+      if(strcmp(challengedHash.c_str(), enteredPassword) == 0)
+         return true;
+   }
+
+   return false;
 }
 
 
@@ -439,13 +454,13 @@ bool GameConnection::userAlreadyHasPermissions(const string &ownerPW, const stri
       return true;
    }
 
-   if(mClientInfo->isAdmin() && adminPW != "" && (checkPass(adminPW, pass) || checkPass(levChangePW, pass)))
+   if(mClientInfo->isAdmin() && adminPW != "" && (checkPass(this, adminPW, pass) || checkPass(this, levChangePW, pass)))
    {
       s2cDisplayErrorMessage("!!! You already have admin permissions");
       return true;
    }
 
-   if(mClientInfo->isLevelChanger() && checkPass(levChangePW, pass))
+   if(mClientInfo->isLevelChanger() && checkPass(this, levChangePW, pass))
    {
       s2cDisplayErrorMessage("!!! You already have level change permissions");
       return true;
@@ -467,7 +482,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    if(userAlreadyHasPermissions(ownerPW, adminPW, levChangePW, pass))
       return;
 
-   if(ownerPW != "" &&  checkPass(ownerPW, pass))
+   if(ownerPW != "" && checkPass(this, ownerPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -493,7 +508,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   else if(adminPW != "" && checkPass(adminPW, pass))
+   else if(adminPW != "" && checkPass(this, adminPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -1848,7 +1863,11 @@ bool GameConnection::TransferLevelFile(const char *filename)
       if(levelInfo.mScriptFileName.c_str()[0] != 0)
       {
          FolderManager *folderManager = mSettings->getFolderManager();
-         string filename1 = strictjoindir(folderManager->levelDir, levelInfo.mScriptFileName);
+         string safeScript = extractFilename(levelInfo.mScriptFileName);
+         if(safeScript.empty() || safeScript.find("..") != string::npos)
+            return false;
+
+         string filename1 = strictjoindir(folderManager->levelDir, safeScript);
          f = fopen(filename1.c_str(), "rb");
 
          if(!f)

@@ -115,7 +115,7 @@ static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<We
       if(weaponStats[i].shots > 0)
       {
          string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck) "
-                       "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " +
+                       "VALUES(" + itos(playerId) + ", '" + sanitizeForSql(WeaponInfo::getWeaponName(weaponStats[i].weaponType)) + "', " +
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
 
          query.runQuery(sql);

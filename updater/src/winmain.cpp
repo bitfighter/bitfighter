@@ -445,6 +445,8 @@ bool getUpdateInfo(string &info2get, const GupParameters& gupParams, const GupEx
 
 		curl_easy_setopt(curl, CURLOPT_URL, urlComplete.c_str());
 
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
 
