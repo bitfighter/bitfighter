@@ -69,6 +69,8 @@ public:
 
    std::string toString() const
    {
+      if(!mValid)
+         return "";
       char buf[NonceSize * 2 + 1];
       for(S32 i = 0; i < NonceSize; i++)
          dSprintf(buf + i * 2, 3, "%02x", data[i]);

@@ -207,7 +207,7 @@ namespace Types
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
-      if(size > 2048)
+      if(size > 65790)
       {
          s.setError();
          return;
@@ -254,7 +254,7 @@ namespace Types
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
-      if(size > 2048)
+      if(size > 65790)
       {
          s.setError();
          return;

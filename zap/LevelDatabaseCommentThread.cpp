@@ -61,7 +61,7 @@ void LevelDatabaseCommentThread::run()
    HttpRequest req = HttpRequest(reqURL);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      username);
-   req.setData("data[User][user_password]", Game::md5.getSaltedHashFromString(user_password));
+   req.setData("data[User][user_password]", user_password);
    req.setData("data[Comment][level_id]",   mLevelId);
    req.setData("data[Comment][text]",       mComment);
 

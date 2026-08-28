@@ -1599,8 +1599,11 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
                fwrite(leveldata, 1, c, f);
             fwrite("Script ", 1, 7, f);
             fwrite(filenameLevelgen.c_str(), 1, strlen(filenameLevelgen.c_str()), f);
-            // Skip the rest of the old Script line up to newline
-            while(c < levelsize && leveldata[c] != '\r' && leveldata[c] != '\n')
+            // Skip "Script" keyword, whitespace, and the old script filename, preserving arguments
+            c += 6;
+            while(c < levelsize && (leveldata[c] == ' ' || leveldata[c] == '\t'))
+               c++;
+            while(c < levelsize && leveldata[c] != ' ' && leveldata[c] != '\t' && leveldata[c] != '\r' && leveldata[c] != '\n')
                c++;
          }
          else

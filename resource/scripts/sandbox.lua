@@ -51,6 +51,8 @@ io = nil
 debug = nil
 require = nil
 ffi = nil
+string.dump = nil
+math.randomseed = nil
 -- Most 'os' stuff is unsafe - we only keep 'clock', 'difftime', 'time'
 os.date = nil
 os.execute = nil

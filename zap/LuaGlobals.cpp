@@ -206,7 +206,7 @@ S32 lua_readFromFile(lua_State *L)
    string filename = extractFilename(getString(L, 1, ""));
 
    if(filename == "" || filename == ".." || filename == "." || filename.find("..") != string::npos || !safeFilename(filename.c_str()))
-      returnNil(L);
+      return returnNil(L);
 
    FolderManager *folderManager = GameSettings::getFolderManager();
    string contents = readFile(folderManager->screenshotDir + getFileSeparator() + filename);
