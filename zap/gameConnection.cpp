@@ -396,11 +396,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisableWeaponsAndModules, (bool disable), (
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
-#ifndef ZAP_DEDICATED
    mClientInfo->setNeedToCheckAuthenticationWithMaster(true);
 
    requestAuthenticationVerificationFromMaster();
-#endif
 }
 
 
@@ -427,8 +425,6 @@ static bool checkPass(const NetConnection *conn, const string &password, const c
       return false;
 
    string hash = Game::md5.getSaltedHashFromString(password);
-   if(strcmp(hash.c_str(), enteredPassword) == 0)
-      return true;
 
    if(conn)
    {
@@ -1502,10 +1498,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 #ifndef ZAP_DEDICATED
    if(isInitiator() && ((flags & ~mSendableFlags) & HostModeFlag))
    {
-      c2sSetParam(mSettings->getLevelChangePassword(), LevelChangePassword);
-      c2sSetParam(mSettings->getAdminPassword(), AdminPassword);
-      c2sSetParam(mSettings->getOwnerPassword(), OwnerPassword);
-      c2sSetParam(mSettings->getServerPassword(), ServerPassword);
       c2sSetParam(mSettings->getHostName(), ServerName);
       c2sSetParam(mSettings->getHostDescr(), ServerDescription);
       c2sSetParam(mSettings->getWelcomeMessage(), ServerWelcomeMessage);

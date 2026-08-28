@@ -186,7 +186,7 @@ string HttpRequest::urlEncodeChar(char c)
       char buffer[4];
       // Convert ordinal to a two character hex number in the range [0, 255],
       // prefixed by a percentage sign
-      dSprintf(buffer, 16, (const char*) "%%%0.2x", (U32) ordinal & 0xFF);
+      dSprintf(buffer, sizeof(buffer), (const char*) "%%%0.2x", (U32) ordinal & 0xFF);
       result = buffer;
    }
    return result;
@@ -221,9 +221,15 @@ void HttpRequest::setMethod(const string& method)
 
 string HttpRequest::buildRequest()
 {
-   // location is anything that comes after the first '/'
-   size_t index = mUrl.find('/');
-   string location = mUrl.substr(index, mUrl.length() - index);
+   // location is anything that comes after the hostname in mUrl
+   string workingUrl = mUrl;
+   if(workingUrl.compare(0, 8, "https://") == 0)
+      workingUrl = workingUrl.substr(8);
+   else if(workingUrl.compare(0, 7, "http://") == 0)
+      workingUrl = workingUrl.substr(7);
+
+   size_t index = workingUrl.find('/');
+   string location = (index == string::npos) ? "/" : workingUrl.substr(index);
 
    // request line
    mRequest = mMethod + " " + location + " HTTP/1.0";
