@@ -235,8 +235,13 @@ GupDownloadInfo::GupDownloadInfo(const char * xmlString) : _updateVersion(""), _
 		if (locStr.compare(0, 8, "https://") != 0)
 			throw exception("Invalid or untrusted update location.");
 
-		size_t hostEnd = locStr.find_first_of("/:", 8);
-		string host = (hostEnd == string::npos) ? locStr.substr(8) : locStr.substr(8, hostEnd - 8);
+		if (locStr.find('@') != string::npos)
+			throw exception("Invalid or untrusted update location.");
+
+		size_t pathPos = locStr.find('/', 8);
+		string authority = (pathPos == string::npos) ? locStr.substr(8) : locStr.substr(8, pathPos - 8);
+		size_t portPos = authority.find(':');
+		string host = (portPos == string::npos) ? authority : authority.substr(0, portPos);
 
 		if (host != "bitfighter.org" && host != "www.bitfighter.org")
 		{

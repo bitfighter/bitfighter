@@ -657,7 +657,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int)
 		//
 		::CreateThread(NULL, 0, launchProgressBar, NULL, 0, NULL);
 		
-		std::string dlDest = std::getenv("TEMP");
+		const char *tempEnv = std::getenv("TEMP");
+		if (!tempEnv) tempEnv = std::getenv("TMP");
+		std::string dlDest = tempEnv ? tempEnv : ".";
 		dlDest += "\\";
 		dlDest += ::PathFindFileNameA(gupDlInfo.getDownloadLocation().c_str());
 

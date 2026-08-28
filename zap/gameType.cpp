@@ -3852,7 +3852,11 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 duration), (ipAddressString, duration))
 {
    GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+   if(!conn)
+      return;
    ClientInfo *clientInfo = conn->getClientInfo();
+   if(!clientInfo)
+      return;
    GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isAdmin())
@@ -3984,7 +3988,11 @@ GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
 GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex), (playerName, teamIndex))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source)
+      return;
    ClientInfo *sourceClientInfo = source->getClientInfo();
+   if(!sourceClientInfo)
+      return;
 
    if(!sourceClientInfo->isAdmin())
       return;  // Error message handled client-side
@@ -4006,7 +4014,11 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
 GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickeeName))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   if(!source)
+      return;
    ClientInfo *sourceClientInfo = source->getClientInfo();
+   if(!sourceClientInfo)
+      return;
 
    if(!sourceClientInfo->isAdmin())
       return;
