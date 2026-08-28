@@ -562,8 +562,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
    mSettings->getIniSettings()->allowGetMap = allowGetMap;
    mSettings->getIniSettings()->allowMapUpload = allowMapUpload;
    mSettings->getIniSettings()->randomLevels = randomLevels;
-   mSettings->getIniSettings()->allowAdminMapUpload = true; // must be True, for host on server to work
-   mSettings->getIniSettings()->allowLevelgenUpload = true;
 }
 
 // Allow admins to change the passwords and other parameters on their systems
@@ -1311,6 +1309,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 
    bool restart = false;
 
+   if(mServerGame->getLevelCount() == 0)
+      return;
+
    if(isRelative)
       newLevelIndex = (mServerGame->getCurrentLevelIndex() + newLevelIndex ) % mServerGame->getLevelCount();
    else if(newLevelIndex == REPLAY_LEVEL)
@@ -1572,9 +1573,9 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
          U32 c=0;
          bool foundscript = false;
          // First, find a line that says "Script"
-         while(c < levelsize - 10)
-         {  // Make sure the previous char is a new line (c < 32), and compare "Script " with only 7 chars
-            if((c == 0 || leveldata[c-1] < 32) && strncmp("Script ", (char*)&leveldata[c], 7) == 0)
+         while(levelsize >= 7 && c + 7 <= levelsize)
+         {  // Make sure the previous char is a new line (c < 32), and compare "Script" plus space or tab
+            if((c == 0 || leveldata[c-1] < 32) && strncmp("Script", (char*)&leveldata[c], 6) == 0 && (leveldata[c+6] == ' ' || leveldata[c+6] == '\t'))
             {
                foundscript = true;
                break;
@@ -1583,21 +1584,13 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
          }
          if(foundscript)
          {  // Found a line, write a modified Script filename we will soon write to.
-            // Could use more work here to better handle spaces and quotes
             if(c != 0)
                fwrite(leveldata, 1, c, f);
-            fwrite("Script ", 1, 7, f); // Using quotation marks to handle filename with spaces
+            fwrite("Script ", 1, 7, f);
             fwrite(filenameLevelgen.c_str(), 1, strlen(filenameLevelgen.c_str()), f);
-            //fputc('"', f);  // End with quotation mark
-            c += 6;
-            while(c < levelsize && leveldata[c] == 32) // First one or more spaces.
+            // Skip the rest of the old Script line up to newline
+            while(c < levelsize && leveldata[c] != '\r' && leveldata[c] != '\n')
                c++;
-            bool isInQuote = false; // to ignore spaces while in quotoation marks
-            while(c < levelsize && leveldata[c] >= 32 && (isInQuote || leveldata[c] != 32)) // Go to end of second arg
-            {
-               isInQuote = isInQuote != (leveldata[c] == '"');
-               c++;
-            }
          }
          else
             c=0;
@@ -1686,8 +1679,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
    if(dataBuffer)
    {
-      if(dataBuffer->getBufferSize() < maxDataBufferSize || isInitiator())  // Limit memory consumption (no limit on clients due to how big game recordings can be)
+      if(dataBuffer->getBufferSize() + data->getBufferSize() <= maxDataBufferSize || isInitiator())  // Limit memory consumption (no limit on clients due to how big game recordings can be)
          dataBuffer->appendBuffer(*data.getPointer());
+      else
+         return;
    }
    else
    {

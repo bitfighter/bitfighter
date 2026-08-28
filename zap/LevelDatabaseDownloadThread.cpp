@@ -115,25 +115,37 @@ void LevelDatabaseDownloadThread::run()
    string levelgenCode = req.getResponseBody();
 
    // no data is sent if the level has no levelgen
-   if(levelgenCode.length() > 0)
+   if(levelgenCode.length() > 3 && levelgenCode.substr(0, 3) == "-- ")
    {
       // the leveldb prepends a lua comment with the target filename, and here we parse it
-      S32 startIndex = 3; // the length of "-- "
       size_t breakIndex = levelgenCode.find_first_of("\r\n");
-      string levelgenFileName = levelgenCode.substr(startIndex, breakIndex - startIndex);
-      // trim the filename line before writing
-      levelgenCode = levelgenCode.substr(breakIndex + 2, levelgenCode.length());
+      if(breakIndex != string::npos && breakIndex > 3)
+      {
+         string rawFileName = levelgenCode.substr(3, breakIndex - 3);
+         string levelgenFileName = extractFilename(rawFileName);
+         if(!levelgenFileName.empty() && levelgenFileName == rawFileName &&
+            levelgenFileName.find('/') == string::npos &&
+            levelgenFileName.find('\\') == string::npos &&
+            levelgenFileName.find("..") == string::npos)
+         {
+            size_t contentStart = levelgenCode.find_first_not_of("\r\n", breakIndex);
+            if(contentStart != string::npos)
+               levelgenCode = levelgenCode.substr(contentStart);
+            else
+               levelgenCode = "";
 
-      filePath = joindir(levelDir, levelgenFileName);
-      if(writeFile(filePath, levelgenCode))
-      {
-         // Success
-      }
-      else
-      {
-         dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
-         errorNumber = 2;
-         return;
+            filePath = joindir(levelDir, levelgenFileName);
+            if(writeFile(filePath, levelgenCode))
+            {
+               // Success
+            }
+            else
+            {
+               dSprintf(url, UrlLength, "!!! Error writing levelgen file");
+               errorNumber = 2;
+               return;
+            }
+         }
       }
    }
 }

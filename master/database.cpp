@@ -483,7 +483,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 
 Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 {
-   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name) + "';";
+   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + sanitizeForSql(name) + "';";
 
    Vector<Vector<string> > results;
 
@@ -500,7 +500,7 @@ Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 
 U16 DatabaseWriter::getGamesPlayed(const char *name)
 {
-   string sql = "SELECT count(*) FROM stats_player WHERE player_name = '" + string(name) + "';";
+   string sql = "SELECT count(*) FROM stats_player WHERE player_name = '" + sanitizeForSql(name) + "';";
 
    Vector<Vector<string> > results;
 

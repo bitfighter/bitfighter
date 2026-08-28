@@ -384,7 +384,10 @@ inline U32 BitStream::readRangedU32(U32 rangeStart, U32 rangeEnd)
    U32 rangeBits = getNextBinLog2(rangeSize);
 
    U32 val = U32(readInt(S32(rangeBits)));
-   return val + rangeStart;
+   U32 ret = val + rangeStart;
+   if(ret > rangeEnd)
+      ret = rangeEnd;
+   return ret;
 }
 
 inline void BitStream::writeEnum(U32 enumValue, U32 enumRange)
@@ -394,7 +397,10 @@ inline void BitStream::writeEnum(U32 enumValue, U32 enumRange)
 
 inline U32 BitStream::readEnum(U32 enumRange)
 {
-   return U32(readInt(getNextBinLog2(enumRange)));
+   U32 val = U32(readInt(getNextBinLog2(enumRange)));
+   if(enumRange > 0 && val >= enumRange)
+      val = enumRange - 1;
+   return val;
 }
 
 /// PacketStream provides a network interface to the BitStream for easy construction of data packets.

@@ -468,6 +468,8 @@ const Color *TeamManager::getTeamHealthBarColor(S32 index) const
 
 AbstractTeam *TeamManager::getTeam(S32 teamIndex)
 {
+   if(teamIndex < 0 || teamIndex >= mTeams.size())
+      return NULL;
    return mTeams[teamIndex];
 }
 
@@ -502,13 +504,16 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
 
 bool TeamManager::getTeamHasFlag(S32 teamIndex) const
 {
+   if(teamIndex < 0 || teamIndex >= mTeamHasFlagList.size())
+      return false;
    return mTeamHasFlagList[teamIndex] != 0;
 }
 
 
 void TeamManager::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
-   mTeamHasFlagList[teamIndex] = hasFlag ? 1 : 0;
+   if(teamIndex >= 0 && teamIndex < mTeamHasFlagList.size())
+      mTeamHasFlagList[teamIndex] = hasFlag ? 1 : 0;
 }
 
 

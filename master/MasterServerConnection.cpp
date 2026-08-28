@@ -675,6 +675,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
 // Called to indicate a connect request is being accepted.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    GameConnectRequest *req = findAndRemoveRequest(requestId);
    if(!req)
       return;
@@ -714,6 +716,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
 // Called to indicate a connect request is being rejected.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    GameConnectRequest *req = findAndRemoveRequest(requestId);
    if(!req)
       return;
@@ -1224,6 +1228,8 @@ void MasterServerConnection::removeOldEntriesFromRatingsCache()
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    writeStatisticsToDb(stats);
    highScores.isValid = false;
 }
@@ -1231,7 +1237,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (Versioned
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
 {
-   if(achievementId > BADGE_COUNT)  // Check for out of range badges
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
+   if(achievementId >= BADGE_COUNT)  // Check for out of range badges
       return;
 
    writeAchievementToDb(achievementId, playerNick);
@@ -1253,6 +1261,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo,
                            (string hash, string levelName, string creator,
                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    writeLevelInfoToDb(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
 }
 
@@ -1442,6 +1452,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestMOTD, ())
 // Game server wants to know if user name has been verified
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    Nonce clientId(id);     // Reconstitute our id
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
