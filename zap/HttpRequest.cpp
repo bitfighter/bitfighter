@@ -50,7 +50,11 @@ void HttpRequest::setUrl(const string &url)
    // hostname is anything before the first '/'
    size_t index = mUrl.find('/');
    string host = mUrl.substr(0, index);
-   string addressString = "ip:" + host + ":80";
+   string addressString;
+   if(host.find(':') != string::npos)
+      addressString = "ip:" + host;
+   else
+      addressString = "ip:" + host + ":80";
 
    mRemoteAddress.reset(new Address(addressString.c_str()));
 }

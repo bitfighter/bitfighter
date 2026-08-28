@@ -1253,7 +1253,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-   if(!(mSendableFlags | ServerFlagHostingLevels))
+   if(!(mSendableFlags & ServerFlagHostingLevels))
       return;
 
    LevelInfo levelInfo(name, (GameTypeId)type.value);
@@ -1271,7 +1271,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-   if(!(mSendableFlags | ServerFlagHostingLevels))
+   if(!(mSendableFlags & ServerFlagHostingLevels))
       return;
 
    getServerGame()->removeLevel(index);
@@ -1739,7 +1739,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
 {
    if(file.getString()[0] != 0)
    {
-      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, file.getString());
+      string reqFile = file.getString();
+      if(reqFile.find('/') != string::npos || reqFile.find('\\') != string::npos || reqFile.find("..") != string::npos)
+      {
+         s2cDisplayErrorMessage("Invalid filename requested.");
+         return;
+      }
+      string fileName = extractFilename(reqFile);
+      if(fileName.empty() || fileName != reqFile)
+      {
+         s2cDisplayErrorMessage("Invalid filename requested.");
+         return;
+      }
+      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, fileName);
       TransferRecordedGameplay(filePath.c_str());
    }
    else
@@ -1925,7 +1937,7 @@ bool GameConnection::TransferRecordedGameplay(const char *filename)
          return false;
       }
 
-      s2cSetFilename(filename);
+      s2cSetFilename(extractFilename(filename).c_str());
       s2rTransferFileSize(totalTransferSize);
       for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; i++)
          s2rSendDataParts(TransmissionRecordedGame, ByteBufferPtr(mPendingTransferData[i]));

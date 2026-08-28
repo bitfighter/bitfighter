@@ -49,6 +49,8 @@ module = nil
 package = nil
 io = nil
 debug = nil
+require = nil
+ffi = nil
 
 -- Unsafe functions mixed with safe functions of some packages
 string.dump = nil

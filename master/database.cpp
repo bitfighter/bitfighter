@@ -182,7 +182,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
-                "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " +
+                "VALUES( " + itos(serverId) + ", '" + sanitizeForSql(gameStats->gameType) + "', " + btos(gameStats->isOfficial) + ", " +
                              itos(gameStats->playerCount) + ", " + itos(gameStats->duration) + ", '" +
                              sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " +
                              itos(gameStats->teamStats.size())  + ");";
@@ -465,7 +465,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
       "INNER JOIN bf_phpbb.phpbb_users "
       "WHERE ratings.level_id = " + itos(databaseId) + " AND "
          "ratings.user_id = phpbb_users.user_id AND "
-         "phpbb_users.username = '" + name.getString() + "' "
+         "phpbb_users.username = '" + sanitizeForSql(name.getString()) + "' "
        "UNION ALL "
        "SELECT 2 as sort, 0 "
        "ORDER BY sort;";

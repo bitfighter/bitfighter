@@ -239,7 +239,8 @@ GameTypeId LevelSource::getLevelType(S32 index)
 
 void LevelSource::remove(S32 index)
 {
-   mLevelInfos.erase(index);
+   if(index >= 0 && index < mLevelInfos.size())
+      mLevelInfos.erase(index);
 }
 
 // static method

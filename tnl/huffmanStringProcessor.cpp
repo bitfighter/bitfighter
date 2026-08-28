@@ -192,14 +192,16 @@ S16 HuffmanStringProcessor::determineIndex(HuffWrap& rWrap)
    }
 }
 
-bool HuffmanStringProcessor::readHuffBuffer(BitStream* pStream, char* out_pBuffer)
+bool HuffmanStringProcessor::readHuffBuffer(BitStream* pStream, char* out_pBuffer, U32 maxLen)
 {
    if (mTablesBuilt == false)
       buildTables();
 
    if (pStream->readFlag()) {
       U32 len = pStream->readInt(8);
-      for (U32 i = 0; i < len; i++) {
+      U32 readLen = len < maxLen ? len : maxLen;
+      U32 i;
+      for (i = 0; i < readLen; i++) {
          S32 index = 0;
          while (true) {
             if (index >= 0) {
@@ -214,13 +216,34 @@ bool HuffmanStringProcessor::readHuffBuffer(BitStream* pStream, char* out_pBuffe
             }
          }
       }
-      out_pBuffer[len] = '\0';
+      for (; i < len; i++) {
+         S32 index = 0;
+         while (true) {
+            if (index >= 0) {
+               if (pStream->readFlag() == true) {
+                  index = mHuffNodes[index].index1;
+               } else {
+                  index = mHuffNodes[index].index0;
+               }
+            } else {
+               break;
+            }
+         }
+      }
+      out_pBuffer[readLen] = '\0';
       return true;
    } else {
       // Uncompressed string...
       U32 len = pStream->readInt(8);
-      pStream->read(len, out_pBuffer);
-      out_pBuffer[len] = '\0';
+      U32 readLen = len < maxLen ? len : maxLen;
+      pStream->read(readLen, out_pBuffer);
+      if (len > readLen) {
+         for (U32 i = 0; i < len - readLen; i++) {
+            U8 dummy;
+            pStream->read(sizeof(dummy), &dummy);
+         }
+      }
+      out_pBuffer[readLen] = '\0';
       return true;
    }
 }

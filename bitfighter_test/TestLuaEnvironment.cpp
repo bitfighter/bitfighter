@@ -102,7 +102,8 @@ TEST_F(LuaEnvironmentTest, sandbox)
    // But it should not interfere with permitted functions
    EXPECT_TRUE(existsFunctionInEnvironment("unpack"));
    EXPECT_TRUE(existsFunctionInEnvironment("ipairs"));
-   EXPECT_TRUE(existsFunctionInEnvironment("require"));
+   EXPECT_FALSE(existsFunctionInEnvironment("require"));
+   EXPECT_FALSE(existsFunctionInEnvironment("ffi"));
 }
 
 

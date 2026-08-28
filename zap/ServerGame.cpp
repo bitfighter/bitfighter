@@ -1891,8 +1891,10 @@ void ServerGame::removeLevel(S32 index)
       while(mLevelSource->getLevelCount())
          mLevelSource->remove(0);
    }
-   else
+   else if(index < mLevelSource->getLevelCount())
       mLevelSource->remove(index);
+   else
+      return;
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
