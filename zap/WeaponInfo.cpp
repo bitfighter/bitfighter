@@ -48,7 +48,10 @@ WeaponInfo weaponInfo[] = {
 
 WeaponInfo WeaponInfo::getWeaponInfo(WeaponType weaponType)
 {
-   return weaponInfo[weaponType];
+   S32 index = (S32)weaponType;
+   if(index < 0 || index >= (S32)(sizeof(weaponInfo)/sizeof(weaponInfo[0])))
+      return weaponInfo[0];
+   return weaponInfo[index];
 }
 
 #ifndef BF_MASTER

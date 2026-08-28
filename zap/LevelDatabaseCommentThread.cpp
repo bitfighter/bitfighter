@@ -17,7 +17,7 @@ namespace Zap
 {
 
 // Define statics
-const string LevelDatabaseCommentThread::LevelDatabaseRateUrl = "bitfighter.org/levels/comments/add";
+const string LevelDatabaseCommentThread::LevelDatabaseRateUrl = "https://bitfighter.org/levels/comments/add";
 
 // Constructor
 LevelDatabaseCommentThread::LevelDatabaseCommentThread(ClientGame* game, const string &comment)

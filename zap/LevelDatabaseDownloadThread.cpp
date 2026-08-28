@@ -28,6 +28,15 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(const string &levelId, 
      mGame(game)
 {
    errorNumber = 0;
+
+   string safeLevelId = extractFilename(mLevelId);
+   if(safeLevelId.empty() || safeLevelId != mLevelId || !safeFilename(safeLevelId.c_str()) || safeLevelId.find("..") != string::npos)
+   {
+      mGame->displayErrorMessage("!!! Invalid level ID requested.");
+      errorNumber = 100;
+      return;
+   }
+
    levelFileName = "db_" + mLevelId + ".level";
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
