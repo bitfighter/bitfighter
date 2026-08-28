@@ -400,7 +400,7 @@ def main():
     configFiles = [os.path.join(d, 'bitfighter.ini') for d in sysConfigDirs + [userConfigDir]]
     
     cfg = configparser.SafeConfigParser({
-        'url':      "http://bitfighter.org/bitfighterStatus.json",
+        'url':      "https://bitfighter.org/bitfighterStatus.json",
         'iconPath': "./icon.png",
         'appName':  "Bitfighter Notifier Applet",
         'notificationTimeout': '5000', # 5 seconds to show notification

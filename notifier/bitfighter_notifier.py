@@ -77,7 +77,7 @@ Configuration
 APPLICATION_NAME        = "Bitfighter Notifier Applet"
 GUI_TITLE               = "Bitfighter"
 MESSAGE_TITLE           = "Bitfighter"
-URL                     = "http://bitfighter.org/bitfighterStatus.json"
+URL                     = "https://bitfighter.org/bitfighterStatus.json"
 REFRESH_INTERVAL        = 20
 NOTIFICATION_TIMEOUT    = 5
 EXECUTABLE              = "bitfighter"
