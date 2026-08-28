@@ -49,7 +49,6 @@ module = nil
 package = nil
 io = nil
 debug = nil
-require = nil
 ffi = nil
 string.dump = nil
 math.randomseed = nil

@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "SoundEffect.h"
+#include "SoundSystemEnums.h"
 
 #ifdef ZAP_DEDICATED
 #  define BF_NO_AUDIO

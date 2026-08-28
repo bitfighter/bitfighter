@@ -61,7 +61,7 @@ public:
 	///
 	/// Throws a MutexFailed exception if we can't acquire the lock for
 	/// some reason.  The exception contains a message saying why.
-	BeecryptMutex() throw (MutexFailed);
+	BeecryptMutex() noexcept(false);
 
 	/// \brief Destroy the mutex
 	///
@@ -70,14 +70,14 @@ public:
 
 	/// \brief Acquire the mutex, blocking if it can't be acquired
 	/// immediately.
-	void lock() throw (MutexFailed);
+	void lock() noexcept(false);
 
 	/// \brief Acquire the mutex immediately and return true, or return
 	/// false if it would have to block to acquire the mutex.
-	bool trylock() throw (MutexFailed);
+	bool trylock() noexcept(false);
 
 	/// \brief Release the mutex
-	void unlock() throw (MutexFailed);
+	void unlock() noexcept(false);
 
 private:
 	void* pmutex_;

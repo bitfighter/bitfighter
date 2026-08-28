@@ -82,7 +82,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
       exitToOs(1);
    }
 
-   string password = Game::md5.getSaltedHashFromString(pw);
+   string password = pw;
 
    FileType fileType = getResourceType(resourceType.c_str());
    if(fileType == INVALID_RESOURCE_TYPE)
@@ -396,7 +396,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       if(mOutputFile)
          fclose((FILE*)mOutputFile);
 
-      mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "w");
+      mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "wb");
 
       if(!mOutputFile)
       {
@@ -431,10 +431,24 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   if(!mOutputFile && isInitiator() && mAction == REQUEST_FILE)
+   {
+      TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
+      Game *game = static_cast<GameNetInterface *>(getInterface())->getGame();
+      FolderManager *folderManager = game->getSettings()->getFolderManager();
+      string folder = getOutputFolder(folderManager, mFileType);
+      string targetPath = strictjoindir(folder, mFilename);
+      mOutputFile = fopen(targetPath.c_str(), "wb");
+      if(!mOutputFile)
+      {
+         logprintf("Problem opening file %s for writing", targetPath.c_str());
+         disconnect(ReasonError, "done");
+         return;
+      }
+   }
+
    if(mOutputFile)
       fwrite(line.getString(), 1, strlen(line.getString()), mOutputFile);
-      //mOutputFile.write(line.getString(), strlen(line.getString()));
-   // else... what?
 }
 
 
@@ -467,26 +481,6 @@ void DataConnection::onConnectionEstablished()
 
       else if(mAction == REQUEST_FILE)
       {
-         TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
-         Game *game = static_cast<GameNetInterface *>(getInterface())->getGame();
-
-         FolderManager *folderManager = game->getSettings()->getFolderManager();
-         string folder = getOutputFolder(folderManager, mFileType);
-
-         if(folder == "")     // filetype was bogus; should never happen
-            logprintf("Error resolving folder!");      // But... we can save files without needing folder, so log and cary on
-
-         //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
-         if(mOutputFile)
-            fclose(mOutputFile);
-         mOutputFile = fopen(strictjoindir(folder, mFilename).c_str(), "w");
-         if(!mOutputFile)
-         {
-            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
-            disconnect(ReasonError, "done");
-            return;
-         }
-
          c2sSendOrRequestFile(challengedHash.c_str(), mFileType, true, mFilename.c_str());
       }
    }

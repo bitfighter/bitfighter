@@ -36,6 +36,7 @@ if(MYSQL_FOUND)
 		EXCLUDE_FROM_ALL
 		${MYSQLPP_SOURCES}
 	)
+	set_target_properties(mysql++ PROPERTIES CXX_STANDARD 11)
 
 	include_directories(SYSTEM ${MYSQL_INCLUDE_DIR}
 	)

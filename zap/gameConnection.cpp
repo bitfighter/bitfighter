@@ -992,12 +992,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    // If we've got a new role, save our password
    if(newRole != ClientInfo::RoleNone && mLastEnteredPassword != "")
    {
-      if(newRole == ClientInfo::RoleOwner)
-         GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
-      else if(newRole == ClientInfo::RoleAdmin)
-         GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
-      else if(newRole == ClientInfo::RoleLevelChanger)
-         GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+      string savedOwner = GameSettings::iniFile.GetValue(ownerKey, getServerName());
+      string savedAdmin = GameSettings::iniFile.GetValue(adminKey, getServerName());
+      string savedLevel = GameSettings::iniFile.GetValue(levelChangeKey, getServerName());
+
+      bool matchesAnySaved = (mLastEnteredPassword == savedOwner || mLastEnteredPassword == savedAdmin || mLastEnteredPassword == savedLevel);
+
+      if(!matchesAnySaved)
+      {
+         if(newRole == ClientInfo::RoleOwner)
+            GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
+         else if(newRole == ClientInfo::RoleAdmin)
+            GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
+         else if(newRole == ClientInfo::RoleLevelChanger)
+            GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+      }
 
       mLastEnteredPassword = "";
    }
@@ -1603,8 +1612,19 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
             c += 6;
             while(c < levelsize && (leveldata[c] == ' ' || leveldata[c] == '\t'))
                c++;
-            while(c < levelsize && leveldata[c] != ' ' && leveldata[c] != '\t' && leveldata[c] != '\r' && leveldata[c] != '\n')
-               c++;
+            if(c < levelsize && leveldata[c] == '"')
+            {
+               c++; // skip opening quote
+               while(c < levelsize && leveldata[c] != '"' && leveldata[c] != '\r' && leveldata[c] != '\n')
+                  c++;
+               if(c < levelsize && leveldata[c] == '"')
+                  c++; // skip closing quote
+            }
+            else
+            {
+               while(c < levelsize && leveldata[c] != ' ' && leveldata[c] != '\t' && leveldata[c] != '\r' && leveldata[c] != '\n')
+                  c++;
+            }
          }
          else
             c=0;

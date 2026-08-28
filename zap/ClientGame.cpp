@@ -1253,7 +1253,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) 
 
 void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
 {
-   const char *message;
+   const char *message = "Your permissions have been updated";
 
    if(role == ClientInfo::RoleOwner)
       message = "You've been granted ownership permissions of this server";
@@ -1261,6 +1261,8 @@ void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
       message = "You've been granted permission to manage players and change levels";
    else if(role == ClientInfo::RoleLevelChanger)
       message = "You've been granted permission to change levels";
+   else if(role == ClientInfo::RoleNone)
+      message = "Your permissions have been removed";
 
    // Notify the UI that the message has arrived
    getUIManager()->gotPasswordOrPermissionsReply(this, message);

@@ -419,6 +419,16 @@ class UnixTimer
 
 static UnixTimer gTimer;
 
+U32 Platform::getRealMilliseconds()
+{
+   return x86UNIXGetTickCount();
+}
+
+U32 Platform::getRealMicroseconds()
+{
+   return x86UNIXGetTickCountMicro();
+}
+
 S64 Platform::getHighPrecisionTimerValue()
 {
    return gTimer.getCurrentTime();
