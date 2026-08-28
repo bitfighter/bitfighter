@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "LevelDatabaseDownloadThread.h"
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 #include "ClientGame.h"
 #include "ServerGame.h"
 #include "LevelSource.h"
@@ -74,8 +74,8 @@ void LevelDatabaseDownloadThread::run()
    if(errorNumber == 100)
       return;
 
-   dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelRequest).c_str(), mLevelId.c_str());
-   HttpRequest req(url);
+   dSprintf(url, UrlLength, (HttpsRequest::LevelDatabaseBaseUrl + LevelRequest).c_str(), mLevelId.c_str());
+   HttpsRequest req(url);
 
    if(!req.send())
    {
@@ -84,7 +84,7 @@ void LevelDatabaseDownloadThread::run()
       return;
    }
 
-   if(req.getResponseCode() != HttpRequest::OK)
+   if(req.getResponseCode() != HttpsRequest::OK)
    {
       dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
       errorNumber = 1;
@@ -105,8 +105,8 @@ void LevelDatabaseDownloadThread::run()
       return;
    }
 
-   dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelgenRequest).c_str(), mLevelId.c_str());
-   req = HttpRequest(url);
+   dSprintf(url, UrlLength, (HttpsRequest::LevelDatabaseBaseUrl + LevelgenRequest).c_str(), mLevelId.c_str());
+   req = HttpsRequest(url);
    if(!req.send())
    {
       dSprintf(url, UrlLength, "!!! Error connecting to server", levelFileName.c_str());
@@ -114,7 +114,7 @@ void LevelDatabaseDownloadThread::run()
       return;
    }
 
-   if(req.getResponseCode() != HttpRequest::OK)
+   if(req.getResponseCode() != HttpsRequest::OK)
    {
       dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
       errorNumber = 2;

@@ -48,7 +48,7 @@ set(SHARED_SOURCES
 	goalZone.cpp
 	gridDB.cpp
 	HTFGame.cpp
-	HttpRequest.cpp
+	HttpsRequest.cpp
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp

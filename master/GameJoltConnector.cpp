@@ -9,7 +9,7 @@
 #include "master.h"
 #include "MasterServerConnection.h"
 
-#include "../zap/HttpRequest.h"
+#include "../zap/HttpsRequest.h"
 #include "../zap/md5wrapper.h"
 #include "../zap/stringUtils.h"
 
@@ -65,7 +65,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
-   //HttpRequest request;
+   //HttpsRequest request;
 
    string urlList = "";
    string otherParamString = otherParams + (otherParams != "" ? "&" : "");

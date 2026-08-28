@@ -46,7 +46,7 @@
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 #include "gameObjectRender.h"
 #include "SystemFunctions.h"
 
@@ -5533,7 +5533,7 @@ void EditorMenuUserInterface::setupMenus()
          "UPDATE LEVEL IN DB" :
          "UPLOAD LEVEL TO DB";
 
-      addMenuItem(new MenuItem(title, uploadToDbPromptCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
+      addMenuItem(new MenuItem(title, uploadToDbPromptCallback, "Levels posted at " + HttpsRequest::LevelDatabaseBaseUrl, KEY_U));
    }
    else
       addMenuItem(new MessageMenuItem("MUST BE LOGGED IN TO UPLOAD LEVELS TO DB", Colors::gray40));

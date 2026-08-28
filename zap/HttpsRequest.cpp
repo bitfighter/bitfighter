@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 #include "Intervals.h"
 
 #include <stdio.h>
@@ -19,13 +19,13 @@ using namespace TNL;
 namespace Zap
 {
 
-const string HttpRequest::GetMethod = "GET";
-const string HttpRequest::PostMethod = "POST";
-const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
+const string HttpsRequest::GetMethod = "GET";
+const string HttpsRequest::PostMethod = "POST";
+const string HttpsRequest::HttpsRequestBoundary = "---REQUEST---BOUNDARY---";
 
-const string HttpRequest::LevelDatabaseBaseUrl = "http://bitfighter.org/pleiades";
+const string HttpsRequest::LevelDatabaseBaseUrl = "https://bitfighter.org/pleiades";
 
-HttpRequest::HttpRequest(const string &url)
+HttpsRequest::HttpsRequest(const string &url)
    : mUrl(url),
      mMethod("GET"),
      mResponseCode(0),
@@ -37,13 +37,13 @@ HttpRequest::HttpRequest(const string &url)
 }
 
 // Destructor
-HttpRequest::~HttpRequest()
+HttpsRequest::~HttpsRequest()
 {
 
 }
 
 
-void HttpRequest::setUrl(const string &url)
+void HttpsRequest::setUrl(const string &url)
 {
    mUrl = url;
 
@@ -69,7 +69,7 @@ void HttpRequest::setUrl(const string &url)
 }
 
 
-bool HttpRequest::send()
+bool HttpsRequest::send()
 {
    mError = "";
 
@@ -119,31 +119,31 @@ bool HttpRequest::send()
 
 
 // Returns most recent error message
-string HttpRequest::getError()
+string HttpsRequest::getError()
 {
    return mError;
 }
 
 
-string HttpRequest::getResponseBody()
+string HttpsRequest::getResponseBody()
 {
    return mResponseBody;
 }
 
 
-string HttpRequest::getResponseHead()
+string HttpsRequest::getResponseHead()
 {
    return mResponseHead;
 }
 
 
-S32 HttpRequest::getResponseCode()
+S32 HttpsRequest::getResponseCode()
 {
    return mResponseCode;
 }
 
 
-void HttpRequest::parseResponse(string response)
+void HttpsRequest::parseResponse(string response)
 {
    std::size_t separatorIndex = response.find("\r\n\r\n");
    if(separatorIndex == string::npos || response == "")
@@ -164,7 +164,7 @@ void HttpRequest::parseResponse(string response)
 }
 
 
-string HttpRequest::urlEncodeChar(char c)
+string HttpsRequest::urlEncodeChar(char c)
 {
    U32 ordinal = c;
    string result;
@@ -193,7 +193,7 @@ string HttpRequest::urlEncodeChar(char c)
 }
 
 
-string HttpRequest::urlEncode(const string& str)
+string HttpsRequest::urlEncode(const string& str)
 {
    string result;
    string::const_iterator it;
@@ -206,20 +206,20 @@ string HttpRequest::urlEncode(const string& str)
 }
 
 
-void HttpRequest::setData(const string& key, const string& value)
+void HttpsRequest::setData(const string& key, const string& value)
 {
    mData.erase(key);
    mData[key] = value;
 }
 
 
-void HttpRequest::setMethod(const string& method)
+void HttpsRequest::setMethod(const string& method)
 {
    mMethod = method;
 }
 
 
-string HttpRequest::buildRequest()
+string HttpsRequest::buildRequest()
 {
    // location is anything that comes after the hostname in mUrl
    string workingUrl = mUrl;
@@ -240,17 +240,17 @@ string HttpRequest::buildRequest()
       stringstream encodedData("");
       for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
       {
-         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "--" + HttpsRequestBoundary + "\r\n";
          encodedData << "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
          encodedData << (*it).second + "\r\n";
       }
 
-      for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
+      for(list<HttpsRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
       {
          stringstream fileData;
          fileData.write((const char*) (*it).data, (*it).length);
 
-         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "--" + HttpsRequestBoundary + "\r\n";
          encodedData << "Content-Disposition: form-data; name=\"" + (*it).fieldName + "\"; filename=\"" + (*it).fileName + "\"\r\n";
          encodedData << "Content-Type: image/png\r\n";
          encodedData << "Content-Transfer-Encoding: binary\r\n\r\n";
@@ -258,14 +258,14 @@ string HttpRequest::buildRequest()
          encodedData << "\r\n";
       }
 
-      encodedData << "--" + HttpRequestBoundary + "\r\n";
+      encodedData << "--" + HttpsRequestBoundary + "\r\n";
 
       char contentLengthHeaderBuffer[1024] = { 0 };
       dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", (U32) encodedData.tellp());
 
       mRequest += contentLengthHeaderBuffer;
       mRequest += "\r\nUser-Agent: Bitfighter";
-      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
+      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpsRequestBoundary;
       mRequest += "\r\n\r\n";
       mRequest += encodedData.str();
    }
@@ -278,7 +278,7 @@ string HttpRequest::buildRequest()
 }
 
 
-bool HttpRequest::sendRequest(string request)
+bool HttpsRequest::sendRequest(string request)
 {
    static const U32 bytesAtOnce = 512;
    unsigned char sendBuffer[bytesAtOnce];
@@ -321,7 +321,7 @@ bool HttpRequest::sendRequest(string request)
 }
 
 
-string HttpRequest::receiveResponse()
+string HttpsRequest::receiveResponse()
 {
    mResponse = "";
    S32 startTime = Platform::getRealMilliseconds();
@@ -334,8 +334,8 @@ string HttpRequest::receiveResponse()
       Platform::sleep(50);
       TNL::NetError recvError;
       S32 bytesRead = 0;
-      char receiveBuffer[HttpRequest::BufferSize] = { 0 };
-      recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
+      char receiveBuffer[HttpsRequest::BufferSize] = { 0 };
+      recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpsRequest::BufferSize, &bytesRead);
 
       // Need to wait
       if(recvError == TNL::WouldBlock)
@@ -366,14 +366,14 @@ string HttpRequest::receiveResponse()
    return mResponse;
 }
 
-void HttpRequest::setTimeout(U32 timeout)
+void HttpsRequest::setTimeout(U32 timeout)
 {
    mTimeout = timeout;
 }
 
-void HttpRequest::addFile(string field, string filename, const U8* data, U32 length)
+void HttpsRequest::addFile(string field, string filename, const U8* data, U32 length)
 {
-   HttpRequestFileInfo info;
+   HttpsRequestFileInfo info;
    info.fieldName = field;
    info.fileName = filename;
    info.data = data;

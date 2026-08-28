@@ -16,7 +16,7 @@ set(MASTER_EXTRA_SOURCES
 	../zap/ChatCheck.cpp
 	../zap/Color.cpp
 	../zap/gameStats.cpp
-	../zap/HttpRequest.cpp
+	../zap/HttpsRequest.cpp
 	../zap/IniFile.cpp
 	../zap/LevelDatabase.cpp
 	../zap/md5wrapper.cpp

@@ -6,7 +6,7 @@
 #include "LevelDatabaseRateThread.h"
 
 #include "ClientGame.h"
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 
 #include <sstream>
 
@@ -16,7 +16,7 @@ namespace Zap
 {
 
 // Define statics
-const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "http://bitfighter.org/pleiades/levels/rate/";
+const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "https://bitfighter.org/pleiades/levels/rate/";
 
 const string LevelDatabaseRateThread::RatingStrings[] = {
 #define LEVEL_RATING(a, strval) strval,
@@ -76,8 +76,8 @@ void LevelDatabaseRateThread::run()
    if(errorNumber == 100)
       return;
 
-   HttpRequest req = HttpRequest(reqURL);
-   req.setMethod(HttpRequest::PostMethod);
+   HttpsRequest req = HttpsRequest(reqURL);
+   req.setMethod(HttpsRequest::PostMethod);
    req.setData("data[User][username]",      username);
    req.setData("data[User][user_password]", user_password);
 
@@ -89,7 +89,7 @@ void LevelDatabaseRateThread::run()
 
    responseCode = req.getResponseCode();
    responseBody = req.getResponseBody();
-   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
+   if(responseCode != HttpsRequest::OK && responseCode != HttpsRequest::Found)
    {
       errorNumber = 2;
       return;
