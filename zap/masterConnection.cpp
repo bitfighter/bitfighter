@@ -219,6 +219,9 @@ S32 MasterServerConnection::getClientId() const
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection,
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
+   if(possibleAddresses.size() == 0)
+      return;
+
    if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
       logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!",

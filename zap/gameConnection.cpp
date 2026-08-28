@@ -929,7 +929,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(levelChangePassword).c_str());
+         submitPassword(levelChangePassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -940,7 +940,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(adminPassword).c_str());
+         submitPassword(adminPassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -951,7 +951,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(ownerPassword).c_str());
+         submitPassword(ownerPassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }

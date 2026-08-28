@@ -64,6 +64,15 @@ public:
    void getRandom() { Random::read(data, NonceSize); mValid = true; }
    Vector<U8> toVector() { Vector<U8> v; if(mValid) for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
    bool isValid() const { return mValid; }
+
+   string toString() const
+   {
+      char buf[NonceSize * 2 + 1];
+      for(S32 i = 0; i < NonceSize; i++)
+         dSprintf(buf + i * 2, 3, "%02x", data[i]);
+      buf[NonceSize * 2] = 0;
+      return string(buf);
+   }
 };
 
 };

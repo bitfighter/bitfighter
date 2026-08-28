@@ -366,9 +366,6 @@ static void x86UNIXInitTimer()
    }
 }
 
-static bool sg_initialized = false;
-static timeval sg_startTime;
-
 static void x86UNIXTimerInit()
 {
    if (sg_initialized == false) {

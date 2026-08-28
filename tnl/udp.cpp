@@ -255,6 +255,13 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
 
       TNLToSocketAddress(bindAddress, &address, &addressSize);
       error = bind(mPlatformSocket, &address, addressSize);
+      if(error != 0)
+      {
+         logprintf(LogConsumer::LogError, "%s socket error: unable to bind socket to address %s.", socketType, bindAddress.toString());
+         closesocket(mPlatformSocket);
+         mPlatformSocket = INVALID_SOCKET;
+         return;
+      }
 
       Address boundAddress;
       addressSize = sizeof(address);
@@ -294,10 +301,9 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
       {
 #if defined ( TNL_OS_WIN32 ) || defined ( TNL_OS_XBOX )
          DWORD notblock = nonblockingIO;
-         S32 error = ioctlsocket(mPlatformSocket, FIONBIO, &notblock);
+         error = ioctlsocket(mPlatformSocket, FIONBIO, &notblock);
 #else
          U32 notblock = nonblockingIO;
-         S32 error;
          error = ioctl(mPlatformSocket, FIONBIO, &notblock);
 	 TNLAssert(error == 0, "Could not set non-blocking IO state");
 #endif
@@ -760,7 +766,7 @@ bool Address::set(const char *addressString)
 #else
             addrinfo hints;
             memset(&hints, 0, sizeof(hints));
-            hints.ai_family = AF_UNSPEC;
+            hints.ai_family = AF_INET;
             addrinfo* result = NULL;
             int rv;
 

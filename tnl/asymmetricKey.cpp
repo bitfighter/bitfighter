@@ -101,11 +101,11 @@ void AsymmetricKey::load(const ByteBuffer &theBuffer)
    crypto_key *theKey = (crypto_key *) malloc(sizeof(crypto_key));
    const U8 *bufferPtr = theBuffer.getBuffer();
 
-   mHasPrivateKey = bufferPtr[0] == KeyTypePrivate;
-
    U32 bufferSize = theBuffer.getBufferSize();
    if(bufferSize < sizeof(U32) + 1)
       return;
+
+   mHasPrivateKey = bufferPtr[0] == KeyTypePrivate;
 
    mKeySize = readU32FromBuffer(bufferPtr + 1);
 
