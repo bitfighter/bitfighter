@@ -8,7 +8,6 @@
 #include "master.h"
 #include "database.h"
 #include "DatabaseAccessThread.h"
-#include "authenticator.h"
 #include "GameJoltConnector.h"
 
 #include "../zap/version.h"
@@ -127,46 +126,9 @@ bool MasterServerConnection::isAuthenticated() { return mAuthenticated; }
 
 // Check username & password against database
 MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verifyCredentials(string &username, string password)
-
-#ifdef VERIFY_PHPBB3    // Defined in Linux Makefile, not in VC++ project
-{
-   Authenticator authenticator;
-
-   // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
-   //          1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
-   //        1 = very basic security (prevents the use of double quote character)  <=== also level 1????   I think this can be deleted --> see comments in authenticator.initialize
-   //          2 = alphanumeric (only allows alphanumeric characters in the username)
-   //
-   // We'll use level 1 for now, so users can put special characters in their username
-   authenticator.initialize(
-      mMaster->getSetting<string>(PHPBB3_DATABASE_ADDRESS),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_USERNAME),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_PASSWORD),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_NAME),
-      mMaster->getSetting<string>(PHPBB3_TABLE_PREFIX),
-      1
-   );
-
-   S32 errorcode;
-   if(authenticator.authenticate(username, password, errorcode))   // returns true if the username was found and the password is correct
-      return Authenticated;
-   else
-   {
-      switch(errorcode)
-      {
-         case 0:  return CantConnect;
-         case 1:  return UnknownUser;
-         case 2:  return WrongPassword;
-         case 3:  return InvalidUsername;
-         default: return UnknownStatus;
-      }
-   }
-}
-#else // verifyCredentials
 {
    return Unsupported;
 }
-#endif
 
 
 class MasterSettings;

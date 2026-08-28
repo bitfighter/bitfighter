@@ -47,6 +47,7 @@ setfenv = nil
 setmetatable = nil
 module = nil
 package = nil
+require = nil
 io = nil
 debug = nil
 ffi = nil

@@ -15,11 +15,6 @@
 #include <cstring>
 #include <cstddef>
 
-#ifdef BF_WRITE_TO_MYSQL
-#  include "mysql++.h"
-using namespace mysqlpp;
-#endif
-
 using namespace std;
 using namespace TNL;
 using namespace Master;
@@ -32,13 +27,7 @@ namespace DbWriter
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
-   if(settings->getVal<YesNo>(WRITE_STATS_TO_MY_SQL))
-      return DatabaseWriter(settings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_NAME).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_PASSWORD).c_str());
-   else
-      return DatabaseWriter("stats.db");
+   return DatabaseWriter("stats.db");
 }
 
 
@@ -49,7 +38,7 @@ DatabaseWriter::DatabaseWriter()
 }
 
 
- // MySQL Constructor
+ // MySQL Constructor (legacy compatibility -> SQLite)
 DatabaseWriter::DatabaseWriter(const char *server, const char *db, const char *user, const char *password)
 {
    initialize(server, db, user, password);
@@ -80,20 +69,12 @@ void DatabaseWriter::initialize(const char *server, const char *db, const char *
    safecopy(user, mUser);
    safecopy(password, mPassword);
 
+   if(!fileExists(mDb))
+      createStatsDatabase();
 }
 
 
 #define btos(value) (value ? "1" : "0")
-
-
-#ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
-   class SimpleResult{
-   public:
-      S32 insert_id() { return 0; }
-   };
-
-#  define Exception std::exception
-#endif
 
 
 static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<LoadoutStats> loadoutStats)
@@ -201,16 +182,7 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
    string sql = "INSERT INTO server(server_name, ip_address) "
                 "VALUES('" + sanitizeForSql(serverName) + "', '" + serverIP + "');";
 
-   if(query.query)
-     return query.runQuery(sql);
-
-   if(query.sqliteDb)
-   {
-      query.runQuery(sql);
-      return sqlite3_last_insert_rowid(query.sqliteDb);
-   }
-
-   return U64_MAX;
+   return query.runQuery(sql);
 }
 
 
@@ -289,7 +261,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          insertStatsGame(query, &gameStats, serverId);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing stats to database: %s", ex.what());
    }
@@ -313,14 +285,14 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing achievement to database: %s", ex.what());
    }
 }
 
 
-void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator,
+void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator, 
                                      const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
@@ -354,7 +326,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing level info to database: %s", ex.what());
    }
@@ -519,47 +491,29 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 
    try
    {
-
-#ifdef BF_WRITE_TO_MYSQL
-      if(query.query)
-      {
-         //S32 serverId_int = -1;
-         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
-
-         S32 rows = results.num_rows();
-
-         for(S32 i = 0; i < rows; i++)
-         {
-            values.push_back(Vector<string>());     // Add another row
-
-            for(S32 j = 0; j < cols; j++)
-               values[i].push_back(string(results[i][j]));
-         }
-      }
-      else
-#endif
       if(query.sqliteDb)
       {
          char *err = 0;
          char **results;
-         int rows, cols;
+         int rows, resultCols;
 
-         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &resultCols, &err);
 
-         // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
+         // results[0]...results[resultCols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
          for(S32 i = 0; i < rows; i++)
          {
             values.push_back(Vector<string>());     // Add another row
 
             for(S32 j = 0; j < cols; j++)
-               values[i].push_back(results[cols + i * cols + j]);
+               values[i].push_back(results[resultCols + i * resultCols + j]);
          }
 
          sqlite3_free_table(results);
-         sqlite3_free(err);
+         if(err)
+            sqlite3_free(err);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf(LogConsumer::LogError, "SQL Execution Error \"%s\"\n\trunning sql: %s", ex.what(), sql.c_str());
    }
@@ -603,82 +557,47 @@ bool DbQuery::dumpSql = false;
 // Constructor
 DbQuery::DbQuery(const char *db, const char *server, const char *user, const char *password)
 {
-   query = NULL;
    sqliteDb = NULL;
    isValid = true;
 
-   TNLAssert(db && db[0] != 0, "must have a database");
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
 
-#ifdef BF_WRITE_TO_MYSQL
-
-   if(server && server[0] != 0) // mysql have a server to connect to
+   if(sqlite3_open(dbPath, &sqliteDb))    // Returns true if an error occurred
    {
-      TNLAssert(server, "const char * server is NULL");
-      TNLAssert(user, "const char * user is NULL");
-      TNLAssert(password, "const char * password is NULL");
-      try
-      {
-         conn.connect(db, server, user, password);    // Will throw error if it fails
-         query = new Query(&conn);
-      }
-      catch(const Exception &ex)
-      {
-         logprintf("Failure opening mysql database: %s", ex.what());
-         isValid = false;
-      }
+      logprintf("ERROR: Can't open stats database %s: %s", dbPath, sqlite3_errmsg(sqliteDb));
+      sqlite3_close(sqliteDb);
+      sqliteDb = NULL;
+      isValid = false;
    }
-   else
-#endif
-      if(sqlite3_open(db, &sqliteDb))    // Returns true if an error occurred
-      {
-         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(sqliteDb));
-         sqlite3_close(sqliteDb);
-         isValid = false;
-      }
 }
 
 // Destructor
 DbQuery::~DbQuery()
 {
-   if(query)
-      delete query;
-
    if(sqliteDb)
       sqlite3_close(sqliteDb);
 }
 
 
-// Run the passed query on the appropriate database -- throws exceptions!
+// Run the passed query on the appropriate database
 U64 DbQuery::runQuery(const string &sql) const
 {
-   if(!isValid)
+   if(!isValid || !sqliteDb)
       return U64_MAX;
 
    if(dumpSql)
       logprintf("SQL: %s", sql.c_str());
 
-   if(query)
-      // Should only get here when mysql has been compiled in
-#ifdef BF_WRITE_TO_MYSQL
-         return query->execute(sql).insert_id();
-#else
-         throw std::exception();    // Should be impossible
-#endif
+   char *err = 0;
+   sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
 
-   if(sqliteDb)
+   if(err)
    {
-      char *err = 0;
-      sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
-
-      if(err)
-         logprintf("Database error accessing sqlite database: %s", err);
-
+      logprintf("Database error accessing sqlite database: %s", err);
       sqlite3_free(err);
-
-      return sqlite3_last_insert_rowid(sqliteDb);
    }
 
-   return U64_MAX;
+   return sqlite3_last_insert_rowid(sqliteDb);
 }
 
 
