@@ -32,6 +32,25 @@
 -- Local reference needed after blacklisting occurs
 local smt = setmetatable
 
+-- Constrain module loading: disable C loaders, FFI, dynamic C loading, and path traversal
+local orig_require = require
+if package and package.loaders then
+	package.cpath = ""
+	package.loadlib = nil
+	package.loaders[3] = nil
+	package.loaders[4] = nil
+end
+
+local function safe_require(modname)
+	if type(modname) ~= "string" then
+		error("module name must be a string")
+	end
+	if modname:find("%.%.") or modname:find("/") or modname:find("\\") or modname:find(":") then
+		error("invalid module name: " .. modname)
+	end
+	return orig_require(modname)
+end
+
 -- Unsafe functions will be nil'd out
 collectgarbage = nil
 dofile = nil
@@ -47,7 +66,7 @@ setfenv = nil
 setmetatable = nil
 module = nil
 package = nil
-require = nil
+require = safe_require
 io = nil
 debug = nil
 ffi = nil

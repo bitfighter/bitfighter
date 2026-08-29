@@ -410,10 +410,22 @@ void MasterServer::testStatsDatabaseConnectivity() const
 {
    try
    {
-      DbWriter::DbQuery query("stats.db");
+      DbWriter::DatabaseWriter writer = DbWriter::getDatabaseWriter(mSettings);
+      writer.ensureSchema();
+
+      DbWriter::DbQuery query(writer.getDbPath());
       if(query.isValid)
       {
-         logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed");
+         Vector<Vector<string> > results;
+         writer.selectHandler("SELECT count(*) FROM stats_game;", 1, results);
+         if(results.size() > 0)
+         {
+            logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed.");
+         }
+         else
+         {
+            logprintf(LogConsumer::ConfigurationError, "Stats database connectivity test FAILED - Schema verification failed");
+         }
       }
       else
       {

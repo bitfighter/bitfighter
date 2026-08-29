@@ -38,6 +38,7 @@ class HttpsRequestTest : public testing::Test
       req.mSocket = sock;
       req.mLocalAddress.reset(new MockAddress());
       req.mRemoteAddress.reset(new MockAddress());
+      req.mUseMockSocket = true;
    }
 };
 
@@ -188,6 +189,14 @@ TEST_F(HttpsRequestTest, successTest)
    ASSERT_TRUE(req.send()) << req.getError();
    EXPECT_EQ(200, req.getResponseCode());
    EXPECT_EQ("response", req.getResponseBody());
+}
+
+TEST_F(HttpsRequestTest, blockPlaintextCredentials)
+{
+   HttpsRequest plainReq("http://example.com/login");
+   plainReq.setData("password", "secret123");
+   EXPECT_FALSE(plainReq.send());
+   EXPECT_EQ("Insecure transmission of credentials over plaintext HTTP blocked", plainReq.getError());
 }
 
 };

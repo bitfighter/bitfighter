@@ -50,4 +50,21 @@ TEST(BugFixTest, UnixTickCountMicroRobustness)
 }
 #endif
 
+TEST(BugFixTest, VectorDeserializationBoundsAndTruncation)
+{
+    // Test that an oversized or truncated vector size declaration does not pre-allocate
+    TNL::BitStream writeStream;
+    // Write 255 followed by 65535 to represent 65790 elements
+    writeStream.writeInt(255, 8);
+    writeStream.writeInt(65535, 16);
+    writeStream.setBitPosition(0);
+
+    TNL::Vector<U32> vec;
+    TNL::read(writeStream, &vec);
+
+    // Stream should be marked invalid/error and vector must be empty
+    EXPECT_FALSE(writeStream.isValid());
+    EXPECT_EQ(0, vec.size());
+}
+
 } // namespace Zap

@@ -96,6 +96,8 @@ void GameConnection::initialize()
    mSendableFlags = 0;
    mDataBuffer = NULL;
    mDataBufferLevelGen = NULL;
+   mReceiveTotalSize = 0;
+   mTransferRejected = false;
    mUploadIndex = -1;
 
    mWrongPasswordCount = 0;
@@ -140,6 +142,9 @@ GameConnection::~GameConnection()
 
    delete mLevelSource;
    delete mDataBuffer;
+   delete mDataBufferLevelGen;
+   mDataBuffer = NULL;
+   mDataBufferLevelGen = NULL;
 }
 
 
@@ -309,13 +314,37 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 
 const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 
+static string computeGameConnectionChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   string tag = "Bitfighter:GameConnection:Auth:";
+   string clientNonce = conn->getNonce().toString();
+   string serverNonce = conn->getServerNonce().toString();
+   return Game::md5.getHashFromString(tag + saltedPwdHash + ":" + clientNonce + ":" + serverNonce);
+}
 
+static string computeLegacyGameChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   return Game::md5.getHashFromString(saltedPwdHash + conn->getNonce().toString());
+}
+
+static string computeServerPasswordChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   string tag = "Bitfighter:ServerPassword:Auth:";
+   string clientNonce = conn->getNonce().toString();
+   string serverNonce = conn->getServerNonce().toString();
+   return Game::md5.getHashFromString(tag + saltedPwdHash + ":" + clientNonce + ":" + serverNonce);
+}
 
 void GameConnection::submitPassword(const char *password)
 {
    string encrypted = Game::md5.getSaltedHashFromString(password);
-   string nonceStr = getNonce().toString();
-   string challengedHash = Game::md5.getHashFromString(encrypted + nonceStr);
+   string challengedHash = computeGameConnectionChallenge(this, encrypted);
    c2sSubmitPassword(challengedHash.c_str());
 
    mLastEnteredPassword = password;
@@ -428,9 +457,9 @@ static bool checkPass(const NetConnection *conn, const string &password, const c
 
    if(conn)
    {
-      string nonceStr = conn->getNonce().toString();
-      string challengedHash = Game::md5.getHashFromString(hash + nonceStr);
-      if(strcmp(challengedHash.c_str(), enteredPassword) == 0)
+      string challengedHash = computeGameConnectionChallenge(conn, hash);
+      string legacyHash = computeLegacyGameChallenge(conn, hash);
+      if(strcmp(challengedHash.c_str(), enteredPassword) == 0 || strcmp(legacyHash.c_str(), enteredPassword) == 0)
          return true;
    }
 
@@ -1709,6 +1738,26 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
    if(!isInitiator() && !(mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())))
       return;
 
+   if(mTransferRejected)
+   {
+      if(type & TransmissionDone)
+      {
+         if(mDataBuffer)
+         {
+            delete mDataBuffer;
+            mDataBuffer = NULL;
+         }
+         if(mDataBufferLevelGen)
+         {
+            delete mDataBufferLevelGen;
+            mDataBufferLevelGen = NULL;
+         }
+         mTransferRejected = false;
+         mReceiveTotalSize = 0;
+      }
+      return;
+   }
+
    ByteBuffer *&dataBuffer = (type & 2 ? mDataBufferLevelGen : mDataBuffer);
 
    static const U32 maxClientDataBufferSize = 100 * 1024 * 1024; // 100MB limit on clients
@@ -1719,7 +1768,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       if(dataBuffer->getBufferSize() + data->getBufferSize() <= maxAllowed)
          dataBuffer->appendBuffer(*data.getPointer());
       else
+      {
+         mTransferRejected = true;
+         if(mDataBuffer) { delete mDataBuffer; mDataBuffer = NULL; }
+         if(mDataBufferLevelGen) { delete mDataBufferLevelGen; mDataBufferLevelGen = NULL; }
          return;
+      }
    }
    else
    {
@@ -1729,17 +1783,33 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          dataBuffer->takeOwnership();
       }
       else
+      {
+         mTransferRejected = true;
+         if(mDataBuffer) { delete mDataBuffer; mDataBuffer = NULL; }
+         if(mDataBufferLevelGen) { delete mDataBufferLevelGen; mDataBufferLevelGen = NULL; }
          return;
+      }
    }
 
    if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
-      if(type & TransmissionRecordedGame)
-         ReceivedRecordedGameplay(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
-      else if(mDataBufferLevelGen)
-         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
+      U32 totalReceived = mDataBuffer->getBufferSize();
+      if(mDataBufferLevelGen)
+         totalReceived += mDataBufferLevelGen->getBufferSize();
+
+      if(mReceiveTotalSize == 0 || totalReceived == mReceiveTotalSize)
+      {
+         if(type & TransmissionRecordedGame)
+            ReceivedRecordedGameplay(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
+         else if(mDataBufferLevelGen)
+            ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
+         else
+            ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
+      }
       else
-         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
+      {
+         logprintf("Transfer size mismatch: expected %u bytes, got %u bytes. Discarding truncated transfer.", mReceiveTotalSize, totalReceived);
+      }
    }
 
    if(type & TransmissionDone)
@@ -1750,6 +1820,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       if(mDataBufferLevelGen)
          delete mDataBufferLevelGen;
       mDataBufferLevelGen = NULL;
+      mReceiveTotalSize = 0;
+      mTransferRejected = false;
    }
 }
 
@@ -1757,7 +1829,25 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 TNL_IMPLEMENT_RPC(GameConnection, s2rTransferFileSize, (U32 size), (size),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   static const U32 maxClientDataBufferSize = 100 * 1024 * 1024; // 100MB limit on clients
+   U32 maxAllowed = isInitiator() ? maxClientDataBufferSize : maxDataBufferSize;
+   if(size > maxAllowed)
+   {
+      mTransferRejected = true;
+      if(mDataBuffer)
+      {
+         delete mDataBuffer;
+         mDataBuffer = NULL;
+      }
+      if(mDataBufferLevelGen)
+      {
+         delete mDataBufferLevelGen;
+         mDataBufferLevelGen = NULL;
+      }
+      return;
+   }
    mReceiveTotalSize = size;
+   mTransferRejected = false;
 }
 
 static S32 QSORT_CALLBACK numberAlphaSort(string *a, string *b)
@@ -1946,13 +2036,32 @@ bool GameConnection::TransferLevelFile(const char *filename)
 
 bool GameConnection::TransferRecordedGameplay(const char *filename)
 {
-   BitStream s;
+   if(!mPendingTransferData.empty())
+   {
+      if(!isInitiator())
+         s2cDisplayErrorMessage("A transfer is already in progress");
+      return false;
+   }
+
    const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize value of 10
 
    FILE *f = fopen(filename, "rb");
 
    if(f)
    {
+      fseek(f, 0, SEEK_END);
+      long fileSize = ftell(f);
+      fseek(f, 0, SEEK_SET);
+
+      static const U32 MaxRecordingTransferSize = 100 * 1024 * 1024; // 100MB limit
+      if(fileSize <= 0 || (U32)fileSize > MaxRecordingTransferSize)
+      {
+         fclose(f);
+         if(!isInitiator())
+            s2cDisplayErrorMessage("Recorded file size invalid or exceeds limit");
+         return false;
+      }
+
       mPendingTransferData.resize(0);
       U32 totalTransferSize = 0;
 
@@ -2053,7 +2162,9 @@ void GameConnection::writeConnectRequest(BitStream *stream)
       serverPW = mClientGame->getEnteredServerAccessPassword();
 
    // Write some info about the client... name, id, and verification status
-   stream->writeString(Game::md5.getSaltedHashFromString(serverPW).c_str());
+   string saltedServerPW = serverPW != "" ? Game::md5.getSaltedHashFromString(serverPW) : "";
+   string hashedServerPW = computeServerPasswordChallenge(this, saltedServerPW);
+   stream->writeString(hashedServerPW.c_str());
    stream->writeString(mClientInfo->getName().getString());
 
     mClientInfo->getId()->write(stream);
@@ -2091,11 +2202,16 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    stream->readString(buf);
    string serverPassword = mServerGame->getSettings()->getServerPassword();
 
-   if(serverPassword != "" && stricmp(buf, Game::md5.getSaltedHashFromString(serverPassword).c_str()))
+   if(serverPassword != "")
    {
-      reason = ReasonNeedServerPassword;
-      reasonStr = "This server requires a password";
-      return false;
+      string salted = Game::md5.getSaltedHashFromString(serverPassword);
+      string challenged = computeServerPasswordChallenge(this, salted);
+      if(stricmp(buf, challenged.c_str()) != 0 && stricmp(buf, salted.c_str()) != 0)
+      {
+         reason = ReasonNeedServerPassword;
+         reasonStr = "This server requires a password";
+         return false;
+      }
    }
 
    // Now read the player name, id, and verification status

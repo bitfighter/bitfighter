@@ -131,11 +131,15 @@ void LevelDatabaseDownloadThread::run()
       if(breakIndex != string::npos && breakIndex > 3)
       {
          string rawFileName = levelgenCode.substr(3, breakIndex - 3);
-         string levelgenFileName = extractFilename(rawFileName);
-         if(!levelgenFileName.empty() && levelgenFileName == rawFileName &&
-            levelgenFileName.find('/') == string::npos &&
-            levelgenFileName.find('\\') == string::npos &&
-            levelgenFileName.find("..") == string::npos)
+         string parsedLevelgenFileName = extractFilename(rawFileName);
+         bool hasValidExt = (parsedLevelgenFileName.size() >= 9 && parsedLevelgenFileName.rfind(".levelgen") == parsedLevelgenFileName.size() - 9) ||
+                            (parsedLevelgenFileName.size() >= 4 && parsedLevelgenFileName.rfind(".lua") == parsedLevelgenFileName.size() - 4);
+         if(!parsedLevelgenFileName.empty() && parsedLevelgenFileName == rawFileName &&
+            safeFilename(parsedLevelgenFileName.c_str()) &&
+            hasValidExt &&
+            parsedLevelgenFileName.find('/') == string::npos &&
+            parsedLevelgenFileName.find('\\') == string::npos &&
+            parsedLevelgenFileName.find("..") == string::npos)
          {
             size_t contentStart = levelgenCode.find_first_not_of("\r\n", breakIndex);
             if(contentStart != string::npos)
@@ -143,10 +147,10 @@ void LevelDatabaseDownloadThread::run()
             else
                levelgenCode = "";
 
-            filePath = joindir(levelDir, levelgenFileName);
+            filePath = strictjoindir(levelDir, parsedLevelgenFileName);
             if(writeFile(filePath, levelgenCode))
             {
-               // Success
+               levelGenFileName = parsedLevelgenFileName;
             }
             else
             {
@@ -155,6 +159,18 @@ void LevelDatabaseDownloadThread::run()
                return;
             }
          }
+         else
+         {
+            dSprintf(url, UrlLength, "!!! Invalid levelgen filename in response");
+            errorNumber = 2;
+            return;
+         }
+      }
+      else
+      {
+         dSprintf(url, UrlLength, "!!! Malformed levelgen response");
+         errorNumber = 2;
+         return;
       }
    }
 }

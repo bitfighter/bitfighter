@@ -27,6 +27,12 @@ namespace DbWriter
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
+   if(settings)
+   {
+      string dbName = settings->getVal<string>(STATS_DATABASE_NAME);
+      if(dbName != "")
+         return DatabaseWriter(dbName.c_str());
+   }
    return DatabaseWriter("stats.db");
 }
 
@@ -34,7 +40,10 @@ DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
 {
-   // Do nothing
+   safecopy("stats.db", mDb);
+   mServer[0] = '\0';
+   mUser[0] = '\0';
+   mPassword[0] = '\0';
 }
 
 
@@ -55,22 +64,24 @@ DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *pas
  // Sqlite Constructor
 DatabaseWriter::DatabaseWriter(const char *db)
 {
-   safecopy(db, mDb);
-
-   if(!fileExists(mDb))
-      createStatsDatabase();
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
+   safecopy(dbPath, mDb);
+   mServer[0] = '\0';
+   mUser[0] = '\0';
+   mPassword[0] = '\0';
+   ensureSchema();
 }
 
 
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   safecopy(server, mServer);
-   safecopy(db, mDb);
-   safecopy(user, mUser);
-   safecopy(password, mPassword);
+   if(server) safecopy(server, mServer); else mServer[0] = '\0';
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
+   safecopy(dbPath, mDb);
+   if(user) safecopy(user, mUser); else mUser[0] = '\0';
+   if(password) safecopy(password, mPassword); else mPassword[0] = '\0';
 
-   if(!fileExists(mDb))
-      createStatsDatabase();
+   ensureSchema();
 }
 
 
@@ -403,7 +414,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 // Returns rating of the specified level
 S16 DatabaseWriter::getLevelRating(U32 databaseId)
 {
-   string sql = "SELECT levels.rating from pleiades.levels WHERE id=" + itos(databaseId) + "; ";
+   string sql = "SELECT rating from stats_level WHERE stats_level_id=" + itos(databaseId) + ";";
 
    Vector<Vector<string> > results;
 
@@ -427,20 +438,13 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 // Returns player's rating of the specified level -- should be -1, 0, or +1
 S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 {
-   // Here, we'll use a UNION to create a dummy record of 0.  That way, if there is a database error,
-   // and no records are returned, we'll be able to differentiate that from the situation where the
-   // user is not in the database and no records are returned.  With the UNION, we'll get back at least
-   // one record with 0, the default rating for a player who hasn't rated a level, even if that player
-   // has not rated it.  Add a sort column to ensure that we get results in the order we expect.
    string sql =
-      "SELECT 1 as sort, ratings.value FROM pleiades.ratings "
-      "INNER JOIN bf_phpbb.phpbb_users "
-      "WHERE ratings.level_id = " + itos(databaseId) + " AND "
-         "ratings.user_id = phpbb_users.user_id AND "
-         "phpbb_users.username = '" + sanitizeForSql(name.getString()) + "' "
+      "SELECT 1 as sort, value FROM level_ratings "
+      "WHERE level_id = " + itos(databaseId) + " AND "
+         "username = '" + sanitizeForSql(name.getString()) + "' "
        "UNION ALL "
        "SELECT 2 as sort, 0 "
-       "ORDER BY sort;";
+       "ORDER BY sort LIMIT 1;";
 
    Vector<Vector<string> > results;
 
@@ -520,26 +524,34 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 }
 
 
-void DatabaseWriter::createStatsDatabase()
+void DatabaseWriter::ensureSchema()
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
+   if(!query.isValid || !query.sqliteDb)
+      return;
 
-   // Create empty file on file system
-   logprintf("Creating stats database file %s", mDb);
-   ofstream dbFile;
-   dbFile.open(mDb);
-   dbFile.close();
+   // Check if schema table exists
+   Vector<Vector<string> > results;
+   selectHandler("SELECT name FROM sqlite_master WHERE type='table' AND name='schema';", 1, results);
 
-   // Import schema
-   logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = NULL;
+   if(results.size() == 0)
+   {
+      logprintf("Initializing database schema for %s", mDb);
+      char *err = 0;
+      int rc = sqlite3_exec(query.sqliteDb, getSqliteSchema().c_str(), NULL, 0, &err);
+      if(rc != SQLITE_OK)
+      {
+         logprintf(LogConsumer::LogError, "Error initializing SQLite schema: %s", err ? err : sqlite3_errmsg(query.sqliteDb));
+         if(err)
+            sqlite3_free(err);
+      }
+   }
+}
 
-   sqlite3_open(mDb, &sqliteDb);
 
-   query.runQuery(getSqliteSchema());
-
-   if(sqliteDb)
-      sqlite3_close(sqliteDb);
+void DatabaseWriter::createStatsDatabase()
+{
+   ensureSchema();
 }
 
 
@@ -562,10 +574,11 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
 
    const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
 
-   if(sqlite3_open(dbPath, &sqliteDb))    // Returns true if an error occurred
+   if(sqlite3_open(dbPath, &sqliteDb) != SQLITE_OK)    // Returns SQLITE_OK (0) on success
    {
-      logprintf("ERROR: Can't open stats database %s: %s", dbPath, sqlite3_errmsg(sqliteDb));
-      sqlite3_close(sqliteDb);
+      logprintf("ERROR: Can't open stats database %s: %s", dbPath, sqliteDb ? sqlite3_errmsg(sqliteDb) : "Unknown error");
+      if(sqliteDb)
+         sqlite3_close(sqliteDb);
       sqliteDb = NULL;
       isValid = false;
    }
@@ -589,12 +602,14 @@ U64 DbQuery::runQuery(const string &sql) const
       logprintf("SQL: %s", sql.c_str());
 
    char *err = 0;
-   sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
+   int rc = sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
 
-   if(err)
+   if(rc != SQLITE_OK)
    {
-      logprintf("Database error accessing sqlite database: %s", err);
-      sqlite3_free(err);
+      logprintf(LogConsumer::LogError, "Database error accessing sqlite database: %s", err ? err : sqlite3_errmsg(sqliteDb));
+      if(err)
+         sqlite3_free(err);
+      return U64_MAX;
    }
 
    return sqlite3_last_insert_rowid(sqliteDb);
@@ -741,9 +756,29 @@ string DatabaseWriter::getSqliteSchema() {
       "   has_levelgen TINYINT NOT NULL,"
       "   team_count INTEGER NOT NULL,"
       "   winning_score INTEGER NOT NULL,"
-      "   game_duration INTEGER NOT NULL"
+      "   game_duration INTEGER NOT NULL,"
+      "   rating INTEGER DEFAULT 0"
       ");"
 
+
+      /* level_ratings */
+      "DROP TABLE IF EXISTS level_ratings;"
+      "CREATE TABLE level_ratings ("
+      "   level_id INTEGER NOT NULL,"
+      "   username TEXT NOT NULL,"
+      "   value INTEGER NOT NULL DEFAULT 0,"
+      "   PRIMARY KEY (level_id, username COLLATE BINARY)"
+      ");"
+
+      /* registered_users */
+      "DROP TABLE IF EXISTS registered_users;"
+      "CREATE TABLE registered_users ("
+      "   user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+      "   username TEXT NOT NULL UNIQUE COLLATE NOCASE,"
+      "   password_hash TEXT NOT NULL,"
+      "   is_admin BOOL NOT NULL DEFAULT 0,"
+      "   date_registered DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+      ");"
 
       /* achievements */
 
@@ -754,7 +789,44 @@ string DatabaseWriter::getSqliteSchema() {
       "   server_id INTEGER NOT NULL,"
       "   date_awarded DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP );"
 
-      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);";
+      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);"
+
+      /* Views for high scores and rankings */
+      "DROP VIEW IF EXISTS v_current_week_top_player_official_wins;"
+      "CREATE VIEW v_current_week_top_player_official_wins AS "
+      "SELECT p.player_name, COUNT(*) AS win_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE g.is_official = 1 AND p.result = 'W' AND p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY win_count DESC;"
+
+      "DROP VIEW IF EXISTS v_last_week_top_player_official_wins;"
+      "CREATE VIEW v_last_week_top_player_official_wins AS "
+      "SELECT p.player_name, COUNT(*) AS win_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE g.is_official = 1 AND p.result = 'W' AND p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-14 days') AND g.insertion_date < datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY win_count DESC;"
+
+      "DROP VIEW IF EXISTS v_current_week_top_player_games;"
+      "CREATE VIEW v_current_week_top_player_games AS "
+      "SELECT p.player_name, COUNT(*) AS game_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY game_count DESC;"
+
+      "DROP VIEW IF EXISTS v_last_week_top_player_games;"
+      "CREATE VIEW v_last_week_top_player_games AS "
+      "SELECT p.player_name, COUNT(*) AS game_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-14 days') AND g.insertion_date < datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY game_count DESC;"
+
+      "DROP VIEW IF EXISTS v_latest_bbb_winners;"
+      "CREATE VIEW v_latest_bbb_winners AS "
+      "SELECT player_name, 1 AS rank FROM player_achievements ORDER BY date_awarded DESC LIMIT 10;";
 
    return schema;
 }

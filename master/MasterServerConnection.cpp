@@ -13,6 +13,7 @@
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
 #include "../zap/LevelDatabase.h"
+#include "../zap/md5wrapper.h"
 
 #include <memory>
 
@@ -20,6 +21,8 @@ using namespace DbWriter;
 
 namespace Master
 {
+
+static md5wrapper sMd5;
 
 
 class MasterThreadEntry : public ThreadEntry
@@ -127,7 +130,31 @@ bool MasterServerConnection::isAuthenticated() { return mAuthenticated; }
 // Check username & password against database
 MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verifyCredentials(string &username, string password)
 {
-   return Unsupported;
+   if(username.empty() || password.empty())
+      return InvalidUsername;
+
+   DatabaseWriter databaseWriter = getDatabaseWriter(mMaster ? mMaster->getSettings() : NULL);
+
+   string sql = "SELECT password_hash, username, is_admin FROM registered_users WHERE username = '" + sanitizeForSql(username) + "' COLLATE NOCASE LIMIT 1;";
+   Vector<Vector<string> > results;
+   databaseWriter.selectHandler(sql, 3, results);
+
+   if(results.size() == 0)
+      return UnknownUser;
+
+   string storedHash = results[0][0];
+   string canonicalName = results[0][1];
+
+   string computedHash = sMd5.getSaltedHashFromString(password);
+   string rawHash = sMd5.getHashFromString(password);
+
+   if(storedHash == computedHash || storedHash == rawHash || storedHash == password)
+   {
+      username = canonicalName;
+      return Authenticated;
+   }
+
+   return WrongPassword;
 }
 
 
@@ -1616,6 +1643,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                return false;
 
             case UnknownStatus:
+            case UnknownUser:
+            case Unsupported:
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
@@ -1635,8 +1664,6 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                break;
 
             case CantConnect:
-            case UnknownUser:
-            case Unsupported:
                // Do nothing
                break;
          }

@@ -63,11 +63,13 @@ public:
 
    bool sendRequest(string request);
    string receiveResponse();
+   bool sendViaCurl();
 
 private:
    shared_ptr<Address> mLocalAddress;
    shared_ptr<Address> mRemoteAddress;
    shared_ptr<Socket> mSocket;
+   bool mUseMockSocket;
 
    map<string, string> mData;
    list<HttpsRequestFileInfo> mFiles;

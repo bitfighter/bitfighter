@@ -70,19 +70,19 @@ class AsymmetricKey : public Object
 public:
 
    /// Constructs an AsymmetricKey from the specified data pointer.
-   AsymmetricKey(U8 *dataPtr, U32 bufferSize) : mKeyData(NULL)
+   AsymmetricKey(U8 *dataPtr, U32 bufferSize) : mKeyData(NULL), mKeySize(0), mHasPrivateKey(false), mPublicKey(NULL), mPrivateKey(NULL), mIsValid(false)
    {
       load(ByteBuffer(dataPtr, bufferSize));
    }
 
    /// Constructs an AsymmetricKey from a ByteBuffer.
-   AsymmetricKey(const ByteBuffer &theBuffer) : mKeyData(NULL)
+   AsymmetricKey(const ByteBuffer &theBuffer) : mKeyData(NULL), mKeySize(0), mHasPrivateKey(false), mPublicKey(NULL), mPrivateKey(NULL), mIsValid(false)
    {
       load(theBuffer);
    }
 
    /// Constructs an AsymmetricKey by reading it from a BitStream.
-   AsymmetricKey(BitStream *theStream) : mKeyData(NULL)
+   AsymmetricKey(BitStream *theStream) : mKeyData(NULL), mKeySize(0), mHasPrivateKey(false), mPublicKey(NULL), mPrivateKey(NULL), mIsValid(false)
    {
       ByteBuffer theBuffer;
       theStream->read(&theBuffer);

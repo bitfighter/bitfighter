@@ -102,8 +102,13 @@ TEST_F(LuaEnvironmentTest, sandbox)
    // But it should not interfere with permitted functions
    EXPECT_TRUE(existsFunctionInEnvironment("unpack"));
    EXPECT_TRUE(existsFunctionInEnvironment("ipairs"));
-   EXPECT_FALSE(existsFunctionInEnvironment("require"));
+   EXPECT_TRUE(existsFunctionInEnvironment("require"));
    EXPECT_FALSE(existsFunctionInEnvironment("ffi"));
+
+   // Constrained require works for bundled modules but blocks traversal
+   EXPECT_TRUE(levelgen->runString("local sd = require('stardust'); assert(sd ~= nil)"));
+   EXPECT_FALSE(levelgen->runString("require('../sandbox')"));
+   EXPECT_FALSE(levelgen->runString("require('sub/dir')"));
 }
 
 

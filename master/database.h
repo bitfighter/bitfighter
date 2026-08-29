@@ -99,6 +99,9 @@ public:
    // SQLite constructor
    DatabaseWriter(const char *db);
 
+   const char *getDbPath() const { return mDb; }
+   void ensureSchema();
+
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
    void setDumpSql(bool dump);

@@ -387,17 +387,29 @@ bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServer
 			curl_easy_setopt(curl, CURLOPT_PROXY, proxyServerInfo.first.c_str());
 			curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyServerInfo.second);
 		}
-		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
+		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST);
 
+		long httpResponseCode = 0;
 		res = curl_easy_perform(curl);
+		if (res == CURLE_OK)
+		{
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpResponseCode);
+		}
 
 		curl_easy_cleanup(curl);
 	}
 
-	if (res != CURLE_OK)
+	if (res != CURLE_OK || httpResponseCode < 200 || httpResponseCode >= 400)
 	{
+		if (pFile)
+		{
+			fclose(pFile);
+			pFile = NULL;
+			::remove(destTo.c_str());
+		}
+
 		if (!isSilentMode && doAbort == false)
-			::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
+			::MessageBoxA(NULL, errorBuffer[0] ? errorBuffer : "Download failed or HTTP error", "curl error", MB_OK);
 		if (doAbort)
 		{
 			::MessageBoxA(NULL, stoppedMessage.first.c_str(), stoppedMessage.second.c_str(), MB_OK);

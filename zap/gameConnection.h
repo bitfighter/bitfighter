@@ -318,6 +318,7 @@ public:
 
    Vector<SafePtr<ByteBuffer> > mPendingTransferData; // Only used for progress meter
    U32 mReceiveTotalSize;
+   bool mTransferRejected;
 
    bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
                             // client side: this can allow or disallow sending voice to server

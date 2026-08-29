@@ -6,6 +6,7 @@
 #include "HttpsRequest.h"
 #include "Intervals.h"
 
+#include <curl/curl.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -25,11 +26,31 @@ const string HttpsRequest::HttpsRequestBoundary = "---REQUEST---BOUNDARY---";
 
 const string HttpsRequest::LevelDatabaseBaseUrl = "https://bitfighter.org/pleiades";
 
+static size_t curlWriteBodyCallback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+   string *responseBody = static_cast<string*>(userdata);
+   size_t total = size * nmemb;
+   static const size_t MaxHttpResponseSize = 10 * 1024 * 1024;
+   if(responseBody->size() + total > MaxHttpResponseSize)
+      return 0;
+   responseBody->append(ptr, total);
+   return total;
+}
+
+static size_t curlWriteHeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+   string *responseHead = static_cast<string*>(userdata);
+   size_t total = size * nmemb;
+   responseHead->append(ptr, total);
+   return total;
+}
+
 HttpsRequest::HttpsRequest(const string &url)
    : mUrl(url),
      mMethod("GET"),
      mResponseCode(0),
-     mTimeout(THREE_SECONDS)
+     mTimeout(THREE_SECONDS),
+     mUseMockSocket(false)
 {
    mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
    mSocket.reset(new Socket(*mLocalAddress));
@@ -40,6 +61,85 @@ HttpsRequest::HttpsRequest(const string &url)
 HttpsRequest::~HttpsRequest()
 {
 
+}
+
+bool HttpsRequest::sendViaCurl()
+{
+   CURL *curl = curl_easy_init();
+   if(!curl)
+   {
+      mError = "Failed to initialize cURL";
+      return false;
+   }
+
+   string effectiveUrl = mUrl;
+   if(effectiveUrl.find("://") == string::npos)
+      effectiveUrl = "https://" + effectiveUrl;
+
+   // Enforce HTTPS - never allow plaintext HTTP if credentials might be transmitted
+   if(effectiveUrl.rfind("http://", 0) == 0)
+   {
+      if(mData.find("password") != mData.end() || mData.find("pass") != mData.end())
+      {
+         mError = "Insecure transmission of credentials over plaintext HTTP blocked";
+         curl_easy_cleanup(curl);
+         return false;
+      }
+   }
+
+   curl_easy_setopt(curl, CURLOPT_URL, effectiveUrl.c_str());
+   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, (long)mTimeout);
+   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Bitfighter");
+
+   mResponseBody = "";
+   mResponseHead = "";
+   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteBodyCallback);
+   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBody);
+   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlWriteHeaderCallback);
+   curl_easy_setopt(curl, CURLOPT_HEADERDATA, &mResponseHead);
+
+   curl_mime *mime = NULL;
+
+   if(mMethod == PostMethod)
+   {
+      mime = curl_mime_init(curl);
+      for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
+      {
+         curl_mimepart *part = curl_mime_addpart(mime);
+         curl_mime_name(part, it->first.c_str());
+         curl_mime_data(part, it->second.c_str(), it->second.size());
+      }
+      for(list<HttpsRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
+      {
+         curl_mimepart *part = curl_mime_addpart(mime);
+         curl_mime_name(part, it->fieldName.c_str());
+         curl_mime_filename(part, it->fileName.c_str());
+         curl_mime_data(part, (const char*)it->data, it->length);
+         curl_mime_type(part, "image/png");
+      }
+      curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+   }
+
+   CURLcode res = curl_easy_perform(curl);
+   if(res != CURLE_OK)
+   {
+      mError = curl_easy_strerror(res);
+      if(mime) curl_mime_free(mime);
+      curl_easy_cleanup(curl);
+      return false;
+   }
+
+   long http_code = 0;
+   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+   mResponseCode = (S32)http_code;
+
+   if(mime) curl_mime_free(mime);
+   curl_easy_cleanup(curl);
+
+   return (mResponseCode >= 200 && mResponseCode < 400);
 }
 
 
@@ -72,6 +172,11 @@ void HttpsRequest::setUrl(const string &url)
 bool HttpsRequest::send()
 {
    mError = "";
+
+   if(!mUseMockSocket)
+   {
+      return sendViaCurl();
+   }
 
    // check that TNL understands the supplied address
    if(!mRemoteAddress->isValid())
@@ -286,9 +391,7 @@ bool HttpsRequest::sendRequest(string request)
    U32 bytesSent = 0, bytesTotal = request.size();
    U32 startTime = Platform::getRealMilliseconds();
 
-   bool sentData = false;
-   // Continue to send indefinitely if data was successfully sent
-   while(sentData || Platform::getRealMilliseconds() - startTime < mTimeout)
+   while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(PollInterval);
 
@@ -305,8 +408,7 @@ bool HttpsRequest::sendRequest(string request)
       {
          // data was transmitted
          bytesSent += bytesAtOnce;
-
-         sentData = true;
+         startTime = Platform::getRealMilliseconds();
 
          if(bytesSent < bytesTotal)
             continue;
@@ -324,12 +426,11 @@ bool HttpsRequest::sendRequest(string request)
 string HttpsRequest::receiveResponse()
 {
    mResponse = "";
-   S32 startTime = Platform::getRealMilliseconds();
+   U32 startTime = Platform::getRealMilliseconds();
 
    static const U32 MaxHttpResponseSize = 10 * 1024 * 1024; // 10MB limit
 
-   bool receivedData = false;
-   while(receivedData || Platform::getRealMilliseconds() - startTime < mTimeout)
+   while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(50);
       TNL::NetError recvError;
@@ -356,12 +457,10 @@ string HttpsRequest::receiveResponse()
       }
 
       mResponse.append(receiveBuffer, 0, bytesRead);
+      startTime = Platform::getRealMilliseconds();
 
       if(bytesRead == 0)
          break;
-
-      // More data to read
-      receivedData = true;
    }
    return mResponse;
 }

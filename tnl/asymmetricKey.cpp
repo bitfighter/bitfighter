@@ -48,23 +48,46 @@ static U8 staticCryptoBuffer[StaticCryptoBufferSize];
 AsymmetricKey::AsymmetricKey(U32 keySize)
 {
    mIsValid = false;
+   mKeyData = NULL;
+   mKeySize = 0;
+   mHasPrivateKey = false;
+   mPublicKey = NULL;
+   mPrivateKey = NULL;
 
    int descriptorIndex = register_prng ( &yarrow_desc );
    crypto_key *theKey = (crypto_key *) malloc(sizeof(crypto_key));
+   if(!theKey)
+      return;
 
    if( crypto_make_key((prng_state *) Random::getState(), descriptorIndex,
       keySize, theKey) != CRYPT_OK )
+   {
+      free(theKey);
       return;
+   }
 
+   int actualKeySize = ecc_get_size(theKey);
+   if(actualKeySize <= 0)
+   {
+      crypto_free(theKey);
+      free(theKey);
+      return;
+   }
    mKeyData = theKey;
-   mKeySize = keySize;
+   mKeySize = (U32)actualKeySize;
 
    unsigned long bufferLen = sizeof(staticCryptoBuffer) - sizeof(U32) - 1;
 
    staticCryptoBuffer[0] = KeyTypePrivate;
    writeU32ToBuffer(mKeySize, staticCryptoBuffer + 1);
 
-   crypto_export(staticCryptoBuffer + sizeof(U32) + 1, &bufferLen, PK_PRIVATE, theKey);
+   if( crypto_export(staticCryptoBuffer + sizeof(U32) + 1, &bufferLen, PK_PRIVATE, theKey) != CRYPT_OK )
+   {
+      crypto_free(theKey);
+      free(theKey);
+      mKeyData = NULL;
+      return;
+   }
    bufferLen += sizeof(U32) + 1;
 
    mPrivateKey = new ByteBuffer(staticCryptoBuffer, bufferLen);
@@ -75,7 +98,14 @@ AsymmetricKey::AsymmetricKey(U32 keySize)
    staticCryptoBuffer[0] = KeyTypePublic;
    writeU32ToBuffer(mKeySize, staticCryptoBuffer + 1);
 
-   crypto_export(staticCryptoBuffer + sizeof(U32) + 1, &bufferLen, PK_PUBLIC, theKey);
+   if( crypto_export(staticCryptoBuffer + sizeof(U32) + 1, &bufferLen, PK_PUBLIC, theKey) != CRYPT_OK )
+   {
+      crypto_free(theKey);
+      free(theKey);
+      mKeyData = NULL;
+      mPrivateKey = NULL;
+      return;
+   }
    bufferLen += sizeof(U32) + 1;
 
    mPublicKey = new ByteBuffer(staticCryptoBuffer, bufferLen);
@@ -91,28 +121,53 @@ AsymmetricKey::~AsymmetricKey()
    {
       crypto_free((crypto_key *) mKeyData);
       free(mKeyData);
+      mKeyData = NULL;
    }
 }
 
 void AsymmetricKey::load(const ByteBuffer &theBuffer)
 {
    mIsValid = false;
-
-   crypto_key *theKey = (crypto_key *) malloc(sizeof(crypto_key));
-   const U8 *bufferPtr = theBuffer.getBuffer();
+   mHasPrivateKey = false;
+   mKeySize = 0;
+   mPublicKey = NULL;
+   mPrivateKey = NULL;
+   if(mKeyData)
+   {
+      crypto_free((crypto_key *) mKeyData);
+      free(mKeyData);
+      mKeyData = NULL;
+   }
 
    U32 bufferSize = theBuffer.getBufferSize();
    if(bufferSize < sizeof(U32) + 1)
       return;
 
+   const U8 *bufferPtr = theBuffer.getBuffer();
+   if(!bufferPtr)
+      return;
+
    mHasPrivateKey = bufferPtr[0] == KeyTypePrivate;
 
-   mKeySize = readU32FromBuffer(bufferPtr + 1);
+   crypto_key *theKey = (crypto_key *) malloc(sizeof(crypto_key));
+   if(!theKey)
+      return;
 
    if( crypto_import(bufferPtr + sizeof(U32) + 1, bufferSize - sizeof(U32) - 1, theKey)
          != CRYPT_OK)
+   {
+      free(theKey);
       return;
+   }
 
+   int actualKeySize = ecc_get_size(theKey);
+   if(actualKeySize <= 0)
+   {
+      crypto_free(theKey);
+      free(theKey);
+      return;
+   }
+   mKeySize = (U32)actualKeySize;
    mKeyData = theKey;
 
    if(mHasPrivateKey)
@@ -124,7 +179,12 @@ void AsymmetricKey::load(const ByteBuffer &theBuffer)
 
       if( crypto_export(staticCryptoBuffer + sizeof(U32) + 1, &bufferLen, PK_PUBLIC, theKey)
             != CRYPT_OK )
+      {
+         crypto_free(theKey);
+         free(theKey);
+         mKeyData = NULL;
          return;
+      }
 
       bufferLen += sizeof(U32) + 1;
 
@@ -143,16 +203,23 @@ void AsymmetricKey::load(const ByteBuffer &theBuffer)
 
 ByteBufferPtr AsymmetricKey::computeSharedSecretKey(AsymmetricKey *publicKey)
 {
-   if(publicKey->getKeySize() != getKeySize() || !mHasPrivateKey)
+   if(!publicKey || !publicKey->isValid() || !isValid() || !mHasPrivateKey || !mKeyData || !publicKey->mKeyData)
+      return NULL;
+
+   if(publicKey->getKeySize() != getKeySize())
       return NULL;
 
    U8 hash[32];
    unsigned long outLen = sizeof(staticCryptoBuffer);
 
+   int res = 0;
    TIME_BLOCK(secretSubKeyGen,
-   crypto_shared_secret((crypto_key *) mKeyData, (crypto_key *) publicKey->mKeyData,
+   res = crypto_shared_secret((crypto_key *) mKeyData, (crypto_key *) publicKey->mKeyData,
       staticCryptoBuffer, &outLen);
    )
+   if(res != CRYPT_OK)
+      return NULL;
+
    hash_state hashState;
    sha256_init(&hashState);
    sha256_process(&hashState, staticCryptoBuffer, outLen);
@@ -164,6 +231,9 @@ ByteBufferPtr AsymmetricKey::computeSharedSecretKey(AsymmetricKey *publicKey)
 
 ByteBufferPtr AsymmetricKey::hashAndSign(const ByteBuffer &theByteBuffer)
 {
+   if(!isValid() || !mHasPrivateKey || !mKeyData)
+      return NULL;
+
    int descriptorIndex = register_prng ( &yarrow_desc );
 
    U8 hash[32];
@@ -175,15 +245,19 @@ ByteBufferPtr AsymmetricKey::hashAndSign(const ByteBuffer &theByteBuffer)
 
    unsigned long outlen = sizeof(staticCryptoBuffer);
 
-   ecc_sign_hash(hash, 32,
+   if(ecc_sign_hash(hash, 32,
       staticCryptoBuffer, &outlen,
-      (prng_state *) Random::getState(), descriptorIndex, (crypto_key *) mKeyData);
+      (prng_state *) Random::getState(), descriptorIndex, (crypto_key *) mKeyData) != CRYPT_OK)
+      return NULL;
 
    return new ByteBuffer(staticCryptoBuffer, (U32) outlen);
 }
 
 bool AsymmetricKey::verifySignature(const ByteBuffer &theByteBuffer, const ByteBuffer &theSignature)
 {
+   if(!isValid() || !mKeyData)
+      return false;
+
    U8 hash[32];
    hash_state hashState;
 
@@ -191,10 +265,12 @@ bool AsymmetricKey::verifySignature(const ByteBuffer &theByteBuffer, const ByteB
    sha256_process(&hashState, theByteBuffer.getBuffer(), theByteBuffer.getBufferSize());
    sha256_done(&hashState, hash);
 
-   int stat;
+   int stat = 0;
 
-   ecc_verify_hash(theSignature.getBuffer(), theSignature.getBufferSize(), hash, 32, &stat, (crypto_key *) mKeyData);
-   return stat != 0;
+   if(ecc_verify_hash(theSignature.getBuffer(), theSignature.getBufferSize(), hash, 32, &stat, (crypto_key *) mKeyData) != CRYPT_OK)
+      return false;
+
+   return stat == 1;
 }
 
 };
