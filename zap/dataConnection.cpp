@@ -275,6 +275,7 @@ DataConnection::DataConnection(GameSettings *settings, ActionType action, string
    mPassword = password;
 
    mOutputFile = NULL;
+   mBytesReceived = 0;
 }
 
 
@@ -286,6 +287,7 @@ DataConnection::DataConnection(GameSettings *settings, const Nonce &clientId)
    mAction = REQUEST_CURRENT_LEVEL;
    mFileType = INVALID_RESOURCE_TYPE;
    mOutputFile = NULL;
+   mBytesReceived = 0;
 }
 
 // Destructor
@@ -431,6 +433,8 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   static const U32 MaxDataUploadSize = 10 * 1024 * 1024; // 10MB limit
+
    if(!mOutputFile && isInitiator() && mAction == REQUEST_FILE)
    {
       TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
@@ -448,7 +452,19 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
    }
 
    if(mOutputFile)
-      fwrite(line.getString(), 1, strlen(line.getString()), mOutputFile);
+   {
+      U32 lineLen = (U32)strlen(line.getString());
+      if(mBytesReceived + lineLen > MaxDataUploadSize)
+      {
+         logprintf("Data upload exceeded maximum allowed size");
+         fclose(mOutputFile);
+         mOutputFile = NULL;
+         disconnect(ReasonError, "File size limit exceeded");
+         return;
+      }
+      fwrite(line.getString(), 1, lineLen, mOutputFile);
+      mBytesReceived += lineLen;
+   }
 }
 
 
