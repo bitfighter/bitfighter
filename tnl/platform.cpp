@@ -357,18 +357,6 @@ void Platform::forceQuit()
 static bool sg_initialized = false;
 static timeval sg_startTime;
 
-static void x86UNIXInitTimer()
-{
-   if(!sg_initialized)
-   {
-      sg_initialized = true;
-      ::gettimeofday(&sg_startTime, NULL);
-   }
-}
-
-static bool sg_initialized = false;
-static timeval sg_startTime;
-
 static void x86UNIXTimerInit()
 {
    if (sg_initialized == false) {
@@ -402,6 +390,16 @@ U32 x86UNIXGetTickCountMicro()
    S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
 
    return (U32)(secs * 1000000 + uSecs);
+}
+
+U32 Platform::getRealMilliseconds()
+{
+   return x86UNIXGetTickCount();
+}
+
+U32 Platform::getRealMicroseconds()
+{
+   return x86UNIXGetTickCountMicro();
 }
 
 class UnixTimer
