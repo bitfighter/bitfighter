@@ -258,7 +258,7 @@ endif()
 
 # mysql++ is for compiling master
 if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
-	add_subdirectory(mysql++ EXCLUDE_FROM_ALL)
+	add_subdirectory(mysql++)
 endif()
 
 
