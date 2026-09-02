@@ -1,4 +1,4 @@
-Some helpful notes for our AI friends (and some humans may find this useful as well)
+Some helpful notes for our AI friends and humans
 
 # Building and Testing
 
@@ -6,45 +6,45 @@ Some helpful notes for our AI friends (and some humans may find this useful as w
 
 ## macOS
 
-### Prerequisites (Homebrew)
+### Prerequisites via Homebrew
 On Apple Silicon macOS, LuaJIT 2.1 from Homebrew is required:
 ```bash
 brew install luajit sdl2 libpng libvorbis libogg speex libmodplug openal-soft
 ```
 
-### Build & Test Commands:
+### Build and Test Commands
 ```bash
-# Configure out-of-source build (use -DMASTER_MINIMAL=ON if MySQL server is not used)
+# Configure out-of-source build, add -DMASTER_MINIMAL=ON when MySQL server is not used
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=ON
 
 # Build test runner
-cmake --build build --target bitfighter_test -j$(sysctl -n hw.ncpu)
+cmake --build build --target bitfighter_test
 
 # Build game client
-cmake --build build --target Bitfighter -j$(sysctl -n hw.ncpu)
+cmake --build build --target Bitfighter
 
 # Run test suite
 cd exe && ./bitfighter_test
 
-# Run filtered tests (e.g. ChatHelper or StringUtils)
+# Run filtered tests such as ChatHelper or StringUtils
 cd exe && ./bitfighter_test --gtest_filter=ChatHelperTest.*
 ```
 
-## Linux / WSL
+## Linux and WSL
 
-### Build & Test Commands:
+### Build and Test Commands
 ```bash
 # Configure
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=ON
 
 # Build
-cmake --build build --target bitfighter_test -j$(nproc)
+cmake --build build --target bitfighter_test
 
 # Run tests
 cd exe && ./bitfighter_test
 ```
 
-### Running Valgrind on Linux / WSL:
+### Running Valgrind on Linux and WSL
 ```bash
 # Build with debug symbols and no optimization
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -O0 -Wno-error" -DMASTER_MINIMAL=ON
@@ -57,7 +57,7 @@ valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressi
 
 ## Windows
 
-### Test Commands:
+### Test Commands
 ```cmd
 cd <ROOT_DIR>\exe
 bitfighter_test_debug.exe
@@ -71,4 +71,4 @@ bitfighter_test_debug.exe --gtest_filter=ChatHelperTest.*
 - `Bitfighter` / `bitfighter`: Main graphical game client.
 - `bitfighterd`: Dedicated headless server.
 - `bitfighter_test`: GoogleTest unit and integration test suite.
-- `master`: Master server daemon (for matchmaking and server listings).
+- `master`: Master server daemon for matchmaking and server listings.
