@@ -14,7 +14,7 @@ brew install luajit sdl2 libpng libvorbis libogg speex libmodplug openal-soft
 
 ### Build and Test Commands
 ```bash
-# Configure out-of-source build, add -DMASTER_MINIMAL=ON when MySQL server is not used
+# Configure out-of-source build; add -DMASTER_MINIMAL=ON when MySQL server is not used
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=ON
 
 # Build test runner
