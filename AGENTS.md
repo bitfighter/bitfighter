@@ -1,4 +1,4 @@
-Some helpful notes for our AI friends and humans
+Some helpful notes for our AI friends and humans.
 
 # Building and Testing
 
