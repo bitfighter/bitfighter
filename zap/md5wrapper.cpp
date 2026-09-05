@@ -27,6 +27,9 @@
 //my includes
 #include "md5wrapper.h"
 #include <tomcrypt.h>
+#include "tnlPlatform.h"
+
+using namespace TNL;
 #include "stringUtils.h"
 
 
