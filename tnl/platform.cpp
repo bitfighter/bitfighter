@@ -357,18 +357,6 @@ void Platform::forceQuit()
 static bool sg_initialized = false;
 static timeval sg_startTime;
 
-static void x86UNIXInitTimer()
-{
-   if(!sg_initialized)
-   {
-      sg_initialized = true;
-      ::gettimeofday(&sg_startTime, NULL);
-   }
-}
-
-static bool sg_initialized = false;
-static timeval sg_startTime;
-
 static void x86UNIXTimerInit()
 {
    if (sg_initialized == false) {

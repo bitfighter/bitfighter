@@ -20,6 +20,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <cstring>
 
 namespace Zap
 {
