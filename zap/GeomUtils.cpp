@@ -119,40 +119,6 @@ bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &p
 }
 
 
-// Fast winding number test for finding if a point is in a polygon.  Adapted from:
-// http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
-static inline F64 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
-{
-    return ( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
-}
-
-static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)
-{
-   S32 counter = 0;    // Winding number counter
-
-   // loop through all edges of the polygon
-   S32 nextIndex;
-   for (S32 i = 0; i < vertexCount; i++)
-   {
-      nextIndex = (i+1)%vertexCount;
-      if (vertices[i]->y <= point->y)
-      {
-         if (vertices[nextIndex]->y  > point->y)                      // an upward crossing
-            if (isLeftP2t(vertices[i], vertices[nextIndex], point) > 0)  // point left of edge
-               ++counter;                                             // have a valid up intersect
-      }
-      else
-      {
-         if (vertices[nextIndex]->y  <= point->y)                     // a downward crossing
-            if (isLeftP2t(vertices[i], vertices[nextIndex], point) < 0)  // point right of edge
-               --counter;                                             // have  a valid down intersect
-      }
-   }
-
-   return counter != 0;   // Point is outside polygon only when counter is 0
-}
-
-
 // Remove collinear points from list.  If this is a polygon, consider removing endpoints as well as midpoints.
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 {
