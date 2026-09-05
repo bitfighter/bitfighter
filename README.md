@@ -6,8 +6,6 @@ The fast-paced team-based outer-space multi-player arcade game. Blast your frien
 
 ## [Download](http://bitfighter.org/downloads/) | [Discord](https://discord.gg/3sdzjkz) | [Wiki](http://bitfighter.org/wiki/index.php?title=Main_Page) | [Forum](http://bitfighter.org/forums/viewforum.php?f=4)
 
-macOS CI builds are not notarized. If Gatekeeper blocks Bitfighter, see [INSTALLATION AND PACKAGING &rarr; macOS](#macos).
-
 ## DEPENDENCIES
 
 Bitfighter has several common, open source dependencies:
@@ -113,8 +111,7 @@ and re-points the load commands.  Homebrew currently ships SDL2 as **sdl2-compat
 which `dlopen`s `libSDL3` at runtime; that library is also copied into
 `Frameworks` (dylibbundler cannot see dlopen deps).  The bundle is **ad-hoc
 signed**, so Gatekeeper will block it on first launch.  See [macOS](#macos)
-below for how to open it; Developer ID signing and notarization are a
-separate step.
+below for how to open it.
 
 To build the Intel client under Rosetta instead (using the bundled `lib/`
 frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
