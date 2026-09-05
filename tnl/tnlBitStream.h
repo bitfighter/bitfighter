@@ -61,7 +61,7 @@ struct Point3F
 ///       broken template functionality.  Thanks MS!
 #define DeclareTemplatizedReadWrite(T) \
 inline bool write(T value) { T temp = convertHostToLEndian(value); return write(sizeof(T), &temp); } \
-inline bool read(T *value) { T temp; bool success = read(sizeof(T), &temp); *value = convertLEndianToHost(temp); return success;}
+inline bool read(T *value) { T temp = T(); bool success = read(sizeof(T), &temp); if(success) *value = convertLEndianToHost(temp); else *value = T(); return success;}
 
 /// BitStream provides a bit-level stream interface to a data buffer.
 class BitStream : public ByteBuffer
@@ -115,6 +115,9 @@ public:
 
    /// sets the ConnectionStringTable for compressing string table entries across the network
    void setStringTable(ConnectionStringTable *table) { mStringTable = table; }
+
+   /// sets the error state
+   void setError() { error = true; }
 
    /// clears the error state from an attempted read or write overrun
    void clearError() { error = false; }
@@ -343,7 +346,7 @@ inline bool BitStream::read(const U32 in_numBytes,  void* out_pBuffer)
 
 inline bool BitStream::readFlag()
 {
-   if(bitNum > maxReadBitNum)
+   if(bitNum >= maxReadBitNum)
    {
       error = true;
       TNLAssert(false, "Out of range read");
@@ -384,7 +387,10 @@ inline U32 BitStream::readRangedU32(U32 rangeStart, U32 rangeEnd)
    U32 rangeBits = getNextBinLog2(rangeSize);
 
    U32 val = U32(readInt(S32(rangeBits)));
-   return val + rangeStart;
+   U32 ret = val + rangeStart;
+   if(ret > rangeEnd)
+      ret = rangeEnd;
+   return ret;
 }
 
 inline void BitStream::writeEnum(U32 enumValue, U32 enumRange)
@@ -394,7 +400,10 @@ inline void BitStream::writeEnum(U32 enumValue, U32 enumRange)
 
 inline U32 BitStream::readEnum(U32 enumRange)
 {
-   return U32(readInt(getNextBinLog2(enumRange)));
+   U32 val = U32(readInt(getNextBinLog2(enumRange)));
+   if(enumRange > 0 && val >= enumRange)
+      val = enumRange - 1;
+   return val;
 }
 
 /// PacketStream provides a network interface to the BitStream for easy construction of data packets.

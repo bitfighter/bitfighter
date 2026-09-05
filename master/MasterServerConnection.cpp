@@ -8,12 +8,12 @@
 #include "master.h"
 #include "database.h"
 #include "DatabaseAccessThread.h"
-#include "authenticator.h"
 #include "GameJoltConnector.h"
 
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
 #include "../zap/LevelDatabase.h"
+#include "../zap/md5wrapper.h"
 
 #include <memory>
 
@@ -21,6 +21,8 @@ using namespace DbWriter;
 
 namespace Master
 {
+
+static md5wrapper sMd5;
 
 
 class MasterThreadEntry : public ThreadEntry
@@ -127,46 +129,33 @@ bool MasterServerConnection::isAuthenticated() { return mAuthenticated; }
 
 // Check username & password against database
 MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verifyCredentials(string &username, string password)
-
-#ifdef VERIFY_PHPBB3    // Defined in Linux Makefile, not in VC++ project
 {
-   Authenticator authenticator;
+   if(username.empty() || password.empty())
+      return InvalidUsername;
 
-   // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
-   //          1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
-   //        1 = very basic security (prevents the use of double quote character)  <=== also level 1????   I think this can be deleted --> see comments in authenticator.initialize
-   //          2 = alphanumeric (only allows alphanumeric characters in the username)
-   //
-   // We'll use level 1 for now, so users can put special characters in their username
-   authenticator.initialize(
-      mMaster->getSetting<string>(PHPBB3_DATABASE_ADDRESS),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_USERNAME),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_PASSWORD),
-      mMaster->getSetting<string>(PHPBB3_DATABASE_NAME),
-      mMaster->getSetting<string>(PHPBB3_TABLE_PREFIX),
-      1
-   );
+   DatabaseWriter databaseWriter = getDatabaseWriter(mMaster ? mMaster->getSettings() : NULL);
 
-   S32 errorcode;
-   if(authenticator.authenticate(username, password, errorcode))   // returns true if the username was found and the password is correct
-      return Authenticated;
-   else
+   string sql = "SELECT password_hash, username, is_admin FROM registered_users WHERE username = '" + sanitizeForSql(username) + "' COLLATE NOCASE LIMIT 1;";
+   Vector<Vector<string> > results;
+   databaseWriter.selectHandler(sql, 3, results);
+
+   if(results.size() == 0)
+      return UnknownUser;
+
+   string storedHash = results[0][0];
+   string canonicalName = results[0][1];
+
+   string computedHash = sMd5.getSaltedHashFromString(password);
+   string rawHash = sMd5.getHashFromString(password);
+
+   if(storedHash == computedHash || storedHash == rawHash || storedHash == password)
    {
-      switch(errorcode)
-      {
-         case 0:  return CantConnect;
-         case 1:  return UnknownUser;
-         case 2:  return WrongPassword;
-         case 3:  return InvalidUsername;
-         default: return UnknownStatus;
-      }
+      username = canonicalName;
+      return Authenticated;
    }
+
+   return WrongPassword;
 }
-#else // verifyCredentials
-{
-   return Unsupported;
-}
-#endif
 
 
 class MasterSettings;
@@ -535,7 +524,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
          fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                      first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()).c_str(),
-                     server->mCSProtocolVersion, server->mLevelName.getString(), server->mLevelType.getString(), server->mPlayerCount);
+                     server->mCSProtocolVersion, sanitizeForJson(server->mLevelName.getString()).c_str(), sanitizeForJson(server->mLevelType.getString()).c_str(), server->mPlayerCount);
          playerCount += server->mPlayerCount;
          serverCount++;
          first = false;
@@ -675,6 +664,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
 // Called to indicate a connect request is being accepted.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    GameConnectRequest *req = findAndRemoveRequest(requestId);
    if(!req)
       return;
@@ -714,6 +705,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
 // Called to indicate a connect request is being rejected.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    GameConnectRequest *req = findAndRemoveRequest(requestId);
    if(!req)
       return;
@@ -1224,6 +1217,8 @@ void MasterServerConnection::removeOldEntriesFromRatingsCache()
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    writeStatisticsToDb(stats);
    highScores.isValid = false;
 }
@@ -1231,7 +1226,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (Versioned
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
 {
-   if(achievementId > BADGE_COUNT)  // Check for out of range badges
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
+   if(achievementId >= BADGE_COUNT)  // Check for out of range badges
       return;
 
    writeAchievementToDb(achievementId, playerNick);
@@ -1253,6 +1250,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo,
                            (string hash, string levelName, string creator,
                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    writeLevelInfoToDb(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
 }
 
@@ -1383,6 +1382,9 @@ U32 PlayerLevelRating::getCacheExpiryTime() { return TEN_MINUTES; }
 // The client has rated the level and sent it to us
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 databaseId, RangedU32<0, 2> rating))
 {
+   if(!mPlayerOrServerName.getString()[0] || !isAuthenticated())
+      return;
+
    // Do nothing if client sent us an invalid id
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return;
@@ -1442,6 +1444,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestMOTD, ())
 // Game server wants to know if user name has been verified
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
 {
+   if(mConnectionType != MasterConnectionTypeServer)
+      return;
    Nonce clientId(id);     // Reconstitute our id
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
@@ -1639,6 +1643,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                return false;
 
             case UnknownStatus:
+            case UnknownUser:
+            case Unsupported:
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
@@ -1658,8 +1664,6 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                break;
 
             case CantConnect:
-            case UnknownUser:
-            case Unsupported:
                // Do nothing
                break;
          }
@@ -1786,6 +1790,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
 
          if(command == "dropserver")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "dropserver: missing address argument");
+               return;
+            }
             bool droppedServer = false;
             Address addr(words[1].c_str());
 
@@ -1824,6 +1833,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
          }
          else if(command == "hideplayer")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "hideplayer: missing player argument");
+               return;
+            }
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
@@ -1843,6 +1857,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
          }
          else if(command == "hideip")
          {
+            if(words.size() < 2)
+            {
+               m2cSendChat(mPlayerOrServerName, true, "hideip: missing address argument");
+               return;
+            }
             Address addr(words[1].c_str());
             bool found = false;
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();

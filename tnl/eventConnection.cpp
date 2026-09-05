@@ -480,8 +480,11 @@ void EventConnection::readPacket(BitStream *bstream)
       }
 
       NetEvent *evt = unpackNetEvent(bstream);
-      if(!evt)
+      if(!evt || !bstream->isValid())
+      {
+         if(evt) delete evt;
          return;
+      }
 
       if(unguaranteedPhase)
       {
@@ -639,7 +642,7 @@ NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
 
 
    evt->unpack(this, bstream);
-   if(mErrorBuffer[0])
+   if(mErrorBuffer[0] || !bstream->isValid())
    {
       delete evt;
       return NULL;

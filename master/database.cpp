@@ -15,11 +15,6 @@
 #include <cstring>
 #include <cstddef>
 
-#ifdef BF_WRITE_TO_MYSQL
-#  include "mysql++.h"
-using namespace mysqlpp;
-#endif
-
 using namespace std;
 using namespace TNL;
 using namespace Master;
@@ -32,24 +27,27 @@ namespace DbWriter
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
-   if(settings->getVal<YesNo>(WRITE_STATS_TO_MY_SQL))
-      return DatabaseWriter(settings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_NAME).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
-                            settings->getVal<string>(STATS_DATABASE_PASSWORD).c_str());
-   else
-      return DatabaseWriter("stats.db");
+   if(settings)
+   {
+      string dbName = settings->getVal<string>(STATS_DATABASE_NAME);
+      if(dbName != "")
+         return DatabaseWriter(dbName.c_str());
+   }
+   return DatabaseWriter("stats.db");
 }
 
 
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
 {
-   // Do nothing
+   safecopy("stats.db", mDb);
+   mServer[0] = '\0';
+   mUser[0] = '\0';
+   mPassword[0] = '\0';
 }
 
 
- // MySQL Constructor
+ // MySQL Constructor (legacy compatibility -> SQLite)
 DatabaseWriter::DatabaseWriter(const char *server, const char *db, const char *user, const char *password)
 {
    initialize(server, db, user, password);
@@ -66,34 +64,28 @@ DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *pas
  // Sqlite Constructor
 DatabaseWriter::DatabaseWriter(const char *db)
 {
-   safecopy(db, mDb);
-
-   if(!fileExists(mDb))
-      createStatsDatabase();
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
+   safecopy(dbPath, mDb);
+   mServer[0] = '\0';
+   mUser[0] = '\0';
+   mPassword[0] = '\0';
+   ensureSchema();
 }
 
 
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   safecopy(server, mServer);
-   safecopy(db, mDb);
-   safecopy(user, mUser);
-   safecopy(password, mPassword);
+   if(server) safecopy(server, mServer); else mServer[0] = '\0';
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
+   safecopy(dbPath, mDb);
+   if(user) safecopy(user, mUser); else mUser[0] = '\0';
+   if(password) safecopy(password, mPassword); else mPassword[0] = '\0';
 
+   ensureSchema();
 }
 
 
 #define btos(value) (value ? "1" : "0")
-
-
-#ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
-   class SimpleResult{
-   public:
-      S32 insert_id() { return 0; }
-   };
-
-#  define Exception std::exception
-#endif
 
 
 static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<LoadoutStats> loadoutStats)
@@ -115,7 +107,7 @@ static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<We
       if(weaponStats[i].shots > 0)
       {
          string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck) "
-                       "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " +
+                       "VALUES(" + itos(playerId) + ", '" + sanitizeForSql(WeaponInfo::getWeaponName(weaponStats[i].weaponType)) + "', " +
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
 
          query.runQuery(sql);
@@ -182,7 +174,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
-                "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " +
+                "VALUES( " + itos(serverId) + ", '" + sanitizeForSql(gameStats->gameType) + "', " + btos(gameStats->isOfficial) + ", " +
                              itos(gameStats->playerCount) + ", " + itos(gameStats->duration) + ", '" +
                              sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " +
                              itos(gameStats->teamStats.size())  + ");";
@@ -201,16 +193,7 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
    string sql = "INSERT INTO server(server_name, ip_address) "
                 "VALUES('" + sanitizeForSql(serverName) + "', '" + serverIP + "');";
 
-   if(query.query)
-     return query.runQuery(sql);
-
-   if(query.sqliteDb)
-   {
-      query.runQuery(sql);
-      return sqlite3_last_insert_rowid(query.sqliteDb);
-   }
-
-   return U64_MAX;
+   return query.runQuery(sql);
 }
 
 
@@ -289,7 +272,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          insertStatsGame(query, &gameStats, serverId);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing stats to database: %s", ex.what());
    }
@@ -313,14 +296,14 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing achievement to database: %s", ex.what());
    }
 }
 
 
-void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator,
+void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator, 
                                      const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
@@ -354,7 +337,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf("Failure writing level info to database: %s", ex.what());
    }
@@ -367,7 +350,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
                 "LIMIT " + itos(count) + ";";
 
-   Vector<Vector<string> > results(count);
+   Vector<Vector<string> > results;
 
    selectHandler(sql, 2, results);
 
@@ -411,11 +394,11 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
 
-   Vector<Vector<string> > results(nameCount);
+   Vector<Vector<string> > results;
 
    selectHandler(sql, 2, results);
 
-   Vector<string> credentialStrings(results.size());
+   Vector<string> credentialStrings;
 
    for(S32 i = 0; i < results.size(); i++)
    {
@@ -431,7 +414,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 // Returns rating of the specified level
 S16 DatabaseWriter::getLevelRating(U32 databaseId)
 {
-   string sql = "SELECT levels.rating from pleiades.levels WHERE id=" + itos(databaseId) + "; ";
+   string sql = "SELECT rating from stats_level WHERE stats_level_id=" + itos(databaseId) + ";";
 
    Vector<Vector<string> > results;
 
@@ -455,24 +438,17 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 // Returns player's rating of the specified level -- should be -1, 0, or +1
 S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 {
-   // Here, we'll use a UNION to create a dummy record of 0.  That way, if there is a database error,
-   // and no records are returned, we'll be able to differentiate that from the situation where the
-   // user is not in the database and no records are returned.  With the UNION, we'll get back at least
-   // one record with 0, the default rating for a player who hasn't rated a level, even if that player
-   // has not rated it.  Add a sort column to ensure that we get results in the order we expect.
    string sql =
-      "SELECT 1 as sort, ratings.value FROM pleiades.ratings "
-      "INNER JOIN bf_phpbb.phpbb_users "
-      "WHERE ratings.level_id = " + itos(databaseId) + " AND "
-         "ratings.user_id = phpbb_users.user_id AND "
-         "phpbb_users.username = '" + name.getString() + "' "
+      "SELECT 1 as sort, value FROM level_ratings "
+      "WHERE level_id = " + itos(databaseId) + " AND "
+         "username = '" + sanitizeForSql(name.getString()) + "' "
        "UNION ALL "
        "SELECT 2 as sort, 0 "
-       "ORDER BY sort;";
+       "ORDER BY sort LIMIT 1;";
 
    Vector<Vector<string> > results;
 
-   selectHandler(sql, 1, results);
+   selectHandler(sql, 2, results);
 
    if(results.size() == 0)    // <== signifies an error getting the rating
       return UnknownRating;
@@ -483,7 +459,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 
 Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 {
-   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name) + "';";
+   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + sanitizeForSql(name) + "';";
 
    Vector<Vector<string> > results;
 
@@ -500,7 +476,7 @@ Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 
 U16 DatabaseWriter::getGamesPlayed(const char *name)
 {
-   string sql = "SELECT count(*) FROM stats_player WHERE player_name = '" + string(name) + "';";
+   string sql = "SELECT count(*) FROM stats_player WHERE player_name = '" + sanitizeForSql(name) + "';";
 
    Vector<Vector<string> > results;
 
@@ -519,73 +495,63 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 
    try
    {
-
-#ifdef BF_WRITE_TO_MYSQL
-      if(query.query)
+      if(query.sqliteDb)
       {
-         //S32 serverId_int = -1;
-         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+         char *err = 0;
+         char **results;
+         int rows, resultCols;
 
-         S32 rows = results.num_rows();
+         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &resultCols, &err);
 
+         // results[0]...results[resultCols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
          for(S32 i = 0; i < rows; i++)
          {
             values.push_back(Vector<string>());     // Add another row
 
             for(S32 j = 0; j < cols; j++)
-               values[i].push_back(string(results[i][j]));
-         }
-      }
-      else
-#endif
-      if(query.sqliteDb)
-      {
-         char *err = 0;
-         char **results;
-         int rows, cols;
-
-         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
-
-         // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
-         for(S32 i = 0; i < rows * cols; i += cols)
-         {
-            values.push_back(Vector<string>());     // Add another row
-
-            for(S32 j = 0; j < cols; j++)
-               values[i].push_back(results[cols + i + j]);
+               values[i].push_back(results[resultCols + i * resultCols + j]);
          }
 
          sqlite3_free_table(results);
-         sqlite3_free(err);
+         if(err)
+            sqlite3_free(err);
       }
    }
-   catch(const Exception &ex)
+   catch(const std::exception &ex)
    {
       logprintf(LogConsumer::LogError, "SQL Execution Error \"%s\"\n\trunning sql: %s", ex.what(), sql.c_str());
    }
 }
 
 
-void DatabaseWriter::createStatsDatabase()
+void DatabaseWriter::ensureSchema()
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
+   if(!query.isValid || !query.sqliteDb)
+      return;
 
-   // Create empty file on file system
-   logprintf("Creating stats database file %s", mDb);
-   ofstream dbFile;
-   dbFile.open(mDb);
-   dbFile.close();
+   // Check if schema table exists
+   Vector<Vector<string> > results;
+   selectHandler("SELECT name FROM sqlite_master WHERE type='table' AND name='schema';", 1, results);
 
-   // Import schema
-   logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = NULL;
+   if(results.size() == 0)
+   {
+      logprintf("Initializing database schema for %s", mDb);
+      char *err = 0;
+      int rc = sqlite3_exec(query.sqliteDb, getSqliteSchema().c_str(), NULL, 0, &err);
+      if(rc != SQLITE_OK)
+      {
+         logprintf(LogConsumer::LogError, "Error initializing SQLite schema: %s", err ? err : sqlite3_errmsg(query.sqliteDb));
+         if(err)
+            sqlite3_free(err);
+      }
+   }
+}
 
-   sqlite3_open(mDb, &sqliteDb);
 
-   query.runQuery(getSqliteSchema());
-
-   if(sqliteDb)
-      sqlite3_close(sqliteDb);
+void DatabaseWriter::createStatsDatabase()
+{
+   ensureSchema();
 }
 
 
@@ -603,82 +569,50 @@ bool DbQuery::dumpSql = false;
 // Constructor
 DbQuery::DbQuery(const char *db, const char *server, const char *user, const char *password)
 {
-   query = NULL;
    sqliteDb = NULL;
    isValid = true;
 
-   TNLAssert(db && db[0] != 0, "must have a database");
+   const char *dbPath = (db && db[0] != 0) ? db : "stats.db";
 
-#ifdef BF_WRITE_TO_MYSQL
-
-   if(server && server[0] != 0) // mysql have a server to connect to
+   if(sqlite3_open(dbPath, &sqliteDb) != SQLITE_OK)    // Returns SQLITE_OK (0) on success
    {
-      TNLAssert(server, "const char * server is NULL");
-      TNLAssert(user, "const char * user is NULL");
-      TNLAssert(password, "const char * password is NULL");
-      try
-      {
-         conn.connect(db, server, user, password);    // Will throw error if it fails
-         query = new Query(&conn);
-      }
-      catch(const Exception &ex)
-      {
-         logprintf("Failure opening mysql database: %s", ex.what());
-         isValid = false;
-      }
-   }
-   else
-#endif
-      if(sqlite3_open(db, &sqliteDb))    // Returns true if an error occurred
-      {
-         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(sqliteDb));
+      logprintf("ERROR: Can't open stats database %s: %s", dbPath, sqliteDb ? sqlite3_errmsg(sqliteDb) : "Unknown error");
+      if(sqliteDb)
          sqlite3_close(sqliteDb);
-         isValid = false;
-      }
+      sqliteDb = NULL;
+      isValid = false;
+   }
 }
 
 // Destructor
 DbQuery::~DbQuery()
 {
-   if(query)
-      delete query;
-
    if(sqliteDb)
       sqlite3_close(sqliteDb);
 }
 
 
-// Run the passed query on the appropriate database -- throws exceptions!
+// Run the passed query on the appropriate database
 U64 DbQuery::runQuery(const string &sql) const
 {
-   if(!isValid)
+   if(!isValid || !sqliteDb)
       return U64_MAX;
 
    if(dumpSql)
       logprintf("SQL: %s", sql.c_str());
 
-   if(query)
-      // Should only get here when mysql has been compiled in
-#ifdef BF_WRITE_TO_MYSQL
-         return query->execute(sql).insert_id();
-#else
-         throw std::exception();    // Should be impossible
-#endif
+   char *err = 0;
+   int rc = sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
 
-   if(sqliteDb)
+   if(rc != SQLITE_OK)
    {
-      char *err = 0;
-      sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
-
+      logprintf(LogConsumer::LogError, "Database error accessing sqlite database: %s", err ? err : sqlite3_errmsg(sqliteDb));
       if(err)
-         logprintf("Database error accessing sqlite database: %s", err);
-
-      sqlite3_free(err);
-
-      return sqlite3_last_insert_rowid(sqliteDb);
+         sqlite3_free(err);
+      return U64_MAX;
    }
 
-   return U64_MAX;
+   return sqlite3_last_insert_rowid(sqliteDb);
 }
 
 
@@ -822,9 +756,29 @@ string DatabaseWriter::getSqliteSchema() {
       "   has_levelgen TINYINT NOT NULL,"
       "   team_count INTEGER NOT NULL,"
       "   winning_score INTEGER NOT NULL,"
-      "   game_duration INTEGER NOT NULL"
+      "   game_duration INTEGER NOT NULL,"
+      "   rating INTEGER DEFAULT 0"
       ");"
 
+
+      /* level_ratings */
+      "DROP TABLE IF EXISTS level_ratings;"
+      "CREATE TABLE level_ratings ("
+      "   level_id INTEGER NOT NULL,"
+      "   username TEXT NOT NULL,"
+      "   value INTEGER NOT NULL DEFAULT 0,"
+      "   PRIMARY KEY (level_id, username COLLATE BINARY)"
+      ");"
+
+      /* registered_users */
+      "DROP TABLE IF EXISTS registered_users;"
+      "CREATE TABLE registered_users ("
+      "   user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+      "   username TEXT NOT NULL UNIQUE COLLATE NOCASE,"
+      "   password_hash TEXT NOT NULL,"
+      "   is_admin BOOL NOT NULL DEFAULT 0,"
+      "   date_registered DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+      ");"
 
       /* achievements */
 
@@ -835,7 +789,44 @@ string DatabaseWriter::getSqliteSchema() {
       "   server_id INTEGER NOT NULL,"
       "   date_awarded DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP );"
 
-      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);";
+      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);"
+
+      /* Views for high scores and rankings */
+      "DROP VIEW IF EXISTS v_current_week_top_player_official_wins;"
+      "CREATE VIEW v_current_week_top_player_official_wins AS "
+      "SELECT p.player_name, COUNT(*) AS win_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE g.is_official = 1 AND p.result = 'W' AND p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY win_count DESC;"
+
+      "DROP VIEW IF EXISTS v_last_week_top_player_official_wins;"
+      "CREATE VIEW v_last_week_top_player_official_wins AS "
+      "SELECT p.player_name, COUNT(*) AS win_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE g.is_official = 1 AND p.result = 'W' AND p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-14 days') AND g.insertion_date < datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY win_count DESC;"
+
+      "DROP VIEW IF EXISTS v_current_week_top_player_games;"
+      "CREATE VIEW v_current_week_top_player_games AS "
+      "SELECT p.player_name, COUNT(*) AS game_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY game_count DESC;"
+
+      "DROP VIEW IF EXISTS v_last_week_top_player_games;"
+      "CREATE VIEW v_last_week_top_player_games AS "
+      "SELECT p.player_name, COUNT(*) AS game_count "
+      "FROM stats_player p JOIN stats_game g ON p.stats_game_id = g.stats_game_id "
+      "WHERE p.is_robot = 0 "
+      "AND g.insertion_date >= datetime('now', '-14 days') AND g.insertion_date < datetime('now', '-7 days') "
+      "GROUP BY p.player_name ORDER BY game_count DESC;"
+
+      "DROP VIEW IF EXISTS v_latest_bbb_winners;"
+      "CREATE VIEW v_latest_bbb_winners AS "
+      "SELECT player_name, 1 AS rank FROM player_achievements ORDER BY date_awarded DESC LIMIT 10;";
 
    return schema;
 }

@@ -150,7 +150,7 @@ if __name__ == "__main__":
     import os.path
     # set up system statusbar GUI
     cfg = configparser.SafeConfigParser({
-        'url':      "http://bitfighter.org/bitfighterStatus.json",
+        'url':      "https://bitfighter.org/bitfighterStatus.json",
         'iconPath': os.path.abspath("./icon.png"),
         'appName':  "Bitfighter Notifier Applet",
         'notificationTimeout': '5000', # 5 seconds to show notification

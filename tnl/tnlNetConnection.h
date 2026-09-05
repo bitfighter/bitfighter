@@ -457,6 +457,8 @@ protected:
    ConnectionParameters mConnectionParameters;
 public:
    ConnectionParameters &getConnectionParameters() { return mConnectionParameters; }
+   const Nonce &getNonce() const { return mConnectionParameters.mNonce; }
+   const Nonce &getServerNonce() const { return mConnectionParameters.mServerNonce; }
 
    /// returns true if this object initiated the connection with the remote host
    bool isInitiator() { return mConnectionParameters.mIsInitiator; }

@@ -18,14 +18,14 @@
 // Here we add a GET parameter for the different OSX architectures.  This way we
 // can serve up a different download URL dynamically
 #  if defined (__x86_64__)
-#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
+#     define SPARKLE_APPCAST_URL @"https://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
 #  elif defined (__i386__)
-#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxi386"
+#     define SPARKLE_APPCAST_URL @"https://bitfighter.org/files/getDownloadUrl.php?platform=osxi386"
 #  elif defined (__ppc__) || defined (__ppc64__)
-#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxppc"
+#     define SPARKLE_APPCAST_URL @"https://bitfighter.org/files/getDownloadUrl.php?platform=osxppc"
 #  else
       // Default to x86_64 since that is all OSX runs on these days...
-#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
+#     define SPARKLE_APPCAST_URL @"https://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
 #  endif
 #endif // !ZAP_DEDICATED && !BF_NO_SPARKLE
 #else

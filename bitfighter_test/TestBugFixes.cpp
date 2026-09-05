@@ -2,6 +2,8 @@
 #include "GeomUtils.h"
 #include "tnlPlatform.h"
 #include "tnlVector.h"
+#include "tnlBitStream.h"
+#include "tnlMethodDispatch.h"
 
 #ifndef TNL_OS_WIN32
 #  include <unistd.h>
@@ -49,5 +51,22 @@ TEST(BugFixTest, UnixTickCountMicroRobustness)
     EXPECT_GE(end - start, 1000000);
 }
 #endif
+
+TEST(BugFixTest, VectorDeserializationBoundsAndTruncation)
+{
+    // Test that an oversized or truncated vector size declaration does not pre-allocate
+    TNL::BitStream writeStream;
+    // Write 255 followed by 65535 to represent 65790 elements
+    writeStream.writeInt(255, 8);
+    writeStream.writeInt(65535, 16);
+    writeStream.setBitPosition(0);
+
+    TNL::Vector<U32> vec;
+    ::Types::read(writeStream, &vec);
+
+    // Stream should be marked invalid/error and vector must be empty
+    EXPECT_FALSE(writeStream.isValid());
+    EXPECT_EQ(0, vec.size());
+}
 
 } // namespace Zap

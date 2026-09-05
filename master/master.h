@@ -117,7 +117,6 @@ private:
    NetInterface *createNetInterface() const;
 
    void testStatsDatabaseConnectivity() const;
-   void testPhpbbDatabaseConnectivity() const;
    void testCurl() const;
 
 public:

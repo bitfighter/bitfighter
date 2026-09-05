@@ -304,7 +304,8 @@ void InputCodeManager::dumpInputCodeStates()
 // Set state of a input code as Up (false) or Down (true)
 void InputCodeManager::setState(InputCode inputCode, bool state)
 {
-   inputCodeIsDown[(S32)inputCode] = state;
+   if((S32)inputCode >= 0 && (S32)inputCode < MAX_INPUT_CODES)
+      inputCodeIsDown[(S32)inputCode] = state;
 }
 
 
@@ -312,7 +313,9 @@ void InputCodeManager::setState(InputCode inputCode, bool state)
 bool InputCodeManager::getState(InputCode inputCode)
 {
 //   logprintf("State: key %d is %s", inputCode, keyIsDown[(int) inputCode] ? "down" : "up");
-   return inputCodeIsDown[(S32)inputCode];
+   if((S32)inputCode >= 0 && (S32)inputCode < MAX_INPUT_CODES)
+      return inputCodeIsDown[(S32)inputCode];
+   return false;
 }
 
 

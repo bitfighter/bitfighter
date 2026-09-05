@@ -245,13 +245,13 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U8> loadout));   // Client has changed his loadout configuration
 
-   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
+   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
-   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
+   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e));
-   TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos));
+   TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers - 1> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos));
 
-   TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
+   TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString));
 
    // These could be consolidated
    TNL_DECLARE_RPC(s2cDisplaySuccessMessage, (StringTableEntry formatString));
@@ -318,6 +318,7 @@ public:
 
    Vector<SafePtr<ByteBuffer> > mPendingTransferData; // Only used for progress meter
    U32 mReceiveTotalSize;
+   bool mTransferRejected;
 
    bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
                             // client side: this can allow or disallow sending voice to server

@@ -14,7 +14,7 @@
 #define MASTER_PROTOCOL_VERSION 9  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
-#define CS_PROTOCOL_VERSION 42     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 43     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33
 // 017[ab] = 35
 // 018[a] = 36

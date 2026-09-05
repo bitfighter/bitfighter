@@ -198,23 +198,39 @@ namespace Types
 
 
    const TNL::U32 VectorSizeNumberSize = (1 << VectorSizeBitSize8) - 1;       // 255
+   const TNL::U32 MaxVectorDeserializationLimit = 8192;                        // Upper limit for RPC vector payload count
 
    /// Reads a Vector of objects from a BitStream.
    template <typename T> 
    inline void read(TNL::BitStream &s, TNL::Vector<T> *val)
    {
+      val->clear();
       TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
-      val->resize(size);
-      for(TNL::S32 i = 0; i < val->size(); i++)
+      if(!s.isValid() || size > MaxVectorDeserializationLimit)
       {
-         TNLAssert(s.isValid(), "Error reading vector");
-         if(!s.isValid())      // Error, don't read any more!
-            break;        
+         s.setError();
+         return;
+      }
 
-         read(s, &((*val)[i]));
+      for(TNL::U32 i = 0; i < size; i++)
+      {
+         if(!s.isValid())
+         {
+            val->clear();
+            return;
+         }
+
+         T item;
+         read(s, &item);
+         if(!s.isValid())
+         {
+            val->clear();
+            return;
+         }
+         val->push_back(item);
       }
    }
 
@@ -244,18 +260,33 @@ namespace Types
    template <typename T, typename A> 
    inline void read(TNL::BitStream &s, TNL::Vector<T> *val, A arg1)
    {
+      val->clear();
       TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
          size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
 
-      val->resize(size);
-      for(TNL::S32 i = 0; i < val->size(); i++)
+      if(!s.isValid() || size > MaxVectorDeserializationLimit)
       {
-         TNLAssert(s.isValid(), "Error reading vector");
-         if(!s.isValid())      // Error, don't read any more!
-            break;        
+         s.setError();
+         return;
+      }
 
-         read(s, &((*val)[i]), arg1);
+      for(TNL::U32 i = 0; i < size; i++)
+      {
+         if(!s.isValid())
+         {
+            val->clear();
+            return;
+         }
+
+         T item;
+         read(s, &item, arg1);
+         if(!s.isValid())
+         {
+            val->clear();
+            return;
+         }
+         val->push_back(item);
       }
    }
 

@@ -20,7 +20,7 @@ using namespace std;
  * Mock class for testing low level network functions
  *
  * {connect,send,receive}Error sets the return value of the mocked function.
- * isWritableResult controls Socket::isWritable (HttpRequest::send waits on it).
+ * isWritableResult controls Socket::isWritable (HttpsRequest::send waits on it).
  */
 class MockSocket : public Socket
 {

@@ -100,8 +100,9 @@ endif()
 if(NOT NO_THREADS)
 	find_package(Threads REQUIRED)
 endif()
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
 find_package(PNG)
-find_package(MySQL)
 find_package(OGG)
 find_package(Speex)
 find_package(Vorbis)
@@ -253,12 +254,6 @@ if(DISCORD)
 
 	set(DISCORD_LIBRARY discord-rpc)
 	add_definitions(-DBF_DISCORD)
-endif()
-
-
-# mysql++ is for compiling master
-if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
-	add_subdirectory(mysql++)
 endif()
 
 

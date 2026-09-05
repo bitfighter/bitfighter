@@ -2235,6 +2235,9 @@ extern bool fileExists(const string &filename);
 
 static string checkName(const string &filename, const Vector<string> &folders, const char *extensions[])
 {
+   if(filename.empty() || filename.find("..") != string::npos)
+      return "";
+
    string name;
    if(filename.find('.') != string::npos)       // filename has an extension
    {

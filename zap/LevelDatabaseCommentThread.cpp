@@ -6,7 +6,7 @@
 #include "LevelDatabaseCommentThread.h"
 
 #include "ClientGame.h"
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 #include "stringUtils.h"
 
 #include <sstream>
@@ -17,7 +17,7 @@ namespace Zap
 {
 
 // Define statics
-const string LevelDatabaseCommentThread::LevelDatabaseRateUrl = "bitfighter.org/levels/comments/add";
+const string LevelDatabaseCommentThread::LevelDatabaseRateUrl = "https://bitfighter.org/levels/comments/add";
 
 // Constructor
 LevelDatabaseCommentThread::LevelDatabaseCommentThread(ClientGame* game, const string &comment)
@@ -58,8 +58,8 @@ void LevelDatabaseCommentThread::run()
    if(errorNumber == 100)
       return;
 
-   HttpRequest req = HttpRequest(reqURL);
-   req.setMethod(HttpRequest::PostMethod);
+   HttpsRequest req = HttpsRequest(reqURL);
+   req.setMethod(HttpsRequest::PostMethod);
    req.setData("data[User][username]",      username);
    req.setData("data[User][user_password]", user_password);
    req.setData("data[Comment][level_id]",   mLevelId);
@@ -74,7 +74,7 @@ void LevelDatabaseCommentThread::run()
    responseCode = req.getResponseCode();
    responseBody = req.getResponseBody();
 
-   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
+   if(responseCode != HttpsRequest::OK && responseCode != HttpsRequest::Found)
    {
       errorNumber = 2;
       return;

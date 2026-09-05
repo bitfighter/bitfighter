@@ -67,7 +67,8 @@ const char *ModuleInfo::getMenuHelp() const
 
 const ModuleInfo *ModuleInfo::getModuleInfo(ShipModule module)
 {
-   TNLAssert(U32(module) < U32(ModuleCount), "Module out of range!");
+   if(U32(module) >= U32(ModuleCount))
+      return &gModuleInfo[0];
    return &gModuleInfo[(U32) module];
 }
 

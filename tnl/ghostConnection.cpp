@@ -478,7 +478,14 @@ void GhostConnection::readPacket(BitStream *bstream)
             endPosition = bstream->readInt(BitStreamPosBitSize);
 
          while(U32(mLocalGhosts.size()) <= index)  // Increase vector size when needed
+         {
+            if(U32(mLocalGhosts.size()) >= MaxGhostCount)
+            {
+               setLastError("Invalid packet -- ghost index out of bounds.");
+               return;
+            }
             mLocalGhosts.push_back(NULL);
+         }
 
          if(!mLocalGhosts[index]) // it's a new ghost... cool
          {

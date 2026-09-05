@@ -516,7 +516,7 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 
 void ServerGame::receivedLevelFromHoster(S32 levelIndex, const string &filename)
 {
-   if(levelIndex >= mLevelSource->getLevelCount())
+   if(levelIndex < 0 || levelIndex >= mLevelSource->getLevelCount())
       return; // out of range
    mLevelSource->setLevelFileName(levelIndex, filename);
    cycleLevel(levelIndex);
@@ -1891,8 +1891,10 @@ void ServerGame::removeLevel(S32 index)
       while(mLevelSource->getLevelCount())
          mLevelSource->remove(0);
    }
-   else
+   else if(index < mLevelSource->getLevelCount())
       mLevelSource->remove(index);
+   else
+      return;
 
    for(S32 i = 0; i < getClientCount(); i++)
    {

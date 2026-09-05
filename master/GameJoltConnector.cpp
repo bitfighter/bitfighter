@@ -9,7 +9,7 @@
 #include "master.h"
 #include "MasterServerConnection.h"
 
-#include "../zap/HttpRequest.h"
+#include "../zap/HttpsRequest.h"
 #include "../zap/md5wrapper.h"
 #include "../zap/stringUtils.h"
 
@@ -65,7 +65,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
-   //HttpRequest request;
+   //HttpsRequest request;
 
    string urlList = "";
    string otherParamString = otherParams + (otherParams != "" ? "&" : "");
@@ -129,7 +129,7 @@ static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const Ma
    // From here on down is child process... we'll never return!
    string nameList = "'" + sanitizeForSql(client->mPlayerOrServerName.getString()) + "'";
 
-   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/" + verb, secret, nameList);
+   updateGameJolt(settings, "https://gamejolt.com/api/game/v1/sessions/" + verb, secret, nameList);
 
    exit(0);    // Bye bye!
 
@@ -204,7 +204,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    }
 
    if(nameCount > 0)
-      updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/ping", secret, nameList);
+      updateGameJolt(settings, "https://gamejolt.com/api/game/v1/sessions/ping", secret, nameList);
 
    exit(0);    // Bye bye!
 
@@ -251,7 +251,7 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
 
    string trophyStr = "trophy_id=" + trophyId;
 
-   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/trophies/add-achieved", secret, name, trophyStr);
+   updateGameJolt(settings, "https://gamejolt.com/api/game/v1/trophies/add-achieved", secret, name, trophyStr);
 
    exit(0);    // Bye bye!
 

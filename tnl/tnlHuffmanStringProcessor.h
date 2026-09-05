@@ -35,7 +35,7 @@ namespace HuffmanStringProcessor
 {
    static const U32 MAX_SENDABLE_LINE_LENGTH = 255;
    /// Reads a Huffman compressed string out of a BitStream.
-   bool readHuffBuffer(BitStream* pStream, char* out_pBuffer);
+   bool readHuffBuffer(BitStream* pStream, char* out_pBuffer, U32 maxLen = 255);
 
    /// Writes and Huffman compresses a string into a BitStream.
    ///

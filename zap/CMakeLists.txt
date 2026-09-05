@@ -48,7 +48,7 @@ set(SHARED_SOURCES
 	goalZone.cpp
 	gridDB.cpp
 	HTFGame.cpp
-	HttpRequest.cpp
+	HttpsRequest.cpp
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
@@ -231,6 +231,7 @@ set(SHARED_LIBS
 	${CLIPPER_LIBRARIES}
 	${CLIPPER2_LIBRARIES}
 	${POLY2TRI_LIBRARIES}
+	${CURL_LIBRARIES}
 	${EXTRA_LIBS}
 )
 

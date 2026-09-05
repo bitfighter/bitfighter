@@ -354,6 +354,11 @@ static DWORD WINAPI launchProgressBar(void *)
 
 bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServerInfo, bool isSilentMode, pair<string, string> stoppedMessage)
 {
+	if (urlFrom.compare(0, 8, "https://") != 0)
+	{
+		return false;
+	}
+
 	FILE* pFile = fopen(destTo.c_str(), "wb");
 
 	//  Download the install package from indicated location
@@ -363,7 +368,9 @@ bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServer
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_URL, urlFrom.c_str());
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, FALSE);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getDownloadData);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, pFile);
@@ -380,17 +387,29 @@ bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServer
 			curl_easy_setopt(curl, CURLOPT_PROXY, proxyServerInfo.first.c_str());
 			curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyServerInfo.second);
 		}
-		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
+		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST);
 
+		long httpResponseCode = 0;
 		res = curl_easy_perform(curl);
+		if (res == CURLE_OK)
+		{
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpResponseCode);
+		}
 
 		curl_easy_cleanup(curl);
 	}
 
-	if (res != CURLE_OK)
+	if (res != CURLE_OK || httpResponseCode < 200 || httpResponseCode >= 400)
 	{
+		if (pFile)
+		{
+			fclose(pFile);
+			pFile = NULL;
+			::remove(destTo.c_str());
+		}
+
 		if (!isSilentMode && doAbort == false)
-			::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
+			::MessageBoxA(NULL, errorBuffer[0] ? errorBuffer : "Download failed or HTTP error", "curl error", MB_OK);
 		if (doAbort)
 		{
 			::MessageBoxA(NULL, stoppedMessage.first.c_str(), stoppedMessage.second.c_str(), MB_OK);
@@ -438,8 +457,10 @@ bool getUpdateInfo(string &info2get, const GupParameters& gupParams, const GupEx
 
 		curl_easy_setopt(curl, CURLOPT_URL, urlComplete.c_str());
 
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, FALSE);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getUpdateInfoCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &info2get);
@@ -648,7 +669,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int)
 		//
 		::CreateThread(NULL, 0, launchProgressBar, NULL, 0, NULL);
 		
-		std::string dlDest = std::getenv("TEMP");
+		const char *tempEnv = std::getenv("TEMP");
+		if (!tempEnv) tempEnv = std::getenv("TMP");
+		std::string dlDest = tempEnv ? tempEnv : ".";
 		dlDest += "\\";
 		dlDest += ::PathFindFileNameA(gupDlInfo.getDownloadLocation().c_str());
 

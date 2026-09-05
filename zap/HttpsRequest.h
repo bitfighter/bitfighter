@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef HTTPREQUEST_H_
-#define HTTPREQUEST_H_
+#ifndef HTTPSREQUEST_H_
+#define HTTPSREQUEST_H_
 
 #include <tnl.h>
 #include <tnlNetBase.h>
@@ -20,7 +20,7 @@ using namespace TNL;
 namespace Zap
 {
 
-struct HttpRequestFileInfo
+struct HttpsRequestFileInfo
 {
    string fileName;
    string fieldName;
@@ -28,8 +28,8 @@ struct HttpRequestFileInfo
    U32 length;
 };
 
-class HttpRequestTest;
-class HttpRequest
+class HttpsRequestTest;
+class HttpsRequest
 {
 public:
    static const S32 BufferSize = 4096;
@@ -38,15 +38,15 @@ public:
    static const string GetMethod;
    static const string PostMethod;
    static const S32 PollInterval = 20;
-   static const string HttpRequestBoundary;
+   static const string HttpsRequestBoundary;
 
    static const string LevelDatabaseBaseUrl;
 
    static string urlEncodeChar(char c);
    static string urlEncode(const string &str);
 
-   HttpRequest(const string &url = "/");
-   virtual ~HttpRequest();
+   HttpsRequest(const string &url = "/");
+   virtual ~HttpsRequest();
 
    void addFile(string field, string filename, const U8* data, U32 length);
    string buildRequest();
@@ -63,14 +63,16 @@ public:
 
    bool sendRequest(string request);
    string receiveResponse();
+   bool sendViaCurl();
 
 private:
    shared_ptr<Address> mLocalAddress;
    shared_ptr<Address> mRemoteAddress;
    shared_ptr<Socket> mSocket;
+   bool mUseMockSocket;
 
    map<string, string> mData;
-   list<HttpRequestFileInfo> mFiles;
+   list<HttpsRequestFileInfo> mFiles;
    string mUrl;
    string mMethod;
    string mRequest;
@@ -81,9 +83,9 @@ private:
    U32 mTimeout;
    string mError;
 
-   friend class HttpRequestTest;
+   friend class HttpsRequestTest;
 };
 
 }
 
-#endif /* HTTPREQUEST_H_ */
+#endif /* HTTPSREQUEST_H_ */

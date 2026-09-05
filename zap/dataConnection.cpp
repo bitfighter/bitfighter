@@ -32,7 +32,9 @@ FileType getResourceType(const char *fileType)
 
 static string getFullFilename(const FolderManager *configDirs, string filename, FileType fileType)
 {
-   // Don't return "" if empty directory, allow client load the file if on the same directory as EXE.
+   if(!configDirs || extractFilename(filename) != filename || filename.find("..") != string::npos || filename.find('/') != string::npos || filename.find('\\') != string::npos)
+      return "";
+
    string name;
    if(fileType == BOT_TYPE)
       name = configDirs->findBotFile(filename);
@@ -46,7 +48,7 @@ static string getFullFilename(const FolderManager *configDirs, string filename, 
    else
       name = "";
 
-   return (name == "") ? filename : name;
+   return name;
 }
 
 
@@ -79,7 +81,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
       exitToOs(1);
    }
 
-   string password = Game::md5.getSaltedHashFromString(pw);
+   string password = pw;
 
    FileType fileType = getResourceType(resourceType.c_str());
    if(fileType == INVALID_RESOURCE_TYPE)
@@ -272,6 +274,10 @@ DataConnection::DataConnection(GameSettings *settings, ActionType action, string
    mPassword = password;
 
    mOutputFile = NULL;
+   mBytesReceived = 0;
+   mTargetPath = "";
+   mTempPath = "";
+   mTransferSuccess = false;
 }
 
 
@@ -283,12 +289,25 @@ DataConnection::DataConnection(GameSettings *settings, const Nonce &clientId)
    mAction = REQUEST_CURRENT_LEVEL;
    mFileType = INVALID_RESOURCE_TYPE;
    mOutputFile = NULL;
+   mBytesReceived = 0;
+   mTargetPath = "";
+   mTempPath = "";
+   mTransferSuccess = false;
 }
 
 // Destructor
 DataConnection::~DataConnection()
 {
-   // Do nothing
+   if(mOutputFile)
+   {
+      fclose((FILE*)mOutputFile);
+      mOutputFile = NULL;
+   }
+
+   if(!mTransferSuccess && mTempPath != "")
+   {
+      remove(mTempPath.c_str());
+   }
 }
 
 
@@ -308,6 +327,23 @@ string DataConnection::getErrorMessage(SenderStatus stat, const string &filename
       return "Unknown problem";
 }
 
+
+static string computeDataConnectionChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   string tag = "Bitfighter:DataConnection:Auth:";
+   string clientNonce = conn->getNonce().toString();
+   string serverNonce = conn->getServerNonce().toString();
+   return Game::md5.getHashFromString(tag + saltedPwdHash + ":" + clientNonce + ":" + serverNonce);
+}
+
+static string computeLegacyDataChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   return Game::md5.getHashFromString(saltedPwdHash + conn->getNonce().toString());
+}
 
 TNL_IMPLEMENT_NETCONNECTION(DataConnection, NetClassGroupGame, true);
 
@@ -337,8 +373,16 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    string adminPW = settings->getAdminPassword();
    string ownerPW = settings->getOwnerPassword();
 
-   bool goodOwnerPW = ownerPW != "" && strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
-   bool goodAdminPW = adminPW != "" && strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
+   string adminHash = adminPW != "" ? Game::md5.getSaltedHashFromString(adminPW) : "";
+   string ownerHash = ownerPW != "" ? Game::md5.getSaltedHashFromString(ownerPW) : "";
+
+   string challengedAdminHash = computeDataConnectionChallenge(this, adminHash);
+   string challengedOwnerHash = computeDataConnectionChallenge(this, ownerHash);
+   string legacyAdminHash = computeLegacyDataChallenge(this, adminHash);
+   string legacyOwnerHash = computeLegacyDataChallenge(this, ownerHash);
+
+   bool goodOwnerPW = ownerPW != "" && (strcmp(challengedOwnerHash.c_str(), password) == 0 || strcmp(legacyOwnerHash.c_str(), password) == 0);
+   bool goodAdminPW = adminPW != "" && (strcmp(challengedAdminHash.c_str(), password) == 0 || strcmp(legacyAdminHash.c_str(), password) == 0);
 
    if(!goodOwnerPW && !goodAdminPW)
    {
@@ -364,6 +408,14 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    }
    else              // Client wants to send us a file -- get ready for incoming data!
    {
+      string filenameStr = filename.getString();
+      if(!safeFilename(filenameStr.c_str()) || extractFilename(filenameStr) != filenameStr || filenameStr.find("..") != string::npos)
+      {
+         logprintf("Invalid or unsafe filename for upload: %s", filenameStr.c_str());
+         disconnect(ReasonError, "Invalid or unsafe filename");
+         return;
+      }
+
       FolderManager *folderManager = settings->getFolderManager();
 
       string folder = getOutputFolder(folderManager, (FileType)(U32)filetype);
@@ -376,13 +428,21 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       }
 
       if(mOutputFile)
+      {
          fclose((FILE*)mOutputFile);
+         mOutputFile = NULL;
+      }
 
-      mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "w");
+      mTargetPath = strictjoindir(folder, filename.getString());
+      mTempPath = mTargetPath + ".tmp." + itos(Platform::getRealMilliseconds());
+      mTransferSuccess = false;
+      mBytesReceived = 0;
+
+      mOutputFile = fopen(mTempPath.c_str(), "wb");
 
       if(!mOutputFile)
       {
-         logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()).c_str());
+         logprintf("Problem opening file %s for writing", mTempPath.c_str());
          disconnect(ReasonError, "Problem writing to file");
          return;
       }
@@ -413,10 +473,53 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   static const U32 MaxDataUploadSize = 10 * 1024 * 1024; // 10MB limit
+
+   if(!mOutputFile && isInitiator() && mAction == REQUEST_FILE)
+   {
+      TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
+      Game *game = static_cast<GameNetInterface *>(getInterface())->getGame();
+      FolderManager *folderManager = game->getSettings()->getFolderManager();
+      string folder = getOutputFolder(folderManager, mFileType);
+      mTargetPath = strictjoindir(folder, mFilename);
+      mTempPath = mTargetPath + ".tmp." + itos(Platform::getRealMilliseconds());
+      mTransferSuccess = false;
+      mBytesReceived = 0;
+      mOutputFile = fopen(mTempPath.c_str(), "wb");
+      if(!mOutputFile)
+      {
+         logprintf("Problem opening file %s for writing", mTempPath.c_str());
+         disconnect(ReasonError, "done");
+         return;
+      }
+   }
+
    if(mOutputFile)
-      fwrite(line.getString(), 1, strlen(line.getString()), mOutputFile);
-      //mOutputFile.write(line.getString(), strlen(line.getString()));
-   // else... what?
+   {
+      U32 lineLen = (U32)strlen(line.getString());
+      if(mBytesReceived + lineLen > MaxDataUploadSize)
+      {
+         logprintf("Data upload exceeded maximum allowed size");
+         fclose((FILE*)mOutputFile);
+         mOutputFile = NULL;
+         if(mTempPath != "")
+            remove(mTempPath.c_str());
+         disconnect(ReasonError, "File size limit exceeded");
+         return;
+      }
+      size_t written = fwrite(line.getString(), 1, lineLen, (FILE*)mOutputFile);
+      if(written != lineLen)
+      {
+         logprintf("Problem writing chunk to file %s", mTempPath.c_str());
+         fclose((FILE*)mOutputFile);
+         mOutputFile = NULL;
+         if(mTempPath != "")
+            remove(mTempPath.c_str());
+         disconnect(ReasonError, "File write error");
+         return;
+      }
+      mBytesReceived += lineLen;
+   }
 }
 
 
@@ -425,13 +528,30 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   disconnect(ReasonNone, "done");     // Terminate connection... should probably send different message depending on status
-
    if(mOutputFile)
    {
-      fclose(mOutputFile);
+      fclose((FILE*)mOutputFile);
       mOutputFile = NULL;
    }
+
+   if(status == STATUS_OK && mTempPath != "" && mTargetPath != "")
+   {
+      remove(mTargetPath.c_str());
+      if(rename(mTempPath.c_str(), mTargetPath.c_str()) == 0)
+      {
+         mTransferSuccess = true;
+      }
+      else
+      {
+         remove(mTempPath.c_str());
+      }
+   }
+   else if(mTempPath != "")
+   {
+      remove(mTempPath.c_str());
+   }
+
+   disconnect(ReasonNone, "done");     // Terminate connection... should probably send different message depending on status
 }
 
 
@@ -439,34 +559,17 @@ void DataConnection::onConnectionEstablished()
 {
    if(isInitiator())    // i.e. client
    {
+      string pwdHash = Game::md5.getSaltedHashFromString(mPassword);
+      string challengedHash = computeDataConnectionChallenge(this, pwdHash);
+
       if(mAction == SEND_FILE)
       {
-         c2sSendOrRequestFile(mPassword.c_str(), mFileType, false, mFilename.c_str());
+         c2sSendOrRequestFile(challengedHash.c_str(), mFileType, false, mFilename.c_str());
       }
 
       else if(mAction == REQUEST_FILE)
       {
-         TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
-         Game *game = static_cast<GameNetInterface *>(getInterface())->getGame();
-
-         FolderManager *folderManager = game->getSettings()->getFolderManager();
-         string folder = getOutputFolder(folderManager, mFileType);
-
-         if(folder == "")     // filetype was bogus; should never happen
-            logprintf("Error resolving folder!");      // But... we can save files without needing folder, so log and cary on
-
-         //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
-         if(mOutputFile)
-            fclose(mOutputFile);
-         mOutputFile = fopen(strictjoindir(folder, mFilename).c_str(), "w");
-         if(!mOutputFile)
-         {
-            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
-            disconnect(ReasonError, "done");
-            return;
-         }
-
-         c2sSendOrRequestFile(mPassword.c_str(), mFileType, true, mFilename.c_str());
+         c2sSendOrRequestFile(challengedHash.c_str(), mFileType, true, mFilename.c_str());
       }
    }
 }
@@ -479,6 +582,11 @@ void DataConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    {
       fclose((FILE*)mOutputFile);
       mOutputFile = NULL;
+   }
+
+   if(!mTransferSuccess && mTempPath != "")
+   {
+      remove(mTempPath.c_str());
    }
 
    if(isInitiator())    // i.e. client

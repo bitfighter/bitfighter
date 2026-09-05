@@ -221,15 +221,19 @@ template<class T> inline void Vector<T>::insert(U32 index, const T &x)
 template<class T> inline void Vector<T>::erase(U32 index)
 {
    TNLAssert(index < this->innerVector.size(), "index out of range");
-   this->innerVector.erase(this->innerVector.begin() + index);
+   if(index < this->innerVector.size())
+      this->innerVector.erase(this->innerVector.begin() + index);
 }
 
 
 template<class T> inline void Vector<T>::deleteAndErase(U32 index)
 {
    TNLAssert(index < this->innerVector.size(), "index out of range");
-   delete this->innerVector[index];
-   erase(index);
+   if(index < this->innerVector.size())
+   {
+      delete this->innerVector[index];
+      erase(index);
+   }
 }
 
 

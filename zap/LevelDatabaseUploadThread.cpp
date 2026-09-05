@@ -6,7 +6,7 @@
 #include "LevelDatabaseUploadThread.h"
 
 #include "UIManager.h"
-#include "HttpRequest.h"
+#include "HttpsRequest.h"
 #include "ClientGame.h"
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
@@ -50,7 +50,7 @@ LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
       levelgen = readFile(mGame->getSettings()->getFolderManager()->findLevelGenScript(levelgenFilename));
    }
 
-   uploadrequest = HttpRequest::LevelDatabaseBaseUrl + UploadRequest;
+   uploadrequest = HttpsRequest::LevelDatabaseBaseUrl + UploadRequest;
 }
 
 
@@ -62,8 +62,8 @@ LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 
 void LevelDatabaseUploadThread::run()
 {
-   HttpRequest req(uploadrequest);
-   req.setMethod(HttpRequest::PostMethod);
+   HttpsRequest req(uploadrequest);
+   req.setMethod(HttpsRequest::PostMethod);
    req.setData("data[User][username]",      username);
    req.setData("data[User][user_password]", user_password);
    req.setData("data[Level][content]",      content);
@@ -83,7 +83,7 @@ void LevelDatabaseUploadThread::run()
 
    responseCode = req.getResponseCode();
    responseBody = req.getResponseBody();
-   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
+   if(responseCode != HttpsRequest::OK && responseCode != HttpsRequest::Found)
    {
       errorNumber = 2;
       return;

@@ -17,16 +17,6 @@
 #include <string>
 
 
-#ifdef BF_WRITE_TO_MYSQL
-#  include "mysql++.h"
-   using namespace mysqlpp;
-#endif
-
-
-#ifndef BF_WRITE_TO_MYSQL
-   struct Query {};  // Dummy object for SQLite
-#endif
-
 using namespace TNL;
 using namespace Zap;
 using namespace std;
@@ -60,12 +50,7 @@ struct ServerInfo
 
 class DbQuery
 {
-#ifdef BF_WRITE_TO_MYSQL
-   Connection conn;
-#endif
-
 public:
-   Query *query;
    sqlite3 *sqliteDb;
 
    bool isValid;
@@ -113,6 +98,9 @@ public:
 
    // SQLite constructor
    DatabaseWriter(const char *db);
+
+   const char *getDbPath() const { return mDb; }
+   void ensureSchema();
 
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 

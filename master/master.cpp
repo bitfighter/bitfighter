@@ -207,7 +207,6 @@ MasterServer::MasterServer(MasterSettings *settings)
    // Test database connectivity
    logprintf(LogConsumer::LogStartup, "Using INI file \"%s\"", mSettings->ini.getPath().c_str());
    testStatsDatabaseConnectivity();
-   testPhpbbDatabaseConnectivity();
    testCurl();
 
    logprintf(LogConsumer::LogStartup, "------ Startup tests complete ------");
@@ -411,13 +410,22 @@ void MasterServer::testStatsDatabaseConnectivity() const
 {
    try
    {
-      DbWriter::DbQuery query(mSettings->getVal<string>(STATS_DATABASE_NAME).c_str(),
-                              mSettings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
-                              mSettings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
-                              mSettings->getVal<string>(STATS_DATABASE_PASSWORD).c_str());
+      DbWriter::DatabaseWriter writer = DbWriter::getDatabaseWriter(mSettings);
+      writer.ensureSchema();
+
+      DbWriter::DbQuery query(writer.getDbPath());
       if(query.isValid)
       {
-         logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed");
+         Vector<Vector<string> > results;
+         writer.selectHandler("SELECT count(*) FROM stats_game;", 1, results);
+         if(results.size() > 0)
+         {
+            logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed.");
+         }
+         else
+         {
+            logprintf(LogConsumer::ConfigurationError, "Stats database connectivity test FAILED - Schema verification failed");
+         }
       }
       else
       {
@@ -427,32 +435,6 @@ void MasterServer::testStatsDatabaseConnectivity() const
    catch(const std::exception &ex)
    {
       logprintf(LogConsumer::ConfigurationError, "Stats database connectivity test FAILED - Exception: %s", ex.what());
-   }
-}
-
-
-// Test database connectivity and log results -- do this on startup
-void MasterServer::testPhpbbDatabaseConnectivity() const
-{
-   try
-   {
-      DbWriter::DbQuery query(mSettings->getVal<string>(PHPBB3_DATABASE_NAME).c_str(),
-                              mSettings->getVal<string>(PHPBB3_DATABASE_ADDRESS).c_str(),
-                              mSettings->getVal<string>(PHPBB3_DATABASE_USERNAME).c_str(),
-                              mSettings->getVal<string>(PHPBB3_DATABASE_PASSWORD).c_str());
-
-      if(query.isValid)
-      {
-         logprintf(LogConsumer::LogStartup, "PHPBB username database connectivity confirmed");
-      }
-      else
-      {
-         logprintf(LogConsumer::ConfigurationError, "PHPBB username connectivity test FAILED - Unable to open database");
-      }
-   }
-   catch(const std::exception &ex)
-   {
-      logprintf(LogConsumer::ConfigurationError, "PHPBB username connectivity test FAILED - Exception: %s", ex.what());
    }
 }
 

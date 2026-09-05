@@ -7,7 +7,6 @@
 
 #include "master.h"
 #include "masterInterface.h"
-#include "authenticator.h"       // For authenticating users against the PHPBB3 database
 #include "database.h"            // For writing to the database
 
 #include "../zap/stringUtils.h"  // For itos, replaceString

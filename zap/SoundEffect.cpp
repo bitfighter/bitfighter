@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "SoundEffect.h"
+#include "SoundSystemEnums.h"
 
 #ifdef ZAP_DEDICATED
 #  define BF_NO_AUDIO
@@ -44,6 +45,8 @@ SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point pos
    mPosition(position),
    mVelocity(velocity)
 {
+   if(profileIndex >= NumSFXBuffers)
+      profileIndex = 0;
    mSFXIndex = profileIndex;
    mProfile = gSFXProfiles + profileIndex;
    mGain = gain;

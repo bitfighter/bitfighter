@@ -353,22 +353,23 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
             S32 index = 0;
             while(isDigit(*src))
             {
-               index = index * 10 + (*src - '0');
+               if(index < 10000)
+                  index = index * 10 + (*src - '0');
                src++;
             }
 
             switch(*type)
             {
                case 'e':
-                  if(index < e.size())
+                  if(index >= 0 && index < (S32)e.size())
                      result += e[index].getString();
                   break;
                case 's':
-                  if(index < s.size())
+                  if(index >= 0 && index < (S32)s.size())
                      result += s[index].getString();
                   break;
                case 'i':
-                  if(index < i.size())
+                  if(index >= 0 && index < (S32)i.size())
                      result += itos(i[index]);
                   break;
             }
@@ -679,6 +680,9 @@ bool safeFilename(const char *str)
    if(!str)
       return false;
 
+   if(strstr(str, "..") != NULL)
+      return false;
+
    char chr = str[0];
    S32 i = 0;
    while(chr != 0)
@@ -843,7 +847,10 @@ S32 countCharInString(const string &source, char search)
 
 string makeFilenameFromString(const char *levelname, bool allowLastDot)
 {
-   static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
+   if (!levelname)
+      return "";
+
+   char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
 
    U32 i = 0;
    U32 lastDotIndex = U32_MAX;   // U32_MAX means "no dot found yet"

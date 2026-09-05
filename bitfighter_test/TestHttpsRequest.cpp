@@ -6,7 +6,7 @@
 #include "MockSocket.h"
 #include "MockAddress.h"
 
-#include "../zap/HttpRequest.h"
+#include "../zap/HttpsRequest.h"
 
 #include "gtest/gtest.h"
 #include "tnlLog.h"
@@ -17,18 +17,18 @@
 namespace Zap
 {
 
-class HttpRequestTest : public testing::Test
+class HttpsRequestTest : public testing::Test
 {
    public:
-   HttpRequest req;
+   HttpsRequest req;
    shared_ptr<MockSocket> sock;
 
-   HttpRequestTest()
+   HttpsRequestTest()
       : req("/")
    {
    }
 
-   virtual ~HttpRequestTest()
+   virtual ~HttpsRequestTest()
    {
    }
 
@@ -38,11 +38,12 @@ class HttpRequestTest : public testing::Test
       req.mSocket = sock;
       req.mLocalAddress.reset(new MockAddress());
       req.mRemoteAddress.reset(new MockAddress());
+      req.mUseMockSocket = true;
    }
 };
 
 
-TEST_F(HttpRequestTest, urlTest)
+TEST_F(HttpsRequestTest, urlTest)
 {
    req.setUrl("example.com/test");
 
@@ -51,7 +52,7 @@ TEST_F(HttpRequestTest, urlTest)
 }
 
 
-TEST_F(HttpRequestTest, urlEncodeTest)
+TEST_F(HttpsRequestTest, urlEncodeTest)
 {
    string result = req.urlEncode("test string-._~!@#$%^&*()=+{}[]|:;'<>,/?\\\"");
 
@@ -59,12 +60,12 @@ TEST_F(HttpRequestTest, urlEncodeTest)
    EXPECT_EQ(expected, result);
 }
 
-TEST_F(HttpRequestTest, postData)
+TEST_F(HttpsRequestTest, postData)
 {
    unsigned char data[] = "data";
    req.addFile("fieldName", "filename.txt", data, sizeof(data));
    req.setData("testKey", "testValue");
-   req.setMethod(HttpRequest::PostMethod);
+   req.setMethod(HttpsRequest::PostMethod);
 
    string result = req.buildRequest();
    EXPECT_NE(string::npos, result.find("Content-Disposition: form-data; name=\"testKey\"\r\n\r\ntestValue\r\n--"));
@@ -72,7 +73,7 @@ TEST_F(HttpRequestTest, postData)
 }
 
 
-TEST_F(HttpRequestTest, goodResponse)
+TEST_F(HttpsRequestTest, goodResponse)
 {
    string response = "HTTP/1.1 200 OK\r\n\r\nresponse body";
    req.parseResponse(response);
@@ -83,7 +84,7 @@ TEST_F(HttpRequestTest, goodResponse)
 }
 
 
-TEST_F(HttpRequestTest, badResponse)
+TEST_F(HttpsRequestTest, badResponse)
 {
    string response = "garbage";
    req.parseResponse(response);
@@ -91,20 +92,20 @@ TEST_F(HttpRequestTest, badResponse)
    EXPECT_EQ(0, req.getResponseCode());
 }
 
-TEST_F(HttpRequestTest, separatorOnlyResponse)
+TEST_F(HttpsRequestTest, separatorOnlyResponse)
 {
    req.parseResponse("\r\n\r\n");
    EXPECT_EQ(0, req.getResponseCode());
 }
 
-TEST_F(HttpRequestTest, emptyResponse)
+TEST_F(HttpsRequestTest, emptyResponse)
 {
    req.parseResponse("");
    EXPECT_EQ(0, req.getResponseCode());
 }
 
 
-TEST_F(HttpRequestTest, sendSuccess)
+TEST_F(HttpsRequestTest, sendSuccess)
 {
    plantMocks();
    sock->sendError = NoError;
@@ -112,19 +113,19 @@ TEST_F(HttpRequestTest, sendSuccess)
 }
 
 
-TEST_F(HttpRequestTest, sendTimeout)
+TEST_F(HttpsRequestTest, sendTimeout)
 {
    plantMocks();
    sock->sendError = WouldBlock;
 
    // don't really want to wait for a default timeout, so set the timeout
    // to two polling intervals
-   req.setTimeout(HttpRequest::PollInterval * 2);
+   req.setTimeout(HttpsRequest::PollInterval * 2);
    EXPECT_FALSE(req.sendRequest(string("test")));
 }
 
 
-TEST_F(HttpRequestTest, receiveSuccess)
+TEST_F(HttpsRequestTest, receiveSuccess)
 {
    plantMocks();
    sock->receiveError = NoError;
@@ -132,16 +133,16 @@ TEST_F(HttpRequestTest, receiveSuccess)
 }
 
 
-TEST_F(HttpRequestTest, receiveTimeout)
+TEST_F(HttpsRequestTest, receiveTimeout)
 {
    plantMocks();
    sock->receiveError = WouldBlock;
-   req.setTimeout(HttpRequest::PollInterval * 2);
+   req.setTimeout(HttpsRequest::PollInterval * 2);
    EXPECT_STREQ("", req.receiveResponse().c_str());
 }
 
 
-TEST_F(HttpRequestTest, connectError)
+TEST_F(HttpsRequestTest, connectError)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
@@ -151,7 +152,7 @@ TEST_F(HttpRequestTest, connectError)
 }
 
 
-TEST_F(HttpRequestTest, notWritable)
+TEST_F(HttpsRequestTest, notWritable)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
@@ -161,7 +162,7 @@ TEST_F(HttpRequestTest, notWritable)
 }
 
 
-TEST_F(HttpRequestTest, sendError)
+TEST_F(HttpsRequestTest, sendError)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
@@ -171,7 +172,7 @@ TEST_F(HttpRequestTest, sendError)
 }
 
 
-TEST_F(HttpRequestTest, receiveFail)
+TEST_F(HttpsRequestTest, receiveFail)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
@@ -181,13 +182,21 @@ TEST_F(HttpRequestTest, receiveFail)
 }
 
 
-TEST_F(HttpRequestTest, successTest)
+TEST_F(HttpsRequestTest, successTest)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    ASSERT_TRUE(req.send()) << req.getError();
    EXPECT_EQ(200, req.getResponseCode());
    EXPECT_EQ("response", req.getResponseBody());
+}
+
+TEST_F(HttpsRequestTest, blockPlaintextCredentials)
+{
+   HttpsRequest plainReq("http://example.com/login");
+   plainReq.setData("password", "secret123");
+   EXPECT_FALSE(plainReq.send());
+   EXPECT_EQ("Insecure transmission of credentials over plaintext HTTP blocked", plainReq.getError());
 }
 
 };

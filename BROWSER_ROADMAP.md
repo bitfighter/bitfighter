@@ -148,7 +148,7 @@ WebRTC unreliable ordered data channels are the closest browser analogue to UDP.
 - A signaling server for session establishment
 - Replacing `tnl/udp.cpp` and `tnl/netInterface.cpp` with a WebRTC transport shim (e.g. using libdatachannel compiled to WASM, or a JS-side WebRTC bridge)
 
-**Secondary concern**: `HttpRequest.cpp` (used for level database downloads) also uses TNL raw sockets. Replace with `emscripten_fetch()` under `#ifdef __EMSCRIPTEN__`.
+**Secondary concern**: `HttpsRequest.cpp` (used for level database downloads) also uses TNL raw sockets. Replace with `emscripten_fetch()` under `#ifdef __EMSCRIPTEN__`.
 
 ---
 

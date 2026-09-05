@@ -275,8 +275,8 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
 	endif()
 	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
-	set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
-	set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
+	set(CPACK_NSIS_HELP_LINK "https://bitfighter.org/")
+	set(CPACK_NSIS_URL_INFO_ABOUT "https://bitfighter.org/")
 
 	# Desktop shortcut handling for install/uninstall
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
@@ -284,8 +284,8 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 
 	# Any extra start menu shortcuts
 	set(CPACK_NSIS_MENU_LINKS
-		"http://bitfighter.org/" "Bitfighter Home Page"
-		"http://bitfighter.org/forums/" "Bitfighter Forums")
+		"https://bitfighter.org/" "Bitfighter Home Page"
+		"https://bitfighter.org/forums/" "Bitfighter Forums")
 
 	# Branding
 	# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!

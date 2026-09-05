@@ -32,6 +32,25 @@
 -- Local reference needed after blacklisting occurs
 local smt = setmetatable
 
+-- Constrain module loading: disable C loaders, FFI, dynamic C loading, and path traversal
+local orig_require = require
+if package and package.loaders then
+	package.cpath = ""
+	package.loadlib = nil
+	package.loaders[3] = nil
+	package.loaders[4] = nil
+end
+
+local function safe_require(modname)
+	if type(modname) ~= "string" then
+		error("module name must be a string")
+	end
+	if modname:find("%.%.") or modname:find("/") or modname:find("\\") or modname:find(":") then
+		error("invalid module name: " .. modname)
+	end
+	return orig_require(modname)
+end
+
 -- Unsafe functions will be nil'd out
 collectgarbage = nil
 dofile = nil
@@ -47,13 +66,12 @@ setfenv = nil
 setmetatable = nil
 module = nil
 package = nil
+require = safe_require
 io = nil
 debug = nil
-
--- Unsafe functions mixed with safe functions of some packages
+ffi = nil
 string.dump = nil
 math.randomseed = nil
-
 -- Most 'os' stuff is unsafe - we only keep 'clock', 'difftime', 'time'
 os.date = nil
 os.execute = nil
@@ -78,3 +96,7 @@ local protected_modules = "coroutine math os string table"
 protected_modules:gsub('%S+', function(module_name)
   _G[module_name] = protect_module(_G[module_name], module_name)
 end)
+
+_G = nil
+newproxy = nil
+jit = nil

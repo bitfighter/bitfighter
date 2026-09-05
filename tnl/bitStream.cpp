@@ -494,12 +494,20 @@ void BitStream::readString(char buf[256])
    if(readFlag())
    {
       S32 offset = readInt(8);
-      HuffmanStringProcessor::readHuffBuffer(this, mStringBuffer + offset);
+      if(offset < 0 || offset > 255)
+      {
+         buf[0] = '\0';
+         mStringBuffer[0] = '\0';
+         return;
+      }
+      HuffmanStringProcessor::readHuffBuffer(this, mStringBuffer + offset, 255 - offset);
+      mStringBuffer[255] = '\0';
       strcpy(buf, mStringBuffer);
    }
    else
    {
-      HuffmanStringProcessor::readHuffBuffer(this, buf);
+      HuffmanStringProcessor::readHuffBuffer(this, buf, 255);
+      buf[255] = '\0';
       strcpy(mStringBuffer, buf);
    }
 }

@@ -96,6 +96,8 @@ void GameConnection::initialize()
    mSendableFlags = 0;
    mDataBuffer = NULL;
    mDataBufferLevelGen = NULL;
+   mReceiveTotalSize = 0;
+   mTransferRejected = false;
    mUploadIndex = -1;
 
    mWrongPasswordCount = 0;
@@ -140,6 +142,9 @@ GameConnection::~GameConnection()
 
    delete mLevelSource;
    delete mDataBuffer;
+   delete mDataBufferLevelGen;
+   mDataBuffer = NULL;
+   mDataBufferLevelGen = NULL;
 }
 
 
@@ -309,12 +314,38 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 
 const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 
+static string computeGameConnectionChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   string tag = "Bitfighter:GameConnection:Auth:";
+   string clientNonce = conn->getNonce().toString();
+   string serverNonce = conn->getServerNonce().toString();
+   return Game::md5.getHashFromString(tag + saltedPwdHash + ":" + clientNonce + ":" + serverNonce);
+}
 
+static string computeLegacyGameChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   return Game::md5.getHashFromString(saltedPwdHash + conn->getNonce().toString());
+}
+
+static string computeServerPasswordChallenge(const NetConnection *conn, const string &saltedPwdHash)
+{
+   if(!conn || saltedPwdHash.empty())
+      return "";
+   string tag = "Bitfighter:ServerPassword:Auth:";
+   string clientNonce = conn->getNonce().toString();
+   string serverNonce = conn->getServerNonce().toString();
+   return Game::md5.getHashFromString(tag + saltedPwdHash + ":" + clientNonce + ":" + serverNonce);
+}
 
 void GameConnection::submitPassword(const char *password)
 {
    string encrypted = Game::md5.getSaltedHashFromString(password);
-   c2sSubmitPassword(encrypted.c_str());
+   string challengedHash = computeGameConnectionChallenge(this, encrypted);
+   c2sSubmitPassword(challengedHash.c_str());
 
    mLastEnteredPassword = password;
 
@@ -394,11 +425,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisableWeaponsAndModules, (bool disable), (
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
-#ifndef ZAP_DEDICATED
    mClientInfo->setNeedToCheckAuthenticationWithMaster(true);
 
    requestAuthenticationVerificationFromMaster();
-#endif
 }
 
 
@@ -419,9 +448,22 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
 
 
 // Return true if passwords match, false if not
-static bool checkPass(const string &password, const char *enteredPassword)
+static bool checkPass(const NetConnection *conn, const string &password, const char *enteredPassword)
 {
-   return strcmp(Game::md5.getSaltedHashFromString(password).c_str(), enteredPassword) == 0;
+   if(password.empty() || !enteredPassword)
+      return false;
+
+   string hash = Game::md5.getSaltedHashFromString(password);
+
+   if(conn)
+   {
+      string challengedHash = computeGameConnectionChallenge(conn, hash);
+      string legacyHash = computeLegacyGameChallenge(conn, hash);
+      if(strcmp(challengedHash.c_str(), enteredPassword) == 0 || strcmp(legacyHash.c_str(), enteredPassword) == 0)
+         return true;
+   }
+
+   return false;
 }
 
 
@@ -439,13 +481,13 @@ bool GameConnection::userAlreadyHasPermissions(const string &ownerPW, const stri
       return true;
    }
 
-   if(mClientInfo->isAdmin() && adminPW != "" && (checkPass(adminPW, pass) || checkPass(levChangePW, pass)))
+   if(mClientInfo->isAdmin() && adminPW != "" && (checkPass(this, adminPW, pass) || checkPass(this, levChangePW, pass)))
    {
       s2cDisplayErrorMessage("!!! You already have admin permissions");
       return true;
    }
 
-   if(mClientInfo->isLevelChanger() && checkPass(levChangePW, pass))
+   if(mClientInfo->isLevelChanger() && checkPass(this, levChangePW, pass))
    {
       s2cDisplayErrorMessage("!!! You already have level change permissions");
       return true;
@@ -467,7 +509,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    if(userAlreadyHasPermissions(ownerPW, adminPW, levChangePW, pass))
       return;
 
-   if(ownerPW != "" &&  checkPass(ownerPW, pass))
+   if(ownerPW != "" && checkPass(this, ownerPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -493,7 +535,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   else if(adminPW != "" && checkPass(adminPW, pass))
+   else if(adminPW != "" && checkPass(this, adminPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -516,7 +558,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If level change password is blank, it should already been granted to all clients
-   else if(checkPass(levChangePW, pass))
+   else if(checkPass(this, levChangePW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -562,8 +604,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
    mSettings->getIniSettings()->allowGetMap = allowGetMap;
    mSettings->getIniSettings()->allowMapUpload = allowMapUpload;
    mSettings->getIniSettings()->randomLevels = randomLevels;
-   mSettings->getIniSettings()->allowAdminMapUpload = true; // must be True, for host on server to work
-   mSettings->getIniSettings()->allowLevelgenUpload = true;
 }
 
 // Allow admins to change the passwords and other parameters on their systems
@@ -918,7 +958,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(levelChangePassword).c_str());
+         submitPassword(levelChangePassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -929,7 +969,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(adminPassword).c_str());
+         submitPassword(adminPassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -940,7 +980,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(ownerPassword).c_str());
+         submitPassword(ownerPassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -981,12 +1021,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    // If we've got a new role, save our password
    if(newRole != ClientInfo::RoleNone && mLastEnteredPassword != "")
    {
-      if(newRole == ClientInfo::RoleOwner)
-         GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
-      else if(newRole == ClientInfo::RoleAdmin)
-         GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
-      else if(newRole == ClientInfo::RoleLevelChanger)
-         GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+      string savedOwner = GameSettings::iniFile.GetValue(ownerKey, getServerName());
+      string savedAdmin = GameSettings::iniFile.GetValue(adminKey, getServerName());
+      string savedLevel = GameSettings::iniFile.GetValue(levelChangeKey, getServerName());
+
+      bool matchesAnySaved = (mLastEnteredPassword == savedOwner || mLastEnteredPassword == savedAdmin || mLastEnteredPassword == savedLevel);
+
+      if(!matchesAnySaved)
+      {
+         if(newRole == ClientInfo::RoleOwner)
+            GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
+         else if(newRole == ClientInfo::RoleAdmin)
+            GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
+         else if(newRole == ClientInfo::RoleLevelChanger)
+            GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+      }
 
       mLastEnteredPassword = "";
    }
@@ -1105,6 +1154,8 @@ Color colors[] =
 void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 #ifndef ZAP_DEDICATED
+   if(colorIndex >= sizeof(colors)/sizeof(colors[0]))
+      colorIndex = 0;
    mClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       mClientGame->playSoundEffect(sfxEnum);
@@ -1113,7 +1164,7 @@ void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *mes
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i),
                   (color, sfx, formatString, e, s, i),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
@@ -1124,7 +1175,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e), (color, sfx, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1133,7 +1184,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos),
+                  (RangedU32<0, NumSFXBuffers - 1> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos),
                   (sfx, team, formatString, e, scorePos),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1173,7 +1224,7 @@ void GameConnection::sendLevelList()
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
-                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),
+                  (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers - 1> sfx, StringTableEntry formatString),
                   (color, sfx, formatString),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1253,7 +1304,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-   if(!(mSendableFlags | ServerFlagHostingLevels))
+   if(!(mSendableFlags & ServerFlagHostingLevels))
       return;
 
    LevelInfo levelInfo(name, (GameTypeId)type.value);
@@ -1271,7 +1322,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-   if(!(mSendableFlags | ServerFlagHostingLevels))
+   if(!(mSendableFlags & ServerFlagHostingLevels))
       return;
 
    getServerGame()->removeLevel(index);
@@ -1310,6 +1361,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    resetTimeSinceLastMove();
 
    bool restart = false;
+
+   if(mServerGame->getLevelCount() == 0)
+      return;
 
    if(isRelative)
       newLevelIndex = (mServerGame->getCurrentLevelIndex() + newLevelIndex ) % mServerGame->getLevelCount();
@@ -1482,10 +1536,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 #ifndef ZAP_DEDICATED
    if(isInitiator() && ((flags & ~mSendableFlags) & HostModeFlag))
    {
-      c2sSetParam(mSettings->getLevelChangePassword(), LevelChangePassword);
-      c2sSetParam(mSettings->getAdminPassword(), AdminPassword);
-      c2sSetParam(mSettings->getOwnerPassword(), OwnerPassword);
-      c2sSetParam(mSettings->getServerPassword(), ServerPassword);
       c2sSetParam(mSettings->getHostName(), ServerName);
       c2sSetParam(mSettings->getHostDescr(), ServerDescription);
       c2sSetParam(mSettings->getWelcomeMessage(), ServerWelcomeMessage);
@@ -1572,9 +1622,9 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
          U32 c=0;
          bool foundscript = false;
          // First, find a line that says "Script"
-         while(c < levelsize - 10)
-         {  // Make sure the previous char is a new line (c < 32), and compare "Script " with only 7 chars
-            if((c == 0 || leveldata[c-1] < 32) && strncmp("Script ", (char*)&leveldata[c], 7) == 0)
+         while(levelsize >= 7 && c + 7 <= levelsize)
+         {  // Make sure the previous char is a new line (c < 32), and compare "Script" plus space or tab
+            if((c == 0 || leveldata[c-1] < 32) && strncmp("Script", (char*)&leveldata[c], 6) == 0 && (leveldata[c+6] == ' ' || leveldata[c+6] == '\t'))
             {
                foundscript = true;
                break;
@@ -1583,20 +1633,26 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
          }
          if(foundscript)
          {  // Found a line, write a modified Script filename we will soon write to.
-            // Could use more work here to better handle spaces and quotes
             if(c != 0)
                fwrite(leveldata, 1, c, f);
-            fwrite("Script ", 1, 7, f); // Using quotation marks to handle filename with spaces
+            fwrite("Script ", 1, 7, f);
             fwrite(filenameLevelgen.c_str(), 1, strlen(filenameLevelgen.c_str()), f);
-            //fputc('"', f);  // End with quotation mark
+            // Skip "Script" keyword, whitespace, and the old script filename, preserving arguments
             c += 6;
-            while(c < levelsize && leveldata[c] == 32) // First one or more spaces.
+            while(c < levelsize && (leveldata[c] == ' ' || leveldata[c] == '\t'))
                c++;
-            bool isInQuote = false; // to ignore spaces while in quotoation marks
-            while(c < levelsize && leveldata[c] >= 32 && (isInQuote || leveldata[c] != 32)) // Go to end of second arg
+            if(c < levelsize && leveldata[c] == '"')
             {
-               isInQuote = isInQuote != (leveldata[c] == '"');
-               c++;
+               c++; // skip opening quote
+               while(c < levelsize && leveldata[c] != '"' && leveldata[c] != '\r' && leveldata[c] != '\n')
+                  c++;
+               if(c < levelsize && leveldata[c] == '"')
+                  c++; // skip closing quote
+            }
+            else
+            {
+               while(c < levelsize && leveldata[c] != ' ' && leveldata[c] != '\t' && leveldata[c] != '\r' && leveldata[c] != '\n')
+                  c++;
             }
          }
          else
@@ -1682,27 +1738,78 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
    if(!isInitiator() && !(mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())))
       return;
 
+   if(mTransferRejected)
+   {
+      if(type & TransmissionDone)
+      {
+         if(mDataBuffer)
+         {
+            delete mDataBuffer;
+            mDataBuffer = NULL;
+         }
+         if(mDataBufferLevelGen)
+         {
+            delete mDataBufferLevelGen;
+            mDataBufferLevelGen = NULL;
+         }
+         mTransferRejected = false;
+         mReceiveTotalSize = 0;
+      }
+      return;
+   }
+
    ByteBuffer *&dataBuffer = (type & 2 ? mDataBufferLevelGen : mDataBuffer);
+
+   static const U32 maxClientDataBufferSize = 100 * 1024 * 1024; // 100MB limit on clients
+   U32 maxAllowed = isInitiator() ? maxClientDataBufferSize : maxDataBufferSize;
 
    if(dataBuffer)
    {
-      if(dataBuffer->getBufferSize() < maxDataBufferSize || isInitiator())  // Limit memory consumption (no limit on clients due to how big game recordings can be)
+      if(dataBuffer->getBufferSize() + data->getBufferSize() <= maxAllowed)
          dataBuffer->appendBuffer(*data.getPointer());
+      else
+      {
+         mTransferRejected = true;
+         if(mDataBuffer) { delete mDataBuffer; mDataBuffer = NULL; }
+         if(mDataBufferLevelGen) { delete mDataBufferLevelGen; mDataBufferLevelGen = NULL; }
+         return;
+      }
    }
    else
    {
-      dataBuffer = new ByteBuffer(*data.getPointer());
-      dataBuffer->takeOwnership();
+      if(data->getBufferSize() <= maxAllowed)
+      {
+         dataBuffer = new ByteBuffer(*data.getPointer());
+         dataBuffer->takeOwnership();
+      }
+      else
+      {
+         mTransferRejected = true;
+         if(mDataBuffer) { delete mDataBuffer; mDataBuffer = NULL; }
+         if(mDataBufferLevelGen) { delete mDataBufferLevelGen; mDataBufferLevelGen = NULL; }
+         return;
+      }
    }
 
    if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
-      if(type & TransmissionRecordedGame)
-         ReceivedRecordedGameplay(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
-      else if(mDataBufferLevelGen)
-         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
+      U32 totalReceived = mDataBuffer->getBufferSize();
+      if(mDataBufferLevelGen)
+         totalReceived += mDataBufferLevelGen->getBufferSize();
+
+      if(mReceiveTotalSize == 0 || totalReceived == mReceiveTotalSize)
+      {
+         if(type & TransmissionRecordedGame)
+            ReceivedRecordedGameplay(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
+         else if(mDataBufferLevelGen)
+            ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
+         else
+            ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
+      }
       else
-         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
+      {
+         logprintf("Transfer size mismatch: expected %u bytes, got %u bytes. Discarding truncated transfer.", mReceiveTotalSize, totalReceived);
+      }
    }
 
    if(type & TransmissionDone)
@@ -1713,6 +1820,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       if(mDataBufferLevelGen)
          delete mDataBufferLevelGen;
       mDataBufferLevelGen = NULL;
+      mReceiveTotalSize = 0;
+      mTransferRejected = false;
    }
 }
 
@@ -1720,7 +1829,25 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 TNL_IMPLEMENT_RPC(GameConnection, s2rTransferFileSize, (U32 size), (size),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   static const U32 maxClientDataBufferSize = 100 * 1024 * 1024; // 100MB limit on clients
+   U32 maxAllowed = isInitiator() ? maxClientDataBufferSize : maxDataBufferSize;
+   if(size > maxAllowed)
+   {
+      mTransferRejected = true;
+      if(mDataBuffer)
+      {
+         delete mDataBuffer;
+         mDataBuffer = NULL;
+      }
+      if(mDataBufferLevelGen)
+      {
+         delete mDataBufferLevelGen;
+         mDataBufferLevelGen = NULL;
+      }
+      return;
+   }
    mReceiveTotalSize = size;
+   mTransferRejected = false;
 }
 
 static S32 QSORT_CALLBACK numberAlphaSort(string *a, string *b)
@@ -1739,7 +1866,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
 {
    if(file.getString()[0] != 0)
    {
-      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, file.getString());
+      string reqFile = file.getString();
+      if(reqFile.find('/') != string::npos || reqFile.find('\\') != string::npos || reqFile.find("..") != string::npos)
+      {
+         s2cDisplayErrorMessage("Invalid filename requested.");
+         return;
+      }
+      string fileName = extractFilename(reqFile);
+      if(fileName.empty() || fileName != reqFile)
+      {
+         s2cDisplayErrorMessage("Invalid filename requested.");
+         return;
+      }
+      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, fileName);
       TransferRecordedGameplay(filePath.c_str());
    }
    else
@@ -1833,7 +1972,11 @@ bool GameConnection::TransferLevelFile(const char *filename)
       if(levelInfo.mScriptFileName.c_str()[0] != 0)
       {
          FolderManager *folderManager = mSettings->getFolderManager();
-         string filename1 = strictjoindir(folderManager->levelDir, levelInfo.mScriptFileName);
+         string safeScript = extractFilename(levelInfo.mScriptFileName);
+         if(safeScript.empty() || safeScript.find("..") != string::npos)
+            return false;
+
+         string filename1 = strictjoindir(folderManager->levelDir, safeScript);
          f = fopen(filename1.c_str(), "rb");
 
          if(!f)
@@ -1893,13 +2036,32 @@ bool GameConnection::TransferLevelFile(const char *filename)
 
 bool GameConnection::TransferRecordedGameplay(const char *filename)
 {
-   BitStream s;
+   if(!mPendingTransferData.empty())
+   {
+      if(!isInitiator())
+         s2cDisplayErrorMessage("A transfer is already in progress");
+      return false;
+   }
+
    const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize value of 10
 
    FILE *f = fopen(filename, "rb");
 
    if(f)
    {
+      fseek(f, 0, SEEK_END);
+      long fileSize = ftell(f);
+      fseek(f, 0, SEEK_SET);
+
+      static const U32 MaxRecordingTransferSize = 100 * 1024 * 1024; // 100MB limit
+      if(fileSize <= 0 || (U32)fileSize > MaxRecordingTransferSize)
+      {
+         fclose(f);
+         if(!isInitiator())
+            s2cDisplayErrorMessage("Recorded file size invalid or exceeds limit");
+         return false;
+      }
+
       mPendingTransferData.resize(0);
       U32 totalTransferSize = 0;
 
@@ -1925,9 +2087,9 @@ bool GameConnection::TransferRecordedGameplay(const char *filename)
          return false;
       }
 
-      s2cSetFilename(filename);
+      s2cSetFilename(extractFilename(filename).c_str());
       s2rTransferFileSize(totalTransferSize);
-      for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; i++)
+      for(U32 i = 0; i < mPendingTransferData.size(); i++)
          s2rSendDataParts(TransmissionRecordedGame, ByteBufferPtr(mPendingTransferData[i]));
 
       s2rSendDataParts(TransmissionRecordedGame | TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
@@ -2000,7 +2162,9 @@ void GameConnection::writeConnectRequest(BitStream *stream)
       serverPW = mClientGame->getEnteredServerAccessPassword();
 
    // Write some info about the client... name, id, and verification status
-   stream->writeString(Game::md5.getSaltedHashFromString(serverPW).c_str());
+   string saltedServerPW = serverPW != "" ? Game::md5.getSaltedHashFromString(serverPW) : "";
+   string hashedServerPW = computeServerPasswordChallenge(this, saltedServerPW);
+   stream->writeString(hashedServerPW.c_str());
    stream->writeString(mClientInfo->getName().getString());
 
     mClientInfo->getId()->write(stream);
@@ -2038,11 +2202,16 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    stream->readString(buf);
    string serverPassword = mServerGame->getSettings()->getServerPassword();
 
-   if(serverPassword != "" && stricmp(buf, Game::md5.getSaltedHashFromString(serverPassword).c_str()))
+   if(serverPassword != "")
    {
-      reason = ReasonNeedServerPassword;
-      reasonStr = "This server requires a password";
-      return false;
+      string salted = Game::md5.getSaltedHashFromString(serverPassword);
+      string challenged = computeServerPasswordChallenge(this, salted);
+      if(stricmp(buf, challenged.c_str()) != 0 && stricmp(buf, salted.c_str()) != 0)
+      {
+         reason = ReasonNeedServerPassword;
+         reasonStr = "This server requires a password";
+         return false;
+      }
    }
 
    // Now read the player name, id, and verification status

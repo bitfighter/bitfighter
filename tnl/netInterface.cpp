@@ -649,7 +649,14 @@ void NetInterface::handleConnectChallengeResponse(const Address &address, BitStr
       }
       else
          theParams.mPrivateKey = mPrivateKey;
+
+      if(!theParams.mPrivateKey->isValid())
+         return;
+
       theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
+      if(!theParams.mSharedSecret)
+         return;
+
       //logprintf("shared secret (client) %s", theParams.mSharedSecret->encodeBase64()->getBuffer());
       Random::read(theParams.mSymmetricKey, SymmetricCipher::KeySize);
       theParams.mUsingCrypto = true;
@@ -786,12 +793,17 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
       theParams.mUsingCrypto = true;
       theParams.mPublicKey = new AsymmetricKey(stream);
+      if(!theParams.mPublicKey->isValid())
+         return;
+
       theParams.mPrivateKey = mPrivateKey;
 
       U32 decryptPos = stream->getBytePosition();
 
       stream->setBytePosition(decryptPos);
       theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
+      if(theParams.mSharedSecret.isNull())
+         return;
 
       SymmetricCipher theCipher(theParams.mSharedSecret);
 
@@ -1251,13 +1263,23 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
    {
       if(mPrivateKey.isNull())
          return;
-      theParams.mUsingCrypto = true;
+
       theParams.mPublicKey = new AsymmetricKey(stream);
+      if(!theParams.mPublicKey->isValid() || !conn->validatePublicKey(theParams.mPublicKey, true))
+         return;
+
       theParams.mPrivateKey = mPrivateKey;
+      if(!theParams.mPrivateKey->isValid())
+         return;
+
+      theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
+      if(!theParams.mSharedSecret)
+         return;
+
+      theParams.mUsingCrypto = true;
 
       U32 decryptPos = stream->getBytePosition();
       stream->setBytePosition(decryptPos);
-      theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
       SymmetricCipher theCipher(theParams.mSharedSecret);
 
       if(!stream->decryptAndCheckHash(NetConnection::MessageSignatureBytes, decryptPos, &theCipher))

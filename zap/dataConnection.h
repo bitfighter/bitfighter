@@ -97,6 +97,10 @@ private:
    string mFilename;
    string mPassword;          // Password supplied by user
    FILE *mOutputFile;         // Where we'll save any incoming data
+   U32 mBytesReceived;        // Count total received bytes to enforce max upload limit
+   string mTargetPath;
+   string mTempPath;
+   bool mTransferSuccess;
 
    Nonce mClientId;           // When called from an active connection, client ID can be used to determine if player
                               // has sufficient permissions

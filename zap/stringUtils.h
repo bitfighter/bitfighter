@@ -18,6 +18,7 @@
 #include "tnlString.h"
 
 #include <string>
+#include <string_view>
 #include <cstring>
 #include <map>
 #include <fstream>

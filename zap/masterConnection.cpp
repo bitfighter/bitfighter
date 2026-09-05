@@ -219,6 +219,9 @@ S32 MasterServerConnection::getClientId() const
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection,
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
+   if(possibleAddresses.size() == 0)
+      return;
+
    if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
       logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!",
@@ -591,7 +594,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(controllerName);
 
       bstream->writeString(clientGame->getPlayerName().c_str());          // User's nickname
-      bstream->writeString(clientGame->getPlayerPassword().c_str());      // and whatever password they supplied
+      string rawPass = clientGame->getPlayerPassword();
+      string passToSend = rawPass != "" ? Game::md5.getSaltedHashFromString(rawPass) : "";
+      bstream->writeString(passToSend.c_str());
 
       // Starting with MASTER_PROTOCOL_VERSION 6 we will write an 8 bit set of flags
       bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);
