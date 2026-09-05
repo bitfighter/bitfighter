@@ -37,7 +37,7 @@ void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 	}
 
 	// maps are sorted by key on insertion
-	for(map<char, Point>::iterator it = points.begin(); it != points.end(); it++)
+	for(map<char, Point>::iterator it = points.begin(); it != points.end(); ++it) // ++it more efficient
 	{
 		result.push_back((*it).second);
 	}

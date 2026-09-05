@@ -1275,7 +1275,7 @@ static void addControllerOptions(Vector<string> *opts)
 
    map<S32,string>::iterator it;
    for(it = GameSettings::DetectedControllerList.begin();
-         it != GameSettings::DetectedControllerList.end(); it++)
+         it != GameSettings::DetectedControllerList.end(); ++it) // ++it more efficient
    {
       // Not too long of a string or we'll overflow the menu option
       string name = it->second;
