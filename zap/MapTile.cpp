@@ -36,12 +36,6 @@ static Point64 pointToC2(const Point &p)
                   static_cast<int64_t>(p.y * CLIPPER2_SCALE));
 }
 
-static Point c2ToPoint(const Point64 &p)
-{
-   return Point(static_cast<F32>(p.x * CLIPPER2_INV_SCALE),
-                static_cast<F32>(p.y * CLIPPER2_INV_SCALE));
-}
-
 /// Hole-aware point-in-union test using the NonZero winding rule.
 ///
 /// The global union (Paths64) produced by Clipper2 with FillRule::NonZero
@@ -689,12 +683,6 @@ static void stripCollinearPoints(Path64 &path)
    }
 
    path = std::move(result);
-}
-
-static void stripCollinearPoints(Paths64 &paths)
-{
-   for(auto &path : paths)
-      stripCollinearPoints(path);
 }
 
 

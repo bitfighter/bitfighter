@@ -2,6 +2,8 @@
 #include "GeomUtils.h"
 #include "tnlPlatform.h"
 #include "tnlVector.h"
+#include "tnlBitStream.h"
+#include "tnlMethodDispatch.h"
 
 #ifndef TNL_OS_WIN32
 #  include <unistd.h>
@@ -60,7 +62,7 @@ TEST(BugFixTest, VectorDeserializationBoundsAndTruncation)
     writeStream.setBitPosition(0);
 
     TNL::Vector<U32> vec;
-    TNL::read(writeStream, &vec);
+    ::Types::read(writeStream, &vec);
 
     // Stream should be marked invalid/error and vector must be empty
     EXPECT_FALSE(writeStream.isValid());

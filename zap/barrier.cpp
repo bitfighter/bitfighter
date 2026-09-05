@@ -18,7 +18,7 @@
 #include <math.h>
 
 #ifndef ZAP_DEDICATED
-#  include "renderer.h"
+#  include "Renderer.h"
 #endif
 
 

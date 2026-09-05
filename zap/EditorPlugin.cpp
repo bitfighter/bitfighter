@@ -338,7 +338,7 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
    S32 pushed = 0;
 
    map<U32, BfObject*>::iterator it;
-   for(it = orderedSelectedItems.begin(); it != orderedSelectedItems.end(); it++)
+   for(it = orderedSelectedItems.begin(); it != orderedSelectedItems.end(); ++it) // ++it more efficient
    {
       BfObject *obj = (*it).second;
       obj->push(L);
