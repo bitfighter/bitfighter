@@ -32,10 +32,11 @@ if(MYSQL_FOUND)
 		wnp_connection.cpp
 	)
 	add_library(mysql++
-		SHARED
+		STATIC
 		EXCLUDE_FROM_ALL
 		${MYSQLPP_SOURCES}
 	)
+	set_target_properties(mysql++ PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 	include_directories(SYSTEM ${MYSQL_INCLUDE_DIR}
 	)

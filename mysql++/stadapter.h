@@ -221,7 +221,7 @@ public:
 	/// WARNING: The throw-spec is incorrect, but it can't be changed
 	/// until v4, where we can break the ABI.  Throw-specs shouldn't be
 	/// relied on anyway.
-	char at(size_type i) const throw(std::out_of_range);
+	char at(size_type i) const;
 
 	/// \brief Compare the internal buffer to the given string
 	///
