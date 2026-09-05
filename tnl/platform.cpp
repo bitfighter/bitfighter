@@ -394,7 +394,18 @@ U32 x86UNIXGetTickCountMicro()
 
 U32 Platform::getRealMilliseconds()
 {
-   return x86UNIXGetTickCount();
+   U32 tickCount;
+   TNL_JOURNAL_READ_BLOCK ( getRealMilliseconds,
+      TNL_JOURNAL_READ( (&tickCount) );
+      return tickCount;
+   )
+
+   tickCount = x86UNIXGetTickCount();
+
+   TNL_JOURNAL_WRITE_BLOCK ( getRealMilliseconds,
+      TNL_JOURNAL_WRITE( (tickCount) );
+   )
+   return tickCount;
 }
 
 U32 Platform::getRealMicroseconds()

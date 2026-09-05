@@ -1116,7 +1116,7 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
    ProfileMap moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
 
    ProfileMap::iterator it;
-   for(it = moduleProfiles.begin(); it != moduleProfiles.end(); it++)
+   for(it = moduleProfiles.begin(); it != moduleProfiles.end(); ++it) // ++it more efficient
    {
       if((*it).first == "global")
       {
