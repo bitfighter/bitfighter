@@ -110,8 +110,8 @@ This copies the dependent dylibs into `Contents/Frameworks` (via `dylibbundler`)
 and re-points the load commands.  Homebrew currently ships SDL2 as **sdl2-compat**,
 which `dlopen`s `libSDL3` at runtime; that library is also copied into
 `Frameworks` (dylibbundler cannot see dlopen deps).  The bundle is **ad-hoc
-signed**, so other users must right-click &rarr; Open it the first time
-(Gatekeeper); Developer ID signing and notarization are a separate step.
+signed**, so Gatekeeper will block it on first launch.  See [macOS](#macos)
+below for how to open it.
 
 To build the Intel client under Rosetta instead (using the bundled `lib/`
 frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
@@ -135,6 +135,21 @@ This will build a self-extracting installer for Bitfighter. You will need to bui
 
 ### macOS
 Run `make package` to build a distributable DMG.
+
+The packaged `.dmg` (from `make package` or CI) is ad-hoc signed, not
+notarized. On first launch macOS will refuse to open it (Gatekeeper):
+
+1. Double-click Bitfighter.app. When the warning appears, click **Done**
+   (do not Move to Trash).
+2. Open **System Settings &rarr; Privacy & Security** and scroll to
+   **Security**.
+3. Click **Open Anyway** next to the Bitfighter blocked message, then
+   authenticate.
+
+You only need to do this once. On macOS 15 (Sequoia) and later, the old
+right-click &rarr; Open bypass no longer works.
+
+[Open a Mac app from an unknown developer](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)
 
 ## CRASHES & PROBLEMS
 If you are building from the `master` branch, then expect crashes and problems. Feel free to report them via the Issues tab, but consider joining the Discord and checking in the dev_irc channel to ask a developer about it -- we probably are already aware.
