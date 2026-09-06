@@ -416,7 +416,7 @@ SQLTypeAdapter::assign(const null_type&)
 }
 
 char
-SQLTypeAdapter::at(size_type i) const throw(std::out_of_range)
+SQLTypeAdapter::at(size_type i) const
 {
 	if (buffer_) {
 		if (i <= length()) {
