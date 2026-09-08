@@ -268,7 +268,7 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
-   if (inNumVertices == 0)
+   if(inNumVertices == 0)
       return false;
 
    // Check if the center is inside the polygon  ==> now works for all polys
@@ -324,7 +324,7 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
-   if (points.empty())
+   if(points.empty())
       return false;
 
    const Point *pointPrev = &points[points.size() - 1];
@@ -346,7 +346,7 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 // Returns true if polygons represented by p1 & p2 intersect or one contains the other
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
-   if (p1.empty() || p2.empty())
+   if(p1.empty() || p2.empty())
       return false;
 
    F32 ct;
@@ -377,7 +377,7 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
                                       F32 &collisionTime, Point &normal)
 {
-   if (vertexCount == 0)
+   if(vertexCount == 0)
       return false;
 
    Point v1 = poly[vertexCount - 1];
@@ -695,7 +695,7 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
 static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
-   if (inNumVertices == 0)
+   if(inNumVertices == 0)
       return false;
 
    // Loop through edges
@@ -776,7 +776,7 @@ static const float EPSILON=0.0000000001f;
 F32 area(const Vector<Point> &contour)
 {
   int n = contour.size();
-  if (n < 3)
+  if(n < 3)
      return 0.0f;
 
   F64 A = 0.0;
@@ -1934,6 +1934,9 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
    if (corners.empty())
       return;
 
+   if(corners.empty())
+      return;
+
    S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
    {
@@ -2162,7 +2165,7 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 // Convert a barrier line into segmented chunks with data about possible mitering
 void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
 {
-   if (inputLine.empty())
+   if(inputLine.empty())
       return;
 
    // Create barriers from line segments, with some pre- and post-

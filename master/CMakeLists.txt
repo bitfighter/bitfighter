@@ -66,6 +66,9 @@ set(MASTER_INCLUDES
 # Handle different compile of master if MySQL is found or minimal build is requested
 # Force
 if(MYSQL_FOUND AND NOT MASTER_MINIMAL)
+	set(MASTER_DEPS ${MASTER_DEPS} mysql++ PARENT_SCOPE)
+	set(MASTER_LIBS ${MASTER_LIBS} mysql++ ${MYSQL_LIBRARIES} PARENT_SCOPE)
+	set(MASTER_INCLUDES ${MASTER_INCLUDES} ../mysql++ ${MYSQL_INCLUDE_DIR} PARENT_SCOPE)
 	set(MASTER_DEPS ${MASTER_DEPS} mysql++)
 	set(MASTER_LIBS ${MASTER_LIBS} mysql++ ${MYSQL_LIBRARIES})
 	set(MASTER_INCLUDES ${MASTER_INCLUDES} ../mysql++ ${MYSQL_INCLUDE_DIR})
