@@ -340,7 +340,7 @@ ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 
 
 // Currently only used on client, for various effects
-// Will return NULL if ship is out-of-scope... we have ClientInfos for all players, but not aways their ships
+// Will return NULL if ship is out-of-scope... we have ClientInfos for all players, but not always their ships
 Ship *Game::findShip(const StringTableEntry &clientName)
 {
    ClientInfo *clientInfo = findClientInfo(clientName);
@@ -590,7 +590,7 @@ void Game::onConnectedToMaster()
 // Called when ServerGame or the editor loads a level
 void Game::resetLevelInfo()
 {
-   // These data need to be reset everytime before a level loads
+   // These data need to be reset every time before a level loads
    mLegacyGridSize = 1.f;
    mLevelFormat = CurrentLevelFormat;
    mHasLevelFormat = false;
@@ -680,7 +680,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       return;
 
    // LevelFormat was introduced in 019 to handle significant file format changes, like
-   // with GridSize removal and the saving of real spacial coordinates.
+   // with GridSize removal and the saving of real spatial coordinates.
    //
    // This should be the first line of the file
    else if(!stricmp(argv[0], "LevelFormat"))
@@ -697,7 +697,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
    // Legacy Gridsize handling - levels used to have a 'GridSize' line that could be used to
    // multiply all points found in the level file.  Since version 019 this is no longer used
-   // and all points are saved as the real spacial coordinates.
+   // and all points are saved as the real spatial coordinates.
    //
    // If a level file contains this setting, we will use it to multiply all points found in
    // the level file.  However, once it is loaded and resaved in the editor, this setting will
@@ -884,6 +884,20 @@ bool Game::processLevelParam(S32 argc, const char **argv, S32 lineNum)
       if(argc > 1)
          getGameType()->setMaxRecPlayers(atoi(argv[1]));
    }
+   else if(!stricmp(argv[0], "FogOfWar"))
+   {
+      if(argc > 1)
+      {
+         if(!stricmp(argv[1], "Yes"))
+            getGameType()->setFogOfWarMode(FogOfWar::YES);
+         else if(!stricmp(argv[1], "No"))
+            getGameType()->setFogOfWarMode(FogOfWar::NO);
+         else
+            getGameType()->setFogOfWarMode(FogOfWar::DEFAULT);
+      }
+      else
+         getGameType()->setFogOfWarMode(FogOfWar::DEFAULT);
+   }
    else
       return false;     // Line not processed; perhaps the caller can handle it?
 
@@ -919,6 +933,17 @@ string Game::toLevelCode() const
 
    str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
+
+   // Write FogOfWar line
+   {
+      FogOfWar fow = gameType->getFogOfWarMode();
+      if(fow == FogOfWar::YES)
+         str += "FogOfWar Yes\n";
+      else if(fow == FogOfWar::NO)
+         str += "FogOfWar No\n";
+      else
+         str += "FogOfWar Default\n";
+   }
 
    return str;
 }
@@ -1013,7 +1038,7 @@ void Game::setGameTime(F32 timeInMinutes)
 // If there is no valid connection to master server, perodically try to create one.
 // If user is playing a game they're hosting, they should get one master connection
 // for the client and one for the server.
-// Called from both clientGame and serverGame idle fuctions, so think of this as a kind of idle
+// Called from both clientGame and serverGame idle functions, so think of this as a kind of idle
 void Game::checkConnectionToMaster(U32 timeDelta)
 {
    if(mConnectionToMaster.isValid() && mConnectionToMaster->isEstablished())
@@ -1468,7 +1493,7 @@ const GridDatabase *Game::getServerGameObjectDatabase()
 
 
 // This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
-// We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
+// We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with uninitialized junk.
 // Static method
 void Game::seedRandomNumberGenerator(const string &name)
 {

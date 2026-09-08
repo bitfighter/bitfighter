@@ -31,7 +31,7 @@ enum PersonalRating     // These need to be able to fit into S16 for totalRating
    Unrated = S16_MIN,                     // -32768
    UnknownRating = S16_MIN + 1,           // -32767
    NotReallyInTheDatabase = S16_MIN + 2,  // -32766
-   MinumumLegitimateRating = S16_MIN + 3  // -32765
+   MinimumLegitimateRating = S16_MIN + 3  // -32765
 };
 
 

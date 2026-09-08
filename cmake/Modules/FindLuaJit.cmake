@@ -8,7 +8,8 @@ set(LUAJIT_SEARCH_PATHS
 	${LUAJIT_SEARCH_PATHS}
 	~/Library/Frameworks
 	/Library/Frameworks
-	/usr/local
+	/opt/homebrew # Homebrew on Apple Silicon
+	/usr/local    # Homebrew on Intel
 	/usr
 	/sw # Fink
 	/opt/local # DarwinPorts
@@ -17,15 +18,15 @@ set(LUAJIT_SEARCH_PATHS
 )
 
 
-find_path(LUAJIT_INCLUDE_DIR 
+find_path(LUAJIT_INCLUDE_DIR
 	NAMES lua.h
 	HINTS ENV LUAJITDIR
-	PATH_SUFFIXES include include/luajit luajit luajit-2.0 luajit-2.1 luajit/src luajit-5_1-2.0
+	PATH_SUFFIXES include include/luajit include/luajit-2.0 include/luajit-2.1 luajit luajit-2.0 luajit-2.1 luajit/src luajit-5_1-2.0
 	PATHS ${LUAJIT_SEARCH_PATHS}
 )
 
-find_library(LUAJIT_LIBRARIES NAMES 
-	NAMES luajit libluajit luajit luajit-5.1
+find_library(LUAJIT_LIBRARIES
+	NAMES luajit libluajit luajit-5.1
 	HINTS ENV LUAJITDIR
 	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 	PATHS ${LUAJIT_SEARCH_PATHS}

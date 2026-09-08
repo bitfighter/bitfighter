@@ -26,7 +26,7 @@ namespace Zap
 
 using namespace UI;
 
-// Constuctor
+// Constructor
 HelperMenu::HelperMenu()
 {
    mClientGame = NULL;
@@ -195,7 +195,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += itemsHeight;
 
    // Adjust for any transition that might be going on that is changing the overall menu height.  menuBottom is the rendering location
-   // of the bottom fo the menu, newBottom is the target bottom location after the transition has ocurred.
+   // of the bottom of the menu, newBottom is the target bottom location after the transition has occurred.
    yPos += menuBottom - newBottom;
 
    if(hasLegend)
@@ -249,7 +249,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
    S32 height = 0;
 
-   // Calculate height of all our items, ignorning those that are hidden
+   // Calculate height of all our items, ignoring those that are hidden
    for(S32 i = 0; i < count; i++)
       if(items[i].showOnMenu)
          height += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -344,7 +344,7 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
 
    const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
 
-   // First, get the total width so we can center poperly
+   // First, get the total width so we can center properly
    for(S32 i = 0; i < legendCount; i++)
       width += getStringWidth(MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
 
@@ -431,7 +431,7 @@ void HelperMenu::idle(U32 deltaT)
 }
 
 
-// Gets run when closing animation is complet
+// Gets run when closing animation is complete
 void HelperMenu::onWidgetClosed()
 {
    Slider::onWidgetClosed();

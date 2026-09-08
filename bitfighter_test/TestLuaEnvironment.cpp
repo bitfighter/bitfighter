@@ -198,7 +198,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    /////
    // Test sending data to bot method
    // Send a table containing multiple values
-   // Note: The key to all these methods is that Lua varaibles are global by default, so message and int will be
+   // Note: The key to all these methods is that Lua variables are global by default, so message and int will be
    //       accessible with getLuaGlobalVar, which gives us an easy way to verify that the event handler was called,
    //       and with what arguments.
    ASSERT_TRUE(bot->runString("function onDataReceived(data) message = data.msg; int = data.int; end"));
@@ -214,7 +214,7 @@ TEST_F(LuaEnvironmentTest, scriptCommunication)
    ASSERT_EQ(0, lua_gettop(L));
 
 
-   // Sending mulitiple values
+   // Sending multiple values
    ASSERT_TRUE(bot->runString("function onDataReceived(param1, param2, param3) p1 = param1; p2 = param2; p3 = param3; end"));
 
    for(U32 i = 0; i < 10; i++) serverGame->idle(10);   // Marinate

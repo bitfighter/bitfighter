@@ -399,7 +399,7 @@ void PlaybackServerDownloadUserInterface::processSelection(U32 index)
    {
       string downloadedstring = mLevels[index] + " (downloaded)";
 
-      // Call destructor and contructor without changing memory pointers... Got a better way to change multiple arguments?
+      // Call destructor and constructor without changing memory pointers... Got a better way to change multiple arguments?
       item->~MenuItem();
       new(item) MenuItem(index | 0x40000000, downloadedstring.c_str(), NULL, "");
    }

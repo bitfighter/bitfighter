@@ -396,7 +396,7 @@ void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
    if(!isGameOver())  // Avoid flooding messages on game over.
       s2cRabbitMessage(RabbitMsgRabbitKill, clientInfo->getName());
 
-   // See if we've acheived our raging rabid rabbit badge
+   // See if we've achieved our raging rabid rabbit badge
    if(clientInfo->isAuthenticated() &&                      // Player must be authenticated
       clientInfo->getKillStreak() >= 9 &&                   // Player must have a kill streak of 9 or more
       !clientInfo->hasBadge(BADGE_RAGING_RABID_RABBIT) &&   // Player doesn't already have the badge

@@ -32,7 +32,7 @@ private:
    virtual S32 getGap(MenuItemSize size) const;          // Gap is the space between items
 
    // Calculated during rendering, used for figuring out which item mouse is over.  Will always be positive during normal use,
-   // but will be intialized to negative so that we know not to use it before menu has been rendered, and this value caluclated.
+   // but will be initialized to negative so that we know not to use it before menu has been rendered, and this value calculated.
    S32 mTopOfFirstMenuItem;
 
 protected:

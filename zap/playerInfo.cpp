@@ -154,7 +154,7 @@ PlayerInfo::PlayerInfo(ClientInfo *clientInfo)
 }
 
 
-// Destuctor
+// Destructor
 PlayerInfo::~PlayerInfo()
 {
    // Do nothing

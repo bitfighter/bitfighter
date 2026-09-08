@@ -227,7 +227,7 @@ function Timer:_insert(record)
 end
 
 
-Timer:_initialize()     -- Actually intialize the timer
+Timer:_initialize()     -- Actually initialize the timer
 
 
 --

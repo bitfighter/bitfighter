@@ -98,7 +98,7 @@ private:
    string mPassword;          // Password supplied by user
    FILE *mOutputFile;         // Where we'll save any incoming data
 
-   Nonce mClientId;           // When called from an active connection, client ID can be used to deterimine if player
+   Nonce mClientId;           // When called from an active connection, client ID can be used to determine if player
                               // has sufficient permissions
 
    bool connectionsAllowed();

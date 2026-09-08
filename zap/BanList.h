@@ -37,7 +37,7 @@ private:
    Vector<KickedHost> serverKickList;
 
    string banListTokenDelimiter;
-   string banListWildcardCharater;
+   string banListWildcardCharacter;
 
    S32 defaultBanDurationMinutes;
    S32 kickDurationMilliseconds;

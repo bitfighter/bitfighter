@@ -1,27 +1,74 @@
-Some helpful notes for our AI friends (and some humans may find this useful as well)
+Some helpful notes for our AI friends and humans.
 
-# Test Commands
-## Windows:
-Windows debug tests:
+# Building and Testing
 
-    cd <ROOT_DIR>\exe
-    bitfighter_test_debug.exe
+> **Important:** Always execute `bitfighter_test` from the `<ROOT_DIR>/exe` directory so resource paths and levels resolve properly.
 
-Run only ChatHelper tests:
+## macOS
 
-    cd <ROOT_DIR>\exe
-    bitfighter_test_debug.exe --gtest_filter=ChatHelperTest.*
+### Prerequisites via Homebrew
+On Apple Silicon macOS, LuaJIT 2.1 from Homebrew is required:
+```bash
+brew install luajit sdl2 libpng libvorbis libogg speex libmodplug openal-soft
+```
 
-# Building on WSL
-Make a copy of the source code in <ROOT_DIR>.
+### Build and Test Commands
+```bash
+# Configure out-of-source build; add -DMASTER_MINIMAL=ON when MySQL server is not used
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=ON
 
-# Running Valgrind
-## WSL
-### Build tests:
-    cd <ROOT_DIR>
-    cmake <ROOT_DIR> -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -O0 -Wno-error"
-    cmake --build . --target bitfighter_test -j 1
+# Build test runner
+cmake --build build --target bitfighter_test
 
-### Run valgrind:
-    cd <ROOT_DIR>/exe
-    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=../lua/luajit/src/lj.supp --log-file=valgrind.log ./bitfighter_test --gtest_filter="GameUserInterfaceTest.Engineer"
+# Build game client
+cmake --build build --target Bitfighter
+
+# Run test suite
+cd exe && ./bitfighter_test
+
+# Run filtered tests such as ChatHelper or StringUtils
+cd exe && ./bitfighter_test --gtest_filter=ChatHelperTest.*
+```
+
+## Linux and WSL
+
+### Build and Test Commands
+```bash
+# Configure
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=ON
+
+# Build
+cmake --build build --target bitfighter_test
+
+# Run tests
+cd exe && ./bitfighter_test
+```
+
+### Running Valgrind on Linux and WSL
+```bash
+# Build with debug symbols and no optimization
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-g -O0 -Wno-error" -DMASTER_MINIMAL=ON
+cmake --build build --target bitfighter_test -j1
+
+# Run Valgrind
+cd exe
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=../lua/luajit/src/lj.supp --log-file=valgrind.log ./bitfighter_test --gtest_filter="GameUserInterfaceTest.Engineer"
+```
+
+## Windows
+
+### Test Commands
+```cmd
+cd <ROOT_DIR>\exe
+bitfighter_test_debug.exe
+
+:: Run only specific tests
+cd <ROOT_DIR>\exe
+bitfighter_test_debug.exe --gtest_filter=ChatHelperTest.*
+```
+
+# Project Targets
+- `Bitfighter` / `bitfighter`: Main graphical game client.
+- `bitfighterd`: Dedicated headless server.
+- `bitfighter_test`: GoogleTest unit and integration test suite.
+- `master`: Master server daemon for matchmaking and server listings.

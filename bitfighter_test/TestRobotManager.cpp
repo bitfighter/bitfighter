@@ -161,7 +161,7 @@ TEST(RobotManagerTest, moreLessBots)
 
    Vector<const char *> botArgs;
 
-   // By putting each of tese tests in a block, we can not worry too much about how to add/remove bots and players
+   // By putting each of these tests in a block, we can not worry too much about how to add/remove bots and players
    // for each test.  Instead, we can blow the entire gamePair away and just start clean each time.  The point of
    // the tests is to look at more/less bots, not adding/removing players in bulk.
    {  // =-=-=-= One team =-=-=-=

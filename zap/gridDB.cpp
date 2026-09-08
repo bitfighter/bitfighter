@@ -59,7 +59,7 @@ GridDatabase::~GridDatabase()
 {
    removeEverythingFromDatabase();
 
-   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "Running GridDatabase destructor without initalizing?");
+   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "Running GridDatabase destructor without initializing?");
 
    if(mWallSegmentManager)
       delete mWallSegmentManager;
@@ -510,7 +510,7 @@ Rect GridDatabase::getExtents()
       }
 
    TNLAssert(first == 0, "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
-                          if it does, please document it and remove this assert, along withthe rect = line below -Wat");
+                          if it does, please document it and remove this assert, along with the rect = line below -Wat");
 
    if(first == -1)      // No suitable objects found, return empty extents
       return Rect();
@@ -797,7 +797,7 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
 }
 
 
-// Kind of hacky, kind of useful.  Only used by BotZones, and ony works because all zones are added at one time, the list does not change,
+// Kind of hacky, kind of useful.  Only used by BotZones, and only works because all zones are added at one time, the list does not change,
 // and the index of the bot zones is stored as an ID by the zone.  If we added and removed zones from our list, this would probably not
 // be a reliable way to access a specific item.  We could probably phase this out by passing pointers to zones rather than indices.
 DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
@@ -924,7 +924,7 @@ void DatabaseObject::setExtent(const Rect &extents)
       // Don't do anything if the buckets haven't changed...
       if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
       {
-         // They are different... remove and readd to database, but don't touch gridDB->mAllObjects
+         // They are different... remove and re-add to database, but don't touch gridDB->mAllObjects
          if(U32(maxx - minx) >= gridDB->BucketRowCount)        maxx    = minx    + gridDB->BucketRowCount - 1;
          if(U32(maxy - miny) >= gridDB->BucketRowCount)        maxy    = miny    + gridDB->BucketRowCount - 1;
          if(U32(maxxold >= minxold) + gridDB->BucketRowCount)  maxxold = minxold + gridDB->BucketRowCount - 1;

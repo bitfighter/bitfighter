@@ -41,7 +41,7 @@ S32 Teleporter::getDestCount() const
 
 Point Teleporter::getDest(S32 index) const
 {
-   // If we have no desitnations, return the orgin for a kind of bizarre loopback effect
+   // If we have no destinations, return the origin for a kind of bizarre loopback effect
    if(mDests.size() == 0)
       return getPos();
 

@@ -9,7 +9,7 @@
 #include "Renderer.h"
 #include "ClientGame.h"
 #include "FontManager.h"
-#include "barrier.h"
+#include "gameType.h"
 
 #include "Colors.h"
 
@@ -79,11 +79,11 @@ void FpsRenderer::idle(U32 timeDelta)
    }
 
 
-   U32 indx = mFrameIndex % FPS_AVG_COUNT;
-   mIdleTimeDelta[indx] = timeDelta;
+   U32 index = mFrameIndex % FPS_AVG_COUNT;
+   mIdleTimeDelta[index] = timeDelta;
 
    if(mGame->getConnectionToServer())
-      mPing[indx] = (U32)mGame->getConnectionToServer()->getRoundTripTime();
+      mPing[index] = (U32)mGame->getConnectionToServer()->getRoundTripTime();
 
    mFrameIndex++;
 }
@@ -100,19 +100,37 @@ void FpsRenderer::render(S32 canvasWidth) const
    if(mGame->getLocalPlayerShip())
    {
       Point shipPos = mGame->getLocalPlayerShip()->getPos();
-      Point vis(DisplayManager::getScreenInfo()->getDrawAreaWidth(), DisplayManager::getScreenInfo()->getDrawAreaHeight());
+      Point visExt = mGame->computePlayerVisArea(mGame->getLocalPlayerShip());
       Rect visibleRect(
-         shipPos.x - vis.x / 2,
-         shipPos.y - vis.y / 2,
-         shipPos.x + vis.x / 2,
-         shipPos.y + vis.y / 2
+         shipPos.x - visExt.x,
+         shipPos.y - visExt.y,
+         shipPos.x + visExt.x,
+         shipPos.y + visExt.y
       );
 
-      // increment by two because each segment is two points
-      for(S32 i = 0; i < Barrier::mRenderLineSegments.size(); i += 2)
+      // Count wall vertices visible on screen as a measure of geometry complexity.
+      // On the client, walls arrive as tiled WallPoly fragments, not Barrier objects.
+      const Vector<WallPoly> &tilePolys = GameType::getTilePolys();
+      for(S32 i = 0; i < tilePolys.size(); i++)
       {
-         if(visibleRect.contains(Barrier::mRenderLineSegments[i]))
-            visibleVertices++;
+         const WallPoly &wp = tilePolys[i];
+         U32 nv = wp.numVerts();
+         if(nv < 3)
+            continue;
+
+         // Compute AABB of this poly from its flattened verts
+         F32 minX = F32_MAX, minY = F32_MAX, maxX = -F32_MAX, maxY = -F32_MAX;
+
+         for(U32 v = 0; v < wp.verts.size(); v += 2)
+         {
+            minX = min(minX, wp.verts[v]);
+            maxX = max(maxX, wp.verts[v]);
+            minY = min(minY, wp.verts[v + 1]);
+            maxY = max(maxY, wp.verts[v + 1]);
+         }
+
+         if(Rect(minX, minY, maxX, maxY).intersects(visibleRect))
+            visibleVertices += nv;
       }
    }
 
@@ -130,7 +148,7 @@ void FpsRenderer::render(S32 canvasWidth) const
    drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, "%1.0f ms",  mPingAvg);
 
    // vertex display is green at zero and red at 1000 or more visible vertices
-   r.setColor(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
+   r.setColor(F32(visibleVertices) / 1000.0f, 1.0f - F32(visibleVertices) / 1000.0f, 0.0f, 1);
    drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
 
    FontManager::popFontContext();

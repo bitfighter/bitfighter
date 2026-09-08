@@ -93,7 +93,8 @@ namespace Colors
    const Color EDITOR_SELECT_COLOR(Colors::yellow);
    const Color EDITOR_PLAIN_COLOR(Colors::gray75);
 
-   const Color EDITOR_WALL_FILL_COLOR(.5f, .5f, 1.0f);
+   const Color EDITOR_WALL_FILL_COLOR(.5f, .5f, 1.0f);	 // Blue for normal walls in editor
+   const Color EDITOR_DEST_WALL_FILL(0.0f, 0.5f, 0.0f);  // Green for destructible walls 
 
    // Special named colors
    const Color NexusOpenColor(0, 0.7, 0);

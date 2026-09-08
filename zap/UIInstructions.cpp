@@ -69,7 +69,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) :
                                                                          mGameTypeInstrs(5   )
 {
    // Quick sanity check...
-   TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
+   TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum InstructionPages!!!");
 
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -329,7 +329,7 @@ void InstructionsUserInterface::render()
 }
 
 
-void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
+void InstructionsUserInterface::activatePage(InstructionPages pageIndex)
 {
    getUIManager()->activate(this);                // Activates ourselves, essentially
    mCurPage = pageIndex;
@@ -1152,7 +1152,10 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
    }
 
    else if(checkInputCode(BINDING_HELP, inputCode))
+   {
+      playBoop();
       nextPage();
+   }
    else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
    else

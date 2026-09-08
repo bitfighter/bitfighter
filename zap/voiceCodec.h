@@ -67,10 +67,10 @@ class SpeexVoiceEncoder : public VoiceEncoder
    static const U32 maxFrameByteSize = 33;  // don't go to high or ByteBuffer will break
 
    void *encoderState;
+public:
    U32 getSamplesPerFrame();
    U32 getMaxCompressedFrameSize();
    U32 compressFrame(S16 *samplePtr, U8 *outputPtr);
-public:
    SpeexVoiceEncoder();
    virtual ~SpeexVoiceEncoder();
 };
@@ -83,11 +83,11 @@ class SpeexVoiceDecoder : public VoiceDecoder
    static const U32 maxFrameByteSize = 33;
 
    void *decoderState;
+public:
    U32 getSamplesPerFrame();
    U32 getAvgCompressedFrameSize();
 
    U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize);
-public:
    SpeexVoiceDecoder();
    virtual ~SpeexVoiceDecoder();
 };

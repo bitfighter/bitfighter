@@ -51,7 +51,7 @@ public:
    static void shutdown();
 
    static void setWindowPosition(S32 left, S32 top);
-   static void saveWindowPostion(GameSettings *settings);
+   static void saveWindowPosition(GameSettings *settings);
    static void saveUpdateWindowScale(GameSettings *settings);
    static bool isFullscreen();
 

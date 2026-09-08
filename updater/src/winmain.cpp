@@ -61,7 +61,7 @@ gup [-verbose] [-vVERSION_VALUE] [-pCUSTOM_PARAM]\r\
     -v : Launch GUP with VERSION_VALUE.\r\
          VERSION_VALUE is the current version number of program to update.\r\
          If you pass the version number as the argument,\r\
-         then the version set in the gup.xml will be overrided.\r\
+         then the version set in the gup.xml will be overridden.\r\
 	-p : Launch GUP with CUSTOM_PARAM.\r\
 	     CUSTOM_PARAM will pass to destination by using GET method\r\
          with argument name \"param\"\r\
@@ -409,7 +409,7 @@ bool getUpdateInfo(string &info2get, const GupParameters& gupParams, const GupEx
 {
 	char errorBuffer[CURL_ERROR_SIZE] = { 0 };
 
-	// Check on the web the availibility of update
+	// Check on the web the availability of update
 	// Get the update package's location
 	CURL *curl;
 	CURLcode res = CURLE_FAILED_INIT;
@@ -574,7 +574,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int)
 
 		// Get your software's current version.
 		// If you pass the version number as the argument
-		// then the version set in the gup.xml will be overrided
+		// then the version set in the gup.xml will be overridden
 		if (!version.empty())
 			gupParams.setCurrentVersion(version.c_str());
 

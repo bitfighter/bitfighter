@@ -38,7 +38,7 @@ void IntRect::set(S32 x1, S32 y1, S32 x2, S32 y2)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constuctors
+// Constructors
 Rect::Rect()
 {
    set(Point(), Point());

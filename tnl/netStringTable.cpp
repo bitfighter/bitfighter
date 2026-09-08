@@ -31,6 +31,9 @@
 #include "tnlDataChunker.h"
 #include "tnlNetInterface.h"
 
+#include "../zap/stringUtils.h"
+
+
 namespace TNL {
 
 namespace StringTable
@@ -279,7 +282,7 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
    TNLAssert(!mNodeListFreeEntry || (mNodeListFreeEntry & 1), "Error in freeList!!");
    mNodeList[stringNode->masterIndex] = stringNode;
 
-   strncpy(stringNode->stringData, val, len);
+   strcpy(stringNode->stringData, val);
    stringNode->stringData[len] = 0;    // Null terminate
    mItemCount++;
 

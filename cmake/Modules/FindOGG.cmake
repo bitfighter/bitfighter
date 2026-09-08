@@ -9,6 +9,7 @@ SET(OGG_SEARCH_PATHS
 	${OGG_SEARCH_PATHS}
 	~/Library/Frameworks
 	/Library/Frameworks
+	/opt/homebrew # Homebrew on Apple Silicon
 	/usr/local
 	/usr
 	/sw # Fink

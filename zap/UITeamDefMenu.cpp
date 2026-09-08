@@ -137,7 +137,7 @@ void TeamDefUserInterface::onActivate()
       ui->mOldTeams[i].name = team->getName().getString();
    }
 
-   // Display an intitial message to users
+   // Display an initial message to users
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
    Cursor::disableCursor();

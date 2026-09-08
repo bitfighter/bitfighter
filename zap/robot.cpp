@@ -42,7 +42,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  * corresponding listener funtcitons.
  *
  * As a conveneinece, robots are automatically subscribed to the Tick event, and if they
- * implement a function called onTick(), it will be called every game cycle.  You can unubscribe
+ * implement a function called onTick(), it will be called every game cycle.  You can unsubscribe
  * from this event if you want.
  *
  * @param event Event to subscribe to.
@@ -84,7 +84,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  *   end
  * @endcode
 
- * Alterntively, if a coordinate pair has been passed to the bot (as two strings, "xxxx", "yyyy"):
+ * Alternatively, if a coordinate pair has been passed to the bot (as two strings, "xxxx", "yyyy"):
  *    x = tonumber(arg[1])
  *    y = tonumber(arg[2])
  *    dest = point.new(x, y)
@@ -217,7 +217,7 @@ bool Robot::initialize(Point &pos)
 
       Parent::initialize(pos);
 
-      // Robots added via robot.new() get intialized.  If the robot is added in a script's main()
+      // Robots added via robot.new() get initialized.  If the robot is added in a script's main()
       // function, the bot will be reinitialized when the game starts.  This check avoids that.
       if(!isCollisionEnabled())
          enableCollision();
@@ -521,7 +521,7 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
 {
    Point difference = point - getActualPos();
 
-   Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
+   Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpendicular to the original vector
    crossVector.normalize(mRadius);                  // reduce point so the vector has length of ship radius
 
    // Edge points of ship

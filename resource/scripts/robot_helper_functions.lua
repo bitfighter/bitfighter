@@ -34,7 +34,7 @@ end
   /**
    * item findClosest(table items, int teamIndex)
    *
-   * @brief Find closest item in a specfied list of items.
+   * @brief Find closest item in a specified list of items.
    *
    * @param items Items to search.  This should be a table with one or more Lua items (note that these are actual items, not item types).
    * @param teamIndex Limit search to items from this team.  If omitted, will return the closest item on any team.
@@ -48,7 +48,7 @@ function findClosest(items, teamIndex)
    local minDist = 999999999
    local pos = bot:getPos()
 
-   for indx, item in ipairs(items) do              -- Iterate over our list
+   for index, item in ipairs(items) do              -- Iterate over our list
 
       --logprint(tostring(teamIndex)..","..item:getTeamIndex())
       if teamIndex == nil or item:getTeamIndex() == teamIndex then

@@ -226,7 +226,7 @@ struct LuaFunctionArgList {
 };
 
 
-// This is an asociation of a LuaFunctionArgList with the function name it is associated with
+// This is an association of a LuaFunctionArgList with the function name it is associated with
 struct LuaFunctionProfile {
    const char         *functionName;
    LuaFunctionArgList  functionArgList;

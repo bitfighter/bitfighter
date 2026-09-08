@@ -10,6 +10,7 @@
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
 #include "barrier.h"             // For WallRec def
+#include "MapTile.h"            // For MapTile
 
 #include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum
@@ -17,6 +18,7 @@
 #include "DismountModesEnum.h"
 
 #include "Timer.h"
+#include "Rect.h"
 
 #include <string>
 
@@ -45,11 +47,20 @@ class Zone;
 ////////////////////////////////////////
 
 
+enum class FogOfWar
+{
+   DEFAULT = 0,
+   YES,
+   NO,
+};
+
+
 class GameType : public NetObject
 {
    typedef NetObject Parent;
 
    static const S32 TeamNotSpecified = -99999;
+
 
 private:
    Game *mGame;
@@ -63,6 +74,24 @@ private:
    bool mShowAllBots;
 
    Vector<WallRec> mWalls;
+   Vector<MapTile> mMapTiles;
+   U32 mTileSize;                // Tile grid cell size (from MapTileBuilder)
+   S32 mGridWidth;               // Number of tile columns (from MapTileBuilder)
+   S32 mGridHeight;              // Number of tile rows (from MapTileBuilder)
+   Rect mTileGridBounds;
+   void buildMapTiles(const Rect *fixedLevelBounds = nullptr);
+   void deliverWallTileTick();         // Called per-tick to send pending wall tiles to clients
+
+   // Tile delivery rate limits
+   static const U32 TILES_PER_TICK_FOW  = 1;   // Slow rate for fog-of-war
+   static const U32 TILES_PER_TICK_NORM = 5;   // Faster for non-FOW levels
+   static const F32 SCOPE_RADIUS;              // Tile scope radius, defined in gameType.cpp
+
+#ifndef ZAP_DEDICATED
+   // Client-side storage for tiled wall polygons received via s2cSendWallTile
+   static Vector<WallPoly> smReceivedTilePolys;
+   static Vector<U16>      smReceivedTileIds;
+#endif
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
@@ -80,6 +109,9 @@ private:
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
+
+   // Fog of war mode as specified in the level file
+   FogOfWar mFogOfWarMode;
 
    // Info about current level
    string mLevelName;
@@ -134,6 +166,12 @@ public:
 
    const char *getGameTypeName() const;
 
+   static void clearTilePolys();
+   static const Vector<WallPoly> &getTilePolys();
+   static bool findTileWallLOS(const Point &rayStart, const Point &rayEnd, bool format, F32 &collisionTime, Point &surfaceNormal);
+   static bool findTileWallSweptCircle(const Point &pos, const Point &delta, F32 radius, F32 &collisionTime, Point &collisionPoint);
+   static bool findTileWallAnchorPointAndNormal(const Point &pos, F32 snapDist, bool format, Point &anchor, Point &normal);
+
    virtual GameTypeId getGameTypeId() const;
    virtual const char *getShortName() const;          // Will be overridden by other games
    virtual const char **getInstructionString() const; //          -- ditto --
@@ -179,6 +217,12 @@ public:
    S32 getSecondLeadingPlayer() const;
 
    bool addWall(const WallRec &barrier, Game *game);
+   const Vector<MapTile> &getMapTiles() const { return mMapTiles; }
+
+   /// Rebuild tiled wall geometry from the current barrier database and
+   /// reset per-connection delivery state so tiles are re-sent to all clients.
+   /// Call this after adding/removing walls at runtime.
+   void rebuildWallTilesAndBotZones();
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
@@ -308,6 +352,10 @@ public:
    bool areBotsAllowed() const;
    void setBotsAllowed(bool allowed);
 
+   FogOfWar getFogOfWarMode() const;
+   void setFogOfWarMode(FogOfWar mode);
+   bool isFogOfWarEnabled() const;       // Resolves Default based on game mode
+
    string getScriptLine() const;
    void setScript(const Vector<string> &args);
 
@@ -350,7 +398,7 @@ public:
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 
-   void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
+   void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeight) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
    void renderObjectiveArrow(const Point &p, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
 #endif
@@ -388,8 +436,9 @@ public:
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount,
-                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
-   TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
+                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId,
+                                     bool fogOfWarEnabled));
+   TNL_DECLARE_RPC(s2cSendWallTile, (U16 tileId, U16 polyCount, Vector<F32> allVerts, Vector<U8> allStyles, Vector<U32> polySizes));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges,
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,
@@ -507,7 +556,7 @@ public:
    Timer mZoneGlowTimer;
    S32 mGlowingZoneTeam;      // Which team's zones are glowing, -1 for all
 
-   virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
+   virtual void majorScoringEventOccurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
    bool canClientAddBots(GameConnection *source, bool checkDefaultBot = true);

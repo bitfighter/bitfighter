@@ -12,7 +12,7 @@
 // Rewritten by: Shane Hill
 // Date:         21/08/2001
 // Email:        Shane.Hill@dsto.defence.gov.au
-// Reason:       Remove dependancy on MFC. Code should compile on any
+// Reason:       Remove dependency on MFC. Code should compile on any
 //               platform.
 //
 // Modified by Chris Eykamp to incorporate journaling for Zap
@@ -557,7 +557,7 @@ bool CIniFile::deleteKey(const string &section, const string &key)
    if(valueID == noID)
       return false;
 
-   // This looks strange, but is neccessary.
+   // This looks strange, but is necessary.
    sections[sectionId].keys.erase(valueID);
    sections[sectionId].values.erase(valueID);
 

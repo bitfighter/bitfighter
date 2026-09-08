@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "Timer.h"
+#include "tnlPlatform.h"
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -119,6 +120,48 @@ TEST(TimerTest, ExtendUnderflow)
    t.update(90); // 10 left
 
    t.extend(-150);
+   EXPECT_EQ(0u, t.getPeriod());
+   EXPECT_EQ(0u, t.getCurrent());
+}
+
+TEST(TimerTest, GetRealMicrosecondsMonotonic)
+{
+   U32 start = TNL::Platform::getRealMicroseconds();
+
+   // Busy wait for about 1.1 seconds to ensure we cross a second boundary
+   U32 elapsedMs = 0;
+   U32 startMs = TNL::Platform::getRealMilliseconds();
+   while(elapsedMs < 1100)
+   {
+      elapsedMs = TNL::Platform::getRealMilliseconds() - startMs;
+   }
+
+   U32 end = TNL::Platform::getRealMicroseconds();
+
+   // End should be greater than start, and significantly so (at least 1 second)
+   EXPECT_GT(end, start);
+   EXPECT_GE(end - start, 1000000u);
+}
+
+TEST(TimerTest, InvertPrecisionBug)
+{
+   U32 largePeriod = 100000000; // 10^8
+   Timer t(largePeriod);
+   t.reset(1, largePeriod); // 1 unit left
+
+   t.invert();
+
+   // Expected: largePeriod - 1 = 99999999
+   // If it has the bug, it might stay at largePeriod due to float precision
+   EXPECT_EQ(99999999u, t.getCurrent());
+}
+
+TEST(TimerTest, ExtendS32MinBug)
+{
+   Timer t(1000);
+   // S32_MIN is -2147483648
+   t.extend(-2147483647 - 1); // S32_MIN
+
    EXPECT_EQ(0u, t.getPeriod());
    EXPECT_EQ(0u, t.getCurrent());
 }

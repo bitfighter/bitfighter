@@ -48,7 +48,7 @@ ProjectileInfo GameWeapon::projectileInfo[ProjectileStyleCount] =
 };
 
 
-// Here we actually intantiate the various projectiles when fired
+// Here we actually instantiate the various projectiles when fired
 void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos, const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter)
 {
    Point projVel = dir * F32(WeaponInfo::getWeaponInfo(weapon).projVelocity) + dir * shooterVel.dot(dir);

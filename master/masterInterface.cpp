@@ -144,8 +144,8 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayerLeftGlobalChat,
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_PRE_017) {}
 
 
-// Implement a need-to-updrade verification service, without breaking older clients, by updgrading the version 1
-// All clients that implement only 0-verison events will ignore this.  In theory.
+// Implement a need-to-upgrade verification service, without breaking older clients, by upgrading the version 1
+// All clients that implement only 0-version events will ignore this.  In theory.
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus, 
    (bool needToUpgrade), 
    (needToUpgrade),

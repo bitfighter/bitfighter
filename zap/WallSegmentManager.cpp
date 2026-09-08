@@ -141,7 +141,7 @@ void WallSegmentManager::rebuildEdges()
    mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
 
    // Create a WallEdge object from the clipped wall geometry.  We'll add it to the WallEdgeDatabase, which will
-   // delete the object when it is ulitmately removed.
+   // delete the object when it is ultimately removed.
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
    {
       WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);   // Create the edge object

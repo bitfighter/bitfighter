@@ -139,7 +139,7 @@ S32 ScreenInfo::getVertPhysicalMargin() const
 }
 
 
-// Dimensions of black bars in physical pixes, based on current window mode
+// Dimensions of black bars in physical pixels, based on current window mode
 S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode) const
 {
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getHorizPhysicalMargin() : 0;

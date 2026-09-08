@@ -81,6 +81,41 @@ Similar to Linux, but with some additional steps.  In a shell, in the `build` di
 * `cmake ..`
 * `make Bitfighter`
 
+#### Apple Silicon (arm64)
+
+The build targets the host CPU by default, so Apple Silicon Macs build native
+`arm64` binaries (no Rosetta).  The prebuilt libraries in `lib/` are Intel-only,
+so a native build resolves its dependencies from Homebrew:
+
+* `brew install luajit sdl2 libpng libogg libvorbis speex libmodplug openal-soft`
+* `cmake .. -DLUAJIT_BUILTIN=NO`
+* `make bitfighterd`   &nbsp;# dedicated server &rarr; `exe/bitfighterd`
+* `make Bitfighter`    &nbsp;# client &rarr; `exe/Bitfighter.app`
+
+`-DLUAJIT_BUILTIN=NO` is required because the bundled LuaJIT 2.0.5 predates Apple
+Silicon; the client is built without the Sparkle auto-updater (the bundled
+Sparkle is Intel-only Sparkle 1.x).
+
+`exe/Bitfighter.app` runs in place (`open exe/Bitfighter.app`); by default it
+links its Homebrew dylibs by absolute path, so that build only runs where
+Homebrew is installed at the same prefix.
+
+To build a **relocatable** `.app` (and a DMG) that runs on Macs without Homebrew,
+add `-DBUNDLE_DEPENDENCIES=YES` (needs `brew install dylibbundler`):
+* `cmake .. -DLUAJIT_BUILTIN=NO -DBUNDLE_DEPENDENCIES=YES`
+* `make Bitfighter` &nbsp;# self-contained, ad-hoc-signed `exe/Bitfighter.app`
+* `make package` &nbsp;&nbsp;&nbsp;# &rarr; `Bitfighter-<version>-OSX-arm64.dmg`
+
+This copies the dependent dylibs into `Contents/Frameworks` (via `dylibbundler`)
+and re-points the load commands.  Homebrew currently ships SDL2 as **sdl2-compat**,
+which `dlopen`s `libSDL3` at runtime; that library is also copied into
+`Frameworks` (dylibbundler cannot see dlopen deps).  The bundle is **ad-hoc
+signed**, so Gatekeeper will block it on first launch.  See [macOS](#macos)
+below for how to open it.
+
+To build the Intel client under Rosetta instead (using the bundled `lib/`
+frameworks), configure with `cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64`.
+
 ## INSTALLATION AND PACKAGING
 ### Linux
 After running `make`, the bitfighter executable is put into the directory `exe/`.  Copy everything from the `resources/` directory into the `exe/` directory, keeping the folders intact (like sfx, scripts, etc.).
@@ -101,7 +136,22 @@ This will build a self-extracting installer for Bitfighter. You will need to bui
 ### macOS
 Run `make package` to build a distributable DMG.
 
-## CRASHES & PROBLEMS
-If you are building off of the `master` branch, then expect crashes and problems. Feel free to report them via the Issues tab, but consider joining the Discord and checking in the dev_irc channel to ask a developer about it- we probably are already aware.
+The packaged `.dmg` (from `make package` or CI) is ad-hoc signed, not
+notarized. On first launch macOS will refuse to open it (Gatekeeper):
 
-If you are building off of a release version, please make sure you can consistently reproduce the problem, then post it, with the steps to reproduce, on the Issues tab.
+1. Double-click Bitfighter.app. When the warning appears, click **Done**
+   (do not Move to Trash).
+2. Open **System Settings &rarr; Privacy & Security** and scroll to
+   **Security**.
+3. Click **Open Anyway** next to the Bitfighter blocked message, then
+   authenticate.
+
+You only need to do this once. On macOS 15 (Sequoia) and later, the old
+right-click &rarr; Open bypass no longer works.
+
+[Open a Mac app from an unknown developer](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)
+
+## CRASHES & PROBLEMS
+If you are building from the `master` branch, then expect crashes and problems. Feel free to report them via the Issues tab, but consider joining the Discord and checking in the dev_irc channel to ask a developer about it -- we probably are already aware.
+
+If you are building from a release version, please make sure you can consistently reproduce the problem, then post it, with the steps to reproduce, on the Issues tab.

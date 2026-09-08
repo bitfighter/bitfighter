@@ -62,10 +62,10 @@ string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
   string::size_type pos = path.find_last_of("\\/");
-  if (pos == string::npos)
+  if(pos == string::npos)
      return "";
 
-  if (pos == 0)
+  if(pos == 0)
      return path.substr(0, 1);
 
   return path.substr( 0, pos ); // Paths should never end with the slash
@@ -121,14 +121,17 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   if (str.find('.') == string::npos)
-      return str;
+   if (str.find('.') != string::npos)
+   {
+      while(str.length() > 0 && str[str.length() - 1]  == '0')
+         str.erase(str.length() - 1);
 
-   while(str.length() > 0 && str[str.length() - 1]  == '0')
-      str.erase(str.length() - 1);
+      if(str.length() > 0 && str[str.length() - 1] == '.')
+         str.erase(str.length() - 1);
+   }
 
-   if(str.length() > 0 && str[str.length() - 1] == '.')
-      str.erase(str.length() - 1);
+   if(str.empty() || str == "-" || str == "-0" || str == "+0")
+      return "0";
 
    return str;
 }
@@ -156,7 +159,6 @@ string ftos(F32 f)
 
    return stripZeros(outString);
 }
-
 
 
 F64 stof(const string &s)
@@ -237,15 +239,21 @@ string ucase(string strToConvert)
 
 // Return true if str looks like a non-negative int
 // Returns false if str is NULL or empty
+// Note: This function trims leading and trailing whitespace
 bool isPositiveInteger(const char *str)
 {
    if(!str || str[0] == 0)
       return false;
 
+   string s = trim(str);
+
+   if(s.empty())
+      return false;
+
    S32 i = 0;
-   while(str[i])
+   while(s[i])
    {
-      if(str[i] < '0' || str[i] > '9')
+      if(s[i] < '0' || s[i] > '9')
          return false;
       i++;
    }
@@ -267,7 +275,7 @@ string sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
       return value;
 
    // If any of the above exist then do some escaping
@@ -298,16 +306,6 @@ string sanitizeForJson(const char *value)
             result += "\\t";
             break;
 
-            // For html markup entities
-         case '&':
-            result += "&amp;";
-            break;
-         case '<':
-            result += "&lt;";
-            break;
-         case '>':
-            result += "&gt;";
-            break;
          default:
             if(isControlCharacter(*c))
             {
@@ -341,25 +339,42 @@ string formatMessage(const char *format, const Vector<StringTableEntry> &e, cons
    const char *src = format;
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+      if(src[0] == '%')
       {
-         S32 index = src[2] - '0';
-         switch(src[1])
+         if(src[1] == '%')
          {
-            case 'e':
-               if(index < e.size())
-                  result += e[index].getString();
-               break;
-            case 's':
-               if(index < s.size())
-                  result += s[index].getString();
-               break;
-            case 'i':
-               if(index < i.size())
-                  result += itos(i[index]);
-               break;
+            result += '%';
+            src += 2;
          }
-         src += 3;
+         else if((src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
+         {
+            const char *type = src + 1;
+            src += 2;
+            S32 index = 0;
+            while(isDigit(*src))
+            {
+               index = index * 10 + (*src - '0');
+               src++;
+            }
+
+            switch(*type)
+            {
+               case 'e':
+                  if(index < e.size())
+                     result += e[index].getString();
+                  break;
+               case 's':
+                  if(index < s.size())
+                     result += s[index].getString();
+                  break;
+               case 'i':
+                  if(index < i.size())
+                     result += itos(i[index]);
+                  break;
+            }
+         }
+         else
+            result += *src++;
       }
       else
          result += *src++;
@@ -453,14 +468,14 @@ Vector<string> parseString(const string &line)
 }
 
 
-void parseString(const string &inputString, Vector<string> &words, char seperator)
+void parseString(const string &inputString, Vector<string> &words, char separator)
 {
-   parseString(inputString.c_str(), words, seperator);
+   parseString(inputString.c_str(), words, separator);
 }
 
 
 // Splits inputString into a series of words using the specified separator; does not consider quotes; trims words
-void parseString(const char *inputString, Vector<string> &words, char seperator)
+void parseString(const char *inputString, Vector<string> &words, char separator)
 {
    words.clear();
 
@@ -472,7 +487,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 
    while(inputString[isn] != 0)
    {
-      if(inputString[isn] == seperator)
+      if(inputString[isn] == separator)
       {
          words.push_back(trim(word));
          word.clear();
@@ -508,21 +523,28 @@ const char *findPointerOfArg(const char *message, S32 count)
    if(!message)
       return "";
 
-   S32 spacecount = 0;
+   if(count < 0)
+      return "";
+
    S32 cur = 0;
-   char prevchar = ' ';
 
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
+   // Skip leading whitespace
+   while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+      cur++;
+
+   for(S32 i = 0; i < count; i++)
    {
-      if(isSpace(message[cur]) && !isSpace(prevchar))
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
-      cur++;
-   }
+      if(message[cur] == '\0')    // End of string
+         return &message[cur];
 
-   while(message[cur] != '\0' && isSpace(message[cur]))
-      cur++;
+      // Skip current argument (non-whitespace)
+      while(message[cur] != '\0' && !isspace((unsigned char)message[cur]))
+         cur++;
+
+      // Skip whitespace separating this arg from the next
+      while(message[cur] != '\0' && isspace((unsigned char)message[cur]))
+         cur++;
+   }
 
    return &message[cur];
 }
@@ -544,12 +566,12 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 
 
 // TODO: Merge with concatenate above
-string listToString(const Vector<string> &words, const string &seperator)
+string listToString(const Vector<string> &words, const string &separator)
 {
    string str = "";
 
    for(S32 i = 0; i < words.size(); i++)
-      str += words[i] + ((i < words.size() - 1) ? seperator : "");
+      str += words[i] + ((i < words.size() - 1) ? separator : "");
 
    return str;
 }
@@ -731,7 +753,7 @@ string joindir(const string &path, const string &filename)
    if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
       return path + filename;
 
-   // Otherwise, join with a delimeter.
+   // Otherwise, join with a delimiter.
    return path + getFileSeparator() + filename;
 }
 
@@ -741,11 +763,11 @@ string strictjoindir(const string &part1, const string &part2)
 {
    if(part1.length() == 0) return part2;      //avoid crash on zero length string.
 
-   // Does path already have a trailing delimeter?  If so, we'll use that.
+   // Does path already have a trailing delimiter?  If so, we'll use that.
    if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
       return part1 + part2;
 
-   // Otherwise, join with a delimeter.
+   // Otherwise, join with a delimiter.
    return part1 + getFileSeparator() + part2;
 }
 
@@ -945,6 +967,7 @@ string writeLevelString(const char *in)
 bool writeFile(const string &path, const string &contents, bool append)
 {
    ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
+   mode |= ios_base::binary;
 
    ofstream file(path.c_str(), mode);
 
@@ -1002,7 +1025,8 @@ string getExecutableDir()
    path = extractDirectory(string(buffer));
 
 #elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getExecutablePath(path);  // Directory.h
+   getExecutablePath(path);        // Directory.h -- returns the full path to the binary
+   path = extractDirectory(path);  // ...so reduce to its containing directory, as on Linux/Win32
 
 #elif defined(TNL_OS_WIN32)
    char buffer[MAX_PATH] = {0};

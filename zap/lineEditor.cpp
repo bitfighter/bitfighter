@@ -278,7 +278,7 @@ bool LineEditor::addChar(const char c)
    case nickNameFilter:
       if(c == '"') return false;
 
-      // %s are banned because of their use in this function: ChatDisplay::substitueVars(), and it could cause
+      // %s are banned because of their use in this function: ChatDisplay::substituteVars(), and it could cause
       // confusion if a player referred to another player and got a variable substitiution instead.  We could/should probably
       // either remove or improve that capability, then we can remove the following line.
       if(c == '%') return false;

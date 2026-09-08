@@ -271,7 +271,7 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
 }
 
 
-// Scenario 5 -- Player enters /idle when in punishment delay period for pervious /idle command
+// Scenario 5 -- Player enters /idle when in punishment delay period for previous /idle command
 static void doScenario5(GamePair &gamePair)
 {
    ClientGame *clientGame = gamePair.getClient(0);
@@ -333,7 +333,7 @@ static void doScenario11(GamePair &gamePair)
 }
 
 
-// The spawnDelay mechansim is complex and interacts with other weird things like levelUp messages and server suspension
+// The spawnDelay mechanism is complex and interacts with other weird things like levelUp messages and server suspension
 TEST(SpawnDelayTest, SpawnDelayTests)
 {
    GamePair gamePair("");     // An empty level should work fine here
@@ -371,7 +371,7 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    ASSERT_EQ(1, fillVector.size());    // ...and also on the client
 
    // Scenario 1: Player is idle and gets spawn delayed -- no other players in game
-   // TODO: Also need a scenario where palyer goes idle and gets spawn delayed, but game does not get suspended due to other players
+   // TODO: Also need a scenario where player goes idle and gets spawn delayed, but game does not get suspended due to other players
    doScenario1(gamePair);
 
    // Scenario 2: Player enters idle command, other players, so server does not suspend itself.  Since
@@ -389,7 +389,7 @@ TEST(SpawnDelayTest, SpawnDelayTests)
       doScenario34(gamePair, true);
    }
 
-   // Scenario 5 -- Player enters idle when in punishment delay period for pervious /idle command
+   // Scenario 5 -- Player enters idle when in punishment delay period for previous /idle command
    doScenario5(gamePair);  // Not complete
 
    // Scenario 6 -- Player is shown a new levelup screen

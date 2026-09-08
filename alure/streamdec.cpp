@@ -124,7 +124,7 @@ static alureStream *get_stream_decoder(const T &fdata)
     std::map<ALint,UserCallbacks>::iterator i = InstalledCallbacks.begin();
     while(i != InstalledCallbacks.end() && i->first < 0)
     {
-        std::auto_ptr<alureStream> stream(new customStream(fdata, i->second));
+        std::unique_ptr<alureStream> stream(new customStream(fdata, i->second));
         if(stream->IsValid()) return stream.release();
         i++;
     }
@@ -140,7 +140,7 @@ static alureStream *get_stream_decoder(const T &fdata)
             file->clear();
             file->seekg(0, std::ios_base::beg);
 
-            std::auto_ptr<alureStream> stream(factory->second(file));
+            std::unique_ptr<alureStream> stream(factory->second(file));
             if(stream.get() != NULL) return stream.release();
 
             factory++;
@@ -157,7 +157,7 @@ static alureStream *get_stream_decoder(const T &fdata)
 
     while(i != InstalledCallbacks.end())
     {
-        std::auto_ptr<alureStream> stream(new customStream(fdata, i->second));
+        std::unique_ptr<alureStream> stream(new customStream(fdata, i->second));
         if(stream->IsValid()) return stream.release();
         i++;
     }

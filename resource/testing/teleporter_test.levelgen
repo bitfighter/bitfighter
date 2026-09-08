@@ -32,7 +32,7 @@ function main()
   -- Add teleporter with origin and dest
   levelgen:addItem(Teleporter.new(p21,p22))
 
-  -- Add teleporter with mulitple dests
+  -- Add teleporter with multiple dests
   levelgen:addItem(Teleporter.new(p31,p32,p42,p52))
 
   -- Add empty teleporter, add two dests with addDest

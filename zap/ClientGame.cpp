@@ -268,7 +268,6 @@ void ClientGame::startLoadingLevel(bool engineerEnabled)
 void ClientGame::doneLoadingLevel()
 {
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
-   Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
 
    getUIManager()->doneLoadingLevel();
 }
@@ -732,7 +731,7 @@ void ClientGame::requestLoadoutPreset(S32 index)
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
+void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccessString,
                                                                                 const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
@@ -756,7 +755,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    GameType *gt = getGameType();
 
    // Show new loadout
-   displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
+   displaySuccessMessage("%s %s", baseSuccessString.c_str(), loadout.toString(false).c_str());
 
    displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" :
                                                            "Changes will be activated when you respawn");
@@ -800,7 +799,11 @@ void ClientGame::idle(U32 timeDelta)
    {
       mConnectionToServer->updateTimers(timeDelta);
 
-      computeWorldObjectExtents();
+      // World extents are set during level loading (doneLoadingLevel) and updated
+      // incrementally when tile data arrives (s2cSendWallTile).  There is no need
+      // to recompute them from the database every frame, and doing so would clobber
+      // the tile-extended bounds once the tile RPC deletes the old wall objects.
+      //computeWorldObjectExtents();
 
       Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
 
@@ -1734,10 +1737,19 @@ Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 ca
 }
 
 
+// A "pseudoItem" is a non-object item that is part of the level, such as a BarrierMaker or PolyWall.  
+// These are not real objects, but they are used to create real objects when the level is loaded.  
+// This function processes a pseudoItem and adds it to the database if necessary.
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {
+      if(database == getGameObjDatabase())
+      {
+         mObjectsLoaded++;
+         return true;
+      }
+
       if(argc >= 2)
       {
          WallItem *wallItem = new WallItem();
@@ -1754,6 +1766,12 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
+      if(database == getGameObjDatabase())
+      {
+         mObjectsLoaded++;
+         return true;
+      }
+
       //if(width)      // BarrierMakerS still width, though we ignore it
       //   barrier.width = F32(atof(argv[1]));
       //else           // PolyWall does not have width specified

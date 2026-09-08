@@ -354,65 +354,63 @@ void Platform::forceQuit()
 }
 
 
-U32 x86UNIXGetTickCount();
-U32 x86UNIXGetTickCountMicro();
-//--------------------------------------
+static bool sg_initialized = false;
+static timeval sg_startTime;
+
+static void x86UNIXTimerInit()
+{
+   if (sg_initialized == false) {
+      sg_initialized = true;
+      ::gettimeofday(&sg_startTime, NULL);
+   }
+}
+
+U32 x86UNIXGetTickCount()
+{
+   x86UNIXTimerInit();
+
+   timeval t;
+   ::gettimeofday(&t, NULL);
+
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
+
+   // Make granularity 1 ms
+   return (U32)(secs * 1000 + uSecs / 1000);
+}
+
+U32 x86UNIXGetTickCountMicro()
+{
+   x86UNIXTimerInit();
+
+   timeval t;
+   ::gettimeofday(&t, NULL);
+
+   S64 secs  = t.tv_sec - sg_startTime.tv_sec;
+   S64 uSecs = t.tv_usec - sg_startTime.tv_usec;
+
+   return (U32)(secs * 1000000 + uSecs);
+}
 
 U32 Platform::getRealMilliseconds()
 {
-   return x86UNIXGetTickCount();
+   U32 tickCount;
+   TNL_JOURNAL_READ_BLOCK ( getRealMilliseconds,
+      TNL_JOURNAL_READ( (&tickCount) );
+      return tickCount;
+   )
+
+   tickCount = x86UNIXGetTickCount();
+
+   TNL_JOURNAL_WRITE_BLOCK ( getRealMilliseconds,
+      TNL_JOURNAL_WRITE( (tickCount) );
+   )
+   return tickCount;
 }
 
 U32 Platform::getRealMicroseconds()
 {
    return x86UNIXGetTickCountMicro();
-}
-
-static bool   sg_initialized = false;
-static U32 sg_secsOffset  = 0;
-
-U32 x86UNIXGetTickCount()
-{
-   // TODO: What happens when crossing a day boundary?
-   //
-   timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_secsOffset = t.tv_sec;
-   }
-
-   ::gettimeofday(&t, NULL);
-
-   U32 secs  = t.tv_sec - sg_secsOffset;
-   U32 uSecs = t.tv_usec;
-
-   // Make granularity 1 ms
-   return (secs * 1000) + (uSecs / 1000);
-}
-
-static U32 sg_uSecsOffset = 0;
-
-U32 x86UNIXGetTickCountMicro()
-{
-   // TODO: What happens when crossing a day boundary?
-   //
-   timeval t;
-
-   if (sg_initialized == false) {
-      sg_initialized = true;
-
-      ::gettimeofday(&t, NULL);
-      sg_uSecsOffset = t.tv_usec;
-   }
-
-   ::gettimeofday(&t, NULL);
-
-   U32 uSecs  = t.tv_usec - sg_uSecsOffset;
-
-   return uSecs;
 }
 
 class UnixTimer

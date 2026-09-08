@@ -84,7 +84,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    //U32 retMask = Parent::packUpdate(connection, updateMask, stream);  // Goes to empty function NetObject::packUpdate
 
    if(stream->writeFlag(updateMask & InitialMask))
-      stream->writeRangedU32(mItemId, 0, U16_MAX);    // Send id in inital packet
+      stream->writeRangedU32(mItemId, 0, U16_MAX);    // Send id in initial packet
 
    if(stream->writeFlag(updateMask & (InitialMask | GeomMask)))
       ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);

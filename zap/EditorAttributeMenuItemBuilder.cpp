@@ -42,7 +42,7 @@ void EditorAttributeMenuItemBuilder::initialize(ClientGame *game)
 
 // Since many of these attribute menus will never be shown in a given session, and each is relatively inexpensive to build,
 // we'll create them lazily on an as-needed basis.  Each section below has a static pointer enclosed in a block so that it
-// will be isloated from other similar variables with the same name.  Since these are statics, they will be destroyed only
+// will be isolated from other similar variables with the same name.  Since these are statics, they will be destroyed only
 // when this object is destroyed, which will be when the game exits.
 
 EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject *obj)

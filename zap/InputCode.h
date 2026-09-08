@@ -25,7 +25,7 @@ namespace Zap
 ////////////////////////////////////////
 
 
-// Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
+// Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any arbitrary and unique token
 
 /*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
 /*                                                            Saved    BindingSet        Def. kb           Def. js           */
@@ -117,7 +117,9 @@ namespace Zap
    EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"           ) \
    EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"            ) \
    EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"        ) \
+   EDITOR_BINDING( BINDING_TOGGLE_WALL_DESTRUCTIBILITY, "ToggleWallDestructibility", keyToggleDestructibility, "X" )\
 /*-------------------------------------------------------------------------------------------------------*/
+
 
 /*---------------------------------------SPECIAL_BINDING_TABLE-------------------------------------*/
 /*                                                                  BindingSet          Def. kb    */

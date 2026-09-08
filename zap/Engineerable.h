@@ -12,7 +12,7 @@
 namespace Zap
 {
 
-// Forward declaraions
+// Forward declarations
 class MountableItem;
 class GridDatabase;
 

@@ -158,7 +158,7 @@ public:
    StringTableEntry mPlayerOrServerName;        // Player's nickname, hopefully unique, but not enforced, or server's name
    Nonce mPlayerId;                             // (Hopefully) unique ID of this player
 
-   S32 mClientId;                               // Guranteed unique ID assigned my master
+   S32 mClientId;                               // Guaranteed unique ID assigned my master
 
    bool mAuthenticated;                         // True if user was authenticated, false if not
    bool mIsDebugClient;                         // True if client is running from a debug build
@@ -233,7 +233,7 @@ public:
 
 
    // Write a current count of clients/servers for display on a website, using JSON format
-   // This gets updated whenver we gain or lose a server, at most every 5 seconds (currently)
+   // This gets updated whenever we gain or lose a server, at most every 5 seconds (currently)
    static void writeClientServerList_JSON();
 
    bool isAuthenticated();

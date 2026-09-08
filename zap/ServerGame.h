@@ -47,6 +47,7 @@ private:
    };
 
    bool mTestMode;                        // True if being tested from editor
+   bool mIsLoadingLevel;                  // True while loading a level; used to suppress redundant bot zone rebuilds
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
 
@@ -97,7 +98,7 @@ private:
    void processVoting(U32 timeDelta);     // Manage any ongoing votes
    void processSimulatedStutter(U32 timeDelta);
 
-   //string getLevelFileNameFromIndex(S32 indx);
+   //string getLevelFileNameFromIndex(S32 index);
 
 
    void resetAllClientTeams();                        // Resets all player team assignments
@@ -186,7 +187,7 @@ public:
 
    /////
    // Bot related
-   void startAllBots();                            // Loop through all our bots and run thier main() functions
+   void startAllBots();                            // Loop through all our bots and run their main() functions
 
    S32 getBotCount() const;
 
@@ -211,8 +212,8 @@ public:
 
    /////
 
-   StringTableEntry getLevelNameFromIndex(S32 indx);
-   S32 getAbsoluteLevelIndex(S32 indx);            // Figures out the level index if the input is a relative index
+   StringTableEntry getLevelNameFromIndex(S32 index);
+   S32 getAbsoluteLevelIndex(S32 index);            // Figures out the level index if the input is a relative index
 
    string getCurrentLevelFileName() const;         // Return filename of level currently in play
    StringTableEntry getCurrentLevelName() const;   // Return name of level currently in play
@@ -265,6 +266,7 @@ public:
    GridDatabase *getBotZoneDatabase() const;
    const Vector<BotNavMeshZone *> *getBotZones() const;
    U16 findZoneContaining(const Point &p) const;
+   void rebuildBotZones();
 
    void setGameType(GameType *gameType);
    void onObjectAdded(BfObject *obj);

@@ -19,8 +19,8 @@ using namespace std;
 /**
  * Mock class for testing low level network functions
  *
- * {connect,send,receive}Error sets the return value of the mocked function
- *
+ * {connect,send,receive}Error sets the return value of the mocked function.
+ * isWritableResult controls Socket::isWritable (HttpRequest::send waits on it).
  */
 class MockSocket : public Socket
 {
@@ -32,17 +32,22 @@ class MockSocket : public Socket
    // the data to pretend we've received
    string data;
    bool dataSent;
+   bool isWritableResult;
 
    MockSocket()
       : Socket(Address(), 0, 0, false, true),
         dataSent(false),
         connectError(NoError),
         sendError(NoError),
-        receiveError(NoError)
+        receiveError(NoError),
+        isWritableResult(true)
    { }
 
-   NetError connect(const Address &address) { return connectError; };
+   NetError connect(const Address &address) { return connectError; }
    NetError send(const U8 *data, S32 size) { return sendError; }
+
+   // Avoid the real select()-based wait (five seconds of hang on unconnected fds)
+   bool isWritable(U32 timeout = 0) { return isWritableResult; }
 
    /**
     * Copies the contents of this->data to buffer and sets bytesRead.

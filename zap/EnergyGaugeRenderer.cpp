@@ -22,7 +22,7 @@ namespace Zap {   namespace UI {
 
 void EnergyGaugeRenderer::render(S32 energy)
 {
-   // Coorinates of upper left corner of main guage bar
+   // Coordinates of upper left corner of main gauge bar
    const F32 xul = F32(                                    GaugeLeftMargin);
    const F32 yul = F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - GaugeBottomMargin - GaugeHeight);
 
@@ -49,7 +49,7 @@ void EnergyGaugeRenderer::render(S32 energy)
    };
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
-   // Guage outline
+   // Gauge outline
    glColor(Colors::white);
    drawVertLine(xul,              yul, yul + GaugeHeight);
    drawVertLine(xul + GuageWidth, yul, yul + GaugeHeight);

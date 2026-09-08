@@ -477,7 +477,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     return (OGLCONSOLE_Console)console;
 }
 
-/* This functoin is only used internally; the user ultimately invokes this
+/* This function is only used internally; the user ultimately invokes this
  * function through either a call to Destroy() or Quit(); the purpose of this
  * mechanism is to warn the user if he has explicitly destroyed a console that
  * was engaged in operation at the time they destroyed it (the only two
@@ -807,7 +807,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
      /* string copy cursors */
      char *consoleCursor, *outputCursor = output;
 
-     /* Acrue arguments in argument list */
+     /* Accrue arguments in argument list */
      va_start(argument, s);
      vsnprintf(output, MAX_CONSOLE_OUTPUT_LENGTH, s, argument);
      va_end(argument);
@@ -832,7 +832,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
 
              //puts("incrementing to the next line");
 
-             /* Inrement text-line index, with wrapping */
+             /* Increment text-line index, with wrapping */
              if(++lineQueueIndex >= maxLines)
                  lineQueueIndex = 0;
 

@@ -997,7 +997,7 @@ bool BfObject::isCollisionEnabled() const
 }
 
 
-// Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
+// Find if the specified polygon intersects theObject's collisionPoly or collisionCircle
 bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
 {
    Point c;
@@ -1055,7 +1055,7 @@ void BfObject::writeCompressedVelocity(const Point &vel, U32 max, BitStream *str
 {
    U32 len = U32(vel.len());
 
-   // Write a flag designating 0; 0 is 0, rounding errors highly undesireable
+   // Write a flag designating 0; 0 is 0, rounding errors highly undesirable
    if(stream->writeFlag(len == 0))
       return;
 
@@ -1202,7 +1202,7 @@ S32 BfObject::lua_getObjType(lua_State *L)
  *
  * @descr Users can assign an id to elements in the editor with the ! or # keys.
  * Use this function to obtain this id. If the user has not assigned an object
- * an id, getId() will return a negative id that will remain consistent throught
+ * an id, getId() will return a negative id that will remain consistent throughout
  * the game.
  *
  * @return The object's id.

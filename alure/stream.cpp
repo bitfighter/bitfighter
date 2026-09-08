@@ -35,8 +35,8 @@ static bool SizeIsUS = false;
 
 static alureStream *InitStream(alureStream *instream, ALsizei chunkLength, ALsizei numBufs, ALuint *bufs)
 {
-    std::auto_ptr<std::istream> fstream(instream->fstream);
-    std::auto_ptr<alureStream> stream(instream);
+    std::unique_ptr<std::istream> fstream(instream->fstream);
+    std::unique_ptr<alureStream> stream(instream);
     ALenum format;
     ALuint freq, blockAlign;
 

@@ -286,7 +286,7 @@ end
 -- Collects a detailed stack trace, dumping locals, resolving function names when they're not available, etc.
 -- This function is suitable to be used as an error handler with pcall or xpcall
 --
--- @param thread An optional thread whose stack is to be inspected (defaul is the current thread)
+-- @param thread An optional thread whose stack is to be inspected (default is the current thread)
 -- @param message An optional error string or object.
 -- @param level An optional number telling at which level to start the traceback (default is 1)
 --

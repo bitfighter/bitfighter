@@ -51,7 +51,7 @@ public:
    FlagItem *clone() const;
    void copyAttrs(FlagItem *target);
 
-   void initialize();      // Set inital values of things
+   void initialize();      // Set initial values of things
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toLevelCode() const;

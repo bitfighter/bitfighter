@@ -207,7 +207,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 }
 
 
-// Could probably be consolodated with HTF & others
+// Could probably be consolidated with HTF & others
 void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
@@ -337,8 +337,8 @@ void ZoneControlGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-// A major scoring event has ocurred -- in this case, it's a touchdown
-void ZoneControlGameType::majorScoringEventOcurred(S32 team)
+// A major scoring event has occurred -- in this case, it's a touchdown
+void ZoneControlGameType::majorScoringEventOccurred(S32 team)
 {
    // Find all zones...
    fillVector.clear();

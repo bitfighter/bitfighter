@@ -1,7 +1,7 @@
 # This script preprocesses our C++ code and generates fodder for Doxygen which makes pretty documentation
 # for our Lua scripters out there
 
-# Works with doxygen verison 1.9.0
+# Works with doxygen version 1.9.0
 
 # HINT: Scanning the Bitfighter source code for the string "METHOD(CLASS," will locate all implemented Lua methods.
 
@@ -337,7 +337,7 @@ def preprocess():
                         continue
 
                     #####
-                    # @LUAFUNCSHEADER delcaration in C++ code
+                    # @LUAFUNCSHEADER declaration in C++ code
                     # Look for  "* @luafuncsheader <class>" followed by a block of text.  class is the class we're documenting, obviously.
                     # This is a magic item that lets us, through extreme hackery, inject a comment at the top of the functions list (as is done with Ship)
                     # Currently only support one per file.  That should be enough.
@@ -359,7 +359,7 @@ def preprocess():
                         continue
 
                     #####
-                    # @LUACONST delcaration in C++ or Lua code
+                    # @LUACONST declaration in C++ or Lua code
                     #####
                     # Transform:
                     #
@@ -396,7 +396,7 @@ def preprocess():
                         continue
 
                     #####
-                    # @LUAFUNC delcaration in C++ code
+                    # @LUAFUNC declaration in C++ code
                     #####
                     # Look for: "* @luafunc static table Geom::triangulate(mixed polygons)"  [retval (table) and args are optional]
 
@@ -594,7 +594,7 @@ def preprocess():
 
                             enumDescr = words[descrColumn] if descrColumn is not None else ""
 
-                            # # Clean up descr -- remove leading and traling non-word characters... i.e. junk  (probably no longer needed, but harmless)
+                            # # Clean up descr -- remove leading and trailing non-word characters... i.e. junk  (probably no longer needed, but harmless)
                             # enumDescr = re.sub(r'^\W*"', "", enumDescr)         # Remove leading junk
                             # enumDescr = re.sub(r'"\W*$', "", enumDescr)         # Remove trailing junk
 
@@ -1265,7 +1265,7 @@ def cleanup_constant_defs(root: Any):
 
 def handle_mixed(argtype: str) -> str:
     """
-    Because Lua functions can return multiple types, and C++ fuctions cannot, we'll use a fake datatype called mixed
+    Because Lua functions can return multiple types, and C++ functions cannot, we'll use a fake datatype called mixed
     to specify multiple types.  In the docs, we specify it as "mixed_xxx_yyy", which should survive the processing steps,
     and here we'll translate to "xxx, yyy".
     """

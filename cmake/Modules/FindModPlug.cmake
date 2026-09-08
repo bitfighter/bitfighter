@@ -9,6 +9,7 @@ set(MODPLUG_SEARCH_PATHS
 	${MODPLUG_SEARCH_PATHS}
 	~/Library/Frameworks
 	/Library/Frameworks
+	/opt/homebrew # Homebrew on Apple Silicon
 	/usr/local
 	/usr
 	/sw # Fink

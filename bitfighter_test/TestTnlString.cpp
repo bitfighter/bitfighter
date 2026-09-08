@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "tnlString.h"
+#include "tnlBitStream.h"
+#include "tnlMethodDispatch.h"
 #include "gtest/gtest.h"
 #include "tnlTypes.h"
 #include "tnlAssert.h"
@@ -136,6 +138,34 @@ TEST(TnlStringTest, StdStringConstructor)
    std::string std_s = "hello";
    StringPtr s(std_s);
    EXPECT_STREQ("hello", s.getString());
+}
+
+TEST(TnlStringTest, StringPtrReadWriteSymmetry)
+{
+   StringPtr s1("Symmetrical test string");
+   StringPtr s2;
+
+   PacketStream stream;
+   Types::write(stream, s1);
+
+   stream.setBitPosition(0);
+   Types::read(stream, &s2);
+
+   EXPECT_STREQ(s1.getString(), s2.getString());
+}
+
+TEST(TnlStringTest, StdStringReadWriteSymmetry)
+{
+   std::string s1 = "Another test string";
+   std::string s2;
+
+   PacketStream stream;
+   Types::write(stream, s1);
+
+   stream.setBitPosition(0);
+   Types::read(stream, &s2);
+
+   EXPECT_EQ(s1, s2);
 }
 
 } // namespace Zap

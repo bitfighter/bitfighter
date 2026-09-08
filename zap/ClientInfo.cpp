@@ -415,7 +415,7 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 }
 
 
-// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed.
+// Server only, robots can run this, bypassing the net interface. Return true if successfully deployed.
 // TODO: Move this elsewhere   <--  where?...  anybody?
 bool ClientInfo::sEngineerDeployObject(U32 objectType)
 {

@@ -84,7 +84,7 @@ void QuickMenuUI::render()
    S32 yStart = S32(mMenuLocation.y);
 
    S32 menuHeight = getTotalMenuItemHeight() +                                         // Height of all menu items
-                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gam
+                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gap
 
    yStart = S32(mMenuLocation.y) - menuHeight;
 
@@ -147,7 +147,7 @@ void QuickMenuUI::render()
       S32 itemGap = getGap(size);
 
       S32 specialCaseFix = 0;
-      // Special case: increase gap beween main menu and "Save and Quit"
+      // Special case: increase gap between main menu and "Save and Quit"
       if(i == getMenuItemCount() - 1)
       {
          specialCaseFix = 2;

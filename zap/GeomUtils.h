@@ -187,10 +187,10 @@ public:
 
    // Decide if point Px/Py is inside triangle defined by
    // (Ax,Ay) (Bx,By) (Cx,Cy)
-   static bool InsideTriangle(float Ax, float Ay,
-         float Bx, float By,
-         float Cx, float Cy,
-         float Px, float Py);
+   static bool InsideTriangle(F64 Ax, F64 Ay,
+         F64 Bx, F64 By,
+         F64 Cx, F64 Cy,
+         F64 Px, F64 Py);
 
 private:
    static bool Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V);

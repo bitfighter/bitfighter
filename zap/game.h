@@ -49,7 +49,7 @@ namespace Master
 /// parameter from the command line.
 ///
 /// If it is run as a client, Bitfighter uses the GLUT library to perform
-/// cross-platform window intialization, event processing and OpenGL setup.
+/// cross-platform window initialization, event processing and OpenGL setup.
 ///
 /// Bitfighter implements a simple game framework.  The GameObject class is
 /// the root class for all of the various objects in the Bitfighter world, including
@@ -135,7 +135,7 @@ enum VolumeType {
 };
 
 
-// DNS resolve ("bitfighter.org:25955") will freeze the game unless this is done as a seperate thread
+// DNS resolve ("bitfighter.org:25955") will freeze the game unless this is done as a separate thread
 class NameToAddressThread : public TNL::Thread
 {
 private:
@@ -315,6 +315,7 @@ public:
    virtual void setPreviousLevelName(const string &name);
 
    void computeWorldObjectExtents();
+   void setWorldExtents(const Rect &extents) { mWorldExtents = extents; }
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;
@@ -395,7 +396,7 @@ public:
    void setScopeAlwaysObject(BfObject *theObject);
    GameType *getGameType() const;
 
-   // MD5 utilties
+   // MD5 utilities
    string getSaltedHash(const string &stringToBeHashed) const;
 
 

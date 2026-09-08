@@ -726,7 +726,7 @@ end
 --		  controlled by `smoothing`
 --		- If this segment's old length was greater than maxDistance:
 --			- Output a vertex at the old midpoint of the segment
---	- If do_completely is true, and any subdivisions occured this pass:
+--	- If do_completely is true, and any subdivisions occurred this pass:
 --		- Set the output geometry as input geometry and repeat
 local function subdividePolyline(poly, maxDistance, smoothing, do_completely)
 	if not poly then

@@ -167,7 +167,7 @@ void VideoSystem::setWindowPosition(S32 left, S32 top)
 }
 
 
-void VideoSystem::saveWindowPostion(GameSettings *settings)
+void VideoSystem::saveWindowPosition(GameSettings *settings)
 {
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
@@ -306,21 +306,21 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          {
             currentState = fullscreen_stretched_st;
 
-            saveWindowPostion(settings);
+            saveWindowPosition(settings);
          }
 
          else if(reason == StateReasonModeDirectFullscreenUnstretched)
          {
             currentState = fullscreen_unstretched_st;
 
-            saveWindowPostion(settings);
+            saveWindowPosition(settings);
          }
 
          else if(reason == StateReasonInterfaceChange)
          {
             currentState = windowed_editor_st;
 
-            saveWindowPostion(settings);
+            saveWindowPosition(settings);
          }
 
          // Stay here if resized
@@ -365,14 +365,14 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          {
             currentState = fullscreen_editor_st;
 
-            saveWindowPostion(settings);
+            saveWindowPosition(settings);
          }
 
          else if(reason == StateReasonInterfaceChange)
          {
             currentState = windowed_st;
 
-            saveWindowPostion(settings);
+            saveWindowPosition(settings);
          }
 
          // Stay here if resized

@@ -45,7 +45,7 @@ public:
    bool update(const LoadoutTracker &tracker);
 
    // Set loadout in bulk
-   void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
+   void setLoadout(const Vector<U8> &items);   // Pass an array of U8s representing loadout... M,M,W,W,W
    void setLoadout(const string &loadoutStr);
 
    // Or set loadout a la carte

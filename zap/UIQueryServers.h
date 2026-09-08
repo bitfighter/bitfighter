@@ -197,7 +197,7 @@ public:
    S32 getLastPage();
    bool isMouseOverDivider();
 
-   void onActivate();            // Run when select server screeen is displayed
+   void onActivate();            // Run when select server screen is displayed
    void idle(U32 t);             // Idle loop
 
    void render();                // Draw the screen

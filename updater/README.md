@@ -60,7 +60,7 @@ How to build it?
     a. Open VS2015 Native Tool Command for 32/64 bits
     b. go to curl winbuild directory:
        cd <your wingup source path>\curl\winbuild
-	c. compile cURL by using one of the following commands, according the mode and archetecture of wingup you want to build.
+	c. compile cURL by using one of the following commands, according the mode and architecture of wingup you want to build.
        x64 release: nmake /f Makefile.vc mode=dll vc=14 RTLIBCFG=static MACHINE=x64
        x64 debug: nmake /f Makefile.vc mode=dll vc=14 RTLIBCFG=static DEBUG=yes MACHINE=x64
        x86 release: nmake /f Makefile.vc mode=dll vc=14 RTLIBCFG=static MACHINE=x86

@@ -71,6 +71,7 @@ class ClientInfo;
    TYPE_NUMBER( WallEdgeTypeNumber,            false,             "WallEdge",            "WallEdge"            ) \
    TYPE_NUMBER( WallSegmentTypeNumber,         false,             "WallSegment",         "WallSegment"         ) \
    TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZone",            "SlipZone"            ) \
+   TYPE_NUMBER( SafeZoneTypeNumber,            true,              "SafeZone",            "SafeZone"            ) \
    TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBug",              "SpyBug"              ) \
    TYPE_NUMBER( CoreTypeNumber,                true,              "CoreItem",            "CoreItem"            ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "Zone",                "Zone"                ) \
@@ -487,4 +488,3 @@ protected:
 };
 
 #endif /* BFOBJECT_H_ */
-

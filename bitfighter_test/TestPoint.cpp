@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "Point.h"
+#include "tnlBitStream.h"
 #include "gtest/gtest.h"
 
 namespace Zap {
@@ -234,6 +235,36 @@ TEST(PointTest, StringConversion)
    // In Point.cpp, toString uses ftos(x) + ", " + ftos(y)
    EXPECT_EQ("1.23, 4.56", p.toString());
    EXPECT_EQ("1.23 4.56", p.toLevelCode());
+}
+
+TEST(PointTest, BitStreamReadWrite)
+{
+   Point p1(123.456f, -789.012f);
+   Point p2;
+
+   TNL::PacketStream stream;
+   p1.write(&stream);
+
+   stream.setBitPosition(0);
+   p2.read(&stream);
+
+   EXPECT_FLOAT_EQ(p1.x, p2.x);
+   EXPECT_FLOAT_EQ(p1.y, p2.y);
+}
+
+TEST(PointTest, TypesReadWrite)
+{
+   Point p1(-0.001f, 10000.0f);
+   Point p2;
+
+   TNL::PacketStream stream;
+   Types::write(stream, p1);
+
+   stream.setBitPosition(0);
+   Types::read(stream, &p2);
+
+   EXPECT_FLOAT_EQ(p1.x, p2.x);
+   EXPECT_FLOAT_EQ(p1.y, p2.y);
 }
 
 } // namespace Zap

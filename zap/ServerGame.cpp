@@ -108,6 +108,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mDedicated = dedicated;
 
+   mIsLoadingLevel = false;
    mGameSuspended = true;                 // Server starts with zero players
 
    U32 stutter = mSettings->getSimulatedStutter();
@@ -469,10 +470,10 @@ void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
 {
    Parent::addWallItem(wallItem, getGameObjDatabase());
 
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and
-   // is convenient to transmit to the clients
-   //WallRec wallRec(wallItem);
-   //getGameType()->addWall(wallRec, this);
+   // Rebuild wall tiles and bot zones so the nav mesh reflects the new wall
+   // Skip during level loading since buildBotMeshZones() is called once after loadLevel() completes
+   if(getGameType() && !mIsLoadingLevel)
+      getGameType()->rebuildWallTilesAndBotZones();
 }
 
 
@@ -830,7 +831,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 
    else if(nextLevel == NEXT_LEVEL)      // Next level
    {
-      // If game is supended, then we are waiting for another player to join.  That means that (probably)
+      // If game is suspended, then we are waiting for another player to join.  That means that (probably)
       // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
       S32 playerCount = getPlayerCount();
       if(mGameSuspended)
@@ -1020,7 +1021,7 @@ void ServerGame::unsuspendIfActivePlayers()
 }
 
 
-// Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
+// Need to handle both forward and backward slashes... will return pathname with trailing delimiter.
 inline string getPathFromFilename(const string &filename)
 {
    std::size_t pos1 = filename.rfind("/");
@@ -1038,6 +1039,8 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
+   mIsLoadingLevel = true;
+
    resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
@@ -1049,6 +1052,7 @@ bool ServerGame::loadLevel()
    if(mLevelFileHash == "")
    {
       logprintf(LogConsumer::LogError, "Error: Cannot load %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      mIsLoadingLevel = false;
       return false;
    }
 
@@ -1080,6 +1084,7 @@ bool ServerGame::loadLevel()
 
    getGameType()->onLevelLoaded();
 
+   mIsLoadingLevel = false;
    return true;
 }
 
@@ -1969,6 +1974,29 @@ U16 ServerGame::findZoneContaining(const Point &p) const
    }
 
    return U16_MAX;
+}
+
+
+/// Rebuild bot navigation zones from scratch.  Called after wall geometry
+/// changes (e.g. destructible wall destroyed) so bots can navigate the
+/// updated barriers.
+void ServerGame::rebuildBotZones()
+{
+   // Clear old zones — they reference deleted barrier geometry
+   mAllZones.clear();
+   mBotZoneDatabase->removeEverythingFromDatabase();
+
+   // Rebuild with current barrier geometry
+   bool triangulate;
+#ifdef ZAP_DEDICATED
+   triangulate = false;
+#else
+   triangulate = !isDedicated();
+#endif
+
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(
+      mBotZoneDatabase, getGameObjDatabase(), &mAllZones,
+      getWorldExtents(), triangulate);
 }
 
 

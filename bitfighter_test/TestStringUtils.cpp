@@ -133,7 +133,7 @@ TEST(StringUtilsTest, stripZeros)
    EXPECT_EQ("1.1", stripZeros("1.100"));
    EXPECT_EQ("1", stripZeros("1.000"));
    EXPECT_EQ("0", stripZeros("0"));
-   EXPECT_EQ("", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros(".000"));
 }
 
 
@@ -185,6 +185,12 @@ TEST(StringUtilsTest, isInteger)
    EXPECT_FALSE(isPositiveInteger(NULL));
    EXPECT_FALSE(isPositiveInteger("-123"));
    EXPECT_FALSE(isPositiveInteger(" "));
+
+   // Whitespace tests
+   EXPECT_TRUE(isPositiveInteger("  123  "));
+   EXPECT_TRUE(isPositiveInteger("\t0\n"));
+   EXPECT_TRUE(isPositiveInteger("\v456\v"));
+   EXPECT_FALSE(isPositiveInteger("  "));
 }
 
 
@@ -228,6 +234,11 @@ TEST(StringUtilsTest, ftosBugReproduction)
 
    // Bug: ftos(1.0f, 0) incorrectly returns " 1" instead of "1"
    EXPECT_EQ("1", ftos(1.0f, 0));
+   EXPECT_EQ("0", ftos(0.0001f, 2));
+   EXPECT_EQ("0", ftos(-0.0001f, 2));
+   EXPECT_EQ("0", ftos(0.0f));
+   EXPECT_EQ("0", stripZeros(".000"));
+   EXPECT_EQ("0", stripZeros("-0"));
 }
 
 
@@ -477,6 +488,13 @@ TEST(StringUtilsTest, findPointerOfArg)
    // Bug fix: NULL input
    EXPECT_STREQ("", findPointerOfArg(NULL, 0));
 
+   // Tests for leading and multiple spaces
+   const char *msg2 = "  one  two   three ";
+   EXPECT_STREQ("one  two   three ", findPointerOfArg(msg2, 0));
+   EXPECT_STREQ("two   three ", findPointerOfArg(msg2, 1));
+   EXPECT_STREQ("three ", findPointerOfArg(msg2, 2));
+   EXPECT_STREQ("", findPointerOfArg(msg2, 3));
+  
    // New tests for leading and multiple spaces
    EXPECT_STREQ("word1 word2", findPointerOfArg("  word1 word2", 0));
    EXPECT_STREQ("word2", findPointerOfArg("  word1 word2", 1));
@@ -597,7 +615,7 @@ TEST(StringUtilsTest, sanitizeForJson)
    EXPECT_EQ("\\\"quoted\\\"", sanitizeForJson("\"quoted\""));
    EXPECT_EQ("\\\\backslash\\\\", sanitizeForJson("\\backslash\\"));
    EXPECT_EQ("\\n\\r\\t", sanitizeForJson("\n\r\t"));
-   EXPECT_EQ("&amp;&lt;&gt;", sanitizeForJson("&<>"));
+   EXPECT_EQ("&<>", sanitizeForJson("&<>")); // Should NOT escape HTML entities
    EXPECT_EQ("", sanitizeForJson(NULL));
 
    // Control characters
@@ -630,6 +648,8 @@ TEST(StringUtilsTest, trim)
 {
    EXPECT_EQ("abc", trim("  abc  "));
    EXPECT_EQ("abc", trim("\n\t abc \r\n"));
+   EXPECT_EQ("abc", trim("\v abc \v"));
+   EXPECT_EQ("abc", trim("\vabc\v"));
    EXPECT_EQ("abc  ", trim_left("  abc  "));
    EXPECT_EQ("  abc", trim_right("  abc  "));
 
@@ -712,6 +732,13 @@ TEST(StringUtilsTest, fileUtils)
    ASSERT_TRUE(writeFile(testFile, content));
    EXPECT_TRUE(fileExists(testFile));
    EXPECT_EQ(content, readFile(testFile));
+
+   // Verify consistency of writeFile/readFile with potentially tricky characters
+   // On Windows, text mode would translate \n to \r\n
+   string binaryContent = "Line1\nLine2\r\nLine3";
+   ASSERT_TRUE(writeFile("test_binary.txt", binaryContent));
+   EXPECT_EQ(binaryContent, readFile("test_binary.txt"));
+   remove("test_binary.txt");
 
    string appendContent = " Append";
    ASSERT_TRUE(writeFile(testFile, appendContent, true));
@@ -843,7 +870,7 @@ TEST(StringUtilsTest, charTypeChecks)
 }
 
 
-// These are comparitors for the actual sort function; they do not do sorting themselves.
+// These are comparators for the actual sort function; they do not do sorting themselves.
 TEST(StringUtilsTest, sorting)
 {
    EXPECT_TRUE(alphaSort("a", "b"));
@@ -865,7 +892,7 @@ TEST(StringUtilsTest, sorting)
    EXPECT_FALSE(alphaNumberSort("abc", "10"));
    EXPECT_FALSE(alphaNumberSort("2xyz", "1xyz"));
 
-   // Positive itegers sort numerically
+   // Positive integers sort numerically
    EXPECT_TRUE(alphaNumberSort("2", "11"));
    EXPECT_FALSE(alphaNumberSort("2", "1"));
 
@@ -957,14 +984,23 @@ TEST(StringUtilsTest, formatMessage)
 
    EXPECT_EQ("entry0 and entry1", formatMessage("%e0 and %e1", e, s, i));
    EXPECT_EQ("ptr0 is 42", formatMessage("%s0 is %i0", e, s, i));
+
+   // Bug: formatMessage should support multi-digit indices
+   for(int j = 2; j < 12; ++j) e.push_back("entry");
+   e[10] = "ten";
+   EXPECT_EQ("ten", formatMessage("%e10", e, s, i));
+
+   // Bug: formatMessage should support %% to escape %
+   EXPECT_EQ("%e0", formatMessage("%%e0", e, s, i));
+
    EXPECT_EQ("plain text", formatMessage("plain text", e, s, i));
    EXPECT_EQ("invalid %x9 tokens", formatMessage("invalid %x9 tokens", e, s, i));
-   EXPECT_EQ("out of range ", formatMessage("out of range %e9", e, s, i));
+   EXPECT_EQ("out of range ", formatMessage("out of range %e12", e, s, i));
 
    // Long string test to ensure no overflow
    std::string longStr(500, 'a');
    e.push_back(longStr.c_str());
-   EXPECT_EQ(longStr, formatMessage("%e2", e, s, i));
+   EXPECT_EQ(longStr, formatMessage("%e12", e, s, i));
 
    // Multiple placeholders and mixed types
    EXPECT_EQ("entry0 entry1 ptr0 42 entry0", formatMessage("%e0 %e1 %s0 %i0 %e0", e, s, i));
@@ -1032,6 +1068,28 @@ TEST(StringUtilsTest, s_fprintfTruncationBug)
    EXPECT_EQ(longString, readContent);
 
    remove(testFile.c_str());
+}
+
+
+// Regression for #820/#824: getExecutableDir must be a directory, not the
+// binary path. On macOS it used to return .../bitfighter_test, so luaDir became
+// .../bitfighter_test/scripts and LuaScriptRunner::startLua failed (L=null).
+TEST(StringUtilsTest, getExecutableDirIsContainingDirectory)
+{
+   string dir = getExecutableDir();
+   ASSERT_FALSE(dir.empty());
+
+   // Must not end with the test binary name (the old macOS bug)
+   string base = dir;
+   string::size_type slash = base.find_last_of("/\\");
+   if(slash != string::npos)
+      base = base.substr(slash + 1);
+   EXPECT_NE("bitfighter_test", base)
+         << "getExecutableDir() returned the binary path, not its parent: " << dir;
+
+   // Loose test runner is always launched from exe/ with scripts/ beside it
+   EXPECT_TRUE(fileExists(joindir(dir, "scripts")))
+         << "Expected scripts/ next to getExecutableDir() (" << dir << ")";
 }
 
 };

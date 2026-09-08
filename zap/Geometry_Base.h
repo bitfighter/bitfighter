@@ -81,7 +81,7 @@ public:
 
    virtual void onPointsChanged();
 
-   // These functions are declered in Geometry.cpp
+   // These functions are declared in Geometry.cpp
    void rotateAboutPoint(const Point &center, F32 angle);
    void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
    void scale(const Point &center, F32 scale);

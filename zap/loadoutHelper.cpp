@@ -204,7 +204,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    // Does key correspond to a menu item being displayed?  No?
    if(index == menuItems.size() || !menuItems[index].showOnMenu)
    {
-      // Since this isn't a menu option, maybe it is a request to avance loadout menu to the presets display.
+      // Since this isn't a menu option, maybe it is a request to advance loadout menu to the presets display.
       // Put this inside here so if joystick users remap the loadout button, maybe they can use the preset menu.
       if(inputCode == getActivationKey())       // Pressing loadout button again advances to preset mode
       {
@@ -298,13 +298,13 @@ void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
 {
    mShowingPresets = true;
 
-   // The menu will be getting larger to accomodate the presets, which are wider than the standard
+   // The menu will be getting larger to accommodate the presets, which are wider than the standard
    // loadout menu.  Here we'll calculate the width of the loadout menu and the preset menu.
    S32 currDisplayWidth = getCurrentDisplayWidth(mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
    S32 futureDisplayWidth = getTotalDisplayWidth(mPresetButtonsWidth, mPresetItemsDisplayWidth);
 
    resetScrollTimer();              // Activate the transition between old items and new ones
-   SlideOutWidget::onActivated();   // Activiate the slide animation to extend the menu a bit
+   SlideOutWidget::onActivated();   // Activate the slide animation to extend the menu a bit
 
    // Now we're transitioning between the already visible loadout menu and the preset menu; we need to tell the
    // render function how much of the display is already visible

@@ -246,8 +246,8 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
 }
 
 
-// A major scoring event has ocurred -- in this case, it's all flags being collected by one team
-void RetrieveGameType::majorScoringEventOcurred(S32 team)
+// A major scoring event has occurred -- in this case, it's all flags being collected by one team
+void RetrieveGameType::majorScoringEventOccurred(S32 team)
 {
    mZoneGlowTimer.reset();
    mGlowingZoneTeam = team;

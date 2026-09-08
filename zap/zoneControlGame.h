@@ -48,7 +48,7 @@ public:
    bool teamHasFlag(S32 teamIndex) const;
 
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
-   void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
+   void majorScoringEventOccurred(S32 team);    // Gets run when a touchdown is scored
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

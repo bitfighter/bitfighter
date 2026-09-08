@@ -17,6 +17,13 @@
 
 -----------------------------------------------------------
 
+-- Lua 5.1 / older LuaJIT provided math.mod as an alias for math.fmod.
+-- Homebrew LuaJIT 2.1 (and Lua 5.2+) dropped it.  Standard bots (s_bot.bot)
+-- and possibly third-party scripts still call math.mod; restore the alias
+-- so they keep working on modern runtimes (notably macOS arm64 CI).
+if math.mod == nil then
+   math.mod = math.fmod
+end
 
 -- Load some additional libraries
 require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function

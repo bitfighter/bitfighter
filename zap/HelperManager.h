@@ -17,7 +17,7 @@ namespace Zap
 {
 
 
-// Declare this here for conveinence... not really the ideal location
+// Declare this here for convenience... not really the ideal location
 namespace UI
 {
    static const F32 DIM_LEVEL = .2f;

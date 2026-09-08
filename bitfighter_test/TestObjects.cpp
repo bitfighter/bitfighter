@@ -27,6 +27,7 @@
 
 
 #include "TestUtils.h"
+#include "LevelFilesForTesting.h"
 
 #include <string>
 #include <cmath>
@@ -137,7 +138,8 @@ TEST_F(ObjectTest, GhostingSanity)
       BfObject *bfobj = dynamic_cast<BfObject *>(obj);
 
       // Skip registered classes that aren't BfObjects (e.g. GameType) or don't have
-      // a geometry at this point (ForceField)
+      // a geometry (ForceField). Geometry must already exist — hasGeometry() only
+      // checks for a Geometry instance, which most objects create in their ctor.
       if(bfobj && bfobj->hasGeometry())
       {
          // First, add some geometry
@@ -157,15 +159,26 @@ TEST_F(ObjectTest, GhostingSanity)
          delete obj;    // Delete original object so delete happens even if cast fails
    }
 
+   S32 serverGhostableCount = 0;
+   for(U32 i = 0; i < classCount; i++)
+      if(ghostingRecords[i].server)
+         serverGhostableCount++;
+   ASSERT_GT(serverGhostableCount, 0)
+         << "GhostingSanity created no server-side objects to transmit";
+
    // Idle to allow object replication
    gamePair.idle(10, 10);
+
+   // Ghosting handshake must deliver GameType before regular objects can scope
+   ASSERT_TRUE(clientGame->getGameType() != NULL)
+         << "Client never received GameType ghost";
 
    // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
    for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
-      if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable...
+      if(bfobj && bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable...
       {
          U32 id = bfobj->getClassId(NetClassGroupGame);
          ghostingRecords[id].client = true;
@@ -177,14 +190,53 @@ TEST_F(ObjectTest, GhostingSanity)
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
 
       // Expect that all objects on the server are on the client, with the
-      // exception of PolyWalls and ForceFields, because these do not follow the
-      // normal ghosting model.
+      // exception of types that do not follow the normal ghosting model:
+      // PolyWall/ForceField (special wall delivery), Robot (needs ClientInfo /
+      // bot setup — bare create()+addToGame is not enough).
       string className = netClassRep->getClassName();
-      if(className != "PolyWall" && className != "ForceField")
+      if(className != "PolyWall" && className != "ForceField" && className != "Robot")
          EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
-      else
+      else if(className == "PolyWall" || className == "ForceField")
          EXPECT_NE(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
+      // Robot: server-side create may succeed; client presence is not required here.
    }
+}
+
+
+/**
+ * Regression for #821: objects (including GameType) that exist before a client
+ * connects must still ghost after join.  Distinct from GhostingSanity, which
+ * creates objects only after the client is already connected.
+ */
+TEST_F(ObjectTest, JoinAfterLevelLoadGhostsGameType)
+{
+   // Host a non-empty level with no clients, then join
+   GamePair gamePair(getLevelCodeForTestingEngineer1(), 0);
+   ServerGame *serverGame = gamePair.server;
+
+   ASSERT_TRUE(serverGame != NULL);
+   ASSERT_TRUE(serverGame->getGameType() != NULL);
+   ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
+
+   // Level objects should already be on the server before anyone joins
+   S32 serverObjCount = serverGame->getGameObjDatabase()->findObjects_fast()->size();
+   ASSERT_GT(serverObjCount, 0) << "Expected pre-loaded level objects on server";
+
+   gamePair.addClient("JoinAfterLoad");
+   GamePair::idle(10, 10);
+
+   ClientGame *clientGame = gamePair.getClient(0);
+   ASSERT_TRUE(clientGame != NULL);
+   ASSERT_TRUE(clientGame->getConnectionToServer() != NULL);
+   ASSERT_TRUE(clientGame->getConnectionToServer()->isEstablished());
+
+   ASSERT_TRUE(clientGame->getGameType() != NULL)
+         << "Client that joined after level load never received GameType ghost (#821)";
+   EXPECT_TRUE(clientGame->getGameType()->isEngineerEnabled());
+
+   S32 clientObjCount = clientGame->getGameObjDatabase()->findObjects_fast()->size();
+   EXPECT_GT(clientObjCount, 0)
+         << "Client database empty after join — pre-existing objects were not ghosted";
 }
 
 
@@ -275,7 +327,7 @@ void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen,
    EXPECT_EQ(geom.size(), obj->getVertCount());
    EXPECT_EQ(teamIndex, obj->getTeam());
 
-   // Verify actual coordiates of points (getting pretty pedantic here!)
+   // Verify actual coordinates of points (getting pretty pedantic here!)
    for(S32 i = 0; i < obj->getVertCount(); i++)
    {
       EXPECT_EQ(geom[i].x, obj->getVert(i).x);

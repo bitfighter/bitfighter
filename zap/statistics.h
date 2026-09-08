@@ -31,7 +31,7 @@ private:
    U32 mDeaths;            // Times died
    U32 mSuicides;          // Self kills
    U32 mFratricides;       // Teammate kills
-   U64 mDist;              // Total distance traveled -- note that this number is mulitplied by 10,000
+   U64 mDist;              // Total distance traveled -- note that this number is multiplied by 10,000
 
    // Long term score tracking
    U32 mTotalKills;        // Total kills over the lifetime of this connection

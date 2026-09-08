@@ -32,42 +32,6 @@ static bool fileExists(const std::string &filepath)
 }
 
 
-// Helper function to read entire file contents
-static std::string readFileContents(const std::string &filepath)
-{
-   std::ifstream file(filepath);
-   if (!file.is_open())
-      return "";
-
-   std::stringstream buffer;
-   buffer << file.rdbuf();
-   return buffer.str();
-}
-
-
-// Helper function to write a string to a file
-static void writeFileContents(const std::string &filepath, const std::string &contents)
-{
-   std::ofstream file(filepath);
-   if (file.is_open())
-   {
-      file << contents;
-      file.close();
-   }
-}
-
-
-// Helper to create directory structure
-static bool createDirectory(const std::string &dirpath)
-{
-#ifdef _WIN32
-   return _mkdir(dirpath.c_str()) == 0 || errno == EEXIST;
-#else
-   return mkdir(dirpath.c_str(), 0755) == 0 || errno == EEXIST;
-#endif
-}
-
-
 class MasterSettingsTest : public testing::Test
 {
 protected:
