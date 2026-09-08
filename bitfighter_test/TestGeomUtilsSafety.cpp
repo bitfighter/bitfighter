@@ -10,10 +10,14 @@
 namespace Zap
 {
 
+using namespace std;
 using namespace TNL;
 
 TEST(GeomUtilsSafetyTest, polygonContainsPointEmpty)
 {
+   Point vertices[1]; // Not used if count is 0
+   EXPECT_FALSE(polygonContainsPoint(vertices, 0, Point(0, 0)));
+  
    Vector<Point> empty;
    EXPECT_FALSE(polygonContainsPoint(empty.address(), empty.size(), Point(0, 0)));
 
@@ -26,13 +30,17 @@ TEST(GeomUtilsSafetyTest, polygonContainsPointEmpty)
 
 TEST(GeomUtilsSafetyTest, polygonCircleIntersectEmpty)
 {
+   Point vertices[1];
+   Point outPoint;
+   EXPECT_FALSE(polygonCircleIntersect(vertices, 0, Point(0, 0), 10.0f, outPoint));
+  
    Vector<Point> empty;
    Point outPoint;
    EXPECT_FALSE(polygonCircleIntersect(empty.address(), empty.size(), Point(0, 0), 10.0f, outPoint));
 }
 
 TEST(GeomUtilsSafetyTest, polygonIntersectsSegmentEmpty)
-{
+{ 
    Vector<Point> empty;
    EXPECT_FALSE(polygonIntersectsSegment(empty, Point(0, 0), Point(10, 10)));
 }
@@ -53,6 +61,19 @@ TEST(GeomUtilsSafetyTest, polygonsIntersectEmpty)
 
 TEST(GeomUtilsSafetyTest, polygonIntersectsSegmentDetailedEmpty)
 {
+   Point poly[1];
+   F32 ct;
+   Point normal;
+   EXPECT_FALSE(polygonIntersectsSegmentDetailed(poly, 0, true, Point(0, 0), Point(10, 10), ct, normal));
+   EXPECT_FALSE(polygonIntersectsSegmentDetailed(poly, 0, false, Point(0, 0), Point(10, 10), ct, normal));
+}
+
+TEST(GeomUtilsSafetyTest, PolygonSweptCircleIntersectEmpty)
+{
+   Point vertices[1];
+   Point outPoint;
+   F32 outFraction;
+   EXPECT_FALSE(PolygonSweptCircleIntersect(vertices, 0, Point(0, 0), Point(10, 0), 5.0f, outPoint, outFraction));
    Vector<Point> empty;
    F32 collisionTime;
    Point normal;
@@ -67,9 +88,8 @@ TEST(GeomUtilsSafetyTest, areaEmpty)
 
 TEST(GeomUtilsSafetyTest, cornersToEdgesEmpty)
 {
-   Vector<Point> empty;
-   Vector<Point> edges;
-   cornersToEdges(empty, edges);
+   Vector<Point> corners, edges;
+   cornersToEdges(corners, edges);
    EXPECT_TRUE(edges.empty());
 }
 
