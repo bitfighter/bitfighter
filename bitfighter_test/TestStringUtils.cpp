@@ -528,11 +528,25 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
 
 TEST(StringUtilsTest, caseInsensitiveStringCompareNonASCII)
 {
+   // Use characters with the high bit set, which would be negative if treated as signed char
+   string s1 = "test";
+   s1 += (char)0xDF;
+   string s2 = "TEST";
+   s2 += (char)0xDF;
+   EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
+
+   std::string s3 = "test";
+   s3 += (char)0xDF;
+   std::string s4 = "test";
+   s4 += (char)0xE0;
+   EXPECT_FALSE(caseInsensitiveStringCompare(s3, s4));
+
+
    // Use characters with the high bit set to ensure we handle them correctly.
    // On systems where char is signed, passing a char with the high bit set
    // to tolower() without a cast to unsigned char is undefined behavior.
-   string s1 = "\xFF";
-   string s2 = "\xFF";
+   s1 = "\xFF";
+   s2 = "\xFF";
    EXPECT_TRUE(caseInsensitiveStringCompare(s1, s2));
 
    s1 = "A\x80";
