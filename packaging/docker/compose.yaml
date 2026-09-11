@@ -1,0 +1,44 @@
+# Public games pin :022 (protocol 41). :023 is protocol 42 and is invisible
+# to 022 clients. Never use :latest.
+#
+#   cp .env.example .env   # set owner/admin passwords
+#   docker compose up -d
+#
+# Optional 023 on host UDP 28001:
+#   docker compose --profile 023 up -d
+
+services:
+  bitfighterd:
+    image: ghcr.io/bitfighter/bitfighterd:${BITFIGHTER_RELEASE:-022}
+    platform: linux/amd64
+    ports:
+      - "${BITFIGHTER_PORT:-28000}:28000/udp"
+    environment:
+      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME:-Bitfighter}
+      BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR:-}
+      BITFIGHTER_ADMIN_PASSWORD: ${BITFIGHTER_ADMIN_PASSWORD:-}
+      BITFIGHTER_OWNER_PASSWORD: ${BITFIGHTER_OWNER_PASSWORD:-}
+      BITFIGHTER_MAX_PLAYERS: ${BITFIGHTER_MAX_PLAYERS:-}
+    volumes:
+      - bitfighter-data:/data
+    restart: unless-stopped
+
+  bitfighterd-023:
+    profiles: ["023"]
+    image: ghcr.io/bitfighter/bitfighterd:023
+    platform: linux/amd64
+    ports:
+      - "28001:28000/udp"
+    environment:
+      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME_023:-Bitfighter 023}
+      BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR_023:-}
+      BITFIGHTER_ADMIN_PASSWORD: ${BITFIGHTER_ADMIN_PASSWORD:-}
+      BITFIGHTER_OWNER_PASSWORD: ${BITFIGHTER_OWNER_PASSWORD:-}
+      BITFIGHTER_MAX_PLAYERS: ${BITFIGHTER_MAX_PLAYERS:-}
+    volumes:
+      - bitfighter-data-023:/data
+    restart: unless-stopped
+
+volumes:
+  bitfighter-data:
+  bitfighter-data-023:

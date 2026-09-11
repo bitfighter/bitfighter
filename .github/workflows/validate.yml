@@ -16,6 +16,8 @@ jobs:
           cd build
           cmake ..
           make
+          # bitfighterd and tnlping are EXCLUDE_FROM_ALL; default make skips them
+          make bitfighterd tnlping
       - name: Copy resources
         run: cp -R resource/* exe/
 

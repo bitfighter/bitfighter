@@ -124,6 +124,8 @@ Bitfighter can now be run from the `exe/` folder with no changes to your system.
 
 Alternatively, you can do a full install directly into your system with `sudo make install`.
 
+A dedicated server image is published to [`ghcr.io/bitfighter/bitfighterd`](https://ghcr.io/bitfighter/bitfighterd). Public games should pin `:022` (protocol 41). See [packaging/docker/README.md](packaging/docker/README.md).
+
 For distribution packaging, Bitfighter is built using the Open Build Service at: https://build.opensuse.org/package/show/games/bitfighter
 
 ### Windows
