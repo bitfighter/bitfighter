@@ -33,9 +33,8 @@ TEST(GeomUtilsSafetyTest, polygonCircleIntersectEmpty)
    Point vertices[1];
    Point outPoint;
    EXPECT_FALSE(polygonCircleIntersect(vertices, 0, Point(0, 0), 10.0f, outPoint));
-  
+
    Vector<Point> empty;
-   Point outPoint;
    EXPECT_FALSE(polygonCircleIntersect(empty.address(), empty.size(), Point(0, 0), 10.0f, outPoint));
 }
 
