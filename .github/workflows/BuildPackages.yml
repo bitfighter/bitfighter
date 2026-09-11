@@ -11,7 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
-      - run: cd build && cmake .. && make
+      - run: |
+          cd build
+          cmake ..
+          make
+          # bitfighterd and tnlping are EXCLUDE_FROM_ALL; default make skips them
+          make bitfighterd tnlping
       - run: cp -R resource/* exe/
       - uses: actions/upload-artifact@v4.6.2
         with:
