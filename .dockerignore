@@ -1,0 +1,37 @@
+# Build context is the repo root (`docker build -f packaging/docker/Dockerfile .`).
+# Dedicated-only: skip client assets, tests, and host build trees.
+
+.git
+.github
+.claude
+.vscode
+.idea
+
+build
+exe
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+
+# Client / platform extras
+alure
+discord-rpc
+fontstash
+gtest
+bitfighter_test
+lib
+notifier
+doc
+packaging/linux
+mysql++
+
+resource/sfx
+resource/music
+resource/fonts
+resource/shaders
+resource/testing
+screenshot.png
+
+CLAUDE.md
+*.md
+!packaging/docker/README.md
