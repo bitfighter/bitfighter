@@ -1,0 +1,111 @@
+name: bitfighterd image
+
+on:
+  pull_request:
+    paths:
+      - "packaging/docker/**"
+      - ".dockerignore"
+      - ".github/workflows/bitfighterd-image.yml"
+      - "CMakeLists.txt"
+      - "cmake/**"
+      - "zap/bitfighterd.cmake"
+      - "zap/CMakeLists.txt"
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Git ref to compile (e.g. bitfighter-022)
+        required: true
+        default: bitfighter-022
+      image_tag:
+        description: Image tag to push (e.g. 022)
+        required: true
+        default: "022"
+      builder_image:
+        description: Builder/runtime base image
+        required: true
+        default: ubuntu:22.04
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Dockerfile
+        uses: actions/checkout@v4
+        with:
+          path: docker-src
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.source_ref || github.sha }}
+          path: src
+
+      - name: Overlay Docker files onto source
+        run: |
+          mkdir -p src/packaging
+          cp -a docker-src/packaging/docker src/packaging/
+          cp docker-src/.dockerignore src/
+
+      - name: Builder image
+        id: builder
+        run: |
+          echo "image=${{ github.event.inputs.builder_image || 'ubuntu:24.04' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Image tags
+        id: tags
+        run: |
+          IMAGE=ghcr.io/bitfighter/bitfighterd
+          EVENT="${{ github.event_name }}"
+          if [ "$EVENT" = "pull_request" ]; then
+            echo "tags=bitfighterd:ci" >> "$GITHUB_OUTPUT"
+            echo "push=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "tags=${IMAGE}:${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(sed -n 's/^#define ZAP_GAME_RELEASE "\(.*\)".*/\1/p' src/zap/version.h)
+            SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+            echo "tags=${IMAGE}:${VERSION},${IMAGE}:master,${IMAGE}:sha-${SHORT}" >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to GHCR
+        if: steps.tags.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        run: |
+          tag_args=()
+          IFS=',' read -ra tags <<< "${{ steps.tags.outputs.tags }}"
+          for t in "${tags[@]}"; do
+            tag_args+=(-t "$t")
+          done
+          docker build \
+            -f src/packaging/docker/Dockerfile \
+            --build-arg "BUILDER_IMAGE=${{ steps.builder.outputs.image }}" \
+            "${tag_args[@]}" \
+            src
+
+      - name: Print version
+        run: |
+          FIRST_TAG=$(echo "${{ steps.tags.outputs.tags }}" | cut -d, -f1)
+          docker run --rm "$FIRST_TAG" -version
+
+      - name: Push image
+        if: steps.tags.outputs.push == 'true'
+        run: |
+          IFS=',' read -ra tags <<< "${{ steps.tags.outputs.tags }}"
+          for t in "${tags[@]}"; do
+            docker push "$t"
+          done
