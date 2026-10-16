@@ -1129,20 +1129,30 @@ bool SoundSystem::queueNextMusicBuffer()
    if(buf == 0)
       return false;
 
-   // Read decoded audio from the ALURE decoder
+   // Read decoded audio from the ALURE decoder.
+   // decoder->read() takes a frame count and returns frames read; each frame
+   // is (channels * bytesPerSample) bytes.  MusicChunkSize is in bytes.
+   alure::ChannelConfig chans = mMusicData.decoder->getChannelConfig();
+   alure::SampleType smptype  = mMusicData.decoder->getSampleType();
+   ALuint channels    = (chans == alure::ChannelConfig::Stereo) ? 2 : 1;
+   ALuint bytesPerSmp = (smptype == alure::SampleType::UInt8)   ? 1 : 2;
+   ALuint bytesPerFrame = channels * bytesPerSmp;
+
    const ALuint bufSize = MusicChunkSize;
    Vector<ALubyte> pcmData;
    pcmData.resize(bufSize);
 
-   ALsizei totalRead = 0;
-   while (totalRead < (ALsizei)bufSize)
+   ALsizei totalFrames = 0;
+   ALuint  maxFrames   = bufSize / bytesPerFrame;
+   while((ALuint)totalFrames < maxFrames)
    {
       ALsizei chunk = mMusicData.decoder->read(
-         pcmData.address() + totalRead,
-         bufSize - totalRead);
+         pcmData.address() + totalFrames * bytesPerFrame,
+         maxFrames - totalFrames);
       if(chunk <= 0) break;
-      totalRead += chunk;
+      totalFrames += chunk;
    }
+   ALsizei totalRead = totalFrames * bytesPerFrame;
 
    if(totalRead == 0)
    {
@@ -1152,8 +1162,6 @@ bool SoundSystem::queueNextMusicBuffer()
    }
 
    // Map ALURE channel config + sample type to OpenAL format
-   alure::ChannelConfig chans = mMusicData.decoder->getChannelConfig();
-   alure::SampleType smptype = mMusicData.decoder->getSampleType();
    ALenum format = AL_FORMAT_MONO16;
    if(chans == alure::ChannelConfig::Mono)
    {
