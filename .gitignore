@@ -287,4 +287,6 @@ resource/music/menu_old.ogg
 
 .idea/
 
+.cache/
+
 vnv.bat

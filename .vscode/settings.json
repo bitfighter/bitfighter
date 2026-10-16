@@ -1,5 +1,4 @@
 {
-    "cmake.generator": "Visual Studio 17 2022",
     "cmake.testExplorer": true,
     "testMate.cpp.test.advancedExecutables": [
         {
