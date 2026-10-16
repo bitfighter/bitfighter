@@ -283,7 +283,9 @@ resource/music/menu_old.ogg
 
 .claude/settings.local.json
 
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
 
 .idea/
 

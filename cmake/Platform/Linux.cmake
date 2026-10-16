@@ -98,7 +98,26 @@ endfunction()
 
 
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
-	# Do nothing!
+	# Symlink resource directories and files into the exe output directory so
+	# the game can find its assets when run directly from a local build without
+	# going through cmake --install.
+	set(resDir ${CMAKE_SOURCE_DIR}/resource)
+	set(exeDir ${CMAKE_SOURCE_DIR}/exe)
+
+	add_custom_command(TARGET ${targetName} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${exeDir}
+		COMMAND ln -sfn ${resDir}/shaders         ${exeDir}/shaders
+		COMMAND ln -sfn ${resDir}/sfx              ${exeDir}/sfx
+		COMMAND ln -sfn ${resDir}/fonts            ${exeDir}/fonts
+		COMMAND ln -sfn ${resDir}/scripts          ${exeDir}/scripts
+		COMMAND ln -sfn ${resDir}/robots           ${exeDir}/robots
+		COMMAND ln -sfn ${resDir}/levels           ${exeDir}/levels
+		COMMAND ln -sfn ${resDir}/music            ${exeDir}/music
+		COMMAND ln -sfn ${resDir}/editor_plugins   ${exeDir}/editor_plugins
+		COMMAND ln -sf  ${resDir}/gamecontrollerdb.txt     ${exeDir}/gamecontrollerdb.txt
+		COMMAND ln -sf  ${resDir}/usergamecontrollerdb.txt ${exeDir}/usergamecontrollerdb.txt
+		COMMAND ln -sf  ${resDir}/bitfighter.xpm           ${exeDir}/bitfighter.xpm
+	)
 endfunction()
 
 

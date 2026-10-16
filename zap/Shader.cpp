@@ -12,8 +12,6 @@
 #include "tnlAssert.h"
 #include "tnlLog.h"
 #include "stringUtils.h"
-#include <limits>
-#include <array>
 
 namespace Zap
 {
@@ -68,7 +66,11 @@ Shader::~Shader()
 std::string Shader::getShaderSource(const std::string &fileName)
 {
    std::string filePath = GameSettings::getFolderManager()->findShaderFile(fileName);
-   TNLAssert(filePath != "", "Expected a shader path here!");
+   if(filePath.empty())
+   {
+      logprintf(LogConsumer::LogError, "Shader file not found: '%s'", fileName.c_str());
+      return "";
+   }
 
    return readFile(filePath);
 }
@@ -80,9 +82,11 @@ U32 Shader::compileShader(const std::string& shaderPath, const std::string& shad
    GLuint shader = glCreateShader(static_cast<GLuint>(type));
 
    // Verify shader code
-   TNLAssert(shaderCode.length() < std::numeric_limits<int>::max(),
-      ("Overflow! Shader '" + shaderPath + "' too long! How is this possible?!").c_str());
-   TNLAssert(shaderLength > 0, ("Shader '" + shaderPath + "' is empty!").c_str());
+   if(shaderLength <= 0)
+   {
+      logprintf(LogConsumer::LogError, "Shader '%s' is empty or missing — cannot compile.", shaderPath.c_str());
+      return 0;
+   }
 
    const char *shaderFiles[] = { shaderCode.c_str() };
    const GLint shaderFilesLength[] = { shaderLength };

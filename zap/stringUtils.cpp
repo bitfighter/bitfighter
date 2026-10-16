@@ -655,9 +655,14 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
 
          for(S32 i = 0; i < extensionCount; i++)
          {
-            if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
+            // Normalize: strip a leading dot from the extension entry so callers
+            // can pass either "level" or ".level" and both work correctly.
+            string ext = lcase(extensions[i]);
+            if(!ext.empty() && ext[0] == '.')
+               ext = ext.substr(1);
+
+            if(name.length() > ext.length() + 1)  // +1 for the dot separator in the filename
             {
-               string ext = lcase(extensions[i]);
                if(ext == extension)
                   files.push_back(name);
             }
