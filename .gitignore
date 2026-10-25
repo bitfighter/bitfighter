@@ -292,3 +292,5 @@ resource/music/menu_old.ogg
 .cache/
 
 vnv.bat
+
+.vscode/
