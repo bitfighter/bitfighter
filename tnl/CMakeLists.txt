@@ -33,8 +33,8 @@ if(NO_THREADS)
 	add_definitions(-DTNL_NO_THREADS)
 endif()
 
-include_directories(${TOMCRYPT_INCLUDE_DIR} SYSTEM)
 add_library(tnl STATIC ${TNL_SOURCES} ${TNL_HEADERS})
+target_include_directories(tnl PUBLIC ${TOMCRYPT_INCLUDE_DIR})
 target_link_libraries(tnl tomcrypt ${CMAKE_THREAD_LIBS_INIT})
 
 set_target_properties(tnl PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG;TNL_ENABLE_LOGGING")
