@@ -19,7 +19,11 @@ jobs:
           # bitfighterd and tnlping are EXCLUDE_FROM_ALL; default make skips them
           make bitfighterd tnlping
       - name: Copy resources
-        run: cp -R resource/* exe/
+        # Linux post-build symlinks resource/ into exe/. cp then errors
+        # ("same file") because source and destination are one inode.
+        run: |
+          find exe -maxdepth 1 -type l -exec rm -f {} +
+          cp -R resource/* exe/
 
   Build-macOS-arm64:
     runs-on: macos-14                 # Apple Silicon (arm64) runner
