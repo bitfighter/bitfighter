@@ -11,8 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
-      - run: cd build && cmake .. && make
-      - run: cp -R resource/* exe/
+      - run: |
+          cd build
+          cmake ..
+          make
+          # bitfighterd and tnlping are EXCLUDE_FROM_ALL; default make skips them
+          make bitfighterd tnlping
+      # Linux post-build symlinks resource/ into exe/. Drop those links or
+      # cp errors with "same file" (source and destination are one inode).
+      - run: |
+          find exe -maxdepth 1 -type l -exec rm -f {} +
+          cp -R resource/* exe/
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: Bitfighter-Linux
