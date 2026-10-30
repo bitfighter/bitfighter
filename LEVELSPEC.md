@@ -187,6 +187,8 @@ Controls whether Fog of War is enabled for the level. When Fog of War is on, wal
 
 The keyword is case-insensitive.
 
+With Fog of War enabled, objects are withheld until a player comes within their scope radius, so signs, go-fasts and other items are revealed only as they are approached.  Cores are the exception: a player always sees the cores belonging to their own team, while enemy and neutral cores have to be found.  Wall tiles are delivered separately, closest-first, within the same radius.
+
 ```
 FogOfWar Yes
 FogOfWar No

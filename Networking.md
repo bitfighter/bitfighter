@@ -220,6 +220,7 @@ Other clients receive the same authoritative ghost stream (subject to scope), so
 - `GameType` itself is always in scope.
 - Before sync completion, regular object ghosting is held back (`isReadyForRegularGhosts`).
 - After sync, scope includes control object + nearby relevant objects + always-in-scope objects.
+- With fog of war enabled, an always-in-scope object is only sent to a client that it opts in for via `BfObject::isAlwaysVisibleWithFogOfWar(recipient)` (cores do this for their own team); anything else is left to the proximity query, so it is only sent once a player comes within `GameType::SCOPE_RADIUS`.
 - Extra logic includes commander map and spy bug visibility.
 
 This keeps bandwidth focused on objects relevant to that client’s view.
