@@ -42,7 +42,7 @@
     </div>
     <div id="toolbar">
       <button id="fullscreen" type="button">Fullscreen</button>
-      <span class="hint">Click HOST GAME, then START HOSTING. UDP uses wss://bitfighter-relay.onrender.com unless you pass ?relay=ws://host:port or ?relay=off. H is in-game help.</span>
+      <span class="hint">Click HOST GAME, then START HOSTING. UDP uses wss://bitfighter-web-relay.spacewalkpublishing.us unless you pass ?relay=ws://host:port or ?relay=off. H is in-game help.</span>
     </div>
     <div class="emscripten_border">
       <canvas class="emscripten" id="canvas" width="1280" height="720" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
@@ -172,9 +172,8 @@
       setStatus('Downloading...');
 
       // Open the relay now, while wasm and the data file are still downloading.
-      // A free Render instance can take about a minute to wake; this throwaway
-      // socket overlaps that with the download. The game opens its own socket
-      // later. ?relay= matches the client: off/none/0/empty disables it.
+      // The game opens its own socket later. ?relay= matches the client:
+      // off/none/0/empty disables it.
       (function () {
         var url = '';
         try {
@@ -186,10 +185,10 @@
           } else if (typeof Module !== 'undefined' && Module['relay']) {
             url = Module['relay'];
           } else {
-            url = 'wss://bitfighter-relay.onrender.com';
+            url = 'wss://bitfighter-web-relay.spacewalkpublishing.us';
           }
         } catch (e) {
-          url = 'wss://bitfighter-relay.onrender.com';
+          url = 'wss://bitfighter-web-relay.spacewalkpublishing.us';
         }
         if (!url)
           return;

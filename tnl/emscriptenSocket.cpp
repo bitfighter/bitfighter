@@ -38,7 +38,7 @@ struct RelaySock
    std::deque<std::vector<U8>> waiting;
 };
 
-const char *DEFAULT_RELAY = "wss://bitfighter-relay.onrender.com";
+const char *DEFAULT_RELAY = "wss://bitfighter-web-relay.spacewalkpublishing.us";
 const double RELAY_GIVE_UP_MS = 90000.0;
 const double RELAY_RETRY_MS = 2000.0;
 
