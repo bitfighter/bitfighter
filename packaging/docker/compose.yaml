@@ -1,44 +1,87 @@
-# Public games pin :022 (protocol 41). :023 is protocol 42 and is invisible
-# to 022 clients. Never use :latest.
+# Three protocol-42 servers from this tree, one UDP port each.
+# The port inside the container must match the published port: the process
+# tells the master which port it bound.
 #
-#   cp .env.example .env   # set owner/admin passwords
-#   docker compose up -d
+#   cp .env.example .env
+#   docker compose up -d --build
 #
-# Optional 023 on host UDP 28001:
-#   docker compose --profile 023 up -d
+# Private test (do not list on the public master):
+#   BITFIGHTER_REGISTER_MASTER=0 docker compose up -d --build
+
+name: bitfighterd
 
 services:
-  bitfighterd:
-    image: ghcr.io/bitfighter/bitfighterd:${BITFIGHTER_RELEASE:-022}
-    platform: linux/amd64
+  bf1:
+    build:
+      context: ../..
+      dockerfile: packaging/docker/Dockerfile
+    image: bitfighterd:local
     ports:
-      - "${BITFIGHTER_PORT:-28000}:28000/udp"
+      - "28000:28000/udp"
     environment:
-      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME:-Bitfighter}
+      BITFIGHTER_PORT: "28000"
+      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME:-VPS one}
       BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR:-}
+      BITFIGHTER_SERVER_PASSWORD: ${BITFIGHTER_SERVER_PASSWORD:-}
       BITFIGHTER_ADMIN_PASSWORD: ${BITFIGHTER_ADMIN_PASSWORD:-}
-      BITFIGHTER_OWNER_PASSWORD: ${BITFIGHTER_OWNER_PASSWORD:-}
+      BITFIGHTER_LEVEL_CHANGE_PASSWORD: ${BITFIGHTER_LEVEL_CHANGE_PASSWORD:-}
       BITFIGHTER_MAX_PLAYERS: ${BITFIGHTER_MAX_PLAYERS:-}
+      BITFIGHTER_REGISTER_MASTER: ${BITFIGHTER_REGISTER_MASTER:-1}
+      BITFIGHTER_MASTER: ${BITFIGHTER_MASTER:-IP:107.172.71.173:25955}
     volumes:
-      - bitfighter-data:/data
+      - bf1:/data
     restart: unless-stopped
 
-  bitfighterd-023:
-    profiles: ["023"]
-    image: ghcr.io/bitfighter/bitfighterd:023
-    platform: linux/amd64
+  bf2:
+    image: bitfighterd:local
     ports:
-      - "28001:28000/udp"
+      - "28001:28001/udp"
     environment:
-      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME_023:-Bitfighter 023}
-      BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR_023:-}
+      BITFIGHTER_PORT: "28001"
+      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME_2:-VPS two}
+      BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR:-}
+      BITFIGHTER_SERVER_PASSWORD: ${BITFIGHTER_SERVER_PASSWORD:-}
       BITFIGHTER_ADMIN_PASSWORD: ${BITFIGHTER_ADMIN_PASSWORD:-}
-      BITFIGHTER_OWNER_PASSWORD: ${BITFIGHTER_OWNER_PASSWORD:-}
+      BITFIGHTER_LEVEL_CHANGE_PASSWORD: ${BITFIGHTER_LEVEL_CHANGE_PASSWORD:-}
       BITFIGHTER_MAX_PLAYERS: ${BITFIGHTER_MAX_PLAYERS:-}
+      BITFIGHTER_REGISTER_MASTER: ${BITFIGHTER_REGISTER_MASTER:-1}
+      BITFIGHTER_MASTER: ${BITFIGHTER_MASTER:-IP:107.172.71.173:25955}
     volumes:
-      - bitfighter-data-023:/data
+      - bf2:/data
     restart: unless-stopped
+    depends_on:
+      - bf1
+
+  bf3:
+    image: bitfighterd:local
+    ports:
+      - "28002:28002/udp"
+    environment:
+      BITFIGHTER_PORT: "28002"
+      BITFIGHTER_HOSTNAME: ${BITFIGHTER_HOSTNAME_3:-VPS three}
+      BITFIGHTER_HOSTDESCR: ${BITFIGHTER_HOSTDESCR:-}
+      BITFIGHTER_SERVER_PASSWORD: ${BITFIGHTER_SERVER_PASSWORD:-}
+      BITFIGHTER_ADMIN_PASSWORD: ${BITFIGHTER_ADMIN_PASSWORD:-}
+      BITFIGHTER_LEVEL_CHANGE_PASSWORD: ${BITFIGHTER_LEVEL_CHANGE_PASSWORD:-}
+      BITFIGHTER_MAX_PLAYERS: ${BITFIGHTER_MAX_PLAYERS:-}
+      BITFIGHTER_REGISTER_MASTER: ${BITFIGHTER_REGISTER_MASTER:-1}
+      BITFIGHTER_MASTER: ${BITFIGHTER_MASTER:-IP:107.172.71.173:25955}
+    volumes:
+      - bf3:/data
+    restart: unless-stopped
+    depends_on:
+      - bf1
+
+  # The browser UDP relay can run on this same VPS later. It is not started
+  # with the game servers. Host networking is how reply packets find it.
+  # relay:
+  #   build: ../../tools/udp-ws-relay
+  #   network_mode: host
+  #   environment:
+  #     RELAY_ALLOW_PORTS: "25955,28000,28001,28002"
+  #   restart: unless-stopped
 
 volumes:
-  bitfighter-data:
-  bitfighter-data-023:
+  bf1:
+  bf2:
+  bf3:

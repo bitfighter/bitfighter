@@ -1,82 +1,92 @@
 # Dedicated server image
 
-`bitfighterd` as a container, published to `ghcr.io/bitfighter/bitfighterd`.
+`bitfighterd` from this tree (protocol 42, release 023). A 022 client will not see or join it. Build the image yourself; nothing here is pushed to a registry.
 
-## Which tag
+```sh
+docker build -f packaging/docker/Dockerfile -t bitfighterd:local .
+```
 
-| Tag | Protocol | Who can join |
-|---|---|---|
-| `:022` | 41 | Current public clients. **Pin this.** |
-| `:023` | 42 | 023 clients only. 022 players will not see the server. |
-| `:master` | whatever `master` is | Dev snapshots. Not for public games. |
+One server on UDP 28000, listed on the stock master `107.172.71.173:25955`:
 
-There is no `:latest`. Mixing 022 and 023 on the same port does not work.
+```sh
+docker run -d --name bf1 --restart unless-stopped \
+  -p 28000:28000/udp \
+  -e BITFIGHTER_HOSTNAME='VPS one' \
+  -e BITFIGHTER_HOSTDESCR='Evening game' \
+  -e BITFIGHTER_SERVER_PASSWORD=play \
+  -e BITFIGHTER_ADMIN_PASSWORD=admin \
+  -e BITFIGHTER_LEVEL_CHANGE_PASSWORD=levels \
+  -e BITFIGHTER_MAX_PLAYERS=16 \
+  -v bf1:/data \
+  bitfighterd:local
+```
 
-Images are **linux/amd64** (CI). Compose pins that platform so an ARM host still runs the published image.
+Several on one host. The container port and the published port are the same, because that is the port the process reports:
 
-`:022` is built from the `bitfighter-022` tag with this Dockerfile (022 has no Docker files of its own). First publish is a manual `workflow_dispatch` after the image is known to compile.
+```sh
+docker run -d --name bf2 -p 28001:28001/udp \
+  -e BITFIGHTER_PORT=28001 \
+  -e BITFIGHTER_HOSTNAME='VPS two' \
+  -e BITFIGHTER_SERVER_PASSWORD=play \
+  -v bf2:/data \
+  bitfighterd:local
+```
 
-## Run
+Or three at once:
 
 ```sh
 cd packaging/docker
 cp .env.example .env
-# set BITFIGHTER_OWNER_PASSWORD and BITFIGHTER_ADMIN_PASSWORD
-docker compose up -d
+docker compose up -d --build
 ```
 
-That pulls `:022` and publishes **UDP 28000**. The server lists itself on the official master automatically.
-
-Optional 023 on host UDP **28001**:
+A private server that does not register. `-master` is pointed at `127.0.0.1:9` inside the container:
 
 ```sh
-docker compose --profile 023 up -d
-```
-
-Build locally instead of pulling:
-
-```sh
-docker compose build
-docker compose up -d
-```
-
-Or without compose:
-
-```sh
-docker build -f packaging/docker/Dockerfile -t bitfighterd:local .
-docker run --rm bitfighterd:local -version   # prints "Bitfighter 023" on current master
-docker run --rm -p 28000:28000/udp \
-  -e BITFIGHTER_HOSTNAME=smoke \
-  -e BITFIGHTER_OWNER_PASSWORD=changeme \
+docker run --rm -p 127.0.0.1:28000:28000/udp \
+  -e BITFIGHTER_REGISTER_MASTER=0 \
+  -e BITFIGHTER_SERVER_PASSWORD=lan-secret \
+  -e BITFIGHTER_HOSTNAME=LocalTest \
   bitfighterd:local
 ```
 
-## Network
+`tnlping 127.0.0.1:28000` from inside the container is the healthcheck. It only checks that the UDP socket answers.
 
-Bitfighter is TNL over **UDP**, IPv4. Caddy/HTTP is not involved.
+## Data
 
-- Open **28000/udp** (and **28001/udp** if running 023).
-- Docker publishes that port through docker-proxy; also allow it on the host firewall (e.g. UFW).
+`/data` is `-rootdatadir` and the volume to keep.
 
-## Data and config
+| Path | What |
+| --- | --- |
+| `/data/bitfighter.ini` | Settings written by the server |
+| `/data/levels/` | Level files. Stock levels are copied here on first start if the directory is empty |
+| `/data/robots/`, `/data/scripts/` | Same for bots and Lua scripts |
+| `/app/bitfighter/levels/` | Read-only stock levels shipped in the image |
 
-`/data` is the writable root (`-rootdatadir /data`): `bitfighter.ini`, logs, `levels/`, `robots/`, `scripts/`. Stock files are copied in on first start if those dirs are empty.
+Mount a directory of your own levels over `/data/levels`, or set `BITFIGHTER_LEVELDIR` to another folder. `BITFIGHTER_LEVELS` is a space-separated list of level filenames passed as `-levels` and must be the last arguments, so do not also pass `-levels` yourself.
 
-`AllowDataConnections` defaults to **No**. Leave it off unless you need admin upload/download of levels and bots.
+The process runs as uid 1000. Bind mounts need to be writable by that user.
 
-Named volumes pick up uid 1000 from the image. Bind-mounts should be owned by uid 1000.
+## Env
 
-## Env → flags
-
-| env | flag |
-|---|---|
+| Env | Flag |
+| --- | --- |
+| `BITFIGHTER_PORT` (default 28000) | `-hostaddr IP:Any:$PORT` |
+| `BITFIGHTER_HOSTADDR` | replaces that `-hostaddr` |
 | `BITFIGHTER_HOSTNAME` | `-hostname` |
 | `BITFIGHTER_HOSTDESCR` | `-hostdescr` |
-| `BITFIGHTER_PORT` (default 28000) | `-hostaddr IP:Any:$PORT` |
+| `BITFIGHTER_SERVER_PASSWORD` | `-serverpassword` |
 | `BITFIGHTER_ADMIN_PASSWORD` | `-adminpassword` |
 | `BITFIGHTER_OWNER_PASSWORD` | `-ownerpassword` |
+| `BITFIGHTER_LEVEL_CHANGE_PASSWORD` | `-levelchangepassword` |
 | `BITFIGHTER_MAX_PLAYERS` | `-maxplayers` |
+| `BITFIGHTER_LEVELDIR` | `-leveldir` |
+| `BITFIGHTER_LEVELS` | `-levels ...` (last) |
+| `BITFIGHTER_REGISTER_MASTER` (default 1) | `0` sends `-master IP:127.0.0.1:9` |
+| `BITFIGHTER_MASTER` (default `IP:107.172.71.173:25955`) | `-master` when registration is on |
 
-Extra `docker run` args are appended as-is. `-dedicated` and `-rootdatadir /data` are always passed.
+Extra arguments are appended before `-levels`. `-dedicated` and `-rootdatadir /data` are always set.
 
-Healthcheck: `tnlping 127.0.0.1:$BITFIGHTER_PORT`.
+## Relay
+
+The browser WebSocket-to-UDP relay in `tools/udp-ws-relay` can run on this same VPS later. It is not part of this image. `packaging/docker/compose.yaml` has it commented out; it wants host networking so reply packets come back to the sockets it binds.
