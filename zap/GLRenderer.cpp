@@ -9,6 +9,10 @@
 #include "Point.h"
 #include "tnlVector.h"
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#endif
+
 #ifdef BF_USE_LEGACY_GL
 #  ifdef BF_USE_GLES
 #     include "SDL_opengles.h"
@@ -293,9 +297,25 @@ bool GLRenderer::isScissorEnabled()
    return scissorEnabled;
 }
 
+#ifdef __EMSCRIPTEN__
+// Window coordinates are CSS pixels. The drawable is CSS * devicePixelRatio.
+static F32 emscriptenDrawableScale()
+{
+   F32 scale = (F32)emscripten_get_device_pixel_ratio();
+   if(scale < 1.0f)
+      scale = 1.0f;
+   return scale;
+}
+#endif
+
 void GLRenderer::setScissor(S32 x, S32 y, S32 width, S32 height)
 {
+#ifdef __EMSCRIPTEN__
+   F32 scale = emscriptenDrawableScale();
+   glScissor((S32)(x * scale), (S32)(y * scale), (S32)(width * scale), (S32)(height * scale));
+#else
    glScissor(x, y, width, height);
+#endif
 }
 
 Point GLRenderer::getScissorPos()
@@ -303,7 +323,12 @@ Point GLRenderer::getScissorPos()
    GLint scissor[4];
    glGetIntegerv(GL_SCISSOR_BOX, scissor);
 
+#ifdef __EMSCRIPTEN__
+   F32 scale = emscriptenDrawableScale();
+   return Point(scissor[0] / scale, scissor[1] / scale);
+#else
    return Point(scissor[0], scissor[1]);
+#endif
 }
 
 Point GLRenderer::getScissorSize()
@@ -311,7 +336,12 @@ Point GLRenderer::getScissorSize()
    GLint scissor[4];
    glGetIntegerv(GL_SCISSOR_BOX, scissor);
 
+#ifdef __EMSCRIPTEN__
+   F32 scale = emscriptenDrawableScale();
+   return Point(scissor[2] / scale, scissor[3] / scale);
+#else
    return Point(scissor[2], scissor[3]);
+#endif
 }
 
 // Uses "nearest pixel" filtering when useLinearFiltering is false

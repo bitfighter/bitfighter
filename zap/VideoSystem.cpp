@@ -19,6 +19,11 @@
 
 #include "tnlLog.h"
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#  include <emscripten/html5.h>
+#endif
+
 #ifdef BF_USE_LEGACY_GL
 #  include "GLLegacyRenderer.h"
 #else
@@ -111,6 +116,9 @@ bool VideoSystem::init()
    DisplayManager::getScreenInfo()->init(mode.w, mode.h);
 
    S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+#ifdef __EMSCRIPTEN__
+   flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
 
    // Fake fullscreen might not be needed with SDL2 - I think it does the fast switching
    // on platforms that support it
@@ -285,6 +293,110 @@ void VideoSystem::debugPrintState(VideoSystem::videoSystem_st_t currentState)
 }
 
 
+#ifdef __EMSCRIPTEN__
+// Browser fullscreen is requested only for an explicit toggle. Startup and
+// resizes just re-fit the canvas the page already sized.
+static bool emscriptenFullscreenReason(VideoSystem::StateReason reason)
+{
+   return reason == VideoSystem::StateReasonToggle
+       || reason == VideoSystem::StateReasonModeDirectWindowed
+       || reason == VideoSystem::StateReasonModeDirectFullscreenStretched
+       || reason == VideoSystem::StateReasonModeDirectFullscreenUnstretched;
+}
+
+static bool emscriptenStateIsFullscreen(VideoSystem::videoSystem_st_t state)
+{
+   return state == VideoSystem::fullscreen_stretched_st
+       || state == VideoSystem::fullscreen_unstretched_st
+       || state == VideoSystem::fullscreen_editor_st;
+}
+
+// Keep the backbuffer at the CSS box times devicePixelRatio and letterbox the
+// 1066x600 canvas inside it. The page CSS owns the box; we do not resize it
+// to the game canvas.
+static void applyEmscriptenCanvas(ScreenInfo *screen, VideoSystem::videoSystem_st_t state,
+      VideoSystem::StateReason reason, DisplayMode &displayMode)
+{
+   if(emscriptenFullscreenReason(reason))
+   {
+      SDL_SetWindowFullscreen(screen->sdlWindow,
+            emscriptenStateIsFullscreen(state) ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+   }
+
+   double cssW = 0;
+   double cssH = 0;
+   emscripten_get_element_css_size("#canvas", &cssW, &cssH);
+
+   S32 width = (S32)floor(cssW + 0.5);
+   S32 height = (S32)floor(cssH + 0.5);
+   if(width < 1 || height < 1)
+   {
+      SDL_GetWindowSize(screen->sdlWindow, &width, &height);
+      if(width < 1)
+         width = 1;
+      if(height < 1)
+         height = 1;
+   }
+
+   // external_size: this updates the bitmap (CSS * pixel ratio) and the
+   // window size SDL reports, and leaves the CSS box alone.
+   S32 curW = 0;
+   S32 curH = 0;
+   SDL_GetWindowSize(screen->sdlWindow, &curW, &curH);
+   if(curW != width || curH != height)
+      SDL_SetWindowSize(screen->sdlWindow, width, height);
+
+   screen->init(width, height);
+   screen->setWindowSize(width, height);
+
+   // Same ortho and scissor the desktop unstretched fullscreen path uses.
+   screen->setOrtho(
+         -1 * screen->getHorizDrawMargin(),
+         screen->getGameCanvasWidth() + screen->getHorizDrawMargin(),
+         screen->getGameCanvasHeight() + screen->getVertDrawMargin(),
+         -1 * screen->getVertDrawMargin());
+   screen->setScissor(
+         screen->getHorizPhysicalMargin(),
+         screen->getVertPhysicalMargin(),
+         screen->getDrawAreaWidth(),
+         screen->getDrawAreaHeight());
+
+   if(state == VideoSystem::fullscreen_stretched_st)
+      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   else if(state == VideoSystem::fullscreen_unstretched_st)
+      displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   else
+      displayMode = DISPLAY_MODE_WINDOWED;
+
+   logprintf("Web canvas %dx%d margins %d,%d", width, height,
+         screen->getHorizPhysicalMargin(), screen->getVertPhysicalMargin());
+
+   // The canvas CSS box can change without a window resize (scrollbar, fullscreen).
+   // SDL only listens for the window event, so forward those here.
+   EM_ASM({
+      if (Module['bfCanvasWatch'])
+         return;
+      Module['bfCanvasWatch'] = true;
+      var canvas = document.getElementById('canvas');
+      if (!canvas || typeof ResizeObserver === 'undefined')
+         return;
+      var lastW = 0;
+      var lastH = 0;
+      new ResizeObserver(function() {
+         var rect = canvas.getBoundingClientRect();
+         var w = Math.round(rect.width);
+         var h = Math.round(rect.height);
+         if (w === lastW && h === lastH)
+            return;
+         lastW = w;
+         lastH = h;
+         window.dispatchEvent(new Event('resize'));
+      }).observe(canvas);
+   });
+}
+#endif
+
+
 // This is a state-machine to manage all the different video states.  It is
 // driven asynchronously
 void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
@@ -310,6 +422,12 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
    switch(currentState)
    {
       case init_st:
+#ifdef __EMSCRIPTEN__
+         // The page owns the canvas. A saved fullscreen mode must not request
+         // the browser fullscreen API during startup (no user gesture).
+         currentState = windowed_st;
+         break;
+#endif
          if(oldDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
             currentState = fullscreen_unstretched_st;
 
@@ -431,6 +549,9 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
 
    // Perform state actions
    // Now that we're in the state we want, alter the video params accordingly
+#ifdef __EMSCRIPTEN__
+   applyEmscriptenCanvas(screen, currentState, reason, displayMode);
+#else
    switch(currentState)
    {
       // We should have moved on by now!
@@ -567,6 +688,7 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
       default:
          break;
    }
+#endif
 
    //
    // END STATE MACHINE
@@ -625,7 +747,11 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    r.setClearColor( 0, 0, 0, 0 );
 
    // TODO High-DPI mode may change various OpenGL parameters below (and also
+#ifdef __EMSCRIPTEN__
+   r.setViewport(0, 0, drawWidth, drawHeight);
+#else
    r.setViewport(0, 0, windowWidth, windowHeight);
+#endif
 
    r.setMatrixMode(MatrixType::Projection);
    r.loadIdentity();
@@ -645,6 +771,7 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    // causing some lines to wrap around the screen, or by writing other
    // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
    // This is probably a bug in the Linux Intel graphics driver.
+   // Scissor is in window pixels. GLRenderer scales it on Emscripten.
    ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
    r.setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
 

@@ -45,8 +45,11 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 
    // If we are in the editor, we want to tell setMousePos that we are running in fullscreen stretched mode because it
    // will convert the mouse coordinate assuming no black bars at the margins.
+   // The web build letterboxes the editor too, so those bars stay in the transform.
+#ifndef __EMSCRIPTEN__
    if(currentUI->usesEditorScreenMode() && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+#endif
 
    DisplayManager::getScreenInfo()->setMousePos(x, y, reportedDisplayMode);
 }
@@ -436,12 +439,20 @@ void Event::onControllerRemoved(S32 deviceId)
 
 void Event::onResized(ClientGame *game, S32 width, S32 height)
 {
+#ifdef __EMSCRIPTEN__
+   // Browser fullscreen is a CSS resize. Re-letterbox instead of ignoring it.
+   (void)width;
+   (void)height;
+   VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonExternalResize);
+   return;
+#else
    // Ignore window resize events if we are in fullscreen mode.  This can occur
    // when you ALT-TAB away and back to the window
    if(VideoSystem::isFullscreen())
       return;
 
    VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonExternalResize);
+#endif
 }
 
 

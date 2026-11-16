@@ -47,6 +47,39 @@ void GL2Renderer::useShader(const Shader &shader)
    }
 }
 
+#ifdef __EMSCRIPTEN__
+// WebGL rejects a draw when any enabled attribute has no buffer, even if the
+// current program does not read it. Other shaders leave theirs enabled.
+static void disableUnusedAttribs(const Shader &shader)
+{
+   static GLint maxAttribs = 0;
+   if(maxAttribs == 0)
+   {
+      glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttribs);
+      if(maxAttribs > 16)
+         maxAttribs = 16;
+   }
+
+   bool used[16] = {};
+   const AttributeName names[] = {
+      AttributeName::VertexPosition,
+      AttributeName::VertexColor,
+      AttributeName::VertexUV
+   };
+
+   for(U32 n = 0; n < sizeof(names) / sizeof(names[0]); n++)
+   {
+      S32 loc = shader.getAttributeLocation(names[n]);
+      if(loc >= 0 && loc < maxAttribs)
+         used[loc] = true;
+   }
+
+   for(GLint i = 0; i < maxAttribs; i++)
+      if(!used[i])
+         glDisableVertexAttribArray((GLuint)i);
+}
+#endif
+
 // Static
 void GL2Renderer::create()
 {
@@ -59,6 +92,9 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	U32 start, U32 stride, U32 vertDimension)
 {
    useShader(mStaticShader);
+#ifdef __EMSCRIPTEN__
+   disableUnusedAttribs(mStaticShader);
+#endif
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
    mStaticShader.setMVP(MVP);
@@ -219,6 +255,9 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    useShader(mDynamicShader);
+#ifdef __EMSCRIPTEN__
+   disableUnusedAttribs(mDynamicShader);
+#endif
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
    mDynamicShader.setMVP(MVP);
@@ -271,6 +310,9 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    useShader(mTexturedShader);
+#ifdef __EMSCRIPTEN__
+   disableUnusedAttribs(mTexturedShader);
+#endif
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
    mTexturedShader.setMVP(MVP);
@@ -324,6 +366,9 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
    RenderType type, U32 start, U32 stride, U32 vertDimension, bool isAlphaTexture)
 {
    useShader(mColoredTextureShader);
+#ifdef __EMSCRIPTEN__
+   disableUnusedAttribs(mColoredTextureShader);
+#endif
 
 	// Uniforms
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();

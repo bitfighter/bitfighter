@@ -142,13 +142,24 @@ S32 ScreenInfo::getVertPhysicalMargin() const
 // Dimensions of black bars in physical pixels, based on current window mode
 S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode) const
 {
+#ifdef __EMSCRIPTEN__
+   // The web canvas is letterboxed in every mode, including the editor.
+   (void)mode;
+   return getHorizPhysicalMargin();
+#else
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getHorizPhysicalMargin() : 0;
+#endif
 }
 
 
 S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode) const
 {
+#ifdef __EMSCRIPTEN__
+   (void)mode;
+   return getVertPhysicalMargin();
+#else
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getVertPhysicalMargin() : 0;
+#endif
 }
 
 
