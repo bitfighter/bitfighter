@@ -15,6 +15,10 @@
 #include "SDL.h"
 #include "SDL_stdinc.h"
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#endif
+
 #include <map>
 
 
@@ -72,11 +76,69 @@ Joystick::~Joystick()
 }
 
 
+#ifdef __EMSCRIPTEN__
+// Seen a browser pad whose mapping is "standard". The default SDL mapping
+// then applies to every pad, so install it only after that report.
+static bool sBrowserStandardMapping = false;
+
+static void installBrowserStandardMapping()
+{
+   if(sBrowserStandardMapping || !SDL_WasInit(SDL_INIT_GAMECONTROLLER))
+      return;
+
+   // W3C standard order is SDL's controller order. Triggers are buttons.
+   const char *mapping =
+      "default,Browser Standard Gamepad,"
+      "a:b0,b:b1,x:b2,y:b3,"
+      "leftshoulder:b4,rightshoulder:b5,lefttrigger:b6,righttrigger:b7,"
+      "back:b8,start:b9,leftstick:b10,rightstick:b11,"
+      "dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,guide:b16,"
+      "leftx:a0,lefty:a1,rightx:a2,righty:a3,"
+      "platform:Emscripten,";
+
+   if(SDL_GameControllerAddMapping(mapping) >= 0)
+      sBrowserStandardMapping = true;
+}
+
+extern "C" EMSCRIPTEN_KEEPALIVE void bfNoteStandardGamepad()
+{
+   installBrowserStandardMapping();
+}
+
+// Capture runs before SDL's bubble listener, so the mapping exists by the
+// time SDL decides whether the new device is a game controller.
+static void watchForStandardGamepad()
+{
+   EM_ASM({
+      if (Module['bfPadHook'])
+         return;
+      Module['bfPadHook'] = true;
+      var note = function(gp) {
+         if (!gp || gp.mapping !== 'standard')
+            return;
+         if (typeof _bfNoteStandardGamepad === 'function')
+            _bfNoteStandardGamepad();
+      };
+      window.addEventListener('gamepadconnected', function(e) { note(e.gamepad); }, true);
+      if (navigator.getGamepads) {
+         var pads = navigator.getGamepads();
+         for (var i = 0; i < pads.length; i++)
+            note(pads[i]);
+      }
+   });
+}
+#endif
+
+
 // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
 bool Joystick::initJoystick(GameSettings *settings)
 {
    GameSettings::DetectedControllerList.clear();
    GameSettings::UseControllerIndex = -1;
+
+#ifdef __EMSCRIPTEN__
+   watchForStandardGamepad();
+#endif
 
    // Allows multiple joysticks with each using a copy of Bitfighter
    SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
@@ -87,6 +149,11 @@ bool Joystick::initJoystick(GameSettings *settings)
       logprintf("Unable to initialize the game controller subsystem");
       return false;
    }
+
+#ifdef __EMSCRIPTEN__
+   // A pad that was already present was noted before the subsystem existed.
+   installBrowserStandardMapping();
+#endif
 
    // Load the default controller database
    SDL_GameControllerAddMappingsFromFile(

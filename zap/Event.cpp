@@ -156,7 +156,7 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
 
       // TODO Use these methods to trigger controller loading/unloading
       case SDL_CONTROLLERDEVICEADDED:
-         onControllerAdded(event->cdevice.which);
+         onControllerAdded(game, event->cdevice.which);
          break;
 
       case SDL_CONTROLLERDEVICEREMOVED:
@@ -406,11 +406,23 @@ void Event::onControllerButtonUp(UserInterface *currentUI, U8 deviceId, U8 butto
 }
 
 
-void Event::onControllerAdded(S32 deviceId)
+void Event::onControllerAdded(ClientGame *game, S32 deviceId)
 {
-//   const char *joystickName = SDL_GameControllerNameForIndex(deviceId);
-
-//   logprintf("Found %s", joystickName);
+#ifdef __EMSCRIPTEN__
+   // A browser pad shows up on the first button press, after startup init.
+   // Open it and take joystick mode, as desktop does when a pad is already
+   // there. Later connects refresh the device but leave the chosen mode.
+   static bool openedBefore = false;
+   (void)deviceId;
+   GameSettings *settings = game->getSettings();
+   if(!Joystick::initJoystick(settings))
+      return;
+   if(Joystick::enableJoystick(settings, openedBefore))
+      openedBefore = true;
+#else
+   (void)game;
+   (void)deviceId;
+#endif
 }
 
 
