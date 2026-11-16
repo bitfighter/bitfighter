@@ -74,9 +74,16 @@ static void disableUnusedAttribs(const Shader &shader)
          used[loc] = true;
    }
 
+   // glVertexAttribPointer does not re-enable an array. A static draw disables
+   // vertexUV; the next glyph quad must turn it back on or every vertex
+   // samples UV (0, 0) and the letter fills solid.
    for(GLint i = 0; i < maxAttribs; i++)
-      if(!used[i])
+   {
+      if(used[i])
+         glEnableVertexAttribArray((GLuint)i);
+      else
          glDisableVertexAttribArray((GLuint)i);
+   }
 }
 #endif
 
