@@ -154,6 +154,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 #ifdef __EMSCRIPTEN__
 #  include <emscripten.h>
+#  include <cstdlib>
 #  include "tnlLog.h"
 #endif
 
@@ -412,13 +413,14 @@ void idle()
 
 #ifdef __EMSCRIPTEN__
 // ?bfTestCrash=1 aborts from the game loop so the wasm stack has C++ names.
-static void bfTestCrashNow()
+static void __attribute__((noinline)) bfTestCrashNow()
 {
-   // abort() from this frame so the wasm stack still has the game loop on it.
-   EM_ASM({ Module.abort('bfTestCrash'); });
+   // libc abort reaches the runtime's abort(), which calls Module.onAbort
+   // while this frame is still on the wasm stack.
+   abort();
 }
 
-static void bfTestCrashFromGameLoop()
+static void __attribute__((noinline)) bfTestCrashFromGameLoop()
 {
    bfTestCrashNow();
 }

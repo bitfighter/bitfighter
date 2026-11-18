@@ -242,8 +242,19 @@
         bfPushLog('FATAL ' + source + ': ' + message);
         if (stack)
           bfPushLog(stack);
-        if (bfCrashActive)
+        // onAbort runs before the thrown RuntimeError. Keep the wasm stack
+        // from whichever handler actually has it.
+        if (bfCrashActive) {
+          if (bfModalReport && stack && stack.indexOf('.wasm') >= 0 &&
+              String(bfModalReport.error.stack || '').indexOf('.wasm') < 0) {
+            bfModalReport.error.stack = stack;
+            if (message)
+              bfModalReport.error.message = message;
+            bfSaveCrash(bfModalReport);
+            bfShowModal(bfModalReport);
+          }
           return;
+        }
         bfCrashActive = true;
         var report = bfBuildReport('crash', source, message, stack, '');
         bfSaveCrash(report);
