@@ -1143,7 +1143,12 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
    updateMovementParams(effect);
    updateGain(effect, sfxVol, voiceVol);
 
+   alGetError();
    alSourcePlay(source);
+   ALenum alErr = alGetError();
+   if(alErr != AL_NO_ERROR)
+      logprintf(LogConsumer::LogConnection, "SFX play failed: OpenAL error %d, index %d",
+            (int)alErr, effect->mSFXIndex);
 }
 
 

@@ -25,6 +25,7 @@
 
 #include "Colors.h"
 #include "stringUtils.h"
+#include "tnlLog.h"
 #ifdef __EMSCRIPTEN__
 #include "emscriptenSocket.h"
 #endif
@@ -348,6 +349,7 @@ Color ShipExplosionColors[] = {
 
 void ClientGame::emitShipExplosion(const Point &pos)
  {
+   logprintf(LogConsumer::LogConnection, "Ship exploded at %.0f,%.0f", pos.x, pos.y);
    playSoundEffect(SFXShipExplode, pos);
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;

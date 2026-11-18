@@ -154,6 +154,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 #ifdef __EMSCRIPTEN__
 #  include <emscripten.h>
+#  include "tnlLog.h"
 #endif
 
 
@@ -410,9 +411,50 @@ void idle()
 
 
 #ifdef __EMSCRIPTEN__
+// ?bfTestCrash=1 aborts from the game loop so the wasm stack has C++ names.
+static void bfTestCrashNow()
+{
+   // abort() from this frame so the wasm stack still has the game loop on it.
+   EM_ASM({ Module.abort('bfTestCrash'); });
+}
+
+static void bfTestCrashFromGameLoop()
+{
+   bfTestCrashNow();
+}
+
+static void bfMaybeTestCrash()
+{
+   static bool checked = false;
+   static bool armed = false;
+   static U32 when = 0;
+
+   if(!checked)
+   {
+      checked = true;
+      int flag = EM_ASM_INT({
+         try {
+            return new URLSearchParams(location.search).get('bfTestCrash') === '1' ? 1 : 0;
+         } catch (e) {
+            return 0;
+         }
+      });
+      if(flag)
+      {
+         armed = true;
+         when = Platform::getRealMilliseconds() + 4000;
+         logprintf(LogConsumer::LogConnection, "bfTestCrash will abort in 4 seconds");
+      }
+   }
+
+   if(armed && Platform::getRealMilliseconds() >= when)
+      bfTestCrashFromGameLoop();
+}
+
 // C linkage so emscripten_set_main_loop can take the pointer directly.
 extern "C" void bitfighter_emscripten_main_loop()
 {
+   bfMaybeTestCrash();
    idle();
 }
 #endif
@@ -1240,8 +1282,11 @@ int main(int argc, char **argv)
 
 #ifdef __EMSCRIPTEN__
    // There is no -inidir flag. Standalone mode would write bitfighter.ini into
-   // the preloaded asset tree, which a reload wipes. Settings live on IDBFS.
+   // the preloaded asset tree, which a reload wipes. Settings and the text
+   // log live on IDBFS. SQLite stays where resolveDirs put it; IDBFS file
+   // locking is a poor fit for that database.
    folderManager->iniDir = "/persist";
+   folderManager->logDir = "/persist";
 #endif
 
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the

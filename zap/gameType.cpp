@@ -35,6 +35,7 @@
 
 #include "stringUtils.h"
 #include "MathUtils.h"
+#include "tnlLog.h"
 
 #include "tnlThread.h"
 #include <math.h>
@@ -4414,6 +4415,11 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
+   TNL::logprintf(TNL::LogConsumer::LogConnection, "Kill: %s by %s (%s)",
+         victim.getString(),
+         killer.isNull() ? "?" : killer.getString(),
+         killerDescr.getString());
+
    if(killer)  // Known killer, was self, robot, or another player
    {
       if(killer == victim)
