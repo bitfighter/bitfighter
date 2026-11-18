@@ -401,7 +401,8 @@
         onAbort(what) {
           var stack = '';
           try { stack = (new Error('abort')).stack || ''; } catch (e) {}
-          bfFatal('onAbort', String(what), stack);
+          var message = (what === undefined || what === null || what === '') ? 'Aborted' : String(what);
+          bfFatal('onAbort', message, stack);
         },
         canvas: canvasElement,
         setStatus: setStatus,
