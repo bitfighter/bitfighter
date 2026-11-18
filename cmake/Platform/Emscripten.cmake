@@ -25,9 +25,37 @@ set(EMSCRIPTEN_LINK_FLAGS
 	-sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=134217728 -sSTACK_SIZE=5242880 \
 	-sFORCE_FILESYSTEM=1 \
 	-lidbfs.js -lopenal -lwebsocket.js \
-	--shell-file ${CMAKE_SOURCE_DIR}/cmake/emscripten/shell.html \
 	--preload-file ${CMAKE_SOURCE_DIR}/resource@/bitfighter"
 )
+
+# The shell is copied so the link can stamp the build commit and time.
+# @keyframes in the CSS is not an @VAR@ and is left alone.
+set(BF_BUILD_COMMIT "unknown")
+execute_process(
+	COMMAND git rev-parse --short=12 HEAD
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	OUTPUT_VARIABLE BF_BUILD_COMMIT
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	ERROR_QUIET
+)
+if(BF_BUILD_COMMIT STREQUAL "")
+	set(BF_BUILD_COMMIT "unknown")
+endif()
+string(TIMESTAMP BF_BUILD_TIME "%Y-%m-%dT%H:%M:%SZ" UTC)
+configure_file(
+	${CMAKE_SOURCE_DIR}/cmake/emscripten/shell.html
+	${CMAKE_BINARY_DIR}/emscripten-shell.html
+	@ONLY
+)
+
+# Names stay in the wasm name section at -O3. The symbol map is staged
+# next to the site for crashes the browser still minifies.
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BF_BUILD_TYPE_UPPER)
+if(BF_BUILD_TYPE_UPPER STREQUAL "RELEASE")
+	string(APPEND EMSCRIPTEN_LINK_FLAGS " --profiling-funcs --emit-symbol-map")
+endif()
+
+string(APPEND EMSCRIPTEN_LINK_FLAGS " --shell-file ${CMAKE_BINARY_DIR}/emscripten-shell.html")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMSCRIPTEN_LINK_FLAGS}")
 

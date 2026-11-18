@@ -54,6 +54,10 @@ jobs:
           cp exe/bitfighter.html site/index.html
           cp exe/bitfighter.html site/bitfighter.html
           cp exe/bitfighter.js exe/bitfighter.wasm exe/bitfighter.data site/
+          # emcc names the map after the html output. Publish it as
+          # bitfighter.js.symbols, next to bitfighter.js.
+          test -f exe/bitfighter.html.symbols
+          cp exe/bitfighter.html.symbols site/bitfighter.js.symbols
           ls -lh site
 
       - name: Setup Pages
