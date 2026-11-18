@@ -141,8 +141,62 @@
         return text.length;
       }
 
-      function bfBuildReport(kind, source, message, stack, note) {
+      // ExitStatus and the emscripten "unwind" abort are a normal process
+      // exit, not a crash. Firefox reports the object as [object Object].
+      function bfIsBenignExit(value, message) {
+        var name = '';
+        if (value && typeof value === 'object')
+          name = value.name || (value.constructor && value.constructor.name) || '';
+        if (name === 'ExitStatus' || name === 'unwind')
+          return true;
+        var text = typeof message === 'string' ? message : (typeof value === 'string' ? value : '');
+        if (text === 'unwind' || /unwind$/.test(text) || text.indexOf('ExitStatus') >= 0 || /^program exited/i.test(text))
+          return true;
+        return false;
+      }
+
+      function bfSerializeThrowable(value) {
+        if (value instanceof Error)
+          return { message: value.message || String(value), stack: value.stack || '', name: value.name || '' };
+        if (typeof value === 'string' || value == null)
+          return { message: String(value), stack: '', name: '' };
+        var name = value.name ? String(value.name) : '';
+        var message = value.message != null ? String(value.message) : '';
+        var ctor = (value.constructor && value.constructor.name) ? String(value.constructor.name) : '';
+        var detail = '';
+        try { detail = JSON.stringify(value); } catch (e) { detail = ''; }
+        if (!message || message === '[object Object]')
+          message = name || ctor || detail || String(value);
+        return {
+          message: message,
+          stack: value.stack ? String(value.stack) : '',
+          name: name,
+          status: value.status,
+          ctor: ctor,
+          detail: detail
+        };
+      }
+
+      function bfAttachErrorExtras(error, extra) {
+        if (!extra)
+          return;
+        if (extra.file) error.file = String(extra.file);
+        if (extra.line) error.line = extra.line;
+        if (extra.column) error.column = extra.column;
+        if (extra.name) error.name = String(extra.name);
+        if (extra.status !== undefined && extra.status !== null) error.status = extra.status;
+        if (extra.ctor) error.ctor = String(extra.ctor);
+        if (extra.detail) error.detail = String(extra.detail).slice(0, 2000);
+      }
+
+      function bfBuildReport(kind, source, message, stack, note, extra) {
         var canvas = document.getElementById('canvas');
+        var error = {
+          message: message || '',
+          stack: stack || '',
+          source: source
+        };
+        bfAttachErrorExtras(error, extra);
         return {
           schema: 1,
           kind: kind,
@@ -161,11 +215,7 @@
             canvasH: canvas ? canvas.height : 0
           },
           gamepads: bfGamepads(),
-          error: {
-            message: message || '',
-            stack: stack || '',
-            source: source
-          },
+          error: error,
           logs: bfLogs.slice(),
           note: String(note || '').slice(0, 2000)
         };
@@ -182,11 +232,15 @@
           userAgent: report.userAgent,
           screen: report.screen,
           gamepads: report.gamepads,
-          error: {
-            message: report.error.message || '',
-            stack: report.error.stack || '',
-            source: report.error.source
-          },
+          error: (function () {
+            var error = {
+              message: report.error.message || '',
+              stack: report.error.stack || '',
+              source: report.error.source
+            };
+            bfAttachErrorExtras(error, report.error);
+            return error;
+          })(),
           logs: report.logs.slice(),
           note: String(report.note || '').slice(0, 2000)
         };
@@ -238,7 +292,10 @@
         document.getElementById('bf-crash-send').disabled = false;
       }
 
-      function bfFatal(source, message, stack) {
+      function bfFatal(source, message, stack, extra) {
+        if (!stack) {
+          try { stack = (new Error(source)).stack || ''; } catch (e) { stack = ''; }
+        }
         bfPushLog('FATAL ' + source + ': ' + message);
         if (stack)
           bfPushLog(stack);
@@ -256,7 +313,7 @@
           return;
         }
         bfCrashActive = true;
-        var report = bfBuildReport('crash', source, message, stack, '');
+        var report = bfBuildReport('crash', source, message, stack, '', extra);
         bfSaveCrash(report);
         bfShowModal(report);
         if (spinnerElement)
@@ -399,6 +456,8 @@
           }
         },
         onAbort(what) {
+          if (bfIsBenignExit(what, what))
+            return;
           var stack = '';
           try { stack = (new Error('abort')).stack || ''; } catch (e) {}
           var message = (what === undefined || what === null || what === '') ? 'Aborted' : String(what);
@@ -484,20 +543,41 @@
         attempt();
       })();
       window.onerror = function (message, source, lineno, colno, error) {
-        var stack = (error && error.stack) ? error.stack : '';
+        if (bfIsBenignExit(error, message))
+          return true;
+        var info = bfSerializeThrowable(error);
+        var stack = info.stack || '';
+        var text = info.message;
+        if (!text || text === '[object Object]')
+          text = String(message);
         console.error(error || message);
-        bfFatal('onerror', String(message), stack);
+        bfFatal('onerror', text, stack, {
+          file: source,
+          line: lineno,
+          column: colno,
+          name: info.name,
+          status: info.status,
+          ctor: info.ctor,
+          detail: info.detail
+        });
         setStatus('Exception thrown, see JavaScript console');
         setStatus = function (text) {
           if (text) console.error('[post-exception status] ' + text);
         };
+        return true;
       };
       window.addEventListener('unhandledrejection', function (event) {
         var reason = event.reason;
-        var message = (reason && reason.message) ? reason.message : String(reason);
-        var stack = (reason && reason.stack) ? reason.stack : '';
+        if (bfIsBenignExit(reason, reason && reason.message))
+          return;
+        var info = bfSerializeThrowable(reason);
         console.error(reason);
-        bfFatal('unhandledrejection', message, stack);
+        bfFatal('unhandledrejection', info.message, info.stack, {
+          name: info.name,
+          status: info.status,
+          ctor: info.ctor,
+          detail: info.detail
+        });
       });
 
       document.getElementById('bf-send-logs').addEventListener('click', function () {

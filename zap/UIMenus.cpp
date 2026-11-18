@@ -971,7 +971,10 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("HIGH SCORES",            highScoresSelectedCallback, "", KEY_S));
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
    addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback,    "", KEY_C));
+#ifndef __EMSCRIPTEN__
+   // exit() on the web is an ExitStatus exception. Close the tab to leave.
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
+#endif
 }
 
 
@@ -1093,7 +1096,9 @@ void MainMenuUserInterface::showUpgradeAlert()
 
 void MainMenuUserInterface::onEscape()
 {
+#ifndef __EMSCRIPTEN__
    shutdownBitfighter();    // Quit!
+#endif
 }
 
 
@@ -1894,7 +1899,9 @@ void NameEntryUserInterface::renderExtras() const
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
+#ifndef __EMSCRIPTEN__
    shutdownBitfighter();
+#endif
 }
 
 
