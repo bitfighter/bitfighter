@@ -65,12 +65,20 @@ namespace Zap
    BINDING( BINDING_LOAD_PRESET_4,      "LoadLoadoutPreset4",  false, keyLoadPreset4,    KEY_ALT_4,        KEY_ALT_4        ) \
    BINDING( BINDING_LOAD_PRESET_5,      "LoadLoadoutPreset5",  false, keyLoadPreset5,    KEY_ALT_5,        KEY_ALT_5        ) \
    BINDING( BINDING_LOAD_PRESET_6,      "LoadLoadoutPreset6",  false, keyLoadPreset6,    KEY_ALT_6,        KEY_ALT_6        ) \
+   BINDING( BINDING_LOAD_PRESET_7,      "LoadLoadoutPreset7",  false, keyLoadPreset7,    KEY_ALT_7,        KEY_ALT_7        ) \
+   BINDING( BINDING_LOAD_PRESET_8,      "LoadLoadoutPreset8",  false, keyLoadPreset8,    KEY_ALT_8,        KEY_ALT_8        ) \
+   BINDING( BINDING_LOAD_PRESET_9,      "LoadLoadoutPreset9",  false, keyLoadPreset9,    KEY_ALT_9,        KEY_ALT_9        ) \
+   BINDING( BINDING_LOAD_PRESET_10,     "LoadLoadoutPreset10", false, keyLoadPreset10,   KEY_ALT_0,        KEY_ALT_0        ) \
    BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  false, keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
    BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  false, keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
    BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  false, keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
    BINDING( BINDING_SAVE_PRESET_4,      "SaveLoadoutPreset4",  false, keySavePreset4,    KEY_CTRL_4,       KEY_CTRL_4       ) \
    BINDING( BINDING_SAVE_PRESET_5,      "SaveLoadoutPreset5",  false, keySavePreset5,    KEY_CTRL_5,       KEY_CTRL_5       ) \
    BINDING( BINDING_SAVE_PRESET_6,      "SaveLoadoutPreset6",  false, keySavePreset6,    KEY_CTRL_6,       KEY_CTRL_6       ) \
+   BINDING( BINDING_SAVE_PRESET_7,      "SaveLoadoutPreset7",  false, keySavePreset7,    KEY_CTRL_7,       KEY_CTRL_7       ) \
+   BINDING( BINDING_SAVE_PRESET_8,      "SaveLoadoutPreset8",  false, keySavePreset8,    KEY_CTRL_8,       KEY_CTRL_8       ) \
+   BINDING( BINDING_SAVE_PRESET_9,      "SaveLoadoutPreset9",  false, keySavePreset9,    KEY_CTRL_9,       KEY_CTRL_9       ) \
+   BINDING( BINDING_SAVE_PRESET_10,     "SaveLoadoutPreset10", false, keySavePreset10,   KEY_CTRL_0,       KEY_CTRL_0       ) \
 /*---------------------------------------------------------------------------------------------------------------------------*/
 
 
