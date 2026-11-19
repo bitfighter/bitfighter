@@ -1112,6 +1112,22 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
 }
 
 
+#ifdef __EMSCRIPTEN__
+// PannerNode.maxDistance must be > 0, and for the linear model it must also
+// be greater than refDistance. OpenAL accepts 0, which the relative flag,
+// goal, and achievement profiles use. Set refDistance first: lowering
+// maxDistance while the previous refDistance is still larger throws.
+static void emscriptenDistanceParams(F32 refDistance, F32 maxDistance, F32 &outRef, F32 &outMax)
+{
+   outRef = refDistance >= 0.0f ? refDistance : 0.0f;
+   outMax = maxDistance;
+   if(!(outMax > outRef))
+      outMax = outRef + 0.01f;
+   if(!(outMax > 0.0f))
+      outMax = 0.01f;
+}
+#endif
+
 void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 {
    ALuint source = gFreeSources[effect->mSourceIndex];
@@ -1136,8 +1152,13 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
       alSourcei(source, AL_BUFFER, gSfxBuffers[effect->mSFXIndex]);
 
    alSourcei(source, AL_LOOPING, effect->mProfile->isLooping);
-   alSourcef(source, AL_REFERENCE_DISTANCE, effect->mProfile->fullGainDistance);
-   alSourcef(source, AL_MAX_DISTANCE, effect->mProfile->zeroGainDistance);
+   F32 refDistance = effect->mProfile->fullGainDistance;
+   F32 maxDistance = effect->mProfile->zeroGainDistance;
+#ifdef __EMSCRIPTEN__
+   emscriptenDistanceParams(refDistance, maxDistance, refDistance, maxDistance);
+#endif
+   alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
+   alSourcef(source, AL_MAX_DISTANCE, maxDistance);
    alSourcef(source, AL_ROLLOFF_FACTOR, 1);
 
    updateMovementParams(effect);
