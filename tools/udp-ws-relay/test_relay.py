@@ -146,6 +146,24 @@ async def scenario():
     await ws.send(struct.pack("!BIIHH", SEND, 1, ip_of("127.0.0.1"), 28444, 4) + b"back")
     check("punch reply delivered", await wait_packet(punch) == b"back")
 
+    # A bind that cannot get its port must not close the session or the
+    # socket that already worked.
+    busy = udp_bind(28991)
+    await ws.send(struct.pack("!BIH", BIND, 2, 28991))
+    closed = False
+    got = None
+    try:
+        got = await asyncio.wait_for(ws.recv(), 0.4)
+    except asyncio.TimeoutError:
+        got = None
+    except (asyncio.IncompleteReadError, ConnectionResetError):
+        closed = True
+    check("in-use bind did not succeed", got is None and not closed)
+    check("session open after in-use bind", not closed)
+    await ws.send(struct.pack("!BIIHH", SEND, 1, ip_of("127.0.0.1"), 28000, 5) + b"still")
+    check("first socket still delivers", await wait_packet(game) == b"still")
+    busy.close()
+
     for sock in (game, other, named, master, punch):
         sock.close()
     ws.writer.close()

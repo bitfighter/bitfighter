@@ -33,6 +33,7 @@ struct Packet
 struct RelaySock
 {
    U32 id;
+   U16 port;
    bool bound;
    std::deque<Packet> inbox;
    std::deque<std::vector<U8>> waiting;
@@ -96,6 +97,29 @@ void flushEarly()
       std::vector<U8> frame = gEarly.front();
       gEarly.pop_front();
       emscripten_websocket_send_binary(gWs, frame.data(), frame.size());
+   }
+}
+
+void sendBind(U32 id, U16 port)
+{
+   std::vector<U8> frame(7);
+   frame[0] = BIND;
+   writeU32(&frame[1], id);
+   writeU16(&frame[5], port);
+   sendFrame(frame);
+}
+
+// The relay drops every UDP socket when the WebSocket drops. Ask for them
+// again before any SEND that was queued during the outage.
+void rebindSockets()
+{
+   for(std::map<U32, RelaySock>::iterator it = gSocks.begin(); it != gSocks.end(); ++it)
+   {
+      if(!it->second.bound)
+         continue;
+      it->second.bound = false;
+      sendBind(it->second.id, it->second.port);
+      logprintf(LogConsumer::LogUDP, "UDP relay rebind socket %u port %u", it->second.id, it->second.port);
    }
 }
 
@@ -173,6 +197,7 @@ EM_BOOL onOpen(int, const EmscriptenWebSocketOpenEvent *, void *userData)
    gFirstAttempt = emscripten_get_now();
    gOpenedAt = gFirstAttempt;
    logprintf(LogConsumer::LogUDP, "UDP relay websocket open: %s", gUrl.c_str());
+   rebindSockets();
    flushEarly();
    return EM_TRUE;
 }
@@ -326,14 +351,11 @@ bool TNL::emscriptenRelayBind(S32 &outFd, U16 port)
    ensureSocket();
    RelaySock sock;
    sock.id = gNextId++;
+   sock.port = port;
    sock.bound = false;
    gSocks[sock.id] = sock;
 
-   std::vector<U8> frame(7);
-   frame[0] = BIND;
-   writeU32(&frame[1], sock.id);
-   writeU16(&frame[5], port);
-   sendFrame(frame);
+   sendBind(sock.id, port);
 
    outFd = S32(sock.id);
    return true;

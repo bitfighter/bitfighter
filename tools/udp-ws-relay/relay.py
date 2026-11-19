@@ -258,9 +258,15 @@ async def bind_socket(client, sock_id, port):
     def factory():
         return UDP(client, sock_id)
 
-    transport, _protocol = await loop.create_datagram_endpoint(
-        factory, local_addr=("0.0.0.0", port)
-    )
+    try:
+        transport, _protocol = await loop.create_datagram_endpoint(
+            factory, local_addr=("0.0.0.0", port)
+        )
+    except OSError as exc:
+        # EADDRINUSE / EACCES must not drop the WebSocket. Other sockets on
+        # this client keep their UDP ports.
+        print(f"bind sock={sock_id} requested={port} failed: {exc}", flush=True)
+        return
     bound = transport.get_extra_info("sockname")[1]
     client.socks[sock_id] = transport
     client.send_frame(struct.pack("!BIH", BIND, sock_id, bound))
