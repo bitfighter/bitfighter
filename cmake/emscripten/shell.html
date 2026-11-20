@@ -12,7 +12,6 @@
       div.emscripten_border { border: 1px solid black; }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; background-color: black; display: block; width: 100%; height: calc(100vh - 11rem); }
-      p.hint { text-align: center; font-size: 14px; margin: 8px; }
       #toolbar { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 6px 10px; background: #1b1b1b; }
       #toolbar button { background: #163; color: #efe; border: 1px solid #3a6; padding: 6px 14px; font: inherit; cursor: pointer; }
       #bf-send-logs { background: transparent; color: #9cf; border: 0; text-decoration: underline; padding: 6px 8px; }
@@ -54,11 +53,6 @@
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>
     </div>
-    <div id="toolbar">
-      <button id="fullscreen" type="button">Fullscreen</button>
-      <button id="bf-send-logs" type="button">Send logs</button>
-      <span class="hint">Click HOST GAME, then START HOSTING. UDP uses wss://bitfighter-web-relay.spacewalkpublishing.us unless you pass ?relay=ws://host:port or ?relay=off. H is in-game help.</span>
-    </div>
     <div id="bf-crash-banner" hidden>
       A previous crash was not sent.
       <button id="bf-crash-banner-send" type="button">Send logs for debugging</button>
@@ -66,6 +60,10 @@
     </div>
     <div class="emscripten_border">
       <canvas class="emscripten" id="canvas" width="1280" height="720" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+    </div>
+    <div id="toolbar">
+      <button id="fullscreen" type="button">Fullscreen</button>
+      <button id="bf-send-logs" type="button">Send logs</button>
     </div>
     <textarea class="emscripten" id="output" rows="8"></textarea>
     <div id="bf-crash-modal" hidden>
