@@ -45,8 +45,11 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 
    // If we are in the editor, we want to tell setMousePos that we are running in fullscreen stretched mode because it
    // will convert the mouse coordinate assuming no black bars at the margins.
+   // The web build letterboxes the editor too, so those bars stay in the transform.
+#ifndef __EMSCRIPTEN__
    if(currentUI->usesEditorScreenMode() && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+#endif
 
    DisplayManager::getScreenInfo()->setMousePos(x, y, reportedDisplayMode);
 }
@@ -156,7 +159,7 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
 
       // TODO Use these methods to trigger controller loading/unloading
       case SDL_CONTROLLERDEVICEADDED:
-         onControllerAdded(event->cdevice.which);
+         onControllerAdded(game, event->cdevice.which);
          break;
 
       case SDL_CONTROLLERDEVICEREMOVED:
@@ -406,11 +409,23 @@ void Event::onControllerButtonUp(UserInterface *currentUI, U8 deviceId, U8 butto
 }
 
 
-void Event::onControllerAdded(S32 deviceId)
+void Event::onControllerAdded(ClientGame *game, S32 deviceId)
 {
-//   const char *joystickName = SDL_GameControllerNameForIndex(deviceId);
-
-//   logprintf("Found %s", joystickName);
+#ifdef __EMSCRIPTEN__
+   // A browser pad shows up on the first button press, after startup init.
+   // Open it and take joystick mode, as desktop does when a pad is already
+   // there. Later connects refresh the device but leave the chosen mode.
+   static bool openedBefore = false;
+   (void)deviceId;
+   GameSettings *settings = game->getSettings();
+   if(!Joystick::initJoystick(settings))
+      return;
+   if(Joystick::enableJoystick(settings, openedBefore))
+      openedBefore = true;
+#else
+   (void)game;
+   (void)deviceId;
+#endif
 }
 
 
@@ -424,12 +439,20 @@ void Event::onControllerRemoved(S32 deviceId)
 
 void Event::onResized(ClientGame *game, S32 width, S32 height)
 {
+#ifdef __EMSCRIPTEN__
+   // Browser fullscreen is a CSS resize. Re-letterbox instead of ignoring it.
+   (void)width;
+   (void)height;
+   VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonExternalResize);
+   return;
+#else
    // Ignore window resize events if we are in fullscreen mode.  This can occur
    // when you ALT-TAB away and back to the window
    if(VideoSystem::isFullscreen())
       return;
 
    VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonExternalResize);
+#endif
 }
 
 

@@ -33,6 +33,9 @@
 #ifdef HAVE_MINIMP3
 #include "decoders/mp3.hpp"
 #endif
+#ifdef HAVE_MODPLUG
+#include "decoders/modplug.hpp"
+#endif
 
 #include "devicemanager.h"
 #include "device.h"
@@ -244,6 +247,9 @@ const DecoderEntryPair sDefaultDecoders[] = {
 #endif
 #ifdef HAVE_MINIMP3
     { "_alure_int_minimp3", alure::MakeUnique<alure::Mp3DecoderFactory>() },
+#endif
+#ifdef HAVE_MODPLUG
+    { "_alure_int_modplug", alure::MakeUnique<alure::ModPlugDecoderFactory>() },
 #endif
 };
 alure::Vector<DecoderEntryPair> sDecoders;
@@ -994,8 +1000,12 @@ BufferOrExceptT ContextImpl::doCreateBufferAsync(StringView name, size_t name_ha
 
     auto buffer = MakeUnique<BufferImpl>(*this, bid, srate, chans, type, name, name_hash);
 
+#ifndef __EMSCRIPTEN__
+    // Browsers cannot spawn this thread without pthreads/SharedArrayBuffer,
+    // which GitHub Pages does not enable. Bitfighter decodes on the caller.
     if(mThread.get_id() == std::thread::id())
         mThread = std::thread(std::mem_fn(&ContextImpl::backgroundProc), this);
+#endif
 
     PendingPromise *pf = nullptr;
     if(mPendingTail == mPendingCurrent.load(std::memory_order_acquire))
@@ -1513,8 +1523,10 @@ void ContextImpl::removePlayingSource(SourceImpl *source)
 void ContextImpl::addStream(SourceImpl *source)
 {
     std::lock_guard<std::mutex> lock(mSourceStreamMutex);
+#ifndef __EMSCRIPTEN__
     if(mThread.get_id() == std::thread::id())
         mThread = std::thread(std::mem_fn(&ContextImpl::backgroundProc), this);
+#endif
     auto iter = std::lower_bound(mStreamingSources.begin(), mStreamingSources.end(), source);
     if(iter == mStreamingSources.end() || *iter != source)
         mStreamingSources.insert(iter, source);

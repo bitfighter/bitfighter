@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Bitfighter</title>
+    <style>
+      body { margin: 0; background: #111; color: #ddd; font-family: sans-serif; }
+      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+      textarea.emscripten { font-family: monospace; width: 80%; }
+      div.emscripten { text-align: center; }
+      div.emscripten_border { border: 1px solid black; }
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten { border: 0px none; background-color: black; display: block; width: 100%; height: calc(100vh - 11rem); }
+      #toolbar { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 6px 10px; background: #1b1b1b; }
+      #toolbar button { background: #163; color: #efe; border: 1px solid #3a6; padding: 6px 14px; font: inherit; cursor: pointer; }
+      #bf-send-logs { background: transparent; color: #9cf; border: 0; text-decoration: underline; padding: 6px 8px; }
+      #bf-crash-banner { margin: 8px auto; max-width: 52rem; background: #321; color: #fec; border: 1px solid #a63; padding: 8px 12px; }
+      #bf-crash-banner[hidden] { display: none; }
+      #bf-crash-banner button { margin-left: 8px; font: inherit; cursor: pointer; }
+      #bf-crash-modal { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.72); display: flex; align-items: center; justify-content: center; }
+      #bf-crash-modal[hidden] { display: none; }
+      #bf-crash-card { background: #1b1b1b; color: #eee; border: 1px solid #555; max-width: 40rem; width: calc(100% - 2rem); padding: 16px; }
+      #bf-crash-card h2 { margin: 0 0 8px; font-size: 1.25rem; }
+      #bf-crash-card pre { max-height: 9rem; overflow: auto; background: #111; padding: 8px; white-space: pre-wrap; }
+      #bf-crash-card textarea { width: 100%; box-sizing: border-box; min-height: 4rem; font: inherit; }
+      #bf-crash-privacy { font-size: 13px; color: #bbb; }
+      #bf-crash-status { min-height: 1.2em; }
+      #bf-crash-card button { margin: 4px 8px 4px 0; font: inherit; cursor: pointer; padding: 8px 12px; }
+      #bf-crash-send { background: #163; color: #efe; border: 1px solid #3a6; font-size: 1.05rem; }
+
+      .spinner {
+        height: 50px;
+        width: 50px;
+        margin: 0px auto;
+        animation: rotation 0.8s linear infinite;
+        border-left: 10px solid rgb(0,150,240);
+        border-right: 10px solid rgb(0,150,240);
+        border-bottom: 10px solid rgb(0,150,240);
+        border-top: 10px solid rgb(100,0,200);
+        border-radius: 100%;
+        background-color: rgb(200,100,250);
+      }
+      @keyframes rotation {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+      }
+    </style>
+  </head>
+  <body>
+    <figure style="overflow:visible;" id="spinner"><div class="spinner"></div></figure>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>
+    </div>
+    <div id="bf-crash-banner" hidden>
+      A previous crash was not sent.
+      <button id="bf-crash-banner-send" type="button">Send logs for debugging</button>
+      <button id="bf-crash-banner-dismiss" type="button">Dismiss</button>
+    </div>
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="canvas" width="1280" height="720" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+    </div>
+    <div id="toolbar">
+      <button id="fullscreen" type="button">Fullscreen</button>
+      <button id="bf-send-logs" type="button">Send logs</button>
+    </div>
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+    <div id="bf-crash-modal" hidden>
+      <div id="bf-crash-card" role="dialog" aria-modal="true" aria-labelledby="bf-crash-title">
+        <h2 id="bf-crash-title">Bitfighter stopped</h2>
+        <p id="bf-crash-message"></p>
+        <pre id="bf-crash-stack"></pre>
+        <p id="bf-crash-privacy">This sends the recent log lines, the error message and stack, the browser and its version, the screen and canvas size, the build commit, the page address, and connected gamepad names. It does not include your account or password.</p>
+        <label>What were you doing? (optional)
+          <textarea id="bf-crash-note" maxlength="2000"></textarea>
+        </label>
+        <p id="bf-crash-status"></p>
+        <button id="bf-crash-send" type="button">Send logs for debugging</button>
+        <button id="bf-crash-copy" type="button">Copy report</button>
+        <button id="bf-crash-reload" type="button">Reload</button>
+      </div>
+    </div>
+    <script type='text/javascript'>
+      var statusElement = document.getElementById('status');
+      var progressElement = document.getElementById('progress');
+      var spinnerElement = document.getElementById('spinner');
+      var canvasElement = document.getElementById('canvas');
+      var outputElement = document.getElementById('output');
+      if (outputElement) outputElement.value = ''; // clear browser cache
+
+      // Stamped at configure time from git HEAD and the UTC clock.
+      window.BF_BUILD = { commit: "@BF_BUILD_COMMIT@", builtAt: "@BF_BUILD_TIME@" };
+
+      // One place to retarget the collector. ?crashEndpoint= overrides it.
+      var BF_CRASH_ENDPOINT = 'https://bitfighter-web-relay.spacewalkpublishing.us/crash-report';
+      var BF_LOG_LIMIT = 500;
+      var BF_REPORT_MAX = 512 * 1024;
+      var bfLogs = [];
+      var bfCrashActive = false;
+      var bfModalReport = null;
+
+      function bfPushLog(line) {
+        line = String(line);
+        if (line.length > 2000)
+          line = line.slice(0, 2000);
+        bfLogs.push(line);
+        if (bfLogs.length > BF_LOG_LIMIT)
+          bfLogs.splice(0, bfLogs.length - BF_LOG_LIMIT);
+      }
+
+      function bfPageUrl() {
+        return location.origin + location.pathname;
+      }
+
+      function bfCrashEndpoint() {
+        try {
+          var params = new URLSearchParams(location.search);
+          if (params.has('crashEndpoint'))
+            return params.get('crashEndpoint') || BF_CRASH_ENDPOINT;
+        } catch (e) {}
+        return BF_CRASH_ENDPOINT;
+      }
+
+      function bfGamepads() {
+        var ids = [];
+        try {
+          var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+          for (var i = 0; i < pads.length; i++)
+            if (pads[i] && pads[i].id)
+              ids.push(String(pads[i].id));
+        } catch (e) {}
+        return ids;
+      }
+
+      function bfByteLength(text) {
+        if (window.TextEncoder)
+          return new TextEncoder().encode(text).length;
+        return text.length;
+      }
+
+      // ExitStatus and the emscripten "unwind" abort are a normal process
+      // exit, not a crash. Firefox reports the object as [object Object].
+      function bfIsBenignExit(value, message) {
+        var name = '';
+        if (value && typeof value === 'object')
+          name = value.name || (value.constructor && value.constructor.name) || '';
+        if (name === 'ExitStatus' || name === 'unwind')
+          return true;
+        var text = typeof message === 'string' ? message : (typeof value === 'string' ? value : '');
+        if (text === 'unwind' || /unwind$/.test(text) || text.indexOf('ExitStatus') >= 0 || /^program exited/i.test(text))
+          return true;
+        return false;
+      }
+
+      function bfSerializeThrowable(value) {
+        if (value instanceof Error)
+          return { message: value.message || String(value), stack: value.stack || '', name: value.name || '' };
+        if (typeof value === 'string' || value == null)
+          return { message: String(value), stack: '', name: '' };
+        var name = value.name ? String(value.name) : '';
+        var message = value.message != null ? String(value.message) : '';
+        var ctor = (value.constructor && value.constructor.name) ? String(value.constructor.name) : '';
+        var detail = '';
+        try { detail = JSON.stringify(value); } catch (e) { detail = ''; }
+        if (!message || message === '[object Object]')
+          message = name || ctor || detail || String(value);
+        return {
+          message: message,
+          stack: value.stack ? String(value.stack) : '',
+          name: name,
+          status: value.status,
+          ctor: ctor,
+          detail: detail
+        };
+      }
+
+      function bfAttachErrorExtras(error, extra) {
+        if (!extra)
+          return;
+        if (extra.file) error.file = String(extra.file);
+        if (extra.line) error.line = extra.line;
+        if (extra.column) error.column = extra.column;
+        if (extra.name) error.name = String(extra.name);
+        if (extra.status !== undefined && extra.status !== null) error.status = extra.status;
+        if (extra.ctor) error.ctor = String(extra.ctor);
+        if (extra.detail) error.detail = String(extra.detail).slice(0, 2000);
+      }
+
+      function bfBuildReport(kind, source, message, stack, note, extra) {
+        var canvas = document.getElementById('canvas');
+        var error = {
+          message: message || '',
+          stack: stack || '',
+          source: source
+        };
+        bfAttachErrorExtras(error, extra);
+        return {
+          schema: 1,
+          kind: kind,
+          build: {
+            commit: (window.BF_BUILD && window.BF_BUILD.commit) || '',
+            builtAt: (window.BF_BUILD && window.BF_BUILD.builtAt) || ''
+          },
+          timestamp: new Date().toISOString(),
+          page: bfPageUrl(),
+          userAgent: navigator.userAgent || '',
+          screen: {
+            w: screen.width || 0,
+            h: screen.height || 0,
+            dpr: window.devicePixelRatio || 1,
+            canvasW: canvas ? canvas.width : 0,
+            canvasH: canvas ? canvas.height : 0
+          },
+          gamepads: bfGamepads(),
+          error: error,
+          logs: bfLogs.slice(),
+          note: String(note || '').slice(0, 2000)
+        };
+      }
+
+      // Drop the oldest log lines until the JSON body fits.
+      function bfPayload(report) {
+        var body = {
+          schema: 1,
+          kind: report.kind,
+          build: report.build,
+          timestamp: report.timestamp,
+          page: report.page,
+          userAgent: report.userAgent,
+          screen: report.screen,
+          gamepads: report.gamepads,
+          error: (function () {
+            var error = {
+              message: report.error.message || '',
+              stack: report.error.stack || '',
+              source: report.error.source
+            };
+            bfAttachErrorExtras(error, report.error);
+            return error;
+          })(),
+          logs: report.logs.slice(),
+          note: String(report.note || '').slice(0, 2000)
+        };
+        var json = JSON.stringify(body);
+        while (bfByteLength(json) > BF_REPORT_MAX && body.logs.length) {
+          body.logs.shift();
+          json = JSON.stringify(body);
+        }
+        if (bfByteLength(json) > BF_REPORT_MAX) {
+          body.error.stack = String(body.error.stack).slice(-4000);
+          body.error.message = String(body.error.message).slice(0, 1000);
+          json = JSON.stringify(body);
+        }
+        return json;
+      }
+
+      function bfSaveCrash(report) {
+        try {
+          localStorage.setItem('bf_last_crash', JSON.stringify({ sent: false, report: report }));
+        } catch (e) {}
+      }
+
+      function bfMarkCrashSent() {
+        try {
+          var raw = localStorage.getItem('bf_last_crash');
+          if (!raw)
+            return;
+          var saved = JSON.parse(raw);
+          saved.sent = true;
+          localStorage.setItem('bf_last_crash', JSON.stringify(saved));
+        } catch (e) {}
+      }
+
+      function bfShowModal(report) {
+        bfModalReport = report;
+        var title = document.getElementById('bf-crash-title');
+        var message = document.getElementById('bf-crash-message');
+        var stack = document.getElementById('bf-crash-stack');
+        var status = document.getElementById('bf-crash-status');
+        var note = document.getElementById('bf-crash-note');
+        title.textContent = report.kind === 'crash' ? 'Bitfighter stopped' : 'Send logs';
+        message.textContent = report.error.message || '';
+        var lines = String(report.error.stack || '').split('\n').slice(0, 8);
+        stack.textContent = lines.join('\n');
+        status.textContent = '';
+        if (note && !note.value)
+          note.value = report.note || '';
+        document.getElementById('bf-crash-modal').hidden = false;
+        document.getElementById('bf-crash-send').disabled = false;
+      }
+
+      function bfFatal(source, message, stack, extra) {
+        if (!stack) {
+          try { stack = (new Error(source)).stack || ''; } catch (e) { stack = ''; }
+        }
+        bfPushLog('FATAL ' + source + ': ' + message);
+        if (stack)
+          bfPushLog(stack);
+        // onAbort runs before the thrown RuntimeError. Keep the wasm stack
+        // from whichever handler actually has it.
+        if (bfCrashActive) {
+          if (bfModalReport && stack && stack.indexOf('.wasm') >= 0 &&
+              String(bfModalReport.error.stack || '').indexOf('.wasm') < 0) {
+            bfModalReport.error.stack = stack;
+            if (message)
+              bfModalReport.error.message = message;
+            bfSaveCrash(bfModalReport);
+            bfShowModal(bfModalReport);
+          }
+          return;
+        }
+        bfCrashActive = true;
+        var report = bfBuildReport('crash', source, message, stack, '', extra);
+        bfSaveCrash(report);
+        bfShowModal(report);
+        if (spinnerElement)
+          spinnerElement.style.display = 'none';
+      }
+
+      function bfCurrentReport() {
+        var note = '';
+        var box = document.getElementById('bf-crash-note');
+        if (box)
+          note = box.value || '';
+        if (!bfModalReport)
+          bfModalReport = bfBuildReport('manual', 'manual', 'Manual log report', '', note);
+        bfModalReport.note = String(note).slice(0, 2000);
+        return bfModalReport;
+      }
+
+      function bfCopyReport() {
+        var json = bfPayload(bfCurrentReport());
+        function fallback() {
+          var area = document.createElement('textarea');
+          area.value = json;
+          document.body.appendChild(area);
+          area.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(area);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(json).catch(fallback);
+        else
+          fallback();
+        document.getElementById('bf-crash-status').textContent = 'Report copied.';
+      }
+
+      function bfSendReport() {
+        var report = bfCurrentReport();
+        var status = document.getElementById('bf-crash-status');
+        var button = document.getElementById('bf-crash-send');
+        button.disabled = true;
+        status.textContent = 'Sending...';
+        fetch(bfCrashEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: bfPayload(report)
+        }).then(function (res) {
+          return res.text().then(function (text) {
+            if (res.status !== 201)
+              throw new Error('HTTP ' + res.status);
+            var data = {};
+            try { data = JSON.parse(text); } catch (e) { throw new Error('bad response'); }
+            if (!data || typeof data.id !== 'string')
+              throw new Error('no id');
+            return data.id;
+          });
+        }).then(function (id) {
+          status.textContent = 'Sent. Report id: ' + id;
+          if (report.kind === 'crash')
+            bfMarkCrashSent();
+          var banner = document.getElementById('bf-crash-banner');
+          if (banner)
+            banner.hidden = true;
+        }).catch(function () {
+          button.disabled = false;
+          status.textContent = 'Could not send (network error). You can still copy the report.';
+        });
+      }
+
+      document.getElementById('fullscreen').addEventListener('click', function () {
+        var target = document.getElementById('canvas');
+        if (target.requestFullscreen)
+          target.requestFullscreen();
+        else if (target.webkitRequestFullscreen)
+          target.webkitRequestFullscreen();
+      });
+
+      canvasElement.addEventListener("webglcontextlost", function (e) {
+        e.preventDefault();
+        bfFatal('webglcontextlost', 'WebGL context lost', '');
+      }, false);
+
+      function setStatus(text) {
+        if (!setStatus.last) setStatus.last = { time: Date.now(), text: '' };
+        if (text === setStatus.last.text) return;
+        var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+        var now = Date.now();
+        if (m && now - setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+        setStatus.last.time = now;
+        setStatus.last.text = text;
+        if (m) {
+          text = m[1];
+          progressElement.value = parseInt(m[2])*100;
+          progressElement.max = parseInt(m[4])*100;
+          progressElement.hidden = false;
+          spinnerElement.hidden = false;
+        } else {
+          progressElement.value = null;
+          progressElement.max = null;
+          progressElement.hidden = true;
+          if (!text) spinnerElement.hidden = true;
+        }
+        statusElement.innerHTML = text;
+      }
+
+      // ?name= skips nickname entry (the LAN test). With no name, the normal
+      // first-run screen is shown. A saved name comes back from IDBFS.
+      // ?master= replaces the master list so a LAN test never dials out.
+      var gameArgs = [];
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var playerName = params.get('name');
+        if (playerName)
+          gameArgs.push('-name', playerName);
+        var master = params.get('master');
+        if (master)
+          gameArgs.push('-master', master);
+      } catch (e) {}
+
+#if MODULARIZE && !EXPORT_ES6
+      var moduleArgs = {
+#else
+      var Module = {
+#endif
+        arguments: gameArgs,
+        print(...args) {
+          var text = args.join(' ');
+          bfPushLog(text);
+          console.log(...args);
+          if (outputElement) {
+            outputElement.value += text + "\n";
+            outputElement.scrollTop = outputElement.scrollHeight; // focus on bottom
+          }
+        },
+        printErr(...args) {
+          var text = args.join(' ');
+          bfPushLog(text);
+          console.error(...args);
+          if (outputElement) {
+            outputElement.value += text + "\n";
+            outputElement.scrollTop = outputElement.scrollHeight;
+          }
+        },
+        onAbort(what) {
+          if (bfIsBenignExit(what, what))
+            return;
+          var stack = '';
+          try { stack = (new Error('abort')).stack || ''; } catch (e) {}
+          var message = (what === undefined || what === null || what === '') ? 'Aborted' : String(what);
+          bfFatal('onAbort', message, stack);
+        },
+        canvas: canvasElement,
+        setStatus: setStatus,
+        preRun: [function () {
+          addRunDependency('idb-settings');
+          try { FS.mkdir('/persist'); } catch (e) {}
+          FS.mount(IDBFS, {}, '/persist');
+          FS.syncfs(true, function (err) {
+            console.log(err ? ('IDBFS load failed: ' + err) : 'IDBFS load complete');
+            removeRunDependency('idb-settings');
+          });
+        }],
+        totalDependencies: 0,
+        monitorRunDependencies(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        }
+      };
+      // One sync at a time. A second save while the first is still flushing
+      // runs again when the first finishes, so the latest INI is what lands
+      // in IndexedDB.
+      window.bfPersist = function () {
+        if (typeof FS === 'undefined' || !FS.syncfs)
+          return;
+        if (!window.bfPersistState)
+          window.bfPersistState = { busy: false, again: false };
+        var st = window.bfPersistState;
+        function kick() {
+          if (st.busy) { st.again = true; return; }
+          st.busy = true;
+          FS.syncfs(false, function (err) {
+            st.busy = false;
+            console.log(err ? ('IDBFS save failed: ' + err) : 'IDBFS save complete');
+            if (st.again) { st.again = false; kick(); }
+          });
+        }
+        kick();
+      };
+      window.addEventListener('beforeunload', function () {
+        window.bfPersist();
+      });
+
+      setStatus('Downloading...');
+
+      // Open the relay now, while wasm and the data file are still downloading.
+      // The game opens its own socket later. ?relay= matches the client:
+      // off/none/0/empty disables it.
+      (function () {
+        var url = '';
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (params.has('relay')) {
+            url = params.get('relay') || '';
+            if (url === 'off' || url === 'none' || url === '0')
+              url = '';
+          } else if (typeof Module !== 'undefined' && Module['relay']) {
+            url = Module['relay'];
+          } else {
+            url = 'wss://bitfighter-web-relay.spacewalkpublishing.us';
+          }
+        } catch (e) {
+          url = 'wss://bitfighter-web-relay.spacewalkpublishing.us';
+        }
+        if (!url)
+          return;
+        var started = Date.now();
+        function attempt() {
+          if (Date.now() - started > 90000)
+            return;
+          var ws;
+          try { ws = new WebSocket(url); }
+          catch (e) { setTimeout(attempt, 2000); return; }
+          ws.onopen = function () { console.log('UDP relay warmup open'); };
+          ws.onclose = function () {
+            if (Date.now() - started < 90000)
+              setTimeout(attempt, 2000);
+          };
+        }
+        attempt();
+      })();
+      window.onerror = function (message, source, lineno, colno, error) {
+        if (bfIsBenignExit(error, message))
+          return true;
+        var info = bfSerializeThrowable(error);
+        var stack = info.stack || '';
+        var text = info.message;
+        if (!text || text === '[object Object]')
+          text = String(message);
+        console.error(error || message);
+        bfFatal('onerror', text, stack, {
+          file: source,
+          line: lineno,
+          column: colno,
+          name: info.name,
+          status: info.status,
+          ctor: info.ctor,
+          detail: info.detail
+        });
+        setStatus('Exception thrown, see JavaScript console');
+        setStatus = function (text) {
+          if (text) console.error('[post-exception status] ' + text);
+        };
+        return true;
+      };
+      window.addEventListener('unhandledrejection', function (event) {
+        var reason = event.reason;
+        if (bfIsBenignExit(reason, reason && reason.message))
+          return;
+        var info = bfSerializeThrowable(reason);
+        console.error(reason);
+        bfFatal('unhandledrejection', info.message, info.stack, {
+          name: info.name,
+          status: info.status,
+          ctor: info.ctor,
+          detail: info.detail
+        });
+      });
+
+      document.getElementById('bf-send-logs').addEventListener('click', function () {
+        if (bfCrashActive)
+          return;
+        bfShowModal(bfBuildReport('manual', 'manual', 'Manual log report', '', ''));
+      });
+      document.getElementById('bf-crash-send').addEventListener('click', bfSendReport);
+      document.getElementById('bf-crash-copy').addEventListener('click', bfCopyReport);
+      document.getElementById('bf-crash-reload').addEventListener('click', function () {
+        location.reload();
+      });
+      document.getElementById('bf-crash-banner-dismiss').addEventListener('click', function () {
+        document.getElementById('bf-crash-banner').hidden = true;
+      });
+      document.getElementById('bf-crash-banner-send').addEventListener('click', function () {
+        try {
+          var saved = JSON.parse(localStorage.getItem('bf_last_crash') || 'null');
+          if (saved && saved.report)
+            bfShowModal(saved.report);
+        } catch (e) {}
+      });
+      try {
+        var savedCrash = JSON.parse(localStorage.getItem('bf_last_crash') || 'null');
+        if (savedCrash && savedCrash.report && !savedCrash.sent)
+          document.getElementById('bf-crash-banner').hidden = false;
+      } catch (e) {}
+    </script>
+    {{{ SCRIPT }}}
+#if MODULARIZE && !EXPORT_ES6
+    <script type='text/javascript'>
+      {{{ EXPORT_NAME }}}(moduleArgs);
+    </script>
+#endif
+  </body>
+</html>

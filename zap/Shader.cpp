@@ -62,6 +62,21 @@ Shader::~Shader()
    glDeleteProgram(static_cast<GLuint>(mId));
 }
 
+#ifdef __EMSCRIPTEN__
+// Desktop shaders are GLSL 1.20. WebGL 1 compiles GLSL ES 1.00. These shaders
+// already use attribute/varying/gl_FragColor; they only need the version line
+// swapped and a default precision.
+static std::string translateShaderForWebGL(std::string source)
+{
+   const std::string desktopVersion = "#version 120";
+   const std::string webglVersion = "#version 100\nprecision mediump float;";
+   std::string::size_type pos = source.find(desktopVersion);
+   if(pos != std::string::npos)
+      source.replace(pos, desktopVersion.length(), webglVersion);
+   return source;
+}
+#endif
+
 // Static
 std::string Shader::getShaderSource(const std::string &fileName)
 {
@@ -72,7 +87,11 @@ std::string Shader::getShaderSource(const std::string &fileName)
       return "";
    }
 
-   return readFile(filePath);
+   std::string source = readFile(filePath);
+#ifdef __EMSCRIPTEN__
+   source = translateShaderForWebGL(source);
+#endif
+   return source;
 }
 
 // Static

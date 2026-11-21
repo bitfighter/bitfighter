@@ -1024,7 +1024,11 @@ string getExecutableDir()
 {
    string path;
 
-#if defined(TNL_OS_LINUX)
+#if defined(__EMSCRIPTEN__)
+   // --preload-file mounts resource/ here. /proc/self/exe does not exist.
+   path = "/bitfighter";
+
+#elif defined(TNL_OS_LINUX)
    char buffer[1024] = {0};
    readlink("/proc/self/exe", buffer, sizeof(buffer));
    path = extractDirectory(string(buffer));

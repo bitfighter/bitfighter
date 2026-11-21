@@ -280,6 +280,13 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #  define FN_CDECL __cdecl
 #endif
 
+#elif defined(__EMSCRIPTEN__)
+#  define TNL_OS_STRING "Emscripten"
+// The browser build reuses the POSIX socket and timer code. Call sites that
+// cannot work in a browser are guarded with __EMSCRIPTEN__.
+#  define TNL_OS_LINUX
+#  define FN_CDECL
+
 #elif defined(linux) || defined(__linux__)
 #  define TNL_OS_STRING "Linux"
 #  define TNL_OS_LINUX
@@ -356,6 +363,9 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #elif defined(__aarch64__)
 #  define TNL_CPU_STRING "ARM64"
 #  define TNL_CPU_ARM64
+#  define TNL_LITTLE_ENDIAN
+#elif defined(__EMSCRIPTEN__)
+#  define TNL_CPU_STRING "WebAssembly"
 #  define TNL_LITTLE_ENDIAN
 #else
 #  error "TNL: Unsupported Target CPU"

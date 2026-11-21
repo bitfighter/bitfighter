@@ -7,6 +7,10 @@
 #include "SoundEffect.h"
 #include "tnlLog.h"
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#endif
+
 #ifndef BF_NO_AUDIO
 
 #include "SFXProfile.h"
@@ -20,6 +24,7 @@
 
 #include "tnlByteBuffer.h"
 #include "tnlNetBase.h"
+#include "voiceCodec.h"
 
 #include <cstring>
 
@@ -270,7 +275,13 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
    try
    {
       mDeviceMgr = alure::DeviceManager::getInstance();
+#ifdef __EMSCRIPTEN__
+      // alcOpenDevice accepts NULL or this exact name. The default
+      // openPlayback() passes an empty string, which Emscripten rejects.
+      mDevice = mDeviceMgr.openPlayback("Emscripten OpenAL");
+#else
       mDevice = mDeviceMgr.openPlayback();
+#endif
       if(!mDevice)
       {
          logprintf(LogConsumer::LogError, "Failed to open OpenAL device");
@@ -404,6 +415,104 @@ void SoundSystem::init(const string &sfxDir, const string &musicDir, float music
    alGenBuffers(NumVoiceChatBuffers, gVoiceFreeBuffers.address());
 
    gSFXValid = true;
+
+#ifdef __EMSCRIPTEN__
+   // Prove tracker music and Speex on this build. Menu music is ogg; game
+   // tracks are xm and go through the same ALURE decoder.
+   for(S32 i = 0; i < mGameMusicList.size(); i++)
+   {
+      const string &track = mGameMusicList[i];
+      if(track.size() < 3)
+         continue;
+      string ext = track.substr(track.size() - 3);
+      if(ext != ".xm" && ext != ".XM")
+         continue;
+      try
+      {
+         string fullPath = joindir(mMusicDir, track);
+         auto decoder = mContext.createDecoder(fullPath);
+         ALuint rate = decoder ? decoder->getFrequency() : 0;
+         // Some modules are silent for the first fraction of a second.
+         // Read the same way the music buffer queue does, far enough to
+         // reach the notes, and do not seek (libmodplug's seek lands in
+         // silence on these files).
+         ALshort frames[4096 * 2];
+         ALuint got = 0;
+         S16 peak = 0;
+         for(S32 n = 0; n < 22 && decoder; n++)
+         {
+            ALuint chunk = decoder->read(frames, 4096);
+            if(!chunk)
+               break;
+            got += chunk;
+            for(ALuint s = 0; s < chunk * 2; s++)
+            {
+               S16 v = frames[s] < 0 ? (S16)-frames[s] : frames[s];
+               if(v > peak) peak = v;
+            }
+         }
+         logprintf(LogConsumer::LogConnection,
+                   "ModPlug loaded %s: %u Hz, read %u frames, peak %d",
+                   track.c_str(), rate, got, (int)peak);
+      }
+      catch(const std::exception &ex)
+      {
+         logprintf(LogConsumer::LogError, "ModPlug failed %s: %s", track.c_str(), ex.what());
+      }
+      break;
+   }
+
+   {
+      SpeexVoiceEncoder encoder;
+      SpeexVoiceDecoder decoder;
+      U32 samples = encoder.getSamplesPerFrame();
+      S16 input[320];
+      S16 output[320];
+      U8 compressed[64];
+      if(samples > 0 && samples <= 320)
+      {
+         for(U32 i = 0; i < samples; i++)
+            input[i] = (S16)(8000 * ((i / 8) & 1 ? 1 : -1));
+         U32 nbytes = encoder.compressFrame(input, compressed);
+         decoder.decompressFrame(output, compressed, nbytes);
+         S16 peak = 0;
+         for(U32 i = 0; i < samples; i++)
+         {
+            S16 v = output[i] < 0 ? (S16)-output[i] : output[i];
+            if(v > peak) peak = v;
+         }
+         logprintf(LogConsumer::LogConnection,
+                   "Speex roundtrip: frame=%u bytes=%u peak=%d", samples, nbytes, (int)peak);
+      }
+   }
+
+   // Browsers start the WebAudio context suspended until a user gesture.
+   EM_ASM({
+      var report = function(ctx) {
+         var queued = 0;
+         if (AL.currentCtx && AL.currentCtx.sources) {
+            for (var id in AL.currentCtx.sources) {
+               var src = AL.currentCtx.sources[id];
+               if (src && src.bufQueue && src.bufQueue.length)
+                  queued++;
+            }
+         }
+         console.log('OpenAL AudioContext state: ' + ctx.state + ' time=' + ctx.currentTime + ' queuedSources=' + queued);
+      };
+      var resume = function() {
+         if (typeof AL === 'undefined' || !AL.currentCtx || !AL.currentCtx.audioCtx)
+            return;
+         var ctx = AL.currentCtx.audioCtx;
+         if (ctx.state === 'suspended')
+            ctx.resume().then(function() { report(ctx); });
+         else
+            report(ctx);
+      };
+      document.addEventListener('pointerdown', resume, true);
+      document.addEventListener('keydown', resume, true);
+      resume();
+   });
+#endif
 }
 
 
@@ -1003,6 +1112,22 @@ void SoundSystem::processSoundEffects(F32 sfxVol, F32 voiceVol)
 }
 
 
+#ifdef __EMSCRIPTEN__
+// PannerNode.maxDistance must be > 0, and for the linear model it must also
+// be greater than refDistance. OpenAL accepts 0, which the relative flag,
+// goal, and achievement profiles use. Set refDistance first: lowering
+// maxDistance while the previous refDistance is still larger throws.
+static void emscriptenDistanceParams(F32 refDistance, F32 maxDistance, F32 &outRef, F32 &outMax)
+{
+   outRef = refDistance >= 0.0f ? refDistance : 0.0f;
+   outMax = maxDistance;
+   if(!(outMax > outRef))
+      outMax = outRef + 0.01f;
+   if(!(outMax > 0.0f))
+      outMax = 0.01f;
+}
+#endif
+
 void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
 {
    ALuint source = gFreeSources[effect->mSourceIndex];
@@ -1027,14 +1152,24 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
       alSourcei(source, AL_BUFFER, gSfxBuffers[effect->mSFXIndex]);
 
    alSourcei(source, AL_LOOPING, effect->mProfile->isLooping);
-   alSourcef(source, AL_REFERENCE_DISTANCE, effect->mProfile->fullGainDistance);
-   alSourcef(source, AL_MAX_DISTANCE, effect->mProfile->zeroGainDistance);
+   F32 refDistance = effect->mProfile->fullGainDistance;
+   F32 maxDistance = effect->mProfile->zeroGainDistance;
+#ifdef __EMSCRIPTEN__
+   emscriptenDistanceParams(refDistance, maxDistance, refDistance, maxDistance);
+#endif
+   alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
+   alSourcef(source, AL_MAX_DISTANCE, maxDistance);
    alSourcef(source, AL_ROLLOFF_FACTOR, 1);
 
    updateMovementParams(effect);
    updateGain(effect, sfxVol, voiceVol);
 
+   alGetError();
    alSourcePlay(source);
+   ALenum alErr = alGetError();
+   if(alErr != AL_NO_ERROR)
+      logprintf(LogConsumer::LogConnection, "SFX play failed: OpenAL error %d, index %d",
+            (int)alErr, effect->mSFXIndex);
 }
 
 
@@ -1324,7 +1459,14 @@ bool SoundSystem::startRecording()
 {
    captureDevice = alcCaptureOpenDevice(NULL, 8000, AL_FORMAT_MONO16, 2048);
    if(alGetError() != AL_NO_ERROR || captureDevice == NULL)
+   {
+#ifdef __EMSCRIPTEN__
+      // The OpenAL port captures through getUserMedia. That needs a user
+      // gesture and a permission prompt; headless runs have no microphone.
+      logprintf(LogConsumer::LogWarning, "Microphone capture is not available");
+#endif
       return false;
+   }
 
    alcCaptureStart(captureDevice);
    return true;

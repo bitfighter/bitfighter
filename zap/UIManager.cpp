@@ -33,6 +33,8 @@
 
 #include "SoundSystem.h"
 
+#include "tnlLog.h"
+
 
 namespace Zap
 {
@@ -296,6 +298,10 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
          // We have the wrong password, let's make sure it's not saved
          string serverName = getLastSelectedServerName();
          GameSettings::deleteServerPassword(serverName);
+
+         // The browser LAN test waits on this line. A missing or wrong
+         // password both land here, before the player is in the game.
+         logprintf(LogConsumer::LogConnection, "Server requires a password");
 
          setConnectAddressAndActivatePasswordEntryUI(Address(serverAddress));
          return;

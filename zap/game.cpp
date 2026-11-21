@@ -1082,9 +1082,16 @@ void Game::checkConnectionToMaster(U32 timeDelta)
                   mConnectionToMaster = new MasterServerConnection(this);
 
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
+                  mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;  // 10 secs, just in case this attempt fails
                }
-
-               mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;     // 10 secs, just in case this attempt fails
+#ifdef __EMSCRIPTEN__
+               // A hostname is rejected immediately. Don't spend the 10s retry on it
+               // when another list entry (the numeric master) can be tried now.
+               else if(masterServerList->size() >= 2)
+                  mNextMasterTryTime = 0;
+#endif
+               else
+                  mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY_TIME;  // 10 secs, just in case this attempt fails
                delete mNameToAddressThread;
                mNameToAddressThread = NULL;
             }

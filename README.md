@@ -44,6 +44,19 @@ To set up a debugging build do:  `cmake -DCMAKE_BUILD_TYPE=Debug ..`
 
 To build a dedicated server do: `make bitfighterd`
 
+### Web browser (Emscripten proof of concept)
+
+A WebAssembly build of the client is documented in [doc/emscripten.md](doc/emscripten.md). It is guarded so the Linux, Windows, and macOS builds above are unchanged. From a shell with the Emscripten SDK activated:
+
+```
+mkdir -p build/emscripten && cd build/emscripten
+emcmake cmake ../.. -DCMAKE_BUILD_TYPE=Release
+emmake make -j$(nproc)
+python3 -m http.server 8080 -d ../../exe
+```
+
+Then open `http://127.0.0.1:8080/bitfighter.html`.
+
 ### Windows
 
 Bitfighter can be built with at least the following build systems:

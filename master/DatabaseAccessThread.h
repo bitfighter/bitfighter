@@ -73,6 +73,21 @@ public:
 
    U32 run()
    {
+#ifdef __EMSCRIPTEN__
+      // TNL_NO_THREADS invokes run() on the caller. The loop below never
+      // returns, which would lock the browser tab the first time a level-db
+      // request is queued. Drain once; Game::idle() calls finish().
+      mThreadActive = true;
+      while(mEntryThread != mEntryEnd)
+      {
+         mEntry[mEntryThread]->run();
+         mEntryThread++;
+         if(mEntryThread >= mEntrySize)
+            mEntryThread = 0;
+      }
+      mThreadActive = false;
+      return 0;
+#else
       mThreadActive = true;
       while(mRunning)
       {
@@ -90,6 +105,7 @@ public:
       mThreadActive = false;
 
       return 0;
+#endif
    }
 
 

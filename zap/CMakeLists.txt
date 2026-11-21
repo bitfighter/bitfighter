@@ -271,6 +271,9 @@ set(COMPILE_TEST_SUITE YES)
 if(NOT EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
 	set(COMPILE_TEST_SUITE NO)
 endif()
+if(EMSCRIPTEN)
+	set(COMPILE_TEST_SUITE NO)
+endif()
 
 
 # We should always be able to compile a dedicated server, it requires much

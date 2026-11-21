@@ -15,3 +15,6 @@
 
 /* Define if we have MINIMP3 support */
 #define HAVE_MINIMP3 1
+
+/* Define if we have libmodplug support */
+#cmakedefine HAVE_MODPLUG

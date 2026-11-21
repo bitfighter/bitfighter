@@ -152,6 +152,12 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #  undef main
 #endif
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#  include <cstdlib>
+#  include "tnlLog.h"
+#endif
+
 
 // Maybe don't enable by default?
 //#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
@@ -405,10 +411,69 @@ void idle()
 }  // end idle()
 
 
+#ifdef __EMSCRIPTEN__
+// ?bfTestCrash=1 aborts from the game loop so the wasm stack has C++ names.
+static void __attribute__((noinline)) bfTestCrashNow()
+{
+   // libc abort reaches the runtime's abort(), which calls Module.onAbort
+   // while this frame is still on the wasm stack.
+   abort();
+}
+
+static void __attribute__((noinline)) bfTestCrashFromGameLoop()
+{
+   bfTestCrashNow();
+}
+
+static void bfMaybeTestCrash()
+{
+   static bool checked = false;
+   static bool armed = false;
+   static U32 when = 0;
+
+   if(!checked)
+   {
+      checked = true;
+      int flag = EM_ASM_INT({
+         try {
+            return new URLSearchParams(location.search).get('bfTestCrash') === '1' ? 1 : 0;
+         } catch (e) {
+            return 0;
+         }
+      });
+      if(flag)
+      {
+         armed = true;
+         when = Platform::getRealMilliseconds() + 4000;
+         logprintf(LogConsumer::LogConnection, "bfTestCrash will abort in 4 seconds");
+      }
+   }
+
+   if(armed && Platform::getRealMilliseconds() >= when)
+      bfTestCrashFromGameLoop();
+}
+
+// C linkage so emscripten_set_main_loop can take the pointer directly.
+extern "C" void bitfighter_emscripten_main_loop()
+{
+   bfMaybeTestCrash();
+   idle();
+}
+#endif
+
 void dedicatedServerLoop()
 {
+#ifdef __EMSCRIPTEN__
+   // Browser frames call idle(); the third argument never returns, matching
+   // the native for(;;) loop. Asyncify was not used: it rewrites every
+   // function that can reach Platform::sleep(), bloats the wasm, and fights
+   // the C++ exceptions around Lua startup. Sleep is a no-op on this target
+   // (see Platform::sleep) because the browser yields between callbacks.
+   emscripten_set_main_loop(bitfighter_emscripten_main_loop, 0, 1);
+#else
    for(;;)        // Loop forever!
       idle();     // Idly!
+#endif
 }
 
 ////////////////////////////////////////
@@ -749,7 +814,12 @@ string getUserDataDir()
 {
    string path;
 
-#if defined(TNL_OS_LINUX)
+#if defined(__EMSCRIPTEN__)
+   // Same folder the preloaded assets live in. Standalone mode normally
+   // avoids this function; keep it valid if something calls it anyway.
+   path = "/bitfighter";
+
+#elif defined(TNL_OS_LINUX)
    path = string(getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
 
 #elif defined(TNL_OS_MAC_OSX)
@@ -1046,7 +1116,11 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
 static bool standaloneDetected()
 {
-#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
+#if defined(__EMSCRIPTEN__)
+   // Assets are preloaded next to the virtual executable. There is no
+   // persistent home directory worth copying them into.
+   return true;
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
    return false;   // Standalone unavailable on Mac and mobile platforms
 #else
 
@@ -1169,6 +1243,15 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
+#ifdef __EMSCRIPTEN__
+   // Mention IDBFS from compiled code so -O3 keeps libidbfs.js. The page
+   // shell mounts /persist and syncs it before main runs.
+   EM_ASM({
+      if (typeof IDBFS === 'undefined')
+         console.log('IDBFS missing');
+   });
+#endif
+
    // We change our current directory to be useful, usually to the location the executable resides
    normalizeWorkingDirectory();
 
@@ -1198,6 +1281,15 @@ int main(int argc, char **argv)
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
+
+#ifdef __EMSCRIPTEN__
+   // There is no -inidir flag. Standalone mode would write bitfighter.ini into
+   // the preloaded asset tree, which a reload wipes. Settings and the text
+   // log live on IDBFS. SQLite stays where resolveDirs put it; IDBFS file
+   // locking is a poor fit for that database.
+   folderManager->iniDir = "/persist";
+   folderManager->logDir = "/persist";
+#endif
 
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the
    // only way to specify a non-standard location is via the command line, which we've now read.

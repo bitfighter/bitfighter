@@ -108,6 +108,10 @@ typedef in_addr IN_ADDR;
 
 #include "tnlLog.h"
 
+#ifdef __EMSCRIPTEN__
+#  include "emscriptenSocket.h"
+#endif
+
 namespace TNL {
 
 static NetError getLastError();
@@ -228,6 +232,18 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
    if(bindAddress.transport == IPProtocol)
    {
       socketType = "UDP";
+#ifdef __EMSCRIPTEN__
+      if(emscriptenRelayEnabled())
+      {
+         S32 fd = INVALID_SOCKET;
+         if(emscriptenRelayBind(fd, bindAddress.port))
+         {
+            mPlatformSocket = fd;
+            logprintf(LogConsumer::LogUDP, "UDP socket handed to the websocket relay (requested port %u)", bindAddress.port);
+            return;
+         }
+      }
+#endif
       mPlatformSocket = socket(AF_INET, SOCK_DGRAM, 0);
    }
    else if(bindAddress.transport == TCPProtocol)
@@ -332,7 +348,14 @@ Socket::~Socket()
    TNL_JOURNAL_WRITE_BLOCK(Socket::~Socket, ;)
 
    if(mPlatformSocket != INVALID_SOCKET)
+   {
+#ifdef __EMSCRIPTEN__
+      if(emscriptenRelayOwns(mPlatformSocket))
+         emscriptenRelayClose(mPlatformSocket);
+      else
+#endif
       closesocket(mPlatformSocket);
+   }
    shutdown();
 }
 
@@ -351,6 +374,10 @@ NetError Socket::sendto(const Address &address, const U8 *buffer, S32 bufferSize
    SOCKADDR destAddress;
    socklen_t addressSize;
 
+#ifdef __EMSCRIPTEN__
+   if(emscriptenRelayOwns(mPlatformSocket))
+      return emscriptenRelaySendTo(mPlatformSocket, address, buffer, bufferSize);
+#endif
    TNLToSocketAddress(address, &destAddress, &addressSize);
    if(::sendto(mPlatformSocket, (const char*)buffer, bufferSize, 0,
          &destAddress, addressSize) == SOCKET_ERROR)
@@ -379,6 +406,11 @@ NetError Socket::recvfrom(Address *address, U8 *buffer, S32 bufferSize, S32 *out
       TNL_JOURNAL_READ( (*outSize, buffer) );
       return NoError;
    )
+
+#ifdef __EMSCRIPTEN__
+   if(emscriptenRelayOwns(mPlatformSocket))
+      return emscriptenRelayRecvFrom(mPlatformSocket, address, buffer, bufferSize, outSize);
+#endif
 
    SOCKADDR sa;
    socklen_t addrLen = sizeof(sa);
@@ -754,7 +786,10 @@ bool Address::set(const char *addressString)
          ipAddr.sin_addr.s_addr = inet_addr(remoteAddr);
          if(ipAddr.sin_addr.s_addr == INADDR_NONE)
          {
-#if defined (TNL_OS_XBOX)
+#if defined (TNL_OS_XBOX) || defined(__EMSCRIPTEN__)
+            // Emscripten's getaddrinfo assigns a fake address for its WebSocket
+            // socket backend. It is not a real DNS result. Callers that need a
+            // host (the master list) also publish a numeric address.
             mIsValid = false;
             return false;
 #else

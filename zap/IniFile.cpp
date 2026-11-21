@@ -38,6 +38,10 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#endif
+
 
 #if defined(WIN32)
 #  define iniEOL endl
@@ -283,6 +287,15 @@ bool CIniFile::WriteFile()
       f << iniEOL;
    }
    f.close();
+
+#ifdef __EMSCRIPTEN__
+   // IndexedDB is asynchronous. Settings were just written into the
+   // mounted folder; ask the browser to flush that folder.
+   EM_ASM({
+      if (typeof window.bfPersist === 'function')
+         window.bfPersist();
+   });
+#endif
 
    return true;
 }

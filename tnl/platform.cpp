@@ -443,7 +443,13 @@ F64 Platform::getHighPrecisionMilliseconds(S64 timerDelta)
 
 void Platform::sleep(U32 msCount)
 {
+#ifdef __EMSCRIPTEN__
+   // idle() is pumped by requestAnimationFrame. usleep() without Asyncify is a
+   // busy-wait and would freeze the tab, so the browser yield is the sleep.
+   (void)msCount;
+#else
    usleep(msCount * 1000);
+#endif
 }
 
 //--------------------------------------

@@ -28,6 +28,9 @@
 #include "tnl.h"
 #include "tnlRandom.h"
 #include "tnlJournal.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace TNL {
 
@@ -50,6 +53,33 @@ static void initialize()
 #endif
    yarrow_start(&prng);
    yarrow_ready(&prng);
+#ifdef __EMSCRIPTEN__
+   // gettimeofday here is milliseconds since the page started, so the
+   // name-and-time seed in Game::seedRandomNumberGenerator is the same on
+   // every reload (it was 0 at the call site). Yarrow then emits the same
+   // player id, and the master rejects the new session as a duplicate.
+   // crypto.getRandomValues is the browser CSPRNG. Connection nonces and
+   // keys read this same pool, so they pick up the entropy too.
+   U8 entropy[32];
+   int filled = EM_ASM_INT({
+      var dst = $0;
+      var n = $1;
+      var c = (typeof globalThis !== 'undefined' && globalThis.crypto) ? globalThis.crypto : null;
+      if (!c || !c.getRandomValues)
+         return 0;
+      var buf = new Uint8Array(n);
+      c.getRandomValues(buf);
+      var heap = HEAPU8;
+      for (var i = 0; i < n; i++)
+         heap[dst + i] = buf[i];
+      return n;
+   }, entropy, (int)sizeof(entropy));
+   if(filled == (int)sizeof(entropy))
+   {
+      yarrow_add_entropy(entropy, sizeof(entropy), &prng);
+      yarrow_ready(&prng);
+   }
+#endif
 }
 
 void *getState()                                      // Doesn't seem to be called

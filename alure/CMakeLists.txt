@@ -29,8 +29,12 @@ list(APPEND ALURE_SOURCES decoders/mp3.cpp)
 set(HAVE_FLAC 1)
 list(APPEND ALURE_SOURCES decoders/flac.cpp)
 
-# Vorbis: optional system dependency
-if(ALURE_ENABLE_VORBIS AND NOT ALURE_ENABLE_VORBIS)
+# Vorbis: optional system dependency. The Emscripten build uses the
+# -sUSE_VORBIS/-sUSE_OGG ports; their headers arrive via the compiler flags.
+if(EMSCRIPTEN)
+    set(HAVE_VORBISFILE 1)
+    list(APPEND ALURE_SOURCES decoders/vorbisfile.cpp)
+elseif(ALURE_ENABLE_VORBIS AND NOT ALURE_ENABLE_VORBIS)
     # User explicitly disabled
 else()
     find_package(Vorbis QUIET)
@@ -40,6 +44,12 @@ else()
         include_directories(${VORBIS_INCLUDE_DIR})
         include_directories(${OGG_INCLUDE_DIR})
     endif()
+endif()
+
+# ModPlug: Emscripten port. Native ALURE stays as it was (no tracker decoder).
+if(EMSCRIPTEN)
+    set(HAVE_MODPLUG 1)
+    list(APPEND ALURE_SOURCES decoders/modplug.cpp)
 endif()
 
 # Opus: optional system dependency
@@ -90,11 +100,16 @@ target_link_libraries(alure
     PUBLIC
         ${OPENAL_LIBRARY}
     PRIVATE
-        Threads::Threads
         ${VORBIS_LIBRARIES}
         ${OPUS_LIBRARIES}
         ${SNDFILE_LIBRARIES}
 )
+
+# ALURE's background thread is not started on Emscripten (no pthreads).
+# The single-threaded build has no Threads::Threads target.
+if(NOT EMSCRIPTEN)
+    target_link_libraries(alure PRIVATE Threads::Threads)
+endif()
 
 # Suppress MSVC warnings from ALURE code
 if(MSVC)

@@ -16,6 +16,9 @@
 #endif
 
 #include "tnlNetInterface.h"
+#ifdef __EMSCRIPTEN__
+#include "emscriptenSocket.h"
+#endif
 
 namespace Zap
 {
@@ -275,7 +278,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
       Vector<Address> fullPossibleAddresses;
       for(S32 i = 0; i < possibleAddresses.size(); i++)
+      {
          fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
+#ifdef __EMSCRIPTEN__
+         TNL::emscriptenRelayAllow(possibleAddresses[i].netNum, possibleAddresses[i].port);
+#endif
+      }
 
       ByteBufferPtr theSharedData =
                      new ByteBuffer(

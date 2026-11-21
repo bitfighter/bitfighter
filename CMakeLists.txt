@@ -17,6 +17,18 @@ option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
 option(LUAJIT_BUILTIN "Use built-in LuaJIT.  Recommended." YES)
 option(DISCORD "Integrate Discord RPC calls." YES)
 
+# Browser limitations. Native builds leave the options above alone.
+if(EMSCRIPTEN)
+	# LuaJIT's interpreter is generated machine code. There is no wasm backend
+	# in the vendored tree, so the Emscripten build uses PUC Lua 5.1 instead.
+	set(LUAJIT_BUILTIN OFF)
+	# pthreads need SharedArrayBuffer and cross-origin isolation. The PoC runs
+	# TNL threads inline (see TNL_NO_THREADS).
+	set(NO_THREADS ON)
+	# Discord's RPC socket has no browser transport.
+	set(DISCORD OFF)
+endif()
+
 
 #
 # CMake system management
@@ -35,8 +47,12 @@ if(MSVC)
     add_compile_definitions(_HAS_STD_BYTE=0)
 endif()
 
-# Use appropriate platform alterations
-if(WIN32)
+# Use appropriate platform alterations.
+# EMSCRIPTEN is also UNIX, so it has to be tested first. Linux.cmake's
+# --as-needed link flag is rejected by wasm-ld.
+if(EMSCRIPTEN)
+	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Emscripten.cmake)
+elseif(WIN32)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Win32.cmake)
 elseif(APPLE)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Apple.cmake)
@@ -63,17 +79,31 @@ endif()
 # Library searching and dependencies
 #
 
-# SDL2 is default and should be found on all platforms except possibly Linux
-find_package(SDL2)
+# SDL2 is default and should be found on all platforms except possibly Linux.
+# Emscripten supplies it as a port (-sUSE_SDL=2), not as a CMake package.
+if(EMSCRIPTEN)
+	set(SDL2_FOUND TRUE)
+	set(SDL_INCLUDE_DIR "")
+	set(SDL_LIBRARY "")
+else()
+	find_package(SDL2)
 
-if(SDL2_FOUND)
-	set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-	set(SDL_LIBRARY ${SDL2_LIBRARY})
+	if(SDL2_FOUND)
+		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+		set(SDL_LIBRARY ${SDL2_LIBRARY})
+	endif()
 endif()
 
 # Searches for OpenGL and enables GLES if GL isn't found in the system
 message(STATUS "Determining system GL provider")
-if(NOT USE_GLES)
+if(EMSCRIPTEN)
+	# WebGL is OpenGL ES 2.0, linked by -sFULL_ES2=1. There is no host libGL.
+	message(STATUS "Using Emscripten WebGL (OpenGL ES 2.0)")
+	set(USE_GLES 1)
+	add_definitions(-DBF_USE_GLES)
+	set(GL_LIBRARY "")
+	set(GL_INCLUDE_DIR "")
+elseif(NOT USE_GLES)
 	message(STATUS "Attempting to use standard OpenGL")
 	find_package(OpenGL)
 	set(USE_STANDARD_GL 1)
@@ -81,7 +111,7 @@ if(NOT USE_GLES)
 	set(GL_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
 endif()
 
-if(USE_GLES OR NOT USE_STANDARD_GL)
+if(NOT EMSCRIPTEN AND (USE_GLES OR NOT USE_STANDARD_GL))
 	message(STATUS "Attempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
@@ -140,17 +170,95 @@ endfunction()
 
 
 # ALURE
-find_with_fallback(ALURE ALURE alure)
-if(NOT ALURE_FOUND)
-	if(NOT OPENAL_FOUND)
-		message(WARNING "OpenAL not found.  Bitfighter will be compiled without audio")
-		add_definitions(-DBF_NO_AUDIO)
-		set(OPENAL_INCLUDE_DIR "")
-	else()
-		message(STATUS "Using in-tree ALURE")
-		add_subdirectory(alure)
-		set(ALURE_LIBRARIES alure)
-		set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure/include")
+if(EMSCRIPTEN)
+	# OpenAL is the WebAudio port. Vorbis/Ogg and ModPlug are Emscripten
+	# ports (-sUSE_VORBIS, -sUSE_MODPLUG). Speex has no port; it is fetched
+	# below. ALURE decodes wav, ogg, and (via the port) tracker modules.
+	message(STATUS "Emscripten audio: OpenAL + ALURE + Vorbis + ModPlug + Speex")
+	include(FetchContent)
+	FetchContent_Declare(speex
+		URL https://downloads.xiph.org/releases/speex/speex-1.2.1.tar.gz
+		URL_HASH SHA256=4b44d4f2b38a370a2d98a78329fefc56a0cf93d1c1be70029217baae6628feea
+	)
+	FetchContent_GetProperties(speex)
+	if(NOT speex_POPULATED)
+		FetchContent_Populate(speex)
+	endif()
+	configure_file(
+		${CMAKE_SOURCE_DIR}/cmake/emscripten/speex/speex_config_types.h
+		${speex_SOURCE_DIR}/include/speex/speex_config_types.h
+		COPYONLY
+	)
+	set(SPEEX_SRC_DIR ${speex_SOURCE_DIR}/libspeex)
+	set(SPEEX_SOURCES
+		${SPEEX_SRC_DIR}/cb_search.c
+		${SPEEX_SRC_DIR}/exc_10_32_table.c
+		${SPEEX_SRC_DIR}/exc_8_128_table.c
+		${SPEEX_SRC_DIR}/filters.c
+		${SPEEX_SRC_DIR}/gain_table.c
+		${SPEEX_SRC_DIR}/hexc_table.c
+		${SPEEX_SRC_DIR}/high_lsp_tables.c
+		${SPEEX_SRC_DIR}/lsp.c
+		${SPEEX_SRC_DIR}/ltp.c
+		${SPEEX_SRC_DIR}/speex.c
+		${SPEEX_SRC_DIR}/stereo.c
+		${SPEEX_SRC_DIR}/vbr.c
+		${SPEEX_SRC_DIR}/vq.c
+		${SPEEX_SRC_DIR}/bits.c
+		${SPEEX_SRC_DIR}/exc_10_16_table.c
+		${SPEEX_SRC_DIR}/exc_20_32_table.c
+		${SPEEX_SRC_DIR}/exc_5_256_table.c
+		${SPEEX_SRC_DIR}/exc_5_64_table.c
+		${SPEEX_SRC_DIR}/gain_table_lbr.c
+		${SPEEX_SRC_DIR}/hexc_10_32_table.c
+		${SPEEX_SRC_DIR}/lpc.c
+		${SPEEX_SRC_DIR}/lsp_tables_nb.c
+		${SPEEX_SRC_DIR}/modes.c
+		${SPEEX_SRC_DIR}/modes_wb.c
+		${SPEEX_SRC_DIR}/nb_celp.c
+		${SPEEX_SRC_DIR}/quant_lsp.c
+		${SPEEX_SRC_DIR}/sb_celp.c
+		${SPEEX_SRC_DIR}/speex_callbacks.c
+		${SPEEX_SRC_DIR}/speex_header.c
+		${SPEEX_SRC_DIR}/window.c
+	)
+	add_library(speex STATIC ${SPEEX_SOURCES})
+	target_include_directories(speex
+		PUBLIC ${speex_SOURCE_DIR}/include
+		PRIVATE ${CMAKE_SOURCE_DIR}/cmake/emscripten/speex ${SPEEX_SRC_DIR}
+	)
+	target_compile_definitions(speex PRIVATE HAVE_CONFIG_H FLOATING_POINT)
+	set(SPEEX_LIBRARIES speex)
+	set(SPEEX_INCLUDE_DIR "${speex_SOURCE_DIR}/include")
+
+	set(OPENAL_FOUND TRUE)
+	set(OPENAL_LIBRARY "")
+	set(OPENAL_INCLUDE_DIR "${EMSCRIPTEN_ROOT_PATH}/system/include/AL")
+	set(PNG_INCLUDE_DIR "")
+	set(PNG_LIBRARY "")
+	# The port is linked via -sUSE_MODPLUG. ALURE calls it; no extra cmake lib.
+	set(MODPLUG_LIBRARIES "")
+	set(OGG_LIBRARIES "")
+	set(VORBIS_LIBRARIES "")
+	set(VORBISFILE_LIBRARIES "")
+	# FALSE so the client target depends on the alure library built below.
+	set(ALURE_FOUND FALSE)
+	add_subdirectory(alure)
+	set(ALURE_LIBRARIES alure)
+	set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure/include")
+else()
+	find_with_fallback(ALURE ALURE alure)
+	if(NOT ALURE_FOUND)
+		if(NOT OPENAL_FOUND)
+			message(WARNING "OpenAL not found.  Bitfighter will be compiled without audio")
+			add_definitions(-DBF_NO_AUDIO)
+			set(OPENAL_INCLUDE_DIR "")
+		else()
+			message(STATUS "Using in-tree ALURE")
+			add_subdirectory(alure)
+			set(ALURE_LIBRARIES alure)
+			set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure/include")
+		endif()
 	endif()
 endif()
 
@@ -227,22 +335,48 @@ if(APPLE AND LUAJIT_BUILTIN AND "arm64" IN_LIST CMAKE_OSX_ARCHITECTURES)
 		"    cmake .. -DLUAJIT_BUILTIN=NO")
 endif()
 
-if(NOT LUAJIT_BUILTIN)
-find_with_fallback(LuaJit LUAJIT lua)
-endif()
-
-if(LUAJIT_FOUND)
-	set(LUA_LIB ${LUAJIT_LIBRARIES})
-	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
+if(EMSCRIPTEN)
+	# LuaJIT has no WebAssembly backend. Fetch the official Lua 5.1.5
+	# tarball at configure time instead of vendoring it.
+	if(CMAKE_VERSION VERSION_LESS 3.14)
+		message(FATAL_ERROR "The Emscripten build downloads Lua 5.1.5 and needs CMake 3.14 or newer.")
+	endif()
+	include(FetchContent)
+	FetchContent_Declare(lua51
+		URL https://www.lua.org/ftp/lua-5.1.5.tar.gz
+		URL_HASH SHA256=2640fc56a795f29d28ef15e13c34a47e223960b0240e8cb0a82d9b0738695333
+	)
+	FetchContent_GetProperties(lua51)
+	if(NOT lua51_POPULATED)
+		FetchContent_Populate(lua51)
+	endif()
+	file(GLOB LUA51_SOURCES "${lua51_SOURCE_DIR}/src/*.c")
+	list(REMOVE_ITEM LUA51_SOURCES
+		"${lua51_SOURCE_DIR}/src/lua.c"
+		"${lua51_SOURCE_DIR}/src/luac.c")
+	add_library(lua STATIC ${LUA51_SOURCES})
+	target_include_directories(lua PUBLIC "${lua51_SOURCE_DIR}/src")
+	message(STATUS "Using fetched Lua 5.1.5 (${lua51_SOURCE_DIR})")
+	set(LUA_LIB lua)
+	set(LUA_INCLUDE_DIR "${lua51_SOURCE_DIR}/src")
 else()
-	message(STATUS "Using in-tree LuaJIT")
-	# Use internal LuaJIT
-	set(LUA_LIB luajit)
-	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
-endif()
+	if(NOT LUAJIT_BUILTIN)
+	find_with_fallback(LuaJit LUAJIT lua)
+	endif()
 
-if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
-	add_subdirectory("${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
+	if(LUAJIT_FOUND)
+		set(LUA_LIB ${LUAJIT_LIBRARIES})
+		set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
+	else()
+		message(STATUS "Using in-tree LuaJIT")
+		# Use internal LuaJIT
+		set(LUA_LIB luajit)
+		set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
+	endif()
+
+	if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
+		add_subdirectory("${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
+	endif()
 endif()
 
 # Discord
@@ -262,8 +396,10 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
 endif()
 
 
-# gtest is for compiling the bitfighter_test suite
-if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
+# gtest is for compiling the bitfighter_test suite.
+# Skip it on Emscripten; the suite is a native target and gtest's pthreads
+# setup fights the single-threaded browser build.
+if(EXISTS "${CMAKE_SOURCE_DIR}/gtest" AND NOT EMSCRIPTEN)
 	add_subdirectory(gtest EXCLUDE_FROM_ALL)
 endif()
 

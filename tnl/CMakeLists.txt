@@ -27,6 +27,10 @@ set(TNL_SOURCES
 	vector.cpp
 )
 
+if(EMSCRIPTEN)
+	list(APPEND TNL_SOURCES emscriptenSocket.cpp)
+endif()
+
 file(GLOB TNL_HEADERS "*.h")
 
 if(NO_THREADS)

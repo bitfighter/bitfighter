@@ -45,9 +45,17 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
+#ifdef __EMSCRIPTEN__
+   // The public relay already has UDP 28000 for the Red server. A browser
+   // host stays on this page: an ephemeral port, and no master listing.
+   address.port = 0;
+#endif
+
    GameManager::setServerGame(new ServerGame(address, settings, levelSource, testMode, dedicatedServer, hostOnServer));
 
+#ifndef __EMSCRIPTEN__
    GameManager::getServerGame()->setReadyToConnectToMaster(true);
+#endif
    Game::seedRandomNumberGenerator(settings->getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
@@ -177,7 +185,10 @@ string getInstalledDataDir()
 {
    string path;
 
-#if defined(TNL_OS_LINUX)
+#if defined(__EMSCRIPTEN__)
+   path = getExecutableDir();
+
+#elif defined(TNL_OS_LINUX)
    // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
    // or /usr/local/share/bitfighter.  Ignore if compiling DEBUG
 #if defined(LINUX_DATA_DIR) && !defined(TNL_DEBUG)

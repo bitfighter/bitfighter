@@ -13,6 +13,12 @@ CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
 
+# Host builds of in-tree LuaJIT. Those objects are linked against the
+# machine's glibc and must not be copied into the image.
+lua/luajit/src/*.o
+lua/luajit/src/*.a
+lua/luajit/src/host/*.o
+
 # Client / platform extras
 alure
 discord-rpc
@@ -30,6 +36,7 @@ resource/music
 resource/fonts
 resource/shaders
 resource/testing
+resource/bitfighter.ini
 screenshot.png
 
 CLAUDE.md

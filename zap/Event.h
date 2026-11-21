@@ -42,7 +42,7 @@ private:
    static void onControllerAxis(ClientGame *game, U8 deviceId, U8 axis, S16 value);
    static void onResized(ClientGame *game, S32 width, S32 height);
    static void onUser(U8 type, S32 code, void* data1, void* data2);
-   static void onControllerAdded(S32 deviceId);
+   static void onControllerAdded(ClientGame *game, S32 deviceId);
    static void onControllerRemoved(S32 deviceId);
 
 public:

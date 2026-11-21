@@ -54,7 +54,14 @@ UserSettings::~UserSettings() { /* Do nothing */ }
 // 12 Aug 2018: bitfighter.org ip address changed to 172.245.93.119
 // 07 Dec 2019: bitfighter.org ip address changed to 107.175.92.56
 // Sometime in 2025: bitfighter.org ip address changed to 107.172.71.173
+#ifdef __EMSCRIPTEN__
+// Address::set rejects hostnames here (Emscripten getaddrinfo is not real DNS).
+// The numeric entry has to be first, or the client waits out the master retry
+// before it ever sends a packet. Native builds keep the hostname-first list.
+const char *MASTER_SERVER_LIST_ADDRESS = "IP:107.172.71.173:25955,bitfighter.org:25955,bitfighter.net:25955";
+#else
 const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,IP:107.172.71.173:25955,bitfighter.net:25955";   // Ok Nov 2026 -CE
+#endif
 
 
 // Constructor: Set default values here

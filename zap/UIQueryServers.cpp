@@ -21,6 +21,11 @@
 #include "RenderUtils.h"
 #include "FontManager.h"
 
+#include "tnlLog.h"
+#ifdef __EMSCRIPTEN__
+#include "emscriptenSocket.h"
+#endif
+
 #include <math.h>
 #include <algorithm>
 
@@ -29,6 +34,17 @@ namespace Zap
 
 
 static const U32 GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME = 8000;      // 8 seconds should be enough time to connect to the master
+
+static U32 masterUnconnectedMs(Game *game)
+{
+   U32 elapsed = game->getTimeUnconnectedToMaster();
+#ifdef __EMSCRIPTEN__
+   // A relay WebSocket can spend most of a minute waking up. That wait is not
+   // a failed master. Count from when the socket opens.
+   elapsed = TNL::emscriptenRelayMasterWaitMs(elapsed);
+#endif
+   return elapsed;
+}
 
 // Text sizes and the like
 static const S32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
@@ -211,6 +227,7 @@ QueryServersUserInterface::~QueryServersUserInterface()
 // Initialize: Runs when "connect to server" screen is shown
 void QueryServersUserInterface::onActivate()
 {
+   logprintf(LogConsumer::LogConnection, "Server browser");
    servers.clear();     // Start fresh
    mReceivedListOfServersFromMaster = false;
    mItemSelectedWithMouse = false;
@@ -275,7 +292,7 @@ void QueryServersUserInterface::contactEveryone()
    }
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer)
+   if(masterUnconnectedMs(getGame()) > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer)
    {
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
@@ -652,7 +669,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // Not sure about the logic in here... maybe this is right...
    if( (mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster) ||
-            (!mGivenUpOnMaster && getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
+            (!mGivenUpOnMaster && masterUnconnectedMs(getGame()) > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
        contactEveryone();
 
    // Go to previous page if a server has gone away and the last server has disappeared from the current screen

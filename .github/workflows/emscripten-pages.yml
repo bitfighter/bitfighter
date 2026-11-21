@@ -1,0 +1,142 @@
+# Publishes the Emscripten browser build to GitHub Pages.
+# Triggers only for this branch, so upstream's master/PR workflows stay idle.
+name: Emscripten Pages
+
+on:
+  push:
+    branches:
+      - emscripten-poc
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: emscripten-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten 7.0.0
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 7.0.0
+          # Compiled ports (SDL2, libpng, zlib) land here and are reused.
+          actions-cache-folder: upstream/emscripten/cache
+
+      - name: Build
+        run: |
+          mkdir -p build/emscripten
+          cd build/emscripten
+          # lua.org occasionally returns a TLS error or HTTP 500 for the pinned tarball.
+          ok=0
+          for i in 1 2 3 4 5; do
+            if emcmake cmake ../.. -DCMAKE_BUILD_TYPE=Release; then
+              ok=1
+              break
+            fi
+            echo "configure failed (attempt ${i}); retrying the Lua download"
+            sleep 20
+          done
+          test "$ok" = 1
+          emmake make -j"$(nproc)"
+
+      - name: Stage site
+        run: |
+          mkdir -p site
+          cp exe/bitfighter.html site/index.html
+          cp exe/bitfighter.html site/bitfighter.html
+          cp exe/bitfighter.js exe/bitfighter.wasm exe/bitfighter.data site/
+          # emcc names the map after the html output. Publish it as
+          # bitfighter.js.symbols, next to bitfighter.js.
+          test -f exe/bitfighter.html.symbols
+          cp exe/bitfighter.html.symbols site/bitfighter.js.symbols
+          ls -lh site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      # The LAN job downloads this. deploy does not wait on that job.
+      - name: Upload wasm site
+        uses: actions/upload-artifact@v4
+        with:
+          name: emscripten-site
+          path: site
+          retention-days: 1
+
+  # Passworded bitfighterd on localhost, through relay.py. A failure here
+  # does not block the Pages deploy.
+  lan-test:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download wasm site
+        uses: actions/download-artifact@v4
+        with:
+          name: emscripten-site
+          path: site
+
+      - name: Install native build dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev libtomcrypt-dev libtommath-dev
+
+      - name: Build bitfighterd
+        run: |
+          mkdir -p build/linux
+          cd build/linux
+          cmake ../.. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --target bitfighterd -j"$(nproc)"
+
+      - name: Relay allowlist checks
+        run: python3 tools/udp-ws-relay/test_relay.py
+
+      - name: Install Playwright
+        run: |
+          npm install --prefix "${RUNNER_TEMP}/bf-lan" playwright@1.65.0
+          cd "${RUNNER_TEMP}/bf-lan"
+          npx playwright install --with-deps chromium
+
+      - name: Join a passworded LAN server
+        env:
+          BF_SITE: site
+          BF_SCREENSHOT: lan-join.png
+          BF_LOG_DIR: lan-logs
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/bf-lan/node_modules/playwright/index.mjs
+        run: node tools/udp-ws-relay/lan-join-test.mjs
+
+      - name: Upload join screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lan-join
+          path: |
+            lan-join.png
+            lan-logs/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <cmath>
 

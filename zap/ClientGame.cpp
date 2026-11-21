@@ -25,6 +25,10 @@
 
 #include "Colors.h"
 #include "stringUtils.h"
+#include "tnlLog.h"
+#ifdef __EMSCRIPTEN__
+#include "emscriptenSocket.h"
+#endif
 
 #include <sys/stat.h>
 #include <cmath>
@@ -345,6 +349,7 @@ Color ShipExplosionColors[] = {
 
 void ClientGame::emitShipExplosion(const Point &pos)
  {
+   logprintf(LogConsumer::LogConnection, "Ship exploded at %.0f,%.0f", pos.x, pos.y);
    playSoundEffect(SFXShipExplode, pos);
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
@@ -876,6 +881,10 @@ void ClientGame::idle(U32 timeDelta)
 
 void ClientGame::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 {
+#ifdef __EMSCRIPTEN__
+   for(S32 i = 0; i < serverList.size(); i++)
+      TNL::emscriptenRelayAllow(serverList[i].ipAddress.netNum, serverList[i].ipAddress.port);
+#endif
    getUIManager()->gotServerListFromMaster(serverList);
 }
 

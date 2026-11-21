@@ -472,7 +472,9 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 
    mIniSettings.mSettings.setVal("LastName", name);
 
-   iniFile.WriteFile();
+   // WriteFile alone dumps the INI object, which still holds the name from
+   // load time. save() copies the settings (including LastName) back first.
+   save();
 }
 
 
@@ -484,7 +486,7 @@ void GameSettings::updatePlayerName(const string &name)
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
       mIniSettings.mSettings.setVal("LastName", name);      // Save new name to the INI
-      iniFile.WriteFile();
+      save();
    }
 }
 

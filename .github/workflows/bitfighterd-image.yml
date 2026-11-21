@@ -24,9 +24,13 @@ on:
         required: true
         default: "022"
       builder_image:
-        description: Builder/runtime base image
+        description: Builder base image (022 may need ubuntu:22.04)
         required: true
-        default: ubuntu:22.04
+        default: debian:bookworm
+      runtime_image:
+        description: Runtime base image (match the builder's Debian/Ubuntu release)
+        required: true
+        default: debian:bookworm-slim
 
 permissions:
   contents: read
@@ -56,7 +60,8 @@ jobs:
       - name: Builder image
         id: builder
         run: |
-          echo "image=${{ github.event.inputs.builder_image || 'ubuntu:24.04' }}" >> "$GITHUB_OUTPUT"
+          echo "image=${{ github.event.inputs.builder_image || 'debian:bookworm' }}" >> "$GITHUB_OUTPUT"
+          echo "runtime=${{ github.event.inputs.runtime_image || 'debian:bookworm-slim' }}" >> "$GITHUB_OUTPUT"
 
       - name: Image tags
         id: tags
@@ -94,6 +99,7 @@ jobs:
           docker build \
             -f src/packaging/docker/Dockerfile \
             --build-arg "BUILDER_IMAGE=${{ steps.builder.outputs.image }}" \
+            --build-arg "RUNTIME_IMAGE=${{ steps.builder.outputs.runtime }}" \
             "${tag_args[@]}" \
             src
 

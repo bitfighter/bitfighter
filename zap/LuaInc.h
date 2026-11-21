@@ -20,4 +20,9 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+// LuaJIT defines lua_open(); PUC Lua 5.1 (the Emscripten interpreter) does not.
+#ifndef lua_open
+#  define lua_open() luaL_newstate()
+#endif
+
 #endif   // _LUA_INC_H_
