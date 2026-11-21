@@ -28,7 +28,7 @@ jobs:
           path: |
             exe/
   Build-macOS-arm64:
-    runs-on: macos-14                 # Apple Silicon (arm64) runner
+    runs-on: macos-26                 # Apple Silicon (arm64). macos-14 retired 2026-11-02.
     steps:
       - uses: actions/checkout@v4
       - run: brew install luajit sdl2 libpng libogg libvorbis speex libmodplug openal-soft dylibbundler
