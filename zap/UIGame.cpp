@@ -1416,7 +1416,7 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 
    if(!loadout.isValid())
    {
-      string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl+" + itos((slot + 1) % 10);
+      string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl+" + itos((slot + 1));
       game->displayErrorMessage(msg.c_str());
       return;
    }
