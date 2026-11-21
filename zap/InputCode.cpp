@@ -1468,9 +1468,21 @@ InputCode InputCodeManager::getBaseKey(InputCode inputCode)
       case KEY_ALT_6:
          return KEY_6;
 
+      case KEY_CTRL_7:
+      case KEY_ALT_7:
+         return KEY_7;
+
+      case KEY_CTRL_8:
+      case KEY_ALT_8:
+         return KEY_8;
+
       case KEY_CTRL_9:
       case KEY_ALT_9:
          return KEY_9;
+
+      case KEY_CTRL_0:
+      case KEY_ALT_0:
+         return KEY_0;
 
       default:
          TNLAssert(false, "Unknown input code!");
@@ -1711,7 +1723,10 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_CTRL_4)]          = "Ctrl+4";
    keyNames[S32(KEY_CTRL_5)]          = "Ctrl+5";
    keyNames[S32(KEY_CTRL_6)]          = "Ctrl+6";
-   keyNames[S32(KEY_CTRL_9)]          = "Ctrl+9";                 // Last ctrl key
+   keyNames[S32(KEY_CTRL_7)]          = "Ctrl+7";
+   keyNames[S32(KEY_CTRL_8)]          = "Ctrl+8";
+   keyNames[S32(KEY_CTRL_9)]          = "Ctrl+9";
+   keyNames[S32(KEY_CTRL_0)]          = "Ctrl+0";                 // Last ctrl key
 
    keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
    keyNames[S32(KEY_ALT_2)]           = "Alt+2";
@@ -1719,7 +1734,10 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_ALT_4)]           = "Alt+4";
    keyNames[S32(KEY_ALT_5)]           = "Alt+5";
    keyNames[S32(KEY_ALT_6)]           = "Alt+6";
-   keyNames[S32(KEY_ALT_9)]           = "Alt+9";                  // Last alt key
+   keyNames[S32(KEY_ALT_7)]           = "Alt+7";
+   keyNames[S32(KEY_ALT_8)]           = "Alt+8";
+   keyNames[S32(KEY_ALT_9)]           = "Alt+9";
+   keyNames[S32(KEY_ALT_0)]           = "Alt+0";                  // Last alt key
 
    keyNames[S32(KEY_BACKQUOTE)]       = "`";
    keyNames[S32(KEY_MENU)]            = "Menu";

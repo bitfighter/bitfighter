@@ -70,9 +70,36 @@ TEST(InputStringTest, normalizeStrings)
    normalized = InputCodeManager::normalizeInputString("Ctrl+OO");   
    EXPECT_EQ("", normalized);                      EXPECT_FALSE(InputCodeManager::isValidInputString(normalized));
 
-   normalized = InputCodeManager::normalizeInputString("Ctrl+Ctrl");   
+   normalized = InputCodeManager::normalizeInputString("Ctrl+Ctrl");
    EXPECT_EQ("", normalized);                      EXPECT_FALSE(InputCodeManager::isValidInputString(normalized));
 
+}
+
+
+// Loadout presets 1-10 use Ctrl/Alt with keys 1-9 and 0 (preset 10)
+TEST(LoadoutPresetKeyTest, presetKeysAreModifiedDigits)
+{
+   InputCodeManager::initializeKeyNames();
+
+   const InputCode ctrlKeys[] = { KEY_CTRL_1, KEY_CTRL_2, KEY_CTRL_3, KEY_CTRL_4, KEY_CTRL_5, KEY_CTRL_6,
+                                  KEY_CTRL_7, KEY_CTRL_8, KEY_CTRL_9, KEY_CTRL_0 };
+   const InputCode altKeys[]  = { KEY_ALT_1,  KEY_ALT_2,  KEY_ALT_3,  KEY_ALT_4,  KEY_ALT_5,  KEY_ALT_6,
+                                  KEY_ALT_7,  KEY_ALT_8,  KEY_ALT_9,  KEY_ALT_0 };
+   const char *ctrlNames[] = { "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+4", "Ctrl+5", "Ctrl+6", "Ctrl+7", "Ctrl+8", "Ctrl+9", "Ctrl+0" };
+   const char *altNames[]  = { "Alt+1",  "Alt+2",  "Alt+3",  "Alt+4",  "Alt+5",  "Alt+6",  "Alt+7",  "Alt+8",  "Alt+9",  "Alt+0" };
+   const InputCode baseKeys[] = { KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0 };
+
+   for(S32 i = 0; i < 10; i++)
+   {
+      EXPECT_TRUE(InputCodeManager::isCtrlKey(ctrlKeys[i]));
+      EXPECT_TRUE(InputCodeManager::isAltKey(altKeys[i]));
+      EXPECT_EQ(baseKeys[i], InputCodeManager::getBaseKey(ctrlKeys[i]));
+      EXPECT_EQ(baseKeys[i], InputCodeManager::getBaseKey(altKeys[i]));
+      EXPECT_EQ(string(ctrlNames[i]), string(InputCodeManager::inputCodeToString(ctrlKeys[i])));
+      EXPECT_EQ(string(altNames[i]),  string(InputCodeManager::inputCodeToString(altKeys[i])));
+      EXPECT_TRUE(InputCodeManager::isValidInputString(ctrlNames[i]));
+      EXPECT_TRUE(InputCodeManager::isValidInputString(altNames[i]));
+   }
 }
 
 
